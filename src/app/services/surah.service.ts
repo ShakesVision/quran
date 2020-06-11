@@ -1,4 +1,4 @@
-import { Surah } from './surah';
+import { Surah, Index } from './surah';
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { map, take } from 'rxjs/operators';
@@ -9,10 +9,12 @@ import { Observable } from 'rxjs';
 })
 export class SurahService {
     surahCollection: AngularFirestoreCollection <Surah>;
+    indexCollection: AngularFirestoreCollection <Index>;
     currentSurah;
 
     constructor(private afs: AngularFirestore) {
         this.surahCollection = this.afs.collection<Surah>('surahs');
+        this.indexCollection = this.afs.collection<Index>('index');
     }
 
     addSurah(item: Surah) {
@@ -33,6 +35,30 @@ export class SurahService {
 
     deleteSurahById(id) {
         return this.afs.doc<Surah>(`surahs/${id}`).delete();
+    }
+    
+    addIndex(item: Index) {
+        return this.indexCollection.add(item);
+    }
+
+    updateIndexById(id, item: Index) {
+        return this.indexCollection.doc(id).set(item);
+    }
+
+    getIndexes(): Observable<Index[]> {
+        return this.indexCollection.valueChanges({idField: 'id'});
+    }
+
+    getIndexById(id): Observable<Index>{
+        return this.indexCollection.doc<Index>(id).valueChanges().pipe(take(1));
+    }
+
+    deleteIndexById(id) {
+        return this.afs.doc<Index>(`index/${id}`).delete();
+    }
+
+    fetchIndexBySurahNumber(remoteId) {
+        return this.afs.collection<Index>("index",ref => ref.where("remoteId", "==", remoteId));
     }
 }
 

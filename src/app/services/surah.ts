@@ -4,4 +4,9 @@ export interface Surah {
     number: string;
     name: string;
   }
+  export interface Index {
+    surahNo: string;
+    surahName: string;
+    remoteId: string;
+  }
   

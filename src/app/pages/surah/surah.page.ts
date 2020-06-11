@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Router, ActivatedRoute } from "@angular/router"
 import { SurahService } from './../../services/surah.service';
-import { Surah } from './../../services/surah';
+import { Surah, Index } from './../../services/surah';
 
 @Component({
   selector: 'app-surah',
@@ -10,18 +10,23 @@ import { Surah } from './../../services/surah';
   styleUrls: ['surah.page.scss'],
 })
 export class SurahPage implements OnInit {
-  items: Observable<Surah[]>;
+  items: Observable<Index[]>;
 
   constructor(private surahService: SurahService, private router: Router) {
       
   }
   ngOnInit() {
-    this.items = this.surahService.getSurahs();
+    // this.items = this.surahService.getSurahs();
+    this.items = this.surahService.getIndexes();
   }
 
   gotoRead(item) {
-    this.surahService.currentSurah = item;
-    this.router.navigate(['/read']);
+    this.surahService.getSurahById(item.remoteId).subscribe(res => {
+      console.log('my item: ', res);
+      this.surahService.currentSurah = res;
+      this.router.navigate(['/read']);
+    });;
+    
   }
 
 }

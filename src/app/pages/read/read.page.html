@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title> {{surah.name}} </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ar">     
+      <div *ngFor="let line of lines;let i = index" id="line_{{i}}" (click)="openTrans(i)">
+        <span> {{line}} </span>
+      </div>    
+  </div>
+    <!-- <table dir="rtl">
+      <tr *ngFor="let line of lines;let i = index" (click)="openTrans(i)">
+        <td> {{line}} </td>
+      </tr>
+    </table> -->  
+  
+
+</ion-content>
+<ion-footer>  
+  <ion-button *ngIf="currentPage!=pages.length" (click)="goToPage(1)">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+  </ion-button>
+  <ion-label>Page {{currentPage}} of {{pages.length}} </ion-label>
+  <ion-button *ngIf="currentPage!=1" (click)="goToPage(-1)">
+    <ion-icon name="arrow-forward-outline"></ion-icon>
+  </ion-button>
+</ion-footer>

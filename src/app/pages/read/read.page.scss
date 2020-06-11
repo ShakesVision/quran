@@ -1,0 +1,28 @@
+.ar, .ur {
+    text-align: justify;
+    text-align-last: justify;
+    -moz-text-align-last: justify;
+    -webkit-text-align-last: justify;
+    -ms-text-align-last: justify;
+    -o-text-align-last: justify;    
+    line-height: 1.8em;
+}
+.ar table, .ur table {
+    margin: 0 auto;    
+}
+.ar {
+    font-size: large;
+    font-family: 'Al Qalam Quran Majeed';
+}
+.ar div:hover {
+    background-color: lightblue;
+}
+.ur {
+    font-family: 'Jameel Noori Nastaleeq';
+}
+ion-footer {
+    text-align: center;
+}
+.trans { 
+    font-family: 'Jameel Noori Nastaleeq';
+}

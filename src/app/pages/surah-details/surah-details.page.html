@@ -1,0 +1,47 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref=""></ion-back-button>
+      </ion-buttons>
+      <ion-title>
+        Surah
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content>
+    <form [formGroup]="surahForm" (ngSubmit)="submit()">
+
+    
+      <ion-item>
+        <ion-label position="stacked">Arabic Text</ion-label>
+        <ion-textarea formControlName="arabic"></ion-textarea>
+    </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Urdu Text</ion-label>
+        <ion-textarea formControlName="urdu"></ion-textarea>
+    </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Surah No.</ion-label>
+        <ion-input formControlName="number"></ion-input>
+    </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Surah Name</ion-label>
+        <ion-input formControlName="name"></ion-input>
+    </ion-item>
+      
+   
+      <ion-button type="submit" expand="block" class="ion-padding-horizontal ion-margin-vertical"
+      [disabled]="!surahForm.valid">
+        Save
+      </ion-button>
+
+      <ion-button *ngIf="id" (click)="delete()" type="button" expand="block" class="ion-padding-horizontal ion-margin-vertical" color="danger">
+        Delete
+      </ion-button>
+    </form>
+  </ion-content>
+  

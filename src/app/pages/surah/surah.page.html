@@ -11,13 +11,14 @@
 
 <ion-content>
   <ion-list>
-    <ion-item *ngFor="let item of items | async" (click)="gotoRead(item)">
-      <ion-label class="ion-text-wrap">
-        {{ item.surahNo }}<br>{{ item.surahName }}        
-      </ion-label>
-      <ion-button slot="end" [routerLink]="[item.remoteId]">
-        <ion-icon name="create" slot="icon-only"></ion-icon>
+    <ion-item *ngFor="let item of items | async">      
+      <ion-label>{{ item.surahNo }}. {{ item.surahName.split(' ')[0] }} <span class="arName">{{ item.surahName.split(' ')[1] }}</span> </ion-label>
+      <ion-button fill="clear" slot="end" [routerLink]="[item.remoteId]">
+        <ion-icon mode="ios" slot="icon-only" name="pencil-outline"></ion-icon>
       </ion-button>
+      <ion-button fill="clear" slot="end" (click)="gotoRead(item)">
+        <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+      </ion-button>        
     </ion-item>
   </ion-list>
 

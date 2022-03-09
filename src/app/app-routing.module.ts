@@ -9,6 +9,14 @@ const routes: Routes = [
     path: 'read',
     loadChildren: () => import('./pages/read/read.module').then( m => m.ReadPageModule)
   },
+  {
+    path: 'memorize',
+    loadChildren: () => import('./pages/memorize/memorize.module').then( m => m.MemorizePageModule)
+  },
+  {
+    path: 'progress',
+    loadChildren: () => import('./pages/progress/progress.module').then( m => m.ProgressPageModule)
+  },
 ];
 
 @NgModule({

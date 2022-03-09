@@ -18,6 +18,7 @@ export class SurahPage implements OnInit {
   ngOnInit() {
     // this.items = this.surahService.getSurahs();
     this.items = this.surahService.getIndexes();
+    console.log(this.items);
   }
 
   gotoRead(item) {

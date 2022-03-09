@@ -1,28 +1,74 @@
-.ar, .ur {
+@font-face {
+    font-family: "Indopak";
+    src: url("./../../../assets/fonts/Naskh-IndoPak.woff2");
+}
+@font-face {
+    font-family: "Mehr";
+    src: url("./../../../assets/fonts/Mehr.ttf");
+}
+ion-content {
+    --background: url("./../../../assets/border.svg") no-repeat center center fixed;
+    --background-size: cover;
+    overflow: hidden;
+}
+.ar,
+.ur {
     text-align: justify;
     text-align-last: justify;
     -moz-text-align-last: justify;
     -webkit-text-align-last: justify;
     -ms-text-align-last: justify;
-    -o-text-align-last: justify;    
+    -o-text-align-last: justify;
     line-height: 1.8em;
 }
-.ar table, .ur table {
-    margin: 0 auto;    
+.ar table,
+.ur table {
+    margin: 0 auto;
 }
 .ar {
-    font-size: large;
-    font-family: 'Al Qalam Quran Majeed';
+    font-size: 16px;// 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
+    font-family: Indopak;
+    direction: rtl;
+    max-width: 390px;
+    padding: 1em;
+    margin: 0 auto;
+}
+.ar div {
+    border-bottom: 0.5px solid #cecece;
+    height: 32px;  //screen:height in px=> 345:32,300:28,250:22
 }
 .ar div:hover {
     background-color: lightblue;
 }
 .ur {
-    font-family: 'Jameel Noori Nastaleeq';
+    font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
+    direction: rtl;
 }
 ion-footer {
     text-align: center;
 }
-.trans { 
-    font-family: 'Jameel Noori Nastaleeq';
+.btmNav {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+.popup,
+.trans {
+    font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
+    direction: rtl;
+}
+.popup {
+    opacity: 0;
+    height: 0;
+    position: absolute;
+    left: 0;
+    background: var(--ion-color-light);
+}
+.popup-header {
+    font-size: small;
+    color: var(--ion-color-medium);
+}
+.beforeText {
+    text-align-last: center;
 }

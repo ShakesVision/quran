@@ -3,6 +3,9 @@ export interface Surah {
     urdu: string;
     number: string;
     name: string;
+    startLineNo: number;
+    revelationType: string;
+    //name<space>arabic_name,startLineNo,makkiMadni
   }
   export interface Index {
     surahNo: string;

@@ -4,29 +4,57 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title> {{surah.name}} </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="changeFontSize(1)" slot="end">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="changeFontSize(-1)" slot="end">
+        <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <div class="ar">     
-      <div *ngFor="let line of lines;let i = index" id="line_{{i}}" (click)="openTrans(i)">
-        <span> {{line}} </span>
-      </div>    
+  <div class="ar">
+    <ng-container class="ion-text-center" *ngIf="currentPage==1 && lines.length<15">
+      <div class="filler-lines" *ngFor="let line of [].constructor(15-lines.length-2)"></div>
+      <div style="text-align-last: center;">{{surah.name.split(' ')[1]}}</div>
+      <div style="text-align-last: center;">﷽</div>
+    </ng-container>
+    
+    <div *ngFor="let line of lines;let i = index" id="line_{{i}}" (click)="openTrans($event,i)">
+      <span> {{line}} </span>
+    </div>
+
+    <ng-container *ngIf="currentPage==pages.length && pages.length!=1 && lines.length<15">
+      <div class="filler-lines" *ngFor="let line of [].constructor(15-lines.length)"></div>      
+    </ng-container>    
   </div>
-    <!-- <table dir="rtl">
+
+  <div class="popup ion-text-center">
+    <div class="popup-header"></div>
+    <div class="popup-text"></div>
+    <ion-button style="font-size: x-small;" fill="outline" size="small" color="dark" class="cross">
+      <ion-icon slot="icon-only" name="close"></ion-icon>
+    </ion-button>
+  </div>
+  <!-- <table dir="rtl">
       <tr *ngFor="let line of lines;let i = index" (click)="openTrans(i)">
         <td> {{line}} </td>
       </tr>
-    </table> -->  
-  
+    </table> -->
+
 
 </ion-content>
-<ion-footer>  
-  <ion-button *ngIf="currentPage!=pages.length" (click)="goToPage(1)">
-    <ion-icon name="arrow-back-outline"></ion-icon>
-  </ion-button>
-  <ion-label>Page {{currentPage}} of {{pages.length}} </ion-label>
-  <ion-button *ngIf="currentPage!=1" (click)="goToPage(-1)">
-    <ion-icon name="arrow-forward-outline"></ion-icon>
-  </ion-button>
+<ion-footer>
+  <div class="btmNav">    
+    <ion-button shape="round" fill="clear" [disabled]="currentPage==pages.length" (click)="goToPage(1)">
+      <ion-icon name="chevron-back-circle-outline"></ion-icon>
+    </ion-button>
+    <ion-label style="font-size: small;">Page {{currentPage}} of {{pages.length}} </ion-label>
+    <ion-button shape="round" fill="clear" [disabled]="currentPage==1" (click)="goToPage(-1)">
+      <ion-icon name="chevron-forward-circle-outline"></ion-icon>
+    </ion-button>
+  </div>
 </ion-footer>

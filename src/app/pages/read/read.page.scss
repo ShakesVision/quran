@@ -1,74 +1,89 @@
 @font-face {
-    font-family: "Indopak";
-    src: url("./../../../assets/fonts/Naskh-IndoPak.woff2");
+  font-family: "Indopak";
+  src: url("./../../../assets/fonts/Naskh-IndoPak.woff2");
 }
 @font-face {
-    font-family: "Mehr";
-    src: url("./../../../assets/fonts/Mehr.ttf");
+  font-family: "Mehr";
+  src: url("./../../../assets/fonts/Mehr.ttf");
 }
 ion-content {
-    --background: url("./../../../assets/border.svg") no-repeat center center fixed;
-    --background-size: cover;
-    overflow: hidden;
+  --background: url("./../../../assets/border.svg") no-repeat center center
+    fixed;
+  --background-size: cover;
+  overflow: hidden;
 }
 .ar,
 .ur {
-    text-align: justify;
-    text-align-last: justify;
-    -moz-text-align-last: justify;
-    -webkit-text-align-last: justify;
-    -ms-text-align-last: justify;
-    -o-text-align-last: justify;
-    line-height: 1.8em;
+  text-align: justify;
+  text-align-last: justify;
+  -moz-text-align-last: justify;
+  -webkit-text-align-last: justify;
+  -ms-text-align-last: justify;
+  -o-text-align-last: justify;
+  line-height: 1.8em;
 }
 .ar table,
 .ur table {
-    margin: 0 auto;
+  margin: 0 auto;
 }
 .ar {
-    font-size: 16px;// 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
-    font-family: Indopak;
-    direction: rtl;
-    max-width: 390px;
-    padding: 1em;
-    margin: 0 auto;
+  font-size: 16px; // 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
+  font-family: Indopak;
+  direction: rtl;
+  max-width: 390px;
+  padding: 1em;
+  margin: 0 auto;
 }
 .ar div {
-    border-bottom: 0.5px solid #cecece;
-    height: 32px;  //screen:height in px=> 345:32,300:28,250:22
+  border-bottom: 0.5px solid #cecece;
+  height: 32px; //screen:height in px=> 345:32,300:28,250:22
 }
 .ar div:hover {
-    background-color: lightblue;
+  background-color: lightblue;
 }
 .ur {
-    font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
-    direction: rtl;
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
+    sans-serif;
+  direction: rtl;
 }
 ion-footer {
-    text-align: center;
+  text-align: center;
 }
 .btmNav {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
 }
 .popup,
 .trans {
-    font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
-    direction: rtl;
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
+    sans-serif;
+  direction: rtl;
 }
 .popup {
-    opacity: 0;
-    height: 0;
-    position: absolute;
-    left: 0;
-    background: var(--ion-color-light);
+  opacity: 0;
+  height: 0;
+  position: absolute;
+  left: 0;
+  background: var(--ion-color-light);
 }
 .popup-header {
-    font-size: small;
-    color: var(--ion-color-medium);
+  font-size: small;
+  color: var(--ion-color-medium);
 }
 .beforeText {
-    text-align-last: center;
+  text-align-last: center;
+}
+
+.surah-name,
+.bism {
+  text-align-last: center;
+}
+.surah-name {
+  font-size: x-large;
+}
+.bism {
+  font-size: larger;
+  color: var(--ion-color-dark-tint);
 }

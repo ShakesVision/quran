@@ -10,12 +10,14 @@ import { AlertController } from "@ionic/angular";
 })
 export class ReadPage implements OnInit {
   surah;
-  pages: string[];
-  translations: string[];
   lines: string[];
+  pages: string[];
+  tPages: string[];
+  arabicLines: string[];
   translationLines: string[];
   currentPage: number = 1;
   translation: string;
+  tMode: boolean = false;
 
   constructor(
     private surahService: SurahService,
@@ -26,9 +28,10 @@ export class ReadPage implements OnInit {
   ngOnInit() {
     this.surah = this.surahService.currentSurah;
     this.pages = this.surah.arabic.split("\n\n");
-    this.lines = this.pages[this.currentPage - 1].split("\n");
-    this.translations = this.surah.urdu.split("\n\n");
-    this.translationLines = this.translations[this.currentPage - 1].split("\n");    
+    this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+    this.lines = this.arabicLines;
+    this.tPages = this.surah.urdu.split("\n\n");
+    this.translationLines = this.tPages[this.currentPage - 1].split("\n");
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -53,10 +56,16 @@ export class ReadPage implements OnInit {
 
   goToPage(n: number) {
     this.currentPage += n;
-    this.lines = this.pages[this.currentPage - 1].split("\n");
-    this.translationLines = this.translations[this.currentPage - 1].split("\n");
+    this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+    this.translationLines = this.tPages[this.currentPage - 1].split("\n");
     //close popup if open
     let popup: HTMLElement = document.querySelector(".popup");
+    this.resetPopup(popup);
+    //show translation only if toggled prop is on
+    this.translationMode(false);
+  }
+
+  resetPopup(popup: HTMLElement) {
     popup.style.opacity = "0";
     popup.style.height = "0";
     popup.style.width = "0";
@@ -65,7 +74,7 @@ export class ReadPage implements OnInit {
   openTrans(event, n: number) {
     if (this.surah.urdu) {
       this.translation = this.translationLines[n];
-      console.log((n + 1) + '. ' + this.translation);
+      console.log(n + 1 + ". " + this.translation);
       let popup: HTMLElement = document.querySelector(".popup");
       let e1: HTMLElement = document.querySelector(".popup .popup-header");
       let e2: HTMLElement = document.querySelector(".popup .popup-text");
@@ -78,14 +87,10 @@ export class ReadPage implements OnInit {
       e1.textContent = "ترجمہ برائے سطر " + (n + 1);
       e2.textContent = this.translation;
       cross.addEventListener("click", () => {
-        popup.style.opacity = "0";
-        popup.style.height = "0";
-        popup.style.width = "0";
+        this.resetPopup(popup);
       });
       popup.addEventListener("click", () => {
-        popup.style.opacity = "0";
-        popup.style.height = "0";
-        popup.style.width = "0";
+        this.resetPopup(popup);
       });
     } else {
       console.log("Translation not available!");
@@ -143,8 +148,14 @@ export class ReadPage implements OnInit {
     var currentSize = parseFloat(style);
     txt.style.fontSize = currentSize + val + "px";
   }
-  translationMode() {
-    this.lines = this.translationLines;
-    document.querySelector('.content-wrapper').classList.add('ur')
+  translationMode(doToggle: boolean) {
+    if (doToggle) this.tMode = !this.tMode;
+    if (this.tMode === true) {
+      this.lines = this.translationLines;
+      document.querySelector(".content-wrapper").classList.add("ur");
+    } else {
+      this.lines = this.arabicLines;
+      document.querySelector(".content-wrapper").classList.remove("ur");
+    }
   }
 }

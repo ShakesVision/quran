@@ -143,4 +143,8 @@ export class ReadPage implements OnInit {
     var currentSize = parseFloat(style);
     txt.style.fontSize = currentSize + val + "px";
   }
+  translationMode() {
+    this.lines = this.translationLines;
+    document.querySelector('.content-wrapper').classList.add('ur')
+  }
 }

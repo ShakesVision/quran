@@ -2,6 +2,9 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
+      <ion-button (click)="translationMode()" expand="block" fill="clear" shape="round">
+        T-Mode
+      </ion-button>
     </ion-buttons>
     <ion-title> {{surah.name}} </ion-title>
     <ion-buttons slot="end">
@@ -16,7 +19,7 @@
 </ion-header>
 
 <ion-content>
-  <div class="ar">
+  <div class="ar content-wrapper">
     <ng-container
       class="ion-text-center"
       *ngIf="currentPage==1 && lines.length<15"

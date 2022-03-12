@@ -18,24 +18,23 @@ import { IonicStorageModule, Storage } from '@ionic/storage-angular';
 import { OneSignal } from '@ionic-native/onesignal/ngx';
 
 @NgModule({
-  declarations: [AppComponent],
-  entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), 
-    AppRoutingModule, 
-    AngularFireModule.initializeApp(environment.firebase), 
-    AngularFirestoreModule, 
-    AngularFireAuthModule, 
-    AngularFireStorageModule, 
-    AngularFireAuthGuardModule, 
-    IonicStorageModule.forRoot()
-  ],
-  providers: [
-    StatusBar,
-    SplashScreen,
-    OneSignal,
-    Storage,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
-  ],
-  bootstrap: [AppComponent]
+    declarations: [AppComponent],
+    imports: [BrowserModule, IonicModule.forRoot(),
+        AppRoutingModule,
+        AngularFireModule.initializeApp(environment.firebase),
+        AngularFirestoreModule,
+        AngularFireAuthModule,
+        AngularFireStorageModule,
+        AngularFireAuthGuardModule,
+        IonicStorageModule.forRoot()
+    ],
+    providers: [
+        StatusBar,
+        SplashScreen,
+        OneSignal,
+        Storage,
+        { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

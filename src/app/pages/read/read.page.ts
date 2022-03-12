@@ -18,6 +18,7 @@ export class ReadPage implements OnInit {
   currentPage: number = 1;
   translation: string;
   tMode: boolean = false;
+  translationExists: boolean = false;
 
   constructor(
     private surahService: SurahService,
@@ -30,8 +31,12 @@ export class ReadPage implements OnInit {
     this.pages = this.surah.arabic.split("\n\n");
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
     this.lines = this.arabicLines;
+    console.log(this.surah.urdu);
+    if(this.surah.urdu && this.surah.urdu!='') {
+      this.translationExists = true;
     this.tPages = this.surah.urdu.split("\n\n");
     this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+  }
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -57,12 +62,20 @@ export class ReadPage implements OnInit {
   goToPage(n: number) {
     this.currentPage += n;
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+    if(this.translationExists)
     this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+    this.lines = this.tMode? this.translationLines: this.arabicLines;
+    
     //close popup if open
     let popup: HTMLElement = document.querySelector(".popup");
     this.resetPopup(popup);
+    
     //show translation only if toggled prop is on
-    this.translationMode(false);
+    // this.translationMode(false);
+    
+    //if last line of last page, center the text
+    console.log(this.currentPage,this.pages.length,`div#line_${this.arabicLines.length-1}`);
+    if(this.currentPage===this.pages.length) {console.log('running'); document.querySelector(`div#line_${this.arabicLines.length-1}`).classList.add('centered-table-text');}
   }
 
   resetPopup(popup: HTMLElement) {

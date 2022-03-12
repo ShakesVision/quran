@@ -14,6 +14,7 @@ export class MemorizePage implements OnInit {
     await this.storage.create();
     this.storage.set("v1",{mother:"son"}).then(res=>console.log(res));
     this.storage.set("v2",{mother:"son"}).then(res=>console.log(res));
+    localStorage.setItem("v1","son");
   }
 
 }

@@ -1,13 +1,13 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
-      <ion-button (click)="translationMode(true)" expand="block" fill="clear" shape="round">
-        T-Mode
-      </ion-button>
+      <ion-back-button></ion-back-button>      
     </ion-buttons>
     <ion-title> {{surah.name}} </ion-title>
     <ion-buttons slot="end">
+      <ion-button *ngIf="translationExists" (click)="translationMode(true)" slot="end">
+        <ion-icon slot="icon-only" name="language"></ion-icon>
+      </ion-button>
       <ion-button (click)="changeFontSize(1)" slot="end">
         <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
       </ion-button>

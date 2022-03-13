@@ -215,4 +215,10 @@ export class ReadPage implements OnInit {
     }
     return d;
   }
+
+  hifzMode(isOn:boolean) {
+    let el:HTMLElement = document.querySelector('.ar');
+    console.log(isOn,el);
+    el.style.color = isOn? 'white': 'black';
+  }
 }

@@ -10,6 +10,6 @@
   <ion-icon slot="start" name="play-outline"></ion-icon>
   Play  
 </ion-button>
-<ion-spinner *ngIf="!audioSrc" name="bubbles"></ion-spinner>
+<ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
 <audio [src]="audioSrc" #audioEl id="audio"></audio>
 </ion-content>

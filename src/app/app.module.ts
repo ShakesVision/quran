@@ -16,6 +16,8 @@ import { AngularFireStorageModule } from '@angular/fire/storage';
 import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { IonicStorageModule, Storage } from '@ionic/storage-angular';
 import { OneSignal } from '@ionic-native/onesignal/ngx';
+import { HttpClientModule } from '@angular/common/http';
+
 
 @NgModule({
     declarations: [AppComponent],
@@ -26,7 +28,8 @@ import { OneSignal } from '@ionic-native/onesignal/ngx';
         AngularFireAuthModule,
         AngularFireStorageModule,
         AngularFireAuthGuardModule,
-        IonicStorageModule.forRoot()
+        IonicStorageModule.forRoot(),
+        HttpClientModule
     ],
     providers: [
         StatusBar,

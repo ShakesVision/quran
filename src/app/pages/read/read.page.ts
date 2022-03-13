@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { SurahService } from "./../../services/surah.service";
 import { ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
+import { alertController } from "@ionic/core";
 
 @Component({
   selector: "app-read",
@@ -19,6 +20,7 @@ export class ReadPage implements OnInit {
   translation: string;
   tMode: boolean = false;
   translationExists: boolean = false;
+  currentSurahInfo;
 
   constructor(
     private surahService: SurahService,
@@ -32,11 +34,11 @@ export class ReadPage implements OnInit {
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
     this.lines = this.arabicLines;
     console.log(this.surah.urdu);
-    if(this.surah.urdu && this.surah.urdu!='') {
+    if (this.surah.urdu && this.surah.urdu != "") {
       this.translationExists = true;
-    this.tPages = this.surah.urdu.split("\n\n");
-    this.translationLines = this.tPages[this.currentPage - 1].split("\n");
-  }
+      this.tPages = this.surah.urdu.split("\n\n");
+      this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+    }
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -62,20 +64,29 @@ export class ReadPage implements OnInit {
   goToPage(n: number) {
     this.currentPage += n;
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
-    if(this.translationExists)
-    this.translationLines = this.tPages[this.currentPage - 1].split("\n");
-    this.lines = this.tMode? this.translationLines: this.arabicLines;
-    
+    if (this.translationExists)
+      this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+    this.lines = this.tMode ? this.translationLines : this.arabicLines;
+
     //close popup if open
     let popup: HTMLElement = document.querySelector(".popup");
     this.resetPopup(popup);
-    
+
     //show translation only if toggled prop is on
     // this.translationMode(false);
-    
+
     //if last line of last page, center the text
-    console.log(this.currentPage,this.pages.length,`div#line_${this.arabicLines.length-1}`);
-    if(this.currentPage===this.pages.length) {console.log('running'); document.querySelector(`div#line_${this.arabicLines.length-1}`).classList.add('centered-table-text');}
+    console.log(
+      this.currentPage,
+      this.pages.length,
+      `div#line_${this.arabicLines.length - 1}`
+    );
+    if (this.currentPage === this.pages.length) {
+      console.log("running");
+      document
+        .querySelector(`div#line_${this.arabicLines.length - 1}`)
+        .classList.add("centered-table-text");
+    }
   }
 
   resetPopup(popup: HTMLElement) {
@@ -170,5 +181,38 @@ export class ReadPage implements OnInit {
       this.lines = this.arabicLines;
       document.querySelector(".content-wrapper").classList.remove("ur");
     }
+  }
+
+  async showSurahInfo() {
+    console.log(this.surah.number);
+    console.log(this.surahService.surahInfo);
+    this.currentSurahInfo = this.surahService.surahInfo.find((s) => {
+      return parseInt(s.index) == parseInt(this.surah.number);
+    });
+    console.log(this.currentSurahInfo);
+    this.presentSurahInfo(this.currentSurahInfo);
+  }
+
+  async presentSurahInfo(s) {
+    const alert = await alertController.create({
+      header: `${s.index}. ${s.title}`,
+      subHeader: `${s.type}`,
+      message: `Surah ${s.title} (${s.titleAr}) has ${
+        s.count
+      } Ayahs, was revealed in ${s.place} and is spanned over ${
+        s.juz?.length
+      } juz, i.e. ${s.juz[0].index}${
+        s.juz.length > 1 ? "-" + s.juz[s.juz.length - 1].index + '.<br><br>'+ this.getJuzDistribution(s.juz) : ""
+      }.`,
+    });
+    alert.present();
+  }
+
+  getJuzDistribution(juz):string {
+    let d = '';
+    for(let j of juz) {
+      d+= `Verses ${j.verse.start}-${j.verse.end} in juz ${j.index}.<br>`
+    }
+    return d;
   }
 }

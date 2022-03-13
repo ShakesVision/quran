@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { SurahService } from 'src/app/services/surah.service';
 
 @Component({
   selector: 'app-listen',
@@ -11,13 +12,14 @@ export class ListenPage implements OnInit {
   audioSrc:string;
   media: HTMLAudioElement;
   spin:boolean= false;
+  surahInfo = [];
 
   @ViewChild('audioEl') audioEl:ElementRef<HTMLAudioElement>;
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient, private surahService:SurahService) { }
 
   ngOnInit() {
     this.media = <HTMLAudioElement>document.getElementById('audio');
-
+    this.surahInfo = [...this.surahService.surahInfo];
   }
 
   get $player(): HTMLAudioElement {

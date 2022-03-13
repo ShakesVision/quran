@@ -96,7 +96,7 @@ export class ReadPage implements OnInit {
   }
 
   openTrans(event, n: number) {
-    if (this.surah.urdu) {
+    if (this.surah.urdu && !this.tMode) {
       this.translation = this.translationLines[n];
       console.log(n + 1 + ". " + this.translation);
       let popup: HTMLElement = document.querySelector(".popup");
@@ -116,7 +116,7 @@ export class ReadPage implements OnInit {
       popup.addEventListener("click", () => {
         this.resetPopup(popup);
       });
-    } else {
+    } else if(!this.surah.urdu) {
       console.log("Translation not available!");
       this.presentToastWithOptions(
         `Translation for Surah ${

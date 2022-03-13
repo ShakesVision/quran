@@ -14,7 +14,7 @@ export class SurahService {
 
     constructor(private afs: AngularFirestore) {
         this.surahCollection = this.afs.collection<Surah>('surahs');
-        this.indexCollection = this.afs.collection<Index>('index');
+        this.indexCollection = this.afs.collection<Index>('index',ref=>ref.orderBy('surahNo'));
     }
 
     addSurah(item: Surah) {

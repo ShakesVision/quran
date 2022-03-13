@@ -1,9 +1,15 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>listen</ion-title>
+    <ion-title>Listen to Recitations</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-
+<ion-input type="number" placeholder="Ayah number" #ayahNumber></ion-input>
+<ion-button (click)="listen(ayahNumber.value)">
+  <ion-icon slot="start" name="play-outline"></ion-icon>
+  Play  
+</ion-button>
+<ion-spinner *ngIf="!audioSrc" name="bubbles"></ion-spinner>
+<audio [src]="audioSrc" #audioEl id="audio"></audio>
 </ion-content>

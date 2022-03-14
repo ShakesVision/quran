@@ -13,6 +13,7 @@ export class ListenPage implements OnInit {
   media: HTMLAudioElement;
   spin: boolean = false;
   surahInfo = [];
+  surahInfoCopy = [];
 
   @ViewChild("audioEl") audioEl: ElementRef<HTMLAudioElement>;
   constructor(private http: HttpClient, private surahService: SurahService) {}
@@ -21,6 +22,7 @@ export class ListenPage implements OnInit {
     this.media = <HTMLAudioElement>document.getElementById("audio");
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = [...res];
+      this.surahInfoCopy = [...res];
       this.surahService.surahInfo = [...res];
     });
   }
@@ -52,4 +54,21 @@ export class ListenPage implements OnInit {
   // API ENDPOINTS
   // https://api.quran.com/api/v4/quran/verses/indopak?chapter_number=100
   // https://api.quran.com/api/v4/chapter_recitations/{id}/{chapter_number}
+
+  p2e = (s) => s.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+  a2e = (s) => s.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+
+  queryChanged(ip: string) {
+    let temp: string = ip.toLowerCase();
+    temp = this.a2e(this.p2e(temp));
+
+    if (temp === "") this.surahInfo = this.surahInfoCopy;
+    this.surahInfo = this.surahInfoCopy.filter((d) => {
+      return (
+        parseInt(d.index).toString().indexOf(temp) > -1 ||
+        d.title.toLowerCase().indexOf(temp) > -1 ||
+        d.titleAr.indexOf(temp) > -1
+      );
+    });
+  }
 }

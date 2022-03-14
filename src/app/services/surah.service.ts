@@ -65,10 +65,7 @@ export class SurahService {
     }
 
     getSurahInfo() {
-        this.http.get('assets/surah.json').subscribe((res:any)=>{
-            this.surahInfo = [...res];
-            console.log('surahInfo is ready!');
-        })
+        return this.http.get('assets/surah.json');
     }
 }
 

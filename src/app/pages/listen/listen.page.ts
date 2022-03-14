@@ -1,30 +1,33 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { SurahService } from 'src/app/services/surah.service';
+import { HttpClient } from "@angular/common/http";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { SurahService } from "src/app/services/surah.service";
 
 @Component({
-  selector: 'app-listen',
-  templateUrl: './listen.page.html',
-  styleUrls: ['./listen.page.scss'],
+  selector: "app-listen",
+  templateUrl: "./listen.page.html",
+  styleUrls: ["./listen.page.scss"],
 })
 export class ListenPage implements OnInit {
-  ayahNumber:number;
-  audioSrc:string;
+  ayahNumber: number;
+  audioSrc: string;
   media: HTMLAudioElement;
-  spin:boolean= false;
+  spin: boolean = false;
   surahInfo = [];
 
-  @ViewChild('audioEl') audioEl:ElementRef<HTMLAudioElement>;
-  constructor(private http:HttpClient, private surahService:SurahService) { }
+  @ViewChild("audioEl") audioEl: ElementRef<HTMLAudioElement>;
+  constructor(private http: HttpClient, private surahService: SurahService) {}
 
   ngOnInit() {
-    this.media = <HTMLAudioElement>document.getElementById('audio');
-    this.surahInfo = [...this.surahService.surahInfo];
+    this.media = <HTMLAudioElement>document.getElementById("audio");
+    this.surahService.getSurahInfo().subscribe((res: any) => {
+      this.surahInfo = [...res];
+      this.surahService.surahInfo = [...res];
+    });
   }
 
   get $player(): HTMLAudioElement {
     return this.audioEl.nativeElement;
-  } 
+  }
 
   listen(num) {
     this.media.pause();
@@ -32,13 +35,13 @@ export class ListenPage implements OnInit {
     // replace http with https in prod
     // this.audioSrc = `http://cdn.islamic.network/quran/audio/64/ar.abdurrahmaansudais/${ayahNumber}.mp3`;
     let apiEndpoint = `https://api.quran.com/api/v4/chapter_recitations/3/${num}`;
-    this.getUrl(apiEndpoint).subscribe((res:any)=>{
-      this.spin=false;
-      console.log(res);    
-      this.audioSrc = res.audio_file.audio_url
+    this.getUrl(apiEndpoint).subscribe((res: any) => {
+      this.spin = false;
+      console.log(res);
+      this.audioSrc = res.audio_file.audio_url;
       this.media.src = this.audioSrc;
       this.media.play();
-    })
+    });
     console.log(this.audioEl);
   }
 
@@ -49,5 +52,4 @@ export class ListenPage implements OnInit {
   // API ENDPOINTS
   // https://api.quran.com/api/v4/quran/verses/indopak?chapter_number=100
   // https://api.quran.com/api/v4/chapter_recitations/{id}/{chapter_number}
-
 }

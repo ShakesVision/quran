@@ -34,7 +34,6 @@ export class ReadPage implements OnInit {
     this.pages = this.surah.arabic.split("\n\n");
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
     this.lines = this.arabicLines;
-    console.log(this.surah.urdu);
     if (this.surah.urdu && this.surah.urdu != "") {
       this.translationExists = true;
       this.tPages = this.surah.urdu.split("\n\n");
@@ -184,14 +183,15 @@ export class ReadPage implements OnInit {
     }
   }
 
-  async showSurahInfo() {
-    console.log(this.surah.number);
-    console.log(this.surahService.surahInfo);
-    this.currentSurahInfo = this.surahService.surahInfo.find((s) => {
-      return parseInt(s.index) == parseInt(this.surah.number);
+  showSurahInfo() {
+    this.surahService.getSurahInfo().subscribe((res: any) => {
+      this.surahService.surahInfo = [...res];
+      this.currentSurahInfo = this.surahService.surahInfo.find((s) => {
+        return parseInt(s.index) == parseInt(this.surah.number);
+      });
+      console.log(this.currentSurahInfo);
+      this.presentSurahInfo(this.currentSurahInfo);
     });
-    console.log(this.currentSurahInfo);
-    this.presentSurahInfo(this.currentSurahInfo);
   }
 
   async presentSurahInfo(s) {
@@ -229,7 +229,6 @@ export class ReadPage implements OnInit {
   }
 
   toggleIconOutline(iconName:string) {
-    console.log(iconName);
     if(iconName.endsWith('-outline')) return iconName.replace('-outline','');
     else return iconName+='-outline';
   }

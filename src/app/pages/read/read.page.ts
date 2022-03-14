@@ -210,6 +210,12 @@ export class ReadPage implements OnInit {
             this.getJuzDistribution(s.juz)
           : ""
       }.`,
+      buttons:[
+        {
+          role: 'cancel',
+          text: 'Ok'
+        }
+      ]
     });
     alert.present();
   }

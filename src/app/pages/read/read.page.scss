@@ -39,7 +39,7 @@ ion-content {
   height: 32px; //screen:height in px=> 345:32,300:28,250:22
 }
 .ar div:hover {
-  background-color: #ebfef6; // #ebf2fe;
+  background-color: var(--success-light); //#ebfef6; // #ebf2fe;
 }
 .ur {
   font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
@@ -86,4 +86,10 @@ ion-footer {
 .bism {
   font-size: larger;
   color: var(--ion-color-medium);
+}
+
+.emphasize-btn {
+  color: var(--ion-color-primary);
+  // border-radius: 50%;
+  // background: var(--success-light);
 }

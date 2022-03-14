@@ -8,17 +8,24 @@
 </ion-header>
 
 <ion-content>
-  <ion-input type="text" placeholder="Type Surah name/number..." (ionChange)="queryChanged($event.target.value)"></ion-input>
-  <ion-input type="number" placeholder="Ayah number" #numValue></ion-input>
-  <ion-button (click)="listen(numValue.value)">
-    <ion-icon slot="start" name="play-outline"></ion-icon>
-    Play
-  </ion-button>
-  <div class="spinner">
-    <ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
+  <div class="top-wrapper ion-padding">
+    <ion-label>Type Surah name or number, in English or Arabic:</ion-label>
+    <!-- <ion-input type="number" placeholder="Ayah number" #numValue></ion-input>
+    <ion-button (click)="listen(numValue.value)">
+      <ion-icon slot="start" name="play-outline"></ion-icon>
+      Play
+    </ion-button> -->
+    <div class="spinner">
+      <ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
+    </div>
+    <audio [src]="audioSrc" #audioEl id="audio"></audio>
   </div>
-  <audio [src]="audioSrc" #audioEl id="audio"></audio>
-
+  <ion-searchbar
+    type="text"
+    class="ion-text-center ar-text"
+    placeholder="falaq / فلق / 113 / ۱۱۳"
+    (ionChange)="queryChanged($event.target.value)"
+  ></ion-searchbar>
   <div class="aud" *ngFor="let s of surahInfo">
     <ion-item button (click)="listen(s.index)">
       <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>

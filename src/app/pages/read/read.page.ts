@@ -19,6 +19,7 @@ export class ReadPage implements OnInit {
   currentPage: number = 1;
   translation: string;
   tMode: boolean = false;
+  hMode: boolean = false;
   translationExists: boolean = false;
   currentSurahInfo;
 
@@ -116,7 +117,7 @@ export class ReadPage implements OnInit {
       popup.addEventListener("click", () => {
         this.resetPopup(popup);
       });
-    } else if(!this.surah.urdu) {
+    } else if (!this.surah.urdu) {
       console.log("Translation not available!");
       this.presentToastWithOptions(
         `Translation for Surah ${
@@ -202,23 +203,34 @@ export class ReadPage implements OnInit {
       } Ayahs, was revealed in ${s.place} and is spanned over ${
         s.juz?.length
       } juz, i.e. ${s.juz[0].index}${
-        s.juz.length > 1 ? "-" + s.juz[s.juz.length - 1].index + '.<br><br>'+ this.getJuzDistribution(s.juz) : ""
+        s.juz.length > 1
+          ? "-" +
+            s.juz[s.juz.length - 1].index +
+            ".<br><br>" +
+            this.getJuzDistribution(s.juz)
+          : ""
       }.`,
     });
     alert.present();
   }
 
-  getJuzDistribution(juz):string {
-    let d = '';
-    for(let j of juz) {
-      d+= `Verses ${j.verse.start}-${j.verse.end} in juz ${j.index}.<br>`
+  getJuzDistribution(juz): string {
+    let d = "";
+    for (let j of juz) {
+      d += `Verses ${j.verse.start}-${j.verse.end} in juz ${j.index}.<br>`;
     }
     return d;
   }
 
-  hifzMode(isOn:boolean) {
-    let el:HTMLElement = document.querySelector('.ar');
-    console.log(isOn,el);
-    el.style.color = isOn? 'white': 'black';
+  toggleHifzMode() {
+    this.hMode = !this.hMode;
+    let el: HTMLElement = document.querySelector(".ar");
+    el.style.color = this.hMode ? "white" : "black";
+  }
+
+  toggleIconOutline(iconName:string) {
+    console.log(iconName);
+    if(iconName.endsWith('-outline')) return iconName.replace('-outline','');
+    else return iconName+='-outline';
   }
 }

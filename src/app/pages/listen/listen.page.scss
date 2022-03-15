@@ -1,0 +1,17 @@
+.top-wrapper {
+  padding: 10px;
+}
+.active {
+  background: var(--success-light);
+}
+.audio-wrapper {
+  position: absolute;
+  bottom: 0;
+  z-index: 5;
+  text-align: center;
+  width: 100%;
+  // audio {
+  //   border: 1px solid;
+  //   border-radius: 50px;
+  // }
+}

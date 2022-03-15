@@ -9,7 +9,9 @@
 
 <ion-content>
   <div class="top-wrapper ion-padding">
-    <ion-label>Type Surah name or number, in English or Arabic:</ion-label>
+    <ion-label style="font-size: small"
+      >Type Surah name or number, in English or Arabic:</ion-label
+    >
     <!-- <ion-input type="number" placeholder="Ayah number" #numValue></ion-input>
     <ion-button (click)="listen(numValue.value)">
       <ion-icon slot="start" name="play-outline"></ion-icon>
@@ -18,7 +20,6 @@
     <div class="spinner">
       <ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
     </div>
-    <audio [src]="audioSrc" #audioEl id="audio"></audio>
   </div>
   <ion-searchbar
     type="text"
@@ -27,11 +28,14 @@
     (ionChange)="queryChanged($event.target.value)"
   ></ion-searchbar>
   <div class="aud" *ngFor="let s of surahInfo">
-    <ion-item button (click)="listen(s.index)">
+    <ion-item button (click)="listen(s.index,$event.target)">
       <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>
       <ion-label slot="end">
         <span class="ar-text">{{s.titleAr}}</span></ion-label
       >
     </ion-item>
+  </div>
+  <div class="audio-wrapper">
+    <audio controls [src]="audioSrc" #audioEl id="audio"></audio>
   </div>
 </ion-content>

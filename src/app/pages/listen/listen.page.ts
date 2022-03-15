@@ -19,11 +19,12 @@ export class ListenPage implements OnInit {
   constructor(private http: HttpClient, private surahService: SurahService) {}
 
   ngOnInit() {
-    this.media = <HTMLAudioElement>document.getElementById("audio");
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = [...res];
       this.surahInfoCopy = [...res];
       this.surahService.surahInfo = [...res];
+      //assign media element too
+      this.media = <HTMLAudioElement>document.getElementById("audio");
     });
   }
 
@@ -31,24 +32,23 @@ export class ListenPage implements OnInit {
     return this.audioEl.nativeElement;
   }
 
-  listen(num) {
+  listen(num, targetEl: HTMLElement) {
     this.media.pause();
     this.spin = true;
     // replace http with https in prod
     // this.audioSrc = `http://cdn.islamic.network/quran/audio/64/ar.abdurrahmaansudais/${ayahNumber}.mp3`;
     let apiEndpoint = `https://api.quran.com/api/v4/chapter_recitations/3/${num}`;
-    this.getUrl(apiEndpoint).subscribe((res: any) => {
+    this.http.get(apiEndpoint).subscribe((res: any) => {
       this.spin = false;
       console.log(res);
       this.audioSrc = res.audio_file.audio_url;
       this.media.src = this.audioSrc;
-      this.media.play();
+      setTimeout(() => {
+        this.media.play();
+        console.log(targetEl);
+        targetEl.classList.toggle("active");
+      }, 150);
     });
-    console.log(this.audioEl);
-  }
-
-  getUrl(url) {
-    return this.http.get(url);
   }
 
   // API ENDPOINTS

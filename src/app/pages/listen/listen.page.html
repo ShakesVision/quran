@@ -36,7 +36,7 @@
   <ion-item class="qari-selector">
     <ion-label>Qaari</ion-label>
     <ion-select
-      *ngIf="reciters.length>0"
+      *ngIf="reciters"
       #mySelect
       value="3"
       (ionChange)="qariChanged(mySelect.value)"
@@ -48,6 +48,7 @@
       >
     </ion-select>
   </ion-item>
+  <div class="total">{{surahInfo.length}}</div>
   <div class="aud-wrapper">
     <div class="aud" *ngFor="let s of surahInfo">
       <ion-item button (click)="listen(s,$event.target)">

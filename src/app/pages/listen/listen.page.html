@@ -3,15 +3,26 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Listen to Recitations</ion-title>
+    <ion-searchbar
+      type="text"
+      class="ion-text-center ion-no-padding ar-text"
+      placeholder="falaq / فلق / 113 / ۱۱۳"
+      (ionChange)="queryChanged($event.target.value)"
+      mode="ios"
+    ></ion-searchbar>
+    <ion-buttons slot="end">
+      <div class="labelled-btn-wrapper">
+        <ion-button (click)="qariSelect()">
+          <ion-icon slot="icon-only" name="people-outline"></ion-icon>
+        </ion-button>
+        <ion-label> {{reciters.length}} </ion-label>
+      </div>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <div class="top-wrapper ion-padding">
-    <ion-label style="font-size: small"
-      >Type Surah name or number, in English or Arabic:</ion-label
-    >
+  <div class="top-wrapper">
     <!-- <ion-input type="number" placeholder="Ayah number" #numValue></ion-input>
     <ion-button (click)="listen(numValue.value)">
       <ion-icon slot="start" name="play-outline"></ion-icon>
@@ -21,12 +32,22 @@
       <ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
     </div>
   </div>
-  <ion-searchbar
-    type="text"
-    class="ion-text-center ar-text"
-    placeholder="falaq / فلق / 113 / ۱۱۳"
-    (ionChange)="queryChanged($event.target.value)"
-  ></ion-searchbar>
+
+  <ion-item class="qari-selector">
+    <ion-label>Qaari</ion-label>
+    <ion-select
+      *ngIf="reciters.length>0"
+      #mySelect
+      value="3"
+      (ionChange)="qariChanged(mySelect.value)"
+      placeholder="Select Qari"
+      mode="ios"
+    >
+      <ion-select-option *ngFor="let r of reciters" [value]="r.id"
+        >{{r.name}}</ion-select-option
+      >
+    </ion-select>
+  </ion-item>
   <div class="aud" *ngFor="let s of surahInfo">
     <ion-item button (click)="listen(s.index,$event.target)">
       <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>

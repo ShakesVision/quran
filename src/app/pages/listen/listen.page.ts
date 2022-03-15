@@ -1,5 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { IonSelect } from "@ionic/angular";
 import { SurahService } from "src/app/services/surah.service";
 
 @Component({
@@ -12,10 +13,14 @@ export class ListenPage implements OnInit {
   audioSrc: string;
   media: HTMLAudioElement;
   spin: boolean = false;
+  qariId: number = 3;
   surahInfo = [];
   surahInfoCopy = [];
+  reciters = [];
 
   @ViewChild("audioEl") audioEl: ElementRef<HTMLAudioElement>;
+  @ViewChild("mySelect", { static: false }) selectRef: IonSelect;
+
   constructor(private http: HttpClient, private surahService: SurahService) {}
 
   ngOnInit() {
@@ -26,6 +31,7 @@ export class ListenPage implements OnInit {
       //assign media element too
       this.media = <HTMLAudioElement>document.getElementById("audio");
     });
+    this.fetchQariList();
   }
 
   get $player(): HTMLAudioElement {
@@ -37,7 +43,7 @@ export class ListenPage implements OnInit {
     this.spin = true;
     // replace http with https in prod
     // this.audioSrc = `http://cdn.islamic.network/quran/audio/64/ar.abdurrahmaansudais/${ayahNumber}.mp3`;
-    let apiEndpoint = `https://api.quran.com/api/v4/chapter_recitations/3/${num}`;
+    let apiEndpoint = `https://api.quran.com/api/v4/chapter_recitations/${this.qariId}/${num}`;
     this.http.get(apiEndpoint).subscribe((res: any) => {
       this.spin = false;
       console.log(res);
@@ -70,5 +76,20 @@ export class ListenPage implements OnInit {
         d.titleAr.indexOf(temp) > -1
       );
     });
+  }
+  fetchQariList() {
+    const url = `https://api.quran.com/api/v4/resources/chapter_reciters?language=ar`;
+    this.http.get(url).subscribe((res: any) => {
+      console.log(res);
+      this.reciters = res.reciters;
+    });
+  }
+
+  qariSelect() {
+    this.selectRef.open();
+  }
+  qariChanged(e) {
+    console.log(e);
+    this.qariId = parseInt(e);
   }
 }

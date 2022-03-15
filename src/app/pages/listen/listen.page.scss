@@ -1,11 +1,14 @@
+ion-searchbar {
+  padding-bottom: 0;
+}
 .top-wrapper {
-  padding: 10px;
+  // padding: 10px;
 }
 .active {
   background: var(--success-light);
 }
 .audio-wrapper {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   z-index: 5;
   text-align: center;
@@ -14,4 +17,18 @@
   //   border: 1px solid;
   //   border-radius: 50px;
   // }
+}
+.labelled-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  ion-button {
+    --padding-bottom: 0;
+  }
+  ion-label {
+    font-size: x-small;
+  }
+}
+.qari-selector {
+  --background: var(--success-light);
 }

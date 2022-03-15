@@ -40,7 +40,7 @@
       #mySelect
       value="3"
       (ionChange)="qariChanged(mySelect.value)"
-      placeholder="Select Qari"
+      placeholder="Select Qaari"
       mode="ios"
     >
       <ion-select-option *ngFor="let r of reciters" [value]="r.id"
@@ -48,15 +48,25 @@
       >
     </ion-select>
   </ion-item>
-  <div class="aud" *ngFor="let s of surahInfo">
-    <ion-item button (click)="listen(s.index,$event.target)">
-      <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>
-      <ion-label slot="end">
-        <span class="ar-text">{{s.titleAr}}</span></ion-label
-      >
-    </ion-item>
+  <div class="aud-wrapper">
+    <div class="aud" *ngFor="let s of surahInfo">
+      <ion-item button (click)="listen(s,$event.target)">
+        <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>
+        <ion-label slot="end">
+          <span class="ar-text">{{s.titleAr}}</span></ion-label
+        >
+      </ion-item>
+    </div>
   </div>
-  <div class="audio-wrapper">
+  <div class="player-wrapper">
+    <div *ngIf="nowPlaying" class="now-playing">
+      <ion-label>
+        <span>{{nowPlaying.index}}. {{nowPlaying.title}}</span></ion-label
+      >
+      <ion-label slot="end">
+        <span class="ar-text">{{nowPlaying.titleAr}}</span></ion-label
+      >
+    </div>
     <audio controls [src]="audioSrc" #audioEl id="audio"></audio>
   </div>
 </ion-content>

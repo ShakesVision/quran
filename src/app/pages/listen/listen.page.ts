@@ -11,6 +11,7 @@ import { SurahService } from "src/app/services/surah.service";
 export class ListenPage implements OnInit {
   ayahNumber: number;
   audioSrc: string;
+  nowPlaying;
   media: HTMLAudioElement;
   spin: boolean = false;
   qariId: number = 3;
@@ -38,7 +39,8 @@ export class ListenPage implements OnInit {
     return this.audioEl.nativeElement;
   }
 
-  listen(num, targetEl: HTMLElement) {
+  listen(s, targetEl: HTMLElement) {
+    let num = s.index;
     this.media.pause();
     this.spin = true;
     // replace http with https in prod
@@ -51,8 +53,8 @@ export class ListenPage implements OnInit {
       this.media.src = this.audioSrc;
       setTimeout(() => {
         this.media.play();
-        console.log(targetEl);
-        targetEl.classList.toggle("active");
+        console.log(targetEl.parentElement);
+        this.nowPlaying = s;
       }, 150);
     });
   }

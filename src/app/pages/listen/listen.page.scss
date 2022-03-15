@@ -7,12 +7,14 @@ ion-searchbar {
 .active {
   background: var(--success-light);
 }
-.audio-wrapper {
+.player-wrapper {
   position: fixed;
   bottom: 0;
   z-index: 5;
   text-align: center;
+  padding-top: 3px;
   width: 100%;
+  background: #ffe2bd;
   // audio {
   //   border: 1px solid;
   //   border-radius: 50px;
@@ -31,4 +33,7 @@ ion-searchbar {
 }
 .qari-selector {
   --background: var(--success-light);
+}
+.aud-wrapper {
+  margin-bottom: 100px;
 }

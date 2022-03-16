@@ -21,6 +21,7 @@ export class ReadPage implements OnInit {
   tMode: boolean = false;
   hMode: boolean = false;
   translationExists: boolean = false;
+  isPopoverOpen: boolean = false;
   currentSurahInfo;
 
   constructor(
@@ -210,12 +211,12 @@ export class ReadPage implements OnInit {
             this.getJuzDistribution(s.juz)
           : ""
       }.`,
-      buttons:[
+      buttons: [
         {
-          role: 'cancel',
-          text: 'Ok'
-        }
-      ]
+          role: "cancel",
+          text: "Ok",
+        },
+      ],
     });
     alert.present();
   }
@@ -234,8 +235,8 @@ export class ReadPage implements OnInit {
     el.style.color = this.hMode ? "white" : "black";
   }
 
-  toggleIconOutline(iconName:string) {
-    if(iconName.endsWith('-outline')) return iconName.replace('-outline','');
-    else return iconName+='-outline';
+  toggleIconOutline(iconName: string) {
+    if (iconName.endsWith("-outline")) return iconName.replace("-outline", "");
+    else return (iconName += "-outline");
   }
 }

@@ -28,7 +28,11 @@
 @font-face {
   font-family: "Indopak";
   // src: url("assets/fonts/Naskh-IndoPak.woff2");
-  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0.woff2");
+  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.woff2");
+}
+@font-face {
+  font-family: "Muhammadi";
+  src: url("assets/fonts/muhammadi.ttf");
 }
 
 ion-title.title-large {
@@ -37,6 +41,10 @@ ion-title.title-large {
 
 .ar-text {
   font-family: Indopak;
+}
+
+.ar-text2 {
+  font-family: Muhammadi;
 }
 
 .total {

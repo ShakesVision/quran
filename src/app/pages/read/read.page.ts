@@ -3,6 +3,7 @@ import { SurahService } from "./../../services/surah.service";
 import { ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
 import { alertController } from "@ionic/core";
+import { MushafLines } from "src/app/services/mushaf-versions";
 
 @Component({
   selector: "app-read",
@@ -23,6 +24,8 @@ export class ReadPage implements OnInit {
   translationExists: boolean = false;
   isPopoverOpen: boolean = false;
   currentSurahInfo;
+
+  mushafVersion = MushafLines.Fifteen;
 
   ayah_marks = [
     "",
@@ -547,5 +550,19 @@ export class ReadPage implements OnInit {
   toggleIconOutline(iconName: string) {
     if (iconName.endsWith("-outline")) return iconName.replace("-outline", "");
     else return (iconName += "-outline");
+  }
+  addSpan(line: string): string {
+    if (this.ayah_marks.some((mark) => line.includes(mark))) {
+      this.ayah_marks.forEach((mark, i) => {
+        if (line.includes(mark)) {
+          const re = new RegExp(mark, "g");
+          line = line.replace(
+            re,
+            `<span class='ayah_mark ayah_mark${i + 1}'>${mark}</span>`
+          );
+        }
+      });
+    }
+    return line;
   }
 }

@@ -55,7 +55,7 @@
       id="line_{{i}}"
       (click)="openTrans($event,i)"
     >
-      <span> {{line}} </span>
+      <span [innerHTML]="addSpan(line)"> </span>
     </div>
 
     <ng-container

@@ -16,7 +16,7 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import '~@ionic/angular/css/display.css';
+@import "~@ionic/angular/css/display.css";
 
 /* Optional CSS utils that can be commented out */
 @import "~@ionic/angular/css/padding.css";
@@ -25,6 +25,38 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+@font-face {
+  font-family: "Indopak";
+  // src: url("assets/fonts/Naskh-IndoPak.woff2");
+  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.woff2");
+}
+@font-face {
+  font-family: "Muhammadi";
+  src: url("assets/fonts/muhammadi.ttf");
+}
+
 ion-title.title-large {
   --color: white;
+}
+
+.ar-text {
+  font-family: Indopak;
+}
+
+.ar-text2 {
+  font-family: Muhammadi;
+}
+
+span.ayah_mark {
+  display: inline-block !important;
+}
+
+.total {
+  text-align: center;
+  background: var(--ion-color-dark);
+  color: var(--ion-color-light);
+  width: 60px;
+  margin: 5px auto;
+  padding: 3px;
+  border-radius: 3px;
 }

@@ -15,7 +15,7 @@
     <ion-card-content>
       The prophet ﷺ has mentioned fazaail for a lot of surahs and ayahs. The following should be memorized on priority.
       <br>
-      <span class="arName" *ngFor="let chapter of recommendedChapters">
+      <span class="ar-text" *ngFor="let chapter of recommendedChapters">
         {{chapter}} .
       </span>
       <ion-button size="small" fill="outline">See supporting ahadith</ion-button>
@@ -47,7 +47,7 @@
     <tr class="row">
       <td>01/01/21</td>
       <td>36</td>
-      <td class="arName">یس</td>
+      <td class="ar-text">یس</td>
       <td>1</td>
       <td>5</td>
       <td>YES</td>
@@ -55,7 +55,7 @@
     <tr class="row" *ngFor="let item of items">
       <td> {{getFormattedDate(item.date)}} </td>
       <td> {{item.number}} </td>
-      <td class="arName"> {{item.surah}} </td>
+      <td class="ar-text"> {{item.surah}} </td>
       <td> {{item.from}} </td>
       <td> {{item.to}} </td>
       <td> {{item.finished=='on'? 'YES':'NO'}} </td>
@@ -64,51 +64,24 @@
   </table>
   </div>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-  <ion-fab-button id="trigger-buttonk" (click)="add()">
+  <ion-fab-button id="trigger-button" (click)="add()">
     <ion-icon name="add"></ion-icon>
   </ion-fab-button></ion-fab>
-
-  <!-- Default -->
-<ion-modal [isOpen]="true">
-  <ng-template>
-    <ion-content>Modal Content</ion-content>
-  </ng-template>
-</ion-modal>
 
 <!-- Use a trigger -->
 <ion-button id="trigger-button">Click to open modal</ion-button>
 <ion-modal trigger="trigger-button">
   <ng-template>
+    <ion-toolbar>
+      <ion-title>Recommended for Hifz</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="closeModal()">
+          <ion-icon name="add"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
     <ion-content>Modal Content</ion-content>
   </ng-template>
 </ion-modal>
 
-<!-- Sheet Modal -->
-<ion-modal
-  [isOpen]="true"
-  [breakpoints]="[0.1, 0.5, 1]"
-  [initialBreakpoint]="0.5"
->
-  <ng-template>
-    <ion-content>Modal Content</ion-content>
-  </ng-template>
-</ion-modal>
-
-<!-- Card Modal -->
-<ion-modal
-  [isOpen]="true"
-  [swipeToClose]="true"
-  [presentingElement]="routerOutlet.nativeEl"
->
-  <ng-template>
-    <ion-content>Modal Content</ion-content>
-  </ng-template>
-</ion-modal>
-
-<!-- Passing Props -->
-<ion-modal [isOpen]="true">
-  <ng-template>
-    <app-angular-component title="Ionic"></app-angular-component>
-  </ng-template>
-</ion-modal>
 </ion-content>

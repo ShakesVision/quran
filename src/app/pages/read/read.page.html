@@ -1,18 +1,34 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>      
+      <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title> {{surah.name}} </ion-title>
     <ion-buttons slot="end">
-      <ion-button *ngIf="translationExists" (click)="translationMode(true)" slot="end">
-        <ion-icon slot="icon-only" name="language"></ion-icon>
+      <ion-button
+        (click)="toggleHifzMode()"
+        slot="end"
+        [ngClass]="!hMode?'emphasize-btn':''"
+      >
+        <ion-icon
+          slot="icon-only"
+          [name]="hMode?toggleIconOutline('eye'):toggleIconOutline('eye-outline')"
+        ></ion-icon>
       </ion-button>
-      <ion-button (click)="changeFontSize(1)" slot="end">
-        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      <ion-button
+        *ngIf="translationExists"
+        (click)="translationMode(true)"
+        slot="end"
+        [ngClass]="tMode?'emphasize-btn':''"
+      >
+        <ion-icon
+          slot="icon-only"
+          [name]="tMode?toggleIconOutline('language-outline'):toggleIconOutline('language')"
+        ></ion-icon>
       </ion-button>
-      <ion-button (click)="changeFontSize(-1)" slot="end">
-        <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
+
+      <ion-button id="popover-trigger-button" slot="end">
+        <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -28,7 +44,9 @@
         class="filler-lines"
         *ngFor="let line of [].constructor(15-lines.length-2)"
       ></div>
-      <div class="surah-name centered-table-text">{{surah.name.split(' ')[1]}}</div>
+      <div class="surah-name centered-table-text">
+        {{surah.name.split(' ')[1]}}
+      </div>
       <div class="bism centered-table-text">﷽</div>
     </ng-container>
 
@@ -37,7 +55,7 @@
       id="line_{{i}}"
       (click)="openTrans($event,i)"
     >
-      <span> {{line}} </span>
+      <span [innerHTML]="addSpan(line)"> </span>
     </div>
 
     <ng-container
@@ -63,11 +81,37 @@
       <ion-icon slot="icon-only" name="close"></ion-icon>
     </ion-button>
   </div>
-  <!-- <table dir="rtl">
-      <tr *ngFor="let line of lines;let i = index" (click)="openTrans(i)">
-        <td> {{line}} </td>
-      </tr>
-    </table> -->
+
+  <ion-popover
+    [isOpen]="isPopoverOpen"
+    trigger="popover-trigger-button"
+    side="bottom"
+  >
+    <ng-template>
+      <ion-content>
+        <div>
+          <ion-list lines="none">
+            <ion-item>
+              <ion-button (click)="changeFontSize(1)" slot="start" fill="clear">
+                <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+              </ion-button>
+              <ion-label>Font Size</ion-label>
+              <ion-button (click)="changeFontSize(-1)" slot="end" fill="clear">
+                <ion-icon
+                  slot="icon-only"
+                  name="remove-circle-outline"
+                ></ion-icon>
+              </ion-button>
+            </ion-item>
+            <ion-item button (click)="showSurahInfo()">
+              <ion-icon slot="start" name="information"></ion-icon>
+              <ion-label>About Surah</ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
 </ion-content>
 <ion-footer>
   <div class="btmNav">

@@ -1,8 +1,4 @@
 @font-face {
-  font-family: "Indopak";
-  src: url("./../../../assets/fonts/Naskh-IndoPak.woff2");
-}
-@font-face {
   font-family: "Mehr";
   src: url("./../../../assets/fonts/Mehr.ttf");
 }
@@ -12,6 +8,7 @@ ion-content {
   --background-size: cover;
   overflow: hidden;
 }
+
 .ar,
 .ur {
   text-align: justify;
@@ -34,12 +31,15 @@ ion-content {
   padding: 1em;
   margin: 0 auto;
 }
+.ar2 {
+  font-family: Muhammadi;
+}
 .ar div {
   border-bottom: 0.5px solid #cecece;
   height: 32px; //screen:height in px=> 345:32,300:28,250:22
 }
 .ar div:hover {
-  background-color: #ebf2fe;
+  background-color: var(--success-light); //#ebfef6; // #ebf2fe;
 }
 .ur {
   font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
@@ -86,4 +86,10 @@ ion-footer {
 .bism {
   font-size: larger;
   color: var(--ion-color-medium);
+}
+
+.emphasize-btn {
+  color: var(--ion-color-primary);
+  // border-radius: 50%;
+  // background: var(--success-light);
 }

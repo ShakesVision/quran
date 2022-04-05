@@ -18,6 +18,7 @@ export class MemorizePage implements OnInit {
     'ملک',
     'کہف '  
   ]
+  isOpen:boolean = true;
   constructor(
     private storage: Storage,
     private alertController: AlertController
@@ -90,4 +91,7 @@ export class MemorizePage implements OnInit {
     alert.present();
   }
   getFormattedDate = (date) => new Date(date).toLocaleDateString();
+  closeModal() {
+    this.isOpen = false;
+  }
 }

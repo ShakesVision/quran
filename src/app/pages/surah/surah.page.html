@@ -3,22 +3,31 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>
-      Surahs
-    </ion-title>
+    <ion-title> Surahs </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
+  <div *ngIf="items" class="progress">
+    <div class="total">{{(items|async)?.length}}</div>
+    <ion-progress-bar
+      type="determinate"
+      [value]="(items|async)?.length/144"
+      color="primary"
+    ></ion-progress-bar>
+  </div>
   <ion-list>
-    <ion-item *ngFor="let item of items | async">      
-      <ion-label>{{ item.surahNo }}. {{ item.surahName.split(' ')[0] }} <span class="arName">{{ item.surahName.split(' ')[1] }}</span> </ion-label>
+    <ion-item *ngFor="let item of items | async">
+      <ion-label
+        >{{ item.surahNo }}. {{ item.surahName.split(' ')[0] }}
+        <span class="ar-text">{{ item.surahName.split(' ')[1] }}</span>
+      </ion-label>
       <ion-button fill="clear" slot="end" [routerLink]="[item.remoteId]">
         <ion-icon mode="ios" slot="icon-only" name="pencil-outline"></ion-icon>
       </ion-button>
       <ion-button fill="clear" slot="end" (click)="gotoRead(item)">
         <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
-      </ion-button>        
+      </ion-button>
     </ion-item>
   </ion-list>
 

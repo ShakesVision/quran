@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-searchbar
+      type="text"
+      class="ion-text-center ion-no-padding ar-text"
+      placeholder="falaq / فلق / 113 / ۱۱۳"
+      (ionChange)="queryChanged($event.target.value)"
+      mode="ios"
+    ></ion-searchbar>
+    <ion-buttons slot="end">
+      <div class="labelled-btn-wrapper">
+        <ion-button (click)="qariSelect()">
+          <ion-icon slot="icon-only" name="people-outline"></ion-icon>
+        </ion-button>
+        <ion-label> {{reciters.length}} </ion-label>
+      </div>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="top-wrapper">
+    <!-- <ion-input type="number" placeholder="Ayah number" #numValue></ion-input>
+    <ion-button (click)="listen(numValue.value)">
+      <ion-icon slot="start" name="play-outline"></ion-icon>
+      Play
+    </ion-button> -->
+    <div class="spinner">
+      <ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
+    </div>
+  </div>
+
+  <ion-item class="qari-selector">
+    <ion-label>Qaari</ion-label>
+    <ion-select
+      *ngIf="reciters"
+      #mySelect
+      value="3"
+      (ionChange)="qariChanged(mySelect.value)"
+      placeholder="Select Qaari"
+      mode="ios"
+    >
+      <ion-select-option *ngFor="let r of reciters" [value]="r.id"
+        >{{r.name}}</ion-select-option
+      >
+    </ion-select>
+  </ion-item>
+  <div class="total">{{surahInfo.length}}</div>
+  <div class="aud-wrapper">
+    <div class="aud" *ngFor="let s of surahInfo">
+      <ion-item button (click)="listen(s,$event.target)">
+        <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>
+        <ion-label slot="end">
+          <span class="ar-text">{{s.titleAr}}</span></ion-label
+        >
+      </ion-item>
+    </div>
+  </div>
+  <div class="player-wrapper">
+    <div *ngIf="nowPlaying" class="now-playing">
+      <ion-label>
+        <span>{{nowPlaying.index}}. {{nowPlaying.title}}</span></ion-label
+      >
+      <ion-label slot="end">
+        <span class="ar-text">{{nowPlaying.titleAr}}</span></ion-label
+      >
+    </div>
+    <audio controls [src]="audioSrc" #audioEl id="audio"></audio>
+  </div>
+</ion-content>

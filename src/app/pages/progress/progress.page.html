@@ -1,9 +1,38 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>progress</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Progress</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-
+<ion-content class="ion-padding">
+  TO DOs:
+  <ol>
+    <li>
+      Go to ayah number using: map of ayah-end-mark and english numbers. e.g. 4
+      => specialCharacterFor4 . Search in ~whole~ speculate page-number based
+      on end-page ayah number and total ayahs.
+      <br />
+      Or maybe get a way to remove everything from pages except ayah marks and
+      quickly jump to that page. then highlight for few seconds.
+      <pre><code>
+      var e = document.querySelectorAll('.ar div span')[8];
+      e.innerText.includes('')? e.parentElement.style.color='red':'';
+    </code></pre>
+    </li>
+    <li>
+      Bug fix for rendering coz of ayah number character. each ayah character in
+      span tag with <code>display:inline-block;</code>.
+    </li>
+    <li>Blogger pages integration for help and download.</li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+  </ol>
 </ion-content>

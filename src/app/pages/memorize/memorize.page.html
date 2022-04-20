@@ -8,80 +8,119 @@
 <ion-content class="ion-padding">
   <ion-card class="ion-no-padding ion-no-margin">
     <ion-card-header>
-    <ion-card-title>
-      Recommended for memorization
-    </ion-card-title>
+      <ion-card-title> Recommended for memorization </ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      The prophet ﷺ has mentioned fazaail for a lot of surahs and ayahs. The following should be memorized on priority.
-      <br>
+      The prophet ﷺ has mentioned fazaail for a lot of surahs and ayahs. The
+      following should be memorized on priority.
+      <br />
       <span class="ar-text" *ngFor="let chapter of recommendedChapters">
         {{chapter}} .
       </span>
-      <ion-button size="small" fill="outline">See supporting ahadith</ion-button>
+      <ion-button size="small" fill="outline"
+        >See supporting ahadith</ion-button
+      >
     </ion-card-content>
   </ion-card>
   <h2>Completion Stats</h2>
   <table>
     <tr>
-      <td>36. Yaseen یس	</td>
-      <td>(12%) </td>
+      <td>36. Yaseen یس</td>
+      <td>(12%)</td>
       <td>5/30 Ayahs</td>
     </tr>
   </table>
-  Use surah list array comma delimited. 20,Taahaa,طہ i.e. Number,EnglishName,ArabicName
+  Use surah list array comma delimited. 20,Taahaa,طہ i.e.
+  Number,EnglishName,ArabicName
   <h2>Daily Memorization Stats</h2>
   <div class="tableWrapper">
     <table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>No.</th>
-      <th>Surah</th>
-      <th>From</th>
-      <th>To</th>
-      <th>Finished</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr class="row">
-      <td>01/01/21</td>
-      <td>36</td>
-      <td class="ar-text">یس</td>
-      <td>1</td>
-      <td>5</td>
-      <td>YES</td>
-    </tr>
-    <tr class="row" *ngFor="let item of items">
-      <td> {{getFormattedDate(item.date)}} </td>
-      <td> {{item.number}} </td>
-      <td class="ar-text"> {{item.surah}} </td>
-      <td> {{item.from}} </td>
-      <td> {{item.to}} </td>
-      <td> {{item.finished=='on'? 'YES':'NO'}} </td>
-    </tr>
-  </tbody>
-  </table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>No.</th>
+          <th>Surah</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Finished</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row">
+          <td>01/01/21</td>
+          <td>36</td>
+          <td class="ar-text">یس</td>
+          <td>1</td>
+          <td>5</td>
+          <td>YES</td>
+        </tr>
+        <tr class="row" *ngFor="let item of items">
+          <td>{{getFormattedDate(item.date)}}</td>
+          <td>{{item.number}}</td>
+          <td class="ar-text">{{item.surah}}</td>
+          <td>{{item.from}}</td>
+          <td>{{item.to}}</td>
+          <td>{{item.finished ? 'YES':'NO'}}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-  <ion-fab-button id="trigger-button" (click)="add()">
-    <ion-icon name="add"></ion-icon>
-  </ion-fab-button></ion-fab>
+    <ion-fab-button id="trigger-button">
+      <ion-icon name="add"></ion-icon> </ion-fab-button
+  ></ion-fab>
 
-<!-- Use a trigger -->
-<ion-button id="trigger-button">Click to open modal</ion-button>
-<ion-modal trigger="trigger-button">
-  <ng-template>
-    <ion-toolbar>
-      <ion-title>Recommended for Hifz</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="closeModal()">
-          <ion-icon name="add"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-    <ion-content>Modal Content</ion-content>
-  </ng-template>
-</ion-modal>
-
+  <!-- Use a trigger -->
+  <!-- <ion-button id="trigger-button">Click to open modal</ion-button> -->
+  <ion-modal trigger="trigger-button" (didDismiss)="getValueFromModal($event)">
+    <ng-template>
+      <ion-toolbar>
+        <ion-title>Add Surah for Hifz</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-content class="ion-padding">
+        <form [formGroup]="memorizeEntryForm">
+          <ion-item>
+            <ion-label>Date</ion-label>
+            <!-- <ion-input type="date" formControlName="date"></ion-input> -->
+            <ion-datetime
+              type="date"
+              formControlName="date"
+              (ionChange)="dateChanged($event)"
+            ></ion-datetime>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Surah</ion-label>
+            <ion-input type="text" formControlName="surah"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">From Ayah</ion-label>
+            <ion-input type="number" formControlName="from"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">To Ayah</ion-label>
+            <ion-input type="number" formControlName="to"></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label>Finished</ion-label>
+            <ion-toggle
+              (ionChange)="toggle($event)"
+              formControlName="finished"
+            ></ion-toggle>
+          </ion-item>
+        </form>
+        <ion-button
+          type="submit"
+          (click)="onSubmit()"
+          [disabled]="!memorizeEntryForm.valid"
+          expand="block"
+          >Add</ion-button
+        >
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

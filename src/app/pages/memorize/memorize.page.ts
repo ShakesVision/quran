@@ -1,5 +1,11 @@
 import { Component, OnInit } from "@angular/core";
-import { AlertController } from "@ionic/angular";
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { AlertController, ModalController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { Observable, Subject } from "rxjs";
 
@@ -10,18 +16,14 @@ import { Observable, Subject } from "rxjs";
 })
 export class MemorizePage implements OnInit {
   items: Array<Object> = [];
-  recommendedChapters = [
-    'الفاتحہ',
-    'یس',
-    'رحمن',
-    'واقعہ',
-    'ملک',
-    'کہف '  
-  ]
-  isOpen:boolean = true;
+  recommendedChapters = ["الفاتحہ", "یس", "رحمن", "واقعہ", "ملک", "کہف "];
+  isOpen: boolean = true;
+  memorizeEntryForm: FormGroup;
   constructor(
     private storage: Storage,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private modalController: ModalController,
+    public formBuilder: FormBuilder
   ) {}
 
   async ngOnInit() {
@@ -29,6 +31,13 @@ export class MemorizePage implements OnInit {
     this.storage.set("v1", { mother: "son" }).then((res) => console.log(res));
     this.storage.set("v2", { mother: "son" }).then((res) => console.log(res));
     localStorage.setItem("v1", "son");
+    this.memorizeEntryForm = this.formBuilder.group({
+      date: new FormControl(new Date().toISOString()),
+      surah: new FormControl("", Validators.required),
+      from: new FormControl("", Validators.required),
+      to: new FormControl("", Validators.required),
+      finished: new FormControl(false),
+    });
   }
 
   async add() {
@@ -40,58 +49,74 @@ export class MemorizePage implements OnInit {
           id: "date",
           type: "date",
           placeholder: "Date...",
-          value: new Date()
+          value: new Date(),
         },
         {
           name: "surah",
           id: "surah",
           type: "search",
           placeholder: "Surah name...",
-          handler: (input)=>{
-            console.log('Inside handler:',input);
-          }
-        },
-        {
-          name: 'from',
-          id: 'from',
-          type: 'number',
-          placeholder: "From Ayah number..."
-        },
-        {
-          name: 'to',
-          id: 'to',
-          type: 'number',
-          placeholder: "To Ayah number..."
-        },
-        {
-          name: 'finished',
-          id: 'finished',
-          type: 'checkbox',
-          label: 'Finished',
-          handler: ()=>{
-            console.log('checkbox selected.');
+          handler: (input) => {
+            console.log("Inside handler:", input);
           },
-          checked: true
-        }
+        },
+        {
+          name: "from",
+          id: "from",
+          type: "number",
+          placeholder: "From Ayah number...",
+        },
+        {
+          name: "to",
+          id: "to",
+          type: "number",
+          placeholder: "To Ayah number...",
+        },
+        {
+          name: "finished",
+          id: "finished",
+          type: "checkbox",
+          label: "Finished",
+          handler: () => {
+            console.log("checkbox selected.");
+          },
+          checked: true,
+        },
       ],
       buttons: [
         {
-          text: 'Cancel',
-          role: 'cancel'
+          text: "Cancel",
+          role: "cancel",
         },
         {
-          text: 'Add',
-          handler: (data)=> {
+          text: "Add",
+          handler: (data) => {
             console.log(data);
             this.items.push(data);
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     alert.present();
   }
   getFormattedDate = (date) => new Date(date).toLocaleDateString();
   closeModal() {
     this.isOpen = false;
+    this.modalController.dismiss();
+  }
+  getValueFromModal(e) {
+    if (e.detail.data) {
+      console.log(e);
+      this.items.push(e.detail.data);
+    }
+  }
+  toggle(e) {
+    // console.log(e.detail.checked);
+  }
+  onSubmit() {
+    this.modalController.dismiss(this.memorizeEntryForm.value);
+  }
+  dateChanged(ev) {
+    console.log(ev.detail.value);
   }
 }

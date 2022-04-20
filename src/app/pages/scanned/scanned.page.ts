@@ -23,6 +23,10 @@ export class ScannedPage implements OnInit {
     602, 603, 603, 604, 604, 605, 605, 606, 606, 607, 607, 608, 608, 608, 609,
     609, 609, 609, 610, 610, 610, 611, 611,
   ];
+  juzPageNumbers = [
+    2, 23, 43, 63, 83, 103, 123, 143, 153, 183, 203, 223, 243, 263, 283, 303,
+    323, 343, 363, 383, 403, 423, 443, 463, 483, 503, 523, 543, 563, 587,
+  ];
 
   constructor(private httpClient: HttpClient) {}
 
@@ -47,8 +51,13 @@ export class ScannedPage implements OnInit {
     this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
   }
   jumpToSurah(n: number) {
-    console.log(n);
     this.loadImg(this.surahPageNumbers[n - 1], this.imgQuality);
+  }
+  jumpToJuz(n: number, section?) {
+    console.log(n, section, this.juzPageNumbers[n - 1 + section * 20]);
+    if (section)
+      this.loadImg(this.juzPageNumbers[n - 1] + section * 20, this.imgQuality);
+    else this.loadImg(this.juzPageNumbers[n - 1], this.imgQuality);
   }
 }
 export enum ImageQuality {

@@ -3,16 +3,28 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="home"></ion-back-button>
     </ion-buttons>
-    <ion-searchbar
-      type="number"
-      min="1"
-      max="618"
-      placeholder="Page number..."
-      [(ngModel)]="pNumberInput"
-    ></ion-searchbar>
-    <ion-button slot="end" (click)="loadImg(pNumberInput)">
-      <ion-icon slot="icon-only" name="search"></ion-icon>
-    </ion-button>
+    <div class="header-controls">
+      <ion-searchbar
+        (keyup.enter)="loadImg(page,imgQuality)"
+        type="number"
+        min="1"
+        max="618"
+        placeholder="Page number..."
+        [(ngModel)]="page"
+        mode="ios"
+      ></ion-searchbar>
+      <ion-select
+        slot="end"
+        value="imgQuality"
+        [(ngModel)]="imgQuality"
+        (ionChange)="loadImg(page,imgQuality)"
+        placeholder="Image Quality"
+      >
+        <ion-select-option [value]="ImageQuality.Low">Low</ion-select-option>
+        <ion-select-option [value]="ImageQuality.High">High</ion-select-option>
+        <ion-select-option [value]="ImageQuality.HD">HD</ion-select-option>
+      </ion-select>
+    </div>
   </ion-toolbar>
 </ion-header>
 

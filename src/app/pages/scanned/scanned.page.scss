@@ -1,0 +1,12 @@
+ion-header {
+  font-size: small;
+  ion-searchbar {
+    padding: 0;
+    max-width: 100px;
+  }
+  .header-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

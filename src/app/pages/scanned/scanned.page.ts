@@ -11,6 +11,8 @@ export class ScannedPage implements OnInit {
   url: string;
   incompleteUrl: string;
   identifier: string;
+  imgQuality: ImageQuality = ImageQuality.High;
+  ImageQuality = ImageQuality;
   constructor(private httpClient: HttpClient) {}
 
   ngOnInit() {
@@ -25,11 +27,17 @@ export class ScannedPage implements OnInit {
         this.url = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${res.metadata.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${res.metadata.identifier}_${this.page}.jp2&id=${res.metadata.identifier}&scale=4&rotate=0`;
         this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${res.metadata.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${res.metadata.identifier}_`;
         this.identifier = res.metadata.identifier;
-        this.loadImg(this.page); //use for showing 'last opened page' initially
+        this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
       });
   }
-  loadImg(p) {
+  loadImg(p: number, quality: ImageQuality) {
+    console.log(p, quality);
     let paddedPageNumber = String(p).padStart(4, "0");
-    this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=4&rotate=0`;
+    this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
   }
+}
+export enum ImageQuality {
+  Low = 8,
+  High = 4,
+  HD = 2,
 }

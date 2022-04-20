@@ -13,6 +13,11 @@
         [(ngModel)]="page"
         mode="ios"
       ></ion-searchbar>
+      <ion-input
+        type="text"
+        (keyup.enter)="jumpToSurah($event.target.value)"
+        placeholder="Surah no."
+      ></ion-input>
       <ion-select
         slot="end"
         value="imgQuality"

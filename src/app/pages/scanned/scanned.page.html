@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="home"></ion-back-button>
+    </ion-buttons>
+    <ion-searchbar
+      type="number"
+      min="1"
+      max="618"
+      placeholder="Page number..."
+      [(ngModel)]="pNumberInput"
+    ></ion-searchbar>
+    <ion-button slot="end" (click)="loadImg(pNumberInput)">
+      <ion-icon slot="icon-only" name="search"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-img [src]="url"></ion-img>
+</ion-content>

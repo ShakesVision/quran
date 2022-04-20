@@ -20,6 +20,10 @@ const routes: Routes = [
     path: 'listen',
     loadChildren: () => import('./pages/listen/listen.module').then( m => m.ListenPageModule)
   },
+  {
+    path: 'scanned',
+    loadChildren: () => import('./pages/scanned/scanned.module').then( m => m.ScannedPageModule)
+  },
 
 ];
 

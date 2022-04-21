@@ -35,14 +35,32 @@ export class ScannedPage implements OnInit {
   }
   setupLinks() {
     this.httpClient
-      .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
+      .get("https://archive.org/metadata/15-lined-saudi")
       .subscribe((res: any) => {
         // https://ia600308.us.archive.org/BookReader/BookReaderImages.php?zip=/9/items/QuranMajeed-15Lines-SaudiPrint/QuranMajeed-15Lines-SaudiPrint_jp2.zip&file=QuranMajeed-15Lines-SaudiPrint_jp2/QuranMajeed-15Lines-SaudiPrint_0494.jp2&id=QuranMajeed-15Lines-SaudiPrint&scale=4&rotate=0
         console.log(res);
-        this.url = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${res.metadata.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${res.metadata.identifier}_${this.page}.jp2&id=${res.metadata.identifier}&scale=4&rotate=0`;
-        this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${res.metadata.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${res.metadata.identifier}_`;
-        this.identifier = res.metadata.identifier;
-        this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+        console.log(
+          res.files
+            .filter((f) => f.size == "43240062")[0]
+            .name.replace(".pdf", "")
+        );
+        if (res.files.filter((f) => f.size == "43240062")[0]) {
+          const fileNameIdentifier = res.files
+            .filter((f) => f.size == "43240062")[0]
+            ?.name?.replace(".pdf", "")
+            .trim();
+          this.identifier = res.metadata.identifier;
+          this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
+          this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+        } else {
+          this.httpClient
+            .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
+            .subscribe((res: any) => {
+              this.identifier = res.metadata.identifier;
+              this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
+              this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+            });
+        }
       });
   }
   loadImg(p: number, quality: ImageQuality) {

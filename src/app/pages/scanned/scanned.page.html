@@ -55,7 +55,9 @@
     *ngIf="loading"
     color="primary"
   ></ion-progress-bar>
-  <ion-img [src]="url"></ion-img>
+  <div style="display: flex; justify-content: center">
+    <ion-img [src]="url"></ion-img>
+  </div>
 </ion-content>
 
 <ion-footer>

@@ -81,7 +81,9 @@ export class ScannedPage implements OnInit {
     console.log(p, quality);
     let paddedPageNumber = String(p).padStart(4, "0");
     this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
-    this.storage.set("scannedBookmark", this.page);
+    this.storage.set("scannedBookmark", this.page).then((_) => {
+      //saved successfully
+    });
     let juzCalculated = this.juzPageNumbers.findIndex((e) => e > p);
     let surahCalculated = this.surahPageNumbers.findIndex((e) => e > p);
     if (juzCalculated == -1) juzCalculated = 30;

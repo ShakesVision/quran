@@ -60,7 +60,15 @@
 
 <ion-footer>
   <ion-toolbar>
-    <div class="ion-text-center">
+    <div class="btmNav">
+      <ion-button
+        shape="round"
+        fill="clear"
+        [disabled]="page > 616"
+        (click)="loadImg((+page)+1,imgQuality)"
+      >
+        <ion-icon name="chevron-back-circle-outline"></ion-icon>
+      </ion-button>
       <ion-searchbar
         (keyup.enter)="loadImg(page,imgQuality)"
         type="number"
@@ -69,6 +77,14 @@
         mode="ios"
         class="page-number-input"
       ></ion-searchbar>
+      <ion-button
+        shape="round"
+        fill="clear"
+        [disabled]="page<0"
+        (click)="loadImg(page-1,imgQuality)"
+      >
+        <ion-icon name="chevron-forward-circle-outline"></ion-icon>
+      </ion-button>
     </div>
   </ion-toolbar>
 </ion-footer>

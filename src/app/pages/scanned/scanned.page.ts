@@ -71,7 +71,7 @@ export class ScannedPage implements OnInit {
   loadImg(p: number, quality: ImageQuality) {
     this.loading = true;
     this.page = p;
-    console.log(p, quality);
+    console.log(p, this.page, quality);
     let paddedPageNumber = String(p).padStart(4, "0");
     this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
     let juzCalculated = this.juzPageNumbers.findIndex((e) => e > p);

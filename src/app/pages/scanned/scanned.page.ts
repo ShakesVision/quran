@@ -13,6 +13,8 @@ export class ScannedPage implements OnInit {
   identifier: string;
   imgQuality: ImageQuality = ImageQuality.High;
   ImageQuality = ImageQuality;
+  surahNumberField;
+  juzNumberField;
   surahPageNumbers = [
     2, 3, 51, 78, 107, 129, 152, 178, 188, 209, 222, 236, 250, 256, 262, 268,
     283, 294, 306, 313, 323, 332, 343, 351, 360, 367, 377, 386, 397, 405, 412,
@@ -64,9 +66,16 @@ export class ScannedPage implements OnInit {
       });
   }
   loadImg(p: number, quality: ImageQuality) {
+    this.page = p;
     console.log(p, quality);
     let paddedPageNumber = String(p).padStart(4, "0");
     this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
+    let juzCalculated = this.juzPageNumbers.findIndex((e) => e > p);
+    let surahCalculated = this.surahPageNumbers.findIndex((e) => e > p);
+    if (juzCalculated == -1) juzCalculated = 30;
+    if (surahCalculated == -1) surahCalculated = 144;
+    this.juzNumberField = juzCalculated;
+    this.surahNumberField = surahCalculated;
   }
   jumpToSurah(n: number) {
     this.loadImg(this.surahPageNumbers[n - 1], this.imgQuality);

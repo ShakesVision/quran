@@ -10,6 +10,7 @@
         [max]="114"
         (keyup.enter)="jumpToSurah($event.target.value)"
         placeholder="Surah no."
+        [(ngModel)]="surahNumberField"
       ></ion-input>
       <ion-input
         #juzInput
@@ -18,6 +19,7 @@
         [max]="114"
         (keyup.enter)="jumpToJuz($event.target.value)"
         placeholder="Juz no."
+        [(ngModel)]="juzNumberField"
       ></ion-input>
       <ion-select
         [disabled]="!juzInput"

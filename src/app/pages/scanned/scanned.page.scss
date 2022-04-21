@@ -1,12 +1,17 @@
 ion-header {
   font-size: small;
+  height: 50px;
+  ion-toolbar {
+    height: 50px;
+  }
   .header-controls {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 }
-ion-searchbar {
+.page-number-input {
   padding: 0;
   max-width: 100px;
+  margin: 0 auto;
 }

@@ -49,17 +49,26 @@
 </ion-header>
 
 <ion-content>
+  <ion-progress-bar
+    type="indeterminate"
+    reversed="true"
+    *ngIf="loading"
+    color="primary"
+  ></ion-progress-bar>
   <ion-img [src]="url"></ion-img>
 </ion-content>
 
 <ion-footer>
   <ion-toolbar>
-    <ion-searchbar
-      (keyup.enter)="loadImg(page,imgQuality)"
-      type="number"
-      placeholder="Page number..."
-      [(ngModel)]="page"
-      mode="ios"
-    ></ion-searchbar>
+    <div class="ion-text-center">
+      <ion-searchbar
+        (keyup.enter)="loadImg(page,imgQuality)"
+        type="number"
+        placeholder="Page number..."
+        [(ngModel)]="page"
+        mode="ios"
+        class="page-number-input"
+      ></ion-searchbar>
+    </div>
   </ion-toolbar>
 </ion-footer>

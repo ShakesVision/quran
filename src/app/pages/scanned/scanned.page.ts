@@ -13,6 +13,7 @@ export class ScannedPage implements OnInit {
   identifier: string;
   imgQuality: ImageQuality = ImageQuality.High;
   ImageQuality = ImageQuality;
+  loading: boolean = false;
   surahNumberField;
   juzNumberField;
   surahPageNumbers = [
@@ -36,6 +37,7 @@ export class ScannedPage implements OnInit {
     this.setupLinks();
   }
   setupLinks() {
+    this.loading = true;
     this.httpClient
       .get("https://archive.org/metadata/15-lined-saudi")
       .subscribe((res: any) => {
@@ -63,9 +65,11 @@ export class ScannedPage implements OnInit {
               this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
             });
         }
+        this.loading = false;
       });
   }
   loadImg(p: number, quality: ImageQuality) {
+    this.loading = true;
     this.page = p;
     console.log(p, quality);
     let paddedPageNumber = String(p).padStart(4, "0");
@@ -76,6 +80,9 @@ export class ScannedPage implements OnInit {
     if (surahCalculated == -1) surahCalculated = 144;
     this.juzNumberField = juzCalculated;
     this.surahNumberField = surahCalculated;
+    setTimeout(() => {
+      this.loading = false;
+    }, 750);
   }
   jumpToSurah(n: number) {
     this.loadImg(this.surahPageNumbers[n - 1], this.imgQuality);

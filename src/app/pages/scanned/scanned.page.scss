@@ -22,3 +22,10 @@ ion-header {
   width: 100%;
   justify-content: center;
 }
+.img-element {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position-x: center;
+  height: 100%;
+  width: 100%;
+}

@@ -11,9 +11,10 @@ ion-header {
   }
 }
 .page-number-input {
-  padding: 0;
   max-width: 100px;
-  margin: 0 auto;
+  text-align: center;
+  background: var(--ion-color-light);
+  border-radius: 30px;
 }
 .btmNav {
   display: flex;

@@ -69,14 +69,13 @@
       >
         <ion-icon name="chevron-back-circle-outline"></ion-icon>
       </ion-button>
-      <ion-searchbar
+      <ion-input
         (keyup.enter)="loadImg(page,imgQuality)"
         type="number"
         placeholder="Page number..."
         [(ngModel)]="page"
-        mode="ios"
         class="page-number-input"
-      ></ion-searchbar>
+      ></ion-input>
       <ion-button
         shape="round"
         fill="clear"

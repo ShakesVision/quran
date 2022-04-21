@@ -1,5 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from "@angular/core";
+import { Storage } from "@ionic/storage-angular";
 
 @Component({
   selector: "app-scanned",
@@ -31,18 +32,24 @@ export class ScannedPage implements OnInit {
     323, 343, 363, 383, 403, 423, 443, 463, 483, 503, 523, 543, 563, 587,
   ];
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private storage: Storage) {}
 
   ngOnInit() {
+    this.getBookmark();
     this.setupLinks();
+  }
+  async getBookmark() {
+    await this.storage.create();
+    this.storage.get("scannedBookmark").then((res) => {
+      console.log(res);
+      if (res) this.page = res;
+    });
   }
   setupLinks() {
     this.loading = true;
     this.httpClient
       .get("https://archive.org/metadata/15-lined-saudi")
       .subscribe((res: any) => {
-        // https://ia600308.us.archive.org/BookReader/BookReaderImages.php?zip=/9/items/QuranMajeed-15Lines-SaudiPrint/QuranMajeed-15Lines-SaudiPrint_jp2.zip&file=QuranMajeed-15Lines-SaudiPrint_jp2/QuranMajeed-15Lines-SaudiPrint_0494.jp2&id=QuranMajeed-15Lines-SaudiPrint&scale=4&rotate=0
-        console.log(res);
         console.log(
           res.files
             .filter((f) => f.size == "43240062")[0]
@@ -71,9 +78,10 @@ export class ScannedPage implements OnInit {
   loadImg(p: number, quality: ImageQuality) {
     this.loading = true;
     this.page = p;
-    console.log(p, this.page, quality);
+    console.log(p, quality);
     let paddedPageNumber = String(p).padStart(4, "0");
     this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
+    this.storage.set("scannedBookmark", this.page);
     let juzCalculated = this.juzPageNumbers.findIndex((e) => e > p);
     let surahCalculated = this.surahPageNumbers.findIndex((e) => e > p);
     if (juzCalculated == -1) juzCalculated = 30;

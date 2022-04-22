@@ -10,6 +10,8 @@ import { Storage } from "@ionic/storage-angular";
 export class ScannedPage implements OnInit {
   page: number = 616;
   url: string;
+  url2: string;
+  url3: string;
   incompleteUrl: string;
   identifier: string;
   imgQuality: ImageQuality = ImageQuality.High;
@@ -75,12 +77,24 @@ export class ScannedPage implements OnInit {
         this.loading = false;
       });
   }
+  getPaddedNumber(n: number) {
+    return String(n).padStart(4, "0");
+  }
   loadImg(p: number, quality: ImageQuality) {
     this.loading = true;
     this.page = p;
     console.log(p, quality);
-    let paddedPageNumber = String(p).padStart(4, "0");
-    this.url = `${this.incompleteUrl}${paddedPageNumber}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
+    this.url = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
+      this.identifier
+    }&scale=${quality}&rotate=0`;
+    setTimeout(() => {
+      this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
+        this.identifier
+      }&scale=${quality}&rotate=0`;
+      this.url3 = `${this.incompleteUrl}${this.getPaddedNumber(p + 2)}.jp2&id=${
+        this.identifier
+      }&scale=${quality}&rotate=0`;
+    }, 500);
     this.storage.set("scannedBookmark", this.page).then((_) => {
       //saved successfully
     });
@@ -102,6 +116,10 @@ export class ScannedPage implements OnInit {
     if (section)
       this.loadImg(this.juzPageNumbers[n - 1] + section * 20, this.imgQuality);
     else this.loadImg(this.juzPageNumbers[n - 1], this.imgQuality);
+  }
+  addClass(el, el2) {
+    el.classList.remove("img-element");
+    el2.classList.add("img-element");
   }
 }
 export enum ImageQuality {

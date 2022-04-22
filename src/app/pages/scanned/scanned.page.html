@@ -57,7 +57,13 @@
   ></ion-progress-bar>
   <div style="display: flex; justify-content: center; height: 100%">
     <!-- <ion-img [src]="url"></ion-img> -->
-    <div class="img-element" [style.background-image]="'url('+url+')'"></div>
+    <div
+      #one
+      class="img-element"
+      [style.background-image]="'url('+url+')'"
+    ></div>
+    <div #two [style.background-image]="'url('+url2+')'"></div>
+    <div [style.background-image]="'url('+url3+')'"></div>
   </div>
 </ion-content>
 
@@ -86,6 +92,9 @@
         (click)="loadImg(page-1,imgQuality)"
       >
         <ion-icon name="chevron-forward-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="addClass(one,two)">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
       </ion-button>
     </div>
   </ion-toolbar>

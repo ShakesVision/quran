@@ -30,12 +30,12 @@ export class ScannedPage implements OnInit {
     609, 609, 609, 610, 610, 610, 611, 611,
   ];
   juzPageNumbers = [
-    2, 23, 43, 63, 83, 103, 123, 143, 153, 183, 203, 223, 243, 263, 283, 303,
+    2, 23, 43, 63, 83, 103, 123, 143, 163, 183, 203, 223, 243, 263, 283, 303,
     323, 343, 363, 383, 403, 423, 443, 463, 483, 503, 523, 543, 563, 587,
   ];
   sectionPageNumbers = [
     [8, 13, 18],
-    [27, 32, 37],
+    [27, 32, 38],
     [47, 53, 58],
     [67, 72, 77],
     [88, 92, 97],
@@ -119,14 +119,14 @@ export class ScannedPage implements OnInit {
     this.url = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
       this.identifier
     }&scale=${quality}&rotate=0`;
-    setTimeout(() => {
-      this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
-        this.identifier
-      }&scale=${quality}&rotate=0`;
-      this.url3 = `${this.incompleteUrl}${this.getPaddedNumber(p + 2)}.jp2&id=${
-        this.identifier
-      }&scale=${quality}&rotate=0`;
-    }, 500);
+    // setTimeout(() => {
+    //   this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
+    //     this.identifier
+    //   }&scale=${quality}&rotate=0`;
+    //   this.url3 = `${this.incompleteUrl}${this.getPaddedNumber(p + 2)}.jp2&id=${
+    //     this.identifier
+    //   }&scale=${quality}&rotate=0`;
+    // }, 500);
     this.storage.set("scannedBookmark", this.page).then((_) => {
       //saved successfully
     });
@@ -168,7 +168,8 @@ export class ScannedPage implements OnInit {
         index = 2;
         break;
       case 1:
-        if (this.page != this.juzPageNumbers[this.juzNumberField] - 1)
+        if (this.juzNumberField == 30) this.loadImg(611, this.imgQuality);
+        else if (this.page != this.juzPageNumbers[this.juzNumberField] - 1)
           this.loadImg(
             this.juzPageNumbers[this.juzNumberField] - 1,
             this.imgQuality

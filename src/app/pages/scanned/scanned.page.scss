@@ -8,6 +8,21 @@ ion-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    .juz-controls-wrapper {
+      position: relative;
+      .small-label {
+        font-size: x-small;
+        color: var(--ion-color-medium);
+        bottom: 0;
+        left: 7px;
+      }
+      .juz-controls {
+        display: flex;
+        .juz-section-dropdown {
+          width: 85px;
+        }
+      }
+    }
   }
 }
 .page-number-input {

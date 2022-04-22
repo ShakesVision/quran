@@ -5,34 +5,42 @@
     </ion-buttons>
     <div class="header-controls">
       <ion-input
-        type="text"
+        type="number"
         [min]="1"
         [max]="114"
         (keyup.enter)="jumpToSurah($event.target.value)"
         placeholder="Surah no."
         [(ngModel)]="surahNumberField"
       ></ion-input>
-      <ion-input
-        #juzInput
-        type="text"
-        [min]="1"
-        [max]="114"
-        (keyup.enter)="jumpToJuz($event.target.value)"
-        placeholder="Juz no."
-        [(ngModel)]="juzNumberField"
-      ></ion-input>
-      <ion-select
-        [disabled]="!juzInput"
-        value="0"
-        (ionChange)="jumpToSection($event.target.value)"
-        placeholder="Section"
-      >
-        <ion-select-option [value]="0">Start</ion-select-option>
-        <ion-select-option [value]="0.25">¼</ion-select-option>
-        <ion-select-option [value]="0.5">½</ion-select-option>
-        <ion-select-option [value]="0.75">¾</ion-select-option>
-        <ion-select-option [value]="1">End</ion-select-option>
-      </ion-select>
+      <div class="juz-controls-wrapper">
+        <div class="juz-controls">
+          <ion-input
+            #juzInput
+            type="number"
+            [(ngModel)]="juzNumberField"
+            (keyup.enter)="jumpToSection(juzSection.value)"
+            [min]="1"
+            [max]="30"
+            placeholder="Juz no."
+            style="max-width: 40px"
+          ></ion-input>
+          <ion-select
+            #juzSection
+            [disabled]="!juzInput"
+            value="0"
+            (ionChange)="jumpToSection($event.target.value)"
+            placeholder="Section"
+            class="juz-section-dropdown"
+          >
+            <ion-select-option [value]="0">Start</ion-select-option>
+            <ion-select-option [value]="0.25">¼</ion-select-option>
+            <ion-select-option [value]="0.5">½</ion-select-option>
+            <ion-select-option [value]="0.75">¾</ion-select-option>
+            <ion-select-option [value]="1">End</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="small-label" style="position: absolute">Juz</div>
+      </div>
       <ion-select
         slot="end"
         value="imgQuality"
@@ -93,9 +101,9 @@
       >
         <ion-icon name="chevron-forward-circle-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="addClass(one,two)">
+      <!-- <ion-button (click)="addClass(one,two)">
         <ion-icon slot="icon-only" name="add"></ion-icon>
-      </ion-button>
+      </ion-button> -->
     </div>
   </ion-toolbar>
 </ion-footer>

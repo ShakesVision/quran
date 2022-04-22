@@ -33,6 +33,38 @@ export class ScannedPage implements OnInit {
     2, 23, 43, 63, 83, 103, 123, 143, 153, 183, 203, 223, 243, 263, 283, 303,
     323, 343, 363, 383, 403, 423, 443, 463, 483, 503, 523, 543, 563, 587,
   ];
+  sectionPageNumbers = [
+    [8, 13, 18],
+    [27, 32, 37],
+    [47, 53, 58],
+    [67, 72, 77],
+    [88, 92, 97],
+    [107, 113, 118],
+    [127, 133, 137],
+    [147, 151, 156],
+    [167, 172, 177],
+    [187, 193, 198],
+    [208, 213, 217],
+    [227, 232, 238],
+    [247, 253, 257],
+    [268, 273, 277],
+    [287, 292, 297],
+    [307, 313, 317],
+    [327, 332, 338],
+    [347, 353, 357],
+    [367, 373, 378],
+    [387, 393, 397],
+    [408, 413, 418],
+    [427, 432, 437],
+    [447, 452, 457],
+    [468, 473, 478],
+    [487, 492, 497],
+    [507, 514, 517],
+    [528, 533, 537],
+    [548, 552, 558],
+    [568, 574, 581],
+    [593, 599, 605],
+  ];
 
   constructor(private httpClient: HttpClient, private storage: Storage) {}
 
@@ -115,7 +147,41 @@ export class ScannedPage implements OnInit {
     console.log(n, section, this.juzPageNumbers[n - 1 + section * 20]);
     if (section)
       this.loadImg(this.juzPageNumbers[n - 1] + section * 20, this.imgQuality);
+    // this.loadImg(this.juzPageNumbers[n - 1] + section * 20, this.imgQuality);
     else this.loadImg(this.juzPageNumbers[n - 1], this.imgQuality);
+  }
+  jumpToSection(section) {
+    console.log(this.juzPageNumbers[this.juzNumberField - 1]);
+    let index: number;
+    switch (section) {
+      case 0:
+        if (this.page != this.juzPageNumbers[this.juzNumberField - 1])
+          this.jumpToJuz(this.juzNumberField);
+        return;
+      case 0.25:
+        index = 0;
+        break;
+      case 0.5:
+        index = 1;
+        break;
+      case 0.75:
+        index = 2;
+        break;
+      case 1:
+        if (this.page != this.juzPageNumbers[this.juzNumberField] - 1)
+          this.loadImg(
+            this.juzPageNumbers[this.juzNumberField] - 1,
+            this.imgQuality
+          );
+        return;
+      default:
+        index = 0;
+        break;
+    }
+    this.loadImg(
+      this.sectionPageNumbers[this.juzNumberField - 1][index],
+      this.imgQuality
+    );
   }
   addClass(el, el2) {
     el.classList.remove("img-element");

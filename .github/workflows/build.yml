@@ -3,8 +3,8 @@ name: build and deploy pwa
 on:
   push:
     branches:
-      - 'master'
-      - 'ng-update'
+      - "master"
+      - "ng-update"
 
 jobs:
   build:
@@ -16,13 +16,13 @@ jobs:
       - name: Use Node 12.x
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: "12.x"
       - name: Install dependencies
         run: npm ci
       - name: Build
         run: npm run build:ci
       - name: Archive build
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: deploy_dist

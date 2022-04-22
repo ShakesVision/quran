@@ -1,20 +1,22 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 
-import { IonicModule } from '@ionic/angular';
+import { IonicModule } from "@ionic/angular";
 
-import { ScannedPageRoutingModule } from './scanned-routing.module';
+import { ScannedPageRoutingModule } from "./scanned-routing.module";
 
-import { ScannedPage } from './scanned.page';
+import { ScannedPage } from "./scanned.page";
+import { PinchZoomModule } from "ngx-pinch-zoom";
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    ScannedPageRoutingModule
+    ScannedPageRoutingModule,
+    PinchZoomModule,
   ],
-  declarations: [ScannedPage]
+  declarations: [ScannedPage],
 })
 export class ScannedPageModule {}

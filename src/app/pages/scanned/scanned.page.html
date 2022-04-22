@@ -56,23 +56,25 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content scrollX="true" scrollY="true">
   <ion-progress-bar
     type="indeterminate"
     reversed="true"
     *ngIf="loading"
     color="primary"
   ></ion-progress-bar>
-  <div style="display: flex; justify-content: center; height: 100%">
-    <!-- <ion-img [src]="url"></ion-img> -->
-    <div
-      #one
-      class="img-element"
-      [style.background-image]="'url('+url+')'"
-    ></div>
-    <div #two [style.background-image]="'url('+url2+')'"></div>
-    <div [style.background-image]="'url('+url3+')'"></div>
-  </div>
+  <pinch-zoom [properties]="zoomProperties">
+    <div class="image-wrapper">
+      <ion-img [src]="url"></ion-img>
+      <!-- <div
+        #one
+        class="img-element"
+        [style.background-image]="'url('+url+')'"
+      ></div> -->
+      <!--<div #two [style.background-image]="'url('+url2+')'"></div>
+      <div [style.background-image]="'url('+url3+')'"></div> -->
+    </div></pinch-zoom
+  >
 </ion-content>
 
 <ion-footer>

@@ -34,6 +34,7 @@
     "core-js": "^2.5.4",
     "deta": "^1.1.0",
     "firebase": "^7.5.2",
+    "ngx-pinch-zoom": "^2.6.2",
     "rxjs": "~6.5.1",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.4"

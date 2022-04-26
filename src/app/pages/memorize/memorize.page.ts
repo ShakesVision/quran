@@ -26,11 +26,8 @@ export class MemorizePage implements OnInit {
     public formBuilder: FormBuilder
   ) {}
 
-  async ngOnInit() {
-    await this.storage.create();
-    this.storage.set("v1", { mother: "son" }).then((res) => console.log(res));
-    this.storage.set("v2", { mother: "son" }).then((res) => console.log(res));
-    localStorage.setItem("v1", "son");
+  ngOnInit() {
+    this.setupStorage();
     this.memorizeEntryForm = this.formBuilder.group({
       date: new FormControl(new Date().toISOString()),
       surah: new FormControl("", Validators.required),
@@ -38,6 +35,12 @@ export class MemorizePage implements OnInit {
       to: new FormControl("", Validators.required),
       finished: new FormControl(false),
     });
+  }
+  async setupStorage() {
+    await this.storage.create();
+    this.storage.set("v1", { mother: "son" }).then((res) => console.log(res));
+    this.storage.set("v2", { mother: "son" }).then((res) => console.log(res));
+    localStorage.setItem("v1", "son");
   }
 
   async add() {

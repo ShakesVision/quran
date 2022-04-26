@@ -125,6 +125,10 @@ export class ScannedPage implements OnInit {
     this.url = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
       this.identifier
     }&scale=${quality}&rotate=0`;
+    this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
+      this.identifier
+    }&scale=${quality}&rotate=0`;
+
     // setTimeout(() => {
     //   this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
     //     this.identifier

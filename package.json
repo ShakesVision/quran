@@ -1,8 +1,8 @@
 {
-  "name": "simonHallo",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "name": "Hifz Helper",
+  "version": "1.0.0",
+  "author": "Shakeeb Ahmad",
+  "homepage": "https://sarbakaf.com/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -78,7 +78,7 @@
     "tslint": "~6.1.0",
     "typescript": "~4.5.5"
   },
-  "description": "An Ionic project",
+  "description": "A project to help you memorize Quran with searchable mushaf, audio and more.",
   "cordova": {
     "plugins": {
       "cordova-plugin-whitelist": {},

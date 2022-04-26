@@ -48,6 +48,7 @@ ion-header {
   display: flex;
   justify-content: center;
   height: 100%;
+  direction: rtl;
   ion-img {
     height: calc(100vh - 110px);
   }

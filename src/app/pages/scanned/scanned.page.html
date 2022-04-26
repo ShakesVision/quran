@@ -54,18 +54,20 @@
       </ion-select>
     </div>
   </ion-toolbar>
-</ion-header>
 
-<ion-content scrollX="true" scrollY="true">
   <ion-progress-bar
     type="indeterminate"
     reversed="true"
     *ngIf="loading"
     color="primary"
   ></ion-progress-bar>
+</ion-header>
+
+<ion-content scrollX="true" scrollY="true">
   <pinch-zoom [properties]="zoomProperties">
     <div class="image-wrapper">
       <ion-img [src]="url"></ion-img>
+      <ion-img [src]="url2"></ion-img>
       <!-- <div
         #one
         class="img-element"
@@ -103,6 +105,25 @@
       >
         <ion-icon name="chevron-forward-circle-outline"></ion-icon>
       </ion-button>
+      <ion-button
+        color="success"
+        shape="round"
+        fill="clear"
+        [disabled]="page<0"
+        (click)="loadImg(+page+2,imgQuality)"
+      >
+        <ion-icon name="chevron-back-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-button
+        color="success"
+        shape="round"
+        fill="clear"
+        [disabled]="page<0"
+        (click)="loadImg(+page-2,imgQuality)"
+      >
+        <ion-icon name="chevron-forward-circle-outline"></ion-icon>
+      </ion-button>
+
       <!-- <ion-button (click)="addClass(one,two)">
         <ion-icon slot="icon-only" name="add"></ion-icon>
       </ion-button> -->

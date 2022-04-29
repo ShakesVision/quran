@@ -148,7 +148,7 @@ export class ScannedPage implements OnInit {
     this.surahNumberField = surahCalculated;
     setTimeout(() => {
       this.loading = false;
-    }, 750);
+    }, 500);
   }
   jumpToSurah(n: number) {
     this.loadImg(this.surahPageNumbers[n - 1], this.imgQuality);

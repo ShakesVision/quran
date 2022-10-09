@@ -565,4 +565,7 @@ export class ReadPage implements OnInit {
     }
     return line;
   }
+  toggleMuhammadiFont() {
+    document.querySelector(".content-wrapper").classList.toggle("ar2");
+  }
 }

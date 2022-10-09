@@ -17,6 +17,7 @@ import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { IonicStorageModule, Storage } from '@ionic/storage-angular';
 import { OneSignal } from '@ionic-native/onesignal/ngx';
 import { HttpClientModule } from '@angular/common/http';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 
 @NgModule({
@@ -29,7 +30,13 @@ import { HttpClientModule } from '@angular/common/http';
         AngularFireStorageModule,
         AngularFireAuthGuardModule,
         IonicStorageModule.forRoot(),
-        HttpClientModule
+        HttpClientModule,
+        ServiceWorkerModule.register('ngsw-worker.js', {
+          enabled: environment.production,
+          // Register the ServiceWorker as soon as the application is stable
+          // or after 30 seconds (whichever comes first).
+          registrationStrategy: 'registerWhenStable:30000'
+        })
     ],
     providers: [
         StatusBar,

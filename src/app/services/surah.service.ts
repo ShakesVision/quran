@@ -1,71 +1,80 @@
-import { Surah, Index } from './surah';
-import { Injectable } from '@angular/core';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { map, take } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { Surah, Index } from "./surah";
+import { Injectable } from "@angular/core";
+import {
+  AngularFirestore,
+  AngularFirestoreCollection,
+} from "@angular/fire/firestore";
+import { map, take } from "rxjs/operators";
+import { Observable } from "rxjs";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: "root",
 })
 export class SurahService {
-    surahCollection: AngularFirestoreCollection <Surah>;
-    indexCollection: AngularFirestoreCollection <Index>;
-    currentSurah;
-    surahInfo=[];
+  surahCollection: AngularFirestoreCollection<Surah>;
+  indexCollection: AngularFirestoreCollection<Index>;
+  currentSurah;
+  surahInfo = [];
 
-    constructor(private afs: AngularFirestore, private http:HttpClient) {
-        this.surahCollection = this.afs.collection<Surah>('surahs');
-        this.indexCollection = this.afs.collection<Index>('index',ref=>ref.orderBy('surahNo'));
-        this.getSurahInfo();
-    }
+  constructor(private afs: AngularFirestore, private http: HttpClient) {
+    this.surahCollection = this.afs.collection<Surah>("surahs");
+    this.indexCollection = this.afs.collection<Index>("index", (ref) =>
+      ref.orderBy("surahNo")
+    );
+    this.getSurahInfo();
+  }
 
-    addSurah(item: Surah) {
-        return this.surahCollection.add(item);
-    }
+  addSurah(item: Surah) {
+    return this.surahCollection.add(item);
+  }
 
-    updateSurahById(id, item: Surah) {
-        return this.surahCollection.doc(id).set(item);
-    }
+  updateSurahById(id, item: Surah) {
+    return this.surahCollection.doc(id).set(item);
+  }
 
-    getSurahs(): Observable<Surah[]> {
-        return this.surahCollection.valueChanges({idField: 'id'});
-    }
+  getSurahs(): Observable<Surah[]> {
+    return this.surahCollection.valueChanges({ idField: "id" });
+  }
 
-    getSurahById(id): Observable<Surah>{
-        return this.surahCollection.doc<Surah>(id).valueChanges().pipe(take(1));
-    }
+  getSurahById(id): Observable<Surah> {
+    return this.surahCollection.doc<Surah>(id).valueChanges().pipe(take(1));
+  }
 
-    deleteSurahById(id) {
-        return this.afs.doc<Surah>(`surahs/${id}`).delete();
-    }
-    
-    addIndex(item: Index) {
-        return this.indexCollection.add(item);
-    }
+  deleteSurahById(id) {
+    return this.afs.doc<Surah>(`surahs/${id}`).delete();
+  }
 
-    updateIndexById(id, item: Index) {
-        return this.indexCollection.doc(id).set(item);
-    }
+  addIndex(item: Index) {
+    return this.indexCollection.add(item);
+  }
 
-    getIndexes(): Observable<Index[]> {
-        return this.indexCollection.valueChanges({idField: 'id'});
-    }
+  updateIndexById(id, item: Index) {
+    return this.indexCollection.doc(id).set(item);
+  }
 
-    getIndexById(id): Observable<Index>{
-        return this.indexCollection.doc<Index>(id).valueChanges().pipe(take(1));
-    }
+  getIndexes(): Observable<Index[]> {
+    return this.indexCollection.valueChanges({ idField: "id" });
+  }
 
-    deleteIndexById(id) {
-        return this.afs.doc<Index>(`index/${id}`).delete();
-    }
+  getIndexById(id): Observable<Index> {
+    return this.indexCollection.doc<Index>(id).valueChanges().pipe(take(1));
+  }
 
-    fetchIndexBySurahNumber(remoteId) {
-        return this.afs.collection<Index>("index",ref => ref.where("remoteId", "==", remoteId));
-    }
+  deleteIndexById(id) {
+    return this.afs.doc<Index>(`index/${id}`).delete();
+  }
 
-    getSurahInfo() {
-        return this.http.get('assets/surah.json');
-    }
+  fetchIndexBySurahNumber(remoteId) {
+    return this.afs.collection<Index>("index", (ref) =>
+      ref.where("remoteId", "==", remoteId)
+    );
+  }
+
+  getSurahInfo() {
+    return this.http.get("assets/surah.json");
+  }
+
+  p2e = (s) => s?.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+  a2e = (s) => s?.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 }
-

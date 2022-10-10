@@ -30,6 +30,7 @@ export class MemorizePage implements OnInit {
     this.setupStorage();
     this.memorizeEntryForm = this.formBuilder.group({
       date: new FormControl(new Date().toISOString()),
+      number: new FormControl(""),
       surah: new FormControl("", Validators.required),
       from: new FormControl("", Validators.required),
       to: new FormControl("", Validators.required),
@@ -38,9 +39,6 @@ export class MemorizePage implements OnInit {
   }
   async setupStorage() {
     await this.storage.create();
-    this.storage.set("v1", { mother: "son" }).then((res) => console.log(res));
-    this.storage.set("v2", { mother: "son" }).then((res) => console.log(res));
-    localStorage.setItem("v1", "son");
   }
 
   async add() {
@@ -53,6 +51,12 @@ export class MemorizePage implements OnInit {
           type: "date",
           placeholder: "Date...",
           value: new Date(),
+        },
+        {
+          name: "number",
+          id: "number",
+          type: "number",
+          placeholder: "Surah number...",
         },
         {
           name: "surah",
@@ -110,6 +114,7 @@ export class MemorizePage implements OnInit {
   getValueFromModal(e) {
     if (e.detail.data) {
       console.log(e);
+      this.storage.set(e.detail.data.number, e.detail.data);
       this.items.push(e.detail.data);
     }
   }

@@ -4,6 +4,8 @@ import { ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
 import { alertController } from "@ionic/core";
 import { MushafLines } from "src/app/services/mushaf-versions";
+import { NavigationExtras, Router } from "@angular/router";
+import { HttpClient } from "@angular/common/http";
 
 @Component({
   selector: "app-read",
@@ -335,17 +337,35 @@ export class ReadPage implements OnInit {
     263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277,
     278, 279, 280, 281, 282, 283, 284, 285, 286,
   ];
+  juzNumber: number = 0;
   constructor(
     private surahService: SurahService,
     public toastController: ToastController,
-    public alert: AlertController
+    public alert: AlertController,
+    private router: Router,
+    private httpClient: HttpClient
   ) {}
 
   ngOnInit() {
-    this.surah = this.surahService.currentSurah;
-    this.pages = this.surah.arabic.split("\n\n");
-    this.arabicLines = this.pages[this.currentPage - 1].split("\n");
-    this.lines = this.arabicLines;
+    this.juzNumber = this.router.getCurrentNavigation().extras.state.juz;
+    this.httpClient
+      .get(
+        `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines_fromInpage/Juz${this.juzNumber}.txt`,
+        { responseType: "text" }
+      )
+      .subscribe((res) => {
+        this.surah = res;
+        this.pages = this.surah.split("\n\n");
+        console.log(this.pages);
+        this.lines = this.pages[this.currentPage - 1].split("\n");
+      });
+    if (this.juzNumber == 0) {
+      this.surah = this.surahService.currentSurah;
+      this.pages = this.surah.arabic.split("\n\n");
+      this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+      this.lines = this.arabicLines;
+    }
+    this.getLastAyahNumberOnPage();
     console.log(this.pages);
     if (this.surah.urdu && this.surah.urdu != "") {
       this.translationExists = true;
@@ -400,6 +420,7 @@ export class ReadPage implements OnInit {
         .querySelector(`div#line_${this.arabicLines.length - 1}`)
         .classList.add("centered-table-text");
     }
+    this.getLastAyahNumberOnPage();
   }
 
   resetPopup(popup: HTMLElement) {
@@ -567,5 +588,17 @@ export class ReadPage implements OnInit {
   }
   toggleMuhammadiFont() {
     document.querySelector(".content-wrapper").classList.toggle("ar2");
+  }
+  getLastAyahNumberOnPage() {
+    let lastAyahOnPageArray = this.lines[this.lines?.length - 1]
+      .trim()
+      .split(" ");
+    let result =
+      lastAyahOnPageArray[lastAyahOnPageArray.length - 1]?.split("۝")[1];
+    result = this.surahService
+      .a2e(this.surahService.p2e(result))
+      ?.replace(/[^0-9]/g, "");
+    console.log("LAST AYAH ON THIS PAGE: " + result);
+    return result;
   }
 }

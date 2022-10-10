@@ -30,8 +30,6 @@
       <td>5/30 Ayahs</td>
     </tr>
   </table>
-  Use surah list array comma delimited. 20,Taahaa,طہ i.e.
-  Number,EnglishName,ArabicName
   <h2>Daily Memorization Stats</h2>
   <div class="tableWrapper">
     <table>
@@ -46,14 +44,6 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="row">
-          <td>01/01/21</td>
-          <td>36</td>
-          <td class="ar-text">یس</td>
-          <td>1</td>
-          <td>5</td>
-          <td>YES</td>
-        </tr>
         <tr class="row" *ngFor="let item of items">
           <td>{{getFormattedDate(item.date)}}</td>
           <td>{{item.number}}</td>
@@ -94,9 +84,14 @@
             ></ion-datetime>
           </ion-item>
           <ion-item>
+            <ion-label position="floating">Surah Number</ion-label>
+            <ion-input type="number" formControlName="number"></ion-input>
+          </ion-item>
+          <ion-item>
             <ion-label position="floating">Surah</ion-label>
             <ion-input type="text" formControlName="surah"></ion-input>
           </ion-item>
+
           <ion-item>
             <ion-label position="floating">From Ayah</ion-label>
             <ion-input type="number" formControlName="from"></ion-input>

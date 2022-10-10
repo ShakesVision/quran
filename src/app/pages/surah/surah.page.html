@@ -30,7 +30,11 @@
       </ion-button>
     </ion-item>
   </ion-list>
-
+  <div class="juz-list">
+    <ion-list>
+      <ion-item button (click)="gotoReadJuz()">Got to Juz</ion-item>
+    </ion-list>
+  </div>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button [routerLink]="['null']">
       <ion-icon name="add"></ion-icon>

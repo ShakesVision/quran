@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title> {{surah.name}} </ion-title>
+    <ion-title> {{surah.name || juzNumber}} </ion-title>
     <ion-buttons slot="end">
       <ion-button
         (click)="toggleHifzMode()"
@@ -38,14 +38,14 @@
   <div class="ar ar2 content-wrapper">
     <ng-container
       class="ion-text-center"
-      *ngIf="currentPage==1 && lines.length<15"
+      *ngIf="currentPage==1 && lines?.length<15"
     >
       <div
         class="filler-lines"
-        *ngFor="let line of [].constructor(15-lines.length-2)"
+        *ngFor="let line of [].constructor(15-lines?.length-2)"
       ></div>
       <div class="surah-name centered-table-text">
-        {{surah.name.split(' ')[1]}}
+        {{surah.name?.split(' ')[1]|| juzNumber}}
       </div>
       <div class="bism centered-table-text">﷽</div>
     </ng-container>
@@ -59,7 +59,7 @@
     </div>
 
     <ng-container
-      *ngIf="currentPage==pages.length && pages.length!=1 && lines.length<15"
+      *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15"
     >
       <div
         class="filler-lines"
@@ -92,7 +92,7 @@
         <div>
           <ion-list lines="none">
             <ion-item>
-              <ion-button (click)="changeFontSize(1)" slot="start" fill="clear">
+              <ion-button (click)="changeFontSize(1)" slot="end" fill="clear">
                 <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
               </ion-button>
               <ion-label>Font Size</ion-label>
@@ -122,13 +122,13 @@
     <ion-button
       shape="round"
       fill="clear"
-      [disabled]="currentPage==pages.length"
+      [disabled]="currentPage==pages?.length"
       (click)="goToPage(1)"
     >
       <ion-icon name="chevron-back-circle-outline"></ion-icon>
     </ion-button>
     <ion-label style="font-size: small"
-      >Page {{currentPage}} of {{pages.length}}
+      >Page {{currentPage}} of {{pages?.length}}
     </ion-label>
     <ion-button
       shape="round"

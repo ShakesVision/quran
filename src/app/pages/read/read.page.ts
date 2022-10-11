@@ -348,25 +348,16 @@ export class ReadPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    const juzNum = this.router.getCurrentNavigation().extras.state?.juz;
-    if (juzNum) this.juzNumber = juzNum;
-    console.log(this.juzNumber, juzNum);
-    if (juzNum) {
-      if (typeof juzNum === "number") this.juzNumber = "Juz" + this.juzNumber;
-      this.httpClient
-        .get(
-          `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/${this.juzNumber}.txt`,
-          { responseType: "text" }
-        )
-        .subscribe((res) => {
-          this.surah = res;
-          this.title = "Juz " + juzNum;
-          this.pages = this.surah.split("\n\n");
-          console.log(this.pages);
-          this.lines = this.pages[this.currentPage - 1].split("\n");
-          this.getLastAyahNumberOnPage();
-        });
-    } else if (!juzNum) {
+    const juzData = this.router.getCurrentNavigation().extras.state?.juzData;
+    console.log(this.juzNumber, juzData);
+    if (juzData) {
+      this.surah = juzData.data;
+      this.title = juzData.title;
+      this.pages = this.surah.split("\n\n");
+      console.log(this.pages);
+      this.lines = this.pages[this.currentPage - 1].split("\n");
+      this.getLastAyahNumberOnPage();
+    } else if (!juzData) {
       this.surah = this.surahService.currentSurah;
       this.title = this.surah.name;
       this.pages = this.surah.arabic.split("\n\n");

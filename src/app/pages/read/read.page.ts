@@ -338,7 +338,7 @@ export class ReadPage implements OnInit {
     278, 279, 280, 281, 282, 283, 284, 285, 286,
   ];
   title;
-  juzNumber: number = 0;
+  juzNumber;
   constructor(
     private surahService: SurahService,
     public toastController: ToastController,
@@ -352,9 +352,10 @@ export class ReadPage implements OnInit {
     if (juzNum) this.juzNumber = juzNum;
     console.log(this.juzNumber, juzNum);
     if (juzNum) {
+      if (typeof juzNum === "number") this.juzNumber = "Juz" + this.juzNumber;
       this.httpClient
         .get(
-          `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines_fromInpage/Juz${this.juzNumber}.txt`,
+          `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/${this.juzNumber}.txt`,
           { responseType: "text" }
         )
         .subscribe((res) => {

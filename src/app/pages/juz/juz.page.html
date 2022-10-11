@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Juz</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="juz-grid-wrapper">
+    <div class="juz-btn" (click)="gotoReadJuz('Quran_full')">
+      <div class="juz-heading-en">Read Complete Quran</div>
+      <div class="juz-number">1-30</div>
+      <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
+    </div>
+    <div
+      class="juz-btn"
+      *ngFor="let j of [].constructor(30);let i = index"
+      (click)="gotoReadJuz(i+1)"
+    >
+      <div class="juz-heading-en">JUZ</div>
+      <div class="juz-number">{{i+1}}</div>
+      <div class="juz-heading-ur ur">پارہ</div>
+    </div>
+  </div>
+</ion-content>

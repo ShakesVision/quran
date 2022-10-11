@@ -598,4 +598,16 @@ export class ReadPage implements OnInit {
     console.log("LAST AYAH ON THIS PAGE: " + result);
     return result;
   }
+  onSearchChange(ev) {
+    // returns a [pageIndex,lineIndex] on a search
+    let text = ev.detail.value;
+    let arr = [];
+    let result = this.pages.filter((v, i) => {
+      if (v.includes(text)) {
+        arr.push(i);
+        return true;
+      }
+    });
+    console.log(result, arr);
+  }
 }

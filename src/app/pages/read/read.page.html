@@ -111,6 +111,14 @@
               <ion-icon slot="start" name="refresh"></ion-icon>
               <ion-label>Change Font</ion-label>
             </ion-item>
+            <ion-item>
+              <ion-searchbar
+                placeholder="Search..."
+                (ionChange)="onSearchChange($event)"
+                [debounce]="250"
+                showCancelButton="always"
+              ></ion-searchbar>
+            </ion-item>
           </ion-list>
         </div>
       </ion-content>

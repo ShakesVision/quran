@@ -24,6 +24,10 @@ const routes: Routes = [
     path: 'scanned',
     loadChildren: () => import('./pages/scanned/scanned.module').then( m => m.ScannedPageModule)
   },
+  {
+    path: 'juz',
+    loadChildren: () => import('./pages/juz/juz.module').then( m => m.JuzPageModule)
+  },
 
 ];
 

@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title> {{surah.name || juzNumber}} </ion-title>
+    <ion-title> {{title}} </ion-title>
     <ion-buttons slot="end">
       <ion-button
         (click)="toggleHifzMode()"
@@ -45,7 +45,7 @@
         *ngFor="let line of [].constructor(15-lines?.length-2)"
       ></div>
       <div class="surah-name centered-table-text">
-        {{surah.name?.split(' ')[1]|| juzNumber}}
+        {{surah?.name?.split(' ')[1]|| juzNumber}}
       </div>
       <div class="bism centered-table-text">﷽</div>
     </ng-container>

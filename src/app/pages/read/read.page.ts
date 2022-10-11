@@ -337,6 +337,7 @@ export class ReadPage implements OnInit {
     263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277,
     278, 279, 280, 281, 282, 283, 284, 285, 286,
   ];
+  title;
   juzNumber: number = 0;
   constructor(
     private surahService: SurahService,
@@ -347,31 +348,37 @@ export class ReadPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.juzNumber = this.router.getCurrentNavigation().extras.state.juz;
-    this.httpClient
-      .get(
-        `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines_fromInpage/Juz${this.juzNumber}.txt`,
-        { responseType: "text" }
-      )
-      .subscribe((res) => {
-        this.surah = res;
-        this.pages = this.surah.split("\n\n");
-        console.log(this.pages);
-        this.lines = this.pages[this.currentPage - 1].split("\n");
-      });
-    if (this.juzNumber == 0) {
+    const juzNum = this.router.getCurrentNavigation().extras.state?.juz;
+    if (juzNum) this.juzNumber = juzNum;
+    console.log(this.juzNumber, juzNum);
+    if (juzNum) {
+      this.httpClient
+        .get(
+          `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines_fromInpage/Juz${this.juzNumber}.txt`,
+          { responseType: "text" }
+        )
+        .subscribe((res) => {
+          this.surah = res;
+          this.title = "Juz " + juzNum;
+          this.pages = this.surah.split("\n\n");
+          console.log(this.pages);
+          this.lines = this.pages[this.currentPage - 1].split("\n");
+          this.getLastAyahNumberOnPage();
+        });
+    } else if (!juzNum) {
       this.surah = this.surahService.currentSurah;
+      this.title = this.surah.name;
       this.pages = this.surah.arabic.split("\n\n");
       this.arabicLines = this.pages[this.currentPage - 1].split("\n");
       this.lines = this.arabicLines;
+      if (this.surah.urdu && this.surah.urdu != "") {
+        this.translationExists = true;
+        this.tPages = this.surah.urdu.split("\n\n");
+        this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+      }
+      this.getLastAyahNumberOnPage();
     }
-    this.getLastAyahNumberOnPage();
-    console.log(this.pages);
-    if (this.surah.urdu && this.surah.urdu != "") {
-      this.translationExists = true;
-      this.tPages = this.surah.urdu.split("\n\n");
-      this.translationLines = this.tPages[this.currentPage - 1].split("\n");
-    }
+
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -453,9 +460,7 @@ export class ReadPage implements OnInit {
     } else if (!this.surah.urdu) {
       console.log("Translation not available!");
       this.presentToastWithOptions(
-        `Translation for Surah ${
-          this.surah.name.split(" ")[0]
-        } is not available!`,
+        `Translation for ${this.title} is not available!`,
         "top"
       );
     }

@@ -33,7 +33,11 @@ ion-content {
 }
 .ar2 {
   font-family: Muhammadi;
-  font-size: 20px;
+  font-size: 17px;
+  direction: rtl;
+}
+.small-text {
+  font-size: small;
 }
 .ar div {
   border-bottom: 0.5px solid #cecece;

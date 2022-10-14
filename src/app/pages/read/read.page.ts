@@ -29,6 +29,8 @@ export class ReadPage implements OnInit {
 
   mushafVersion = MushafLines.Fifteen;
 
+  searchResults;
+
   ayah_marks = [
     "",
     "",
@@ -598,16 +600,113 @@ export class ReadPage implements OnInit {
     console.log("LAST AYAH ON THIS PAGE: " + result);
     return result;
   }
+  getArabicScript(text) {
+    return text
+      .replace(/آ/g, "آ")
+      .replace(/ا/g, "ا")
+      .replace(/ب/g, "ب")
+      .replace(/پ/g, "پ")
+      .replace(/ت/g, "ت")
+      .replace(/ٹ/g, "ٹ")
+      .replace(/ث/g, "ث")
+      .replace(/ج/g, "ج")
+      .replace(/چ/g, "چ")
+      .replace(/خ/g, "خ")
+      .replace(/ح/g, "ح")
+      .replace(/د/g, "د")
+      .replace(/ڈ/g, "ڈ")
+      .replace(/ذ/g, "ذ")
+      .replace(/ر/g, "ر")
+      .replace(/ڑ/g, "ڑ")
+      .replace(/ز/g, "ز")
+      .replace(/ژ/g, "ژ")
+      .replace(/س/g, "س")
+      .replace(/ش/g, "ش")
+      .replace(/ص/g, "ص")
+      .replace(/ض/g, "ض")
+      .replace(/ط/g, "ط")
+      .replace(/ظ/g, "ظ")
+      .replace(/ع/g, "ع")
+      .replace(/غ/g, "غ")
+      .replace(/ف/g, "ف")
+      .replace(/ک/g, "ك")
+      .replace(/ق/g, "ق")
+      .replace(/گ/g, "گ")
+      .replace(/ل/g, "ل")
+      .replace(/م/g, "م")
+      .replace(/ن/g, "ن")
+      .replace(/و/g, "و")
+      .replace(/ہ/g, "ه")
+      .replace(/ء/g, "ء")
+      .replace(/ی/g, "ي")
+      .replace(/ئ/g, "ئ")
+      .replace(/ے/g, "ے")
+      .replace(/ۃ/g, "ة")
+      .replace(/ؤ/g, "ؤ")
+      .replace(/إ/g, "إ")
+      .replace(/أ/g, "أ")
+      .replace(/ھ/g, "ه")
+      .replace(/ الذي /g, " الذى ")
+      .replace(/ علي /g, " على ")
+      .replace(/ معني /g, " معنى ")
+      .replace(/ إلي /g, " إلى ")
+      .replace(/ تعاليٰ /g, " تعالىٰ ")
+      .replace(/ النبي /g, " النبى ")
+      .replace(/صلي الله عليه وسلم/g, "صلى الله عليه وسلم")
+      .replace(/ في /g, " فى ")
+      .replace(/ أبي /g, " أبى ")
+      .replace(/ رضي الله عنه /g, " رضى الله عنه ")
+      .replace(/ يري /g, " يرى ")
+      .replace(/ وهي /g, " وهى ")
+      .replace(/ أي /g, " أى ")
+      .replace(/ التي /g, " التى ")
+      .replace(/ فسيأتي /g, " فسيأتى ")
+      .replace(/ الذي /g, " الذى ")
+      .replace(/ إلي /g, " إلى ")
+      .replace(/ فنفي /g, " فنفى ")
+      .replace(/ الّذي /g, " الّذى ")
+      .replace(/ النبي /g, " النبى ")
+      .replace(/ صلّي /g, " صلّى ")
+      .replace(/ إحدي /g, " إحدى ")
+      .replace(/ يأتي /g, " يأتى ")
+      .replace(/أي /g, " أى ")
+      .replace(/ والدواعي /g, " والدواعى ")
+      .replace(/ صلي /g, " صلى ");
+  }
   onSearchChange(ev) {
     // returns a [pageIndex,lineIndex] on a search
-    let text = ev.detail.value;
+    let searchText = ev.detail.value;
+    if (!searchText || searchText == "") return;
+    searchText = this.getArabicScript(searchText);
     let arr = [];
-    let result = this.pages.filter((v, i) => {
-      if (v.includes(text)) {
-        arr.push(i);
+    let result = this.pages.filter((v, pageIndex) => {
+      v = this.getArabicScript(v);
+      if (v.includes(searchText)) {
+        let lineIndex = v.split("\n").findIndex((l) => l.includes(searchText));
+        arr.push({ pageIndex, lineIndex });
         return true;
       }
     });
     console.log(result, arr);
+    this.searchResults = arr;
+    arr.forEach((indices) => {
+      let output = this.getLineTextFromIndices(
+        indices.pageIndex,
+        indices.lineIndex
+      );
+      console.log(output);
+    });
+  }
+  getLineTextFromIndices(pageIndex, lineIndex) {
+    return this.pages[pageIndex].split("\n")[lineIndex];
+  }
+  gotoPageAndHighlightLine(p, l) {
+    console.log("going to page:" + p + " & line:" + l);
+    this.currentPage = p + 1;
+    this.lines = this.pages[this.currentPage - 1].split("\n");
+    setTimeout(() => {
+      let el = document.getElementById("line_" + l);
+      el.style.color = "red";
+    }, 100);
   }
 }

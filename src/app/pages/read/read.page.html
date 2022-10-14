@@ -119,6 +119,15 @@
                 showCancelButton="always"
               ></ion-searchbar>
             </ion-item>
+            <ion-item
+              button
+              *ngFor="let r of searchResults"
+              (click)="gotoPageAndHighlightLine(r.pageIndex,r.lineIndex)"
+            >
+              <ion-label class="ar2 small-text"
+                >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label
+              >
+            </ion-item>
           </ion-list>
         </div>
       </ion-content>

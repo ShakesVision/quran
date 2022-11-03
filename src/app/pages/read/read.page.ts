@@ -4,7 +4,7 @@ import { ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
 import { alertController } from "@ionic/core";
 import { MushafLines } from "src/app/services/mushaf-versions";
-import { NavigationExtras, Router } from "@angular/router";
+import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 
 @Component({
@@ -341,22 +341,25 @@ export class ReadPage implements OnInit {
   ];
   title;
   juzNumber;
+  ignoreTashkeel: boolean = true;
   constructor(
     private surahService: SurahService,
     public toastController: ToastController,
     public alert: AlertController,
     private router: Router,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit() {
     const juzData = this.router.getCurrentNavigation().extras.state?.juzData;
+    const id = this.activatedRoute.snapshot.params.id;
+    console.log(id);
     console.log(this.juzNumber, juzData);
     if (juzData) {
       this.surah = juzData.data;
       this.title = juzData.title;
       this.pages = this.surah.split("\n\n");
-      console.log(this.pages);
       this.lines = this.pages[this.currentPage - 1].split("\n");
       this.getLastAyahNumberOnPage();
     } else if (!juzData) {
@@ -585,6 +588,17 @@ export class ReadPage implements OnInit {
     }
     return line;
   }
+  addIndicators(line: string): string {
+    if (line.includes("ۧ")) {
+      const ayahNumber = this.surahService.e2a(
+        this.surahService
+          .a2e(this.surahService.p2e(line))
+          ?.replace(/[^0-9]/g, "")
+      );
+      console.log(ayahNumber);
+      return `<span>#</span><span>${ayahNumber}</span><span>#</span>`;
+    } else return "";
+  }
   toggleMuhammadiFont() {
     document.querySelector(".content-wrapper").classList.toggle("ar2");
   }
@@ -673,14 +687,16 @@ export class ReadPage implements OnInit {
       .replace(/ والدواعي /g, " والدواعى ")
       .replace(/ صلي /g, " صلى ");
   }
+
+  // returns a [pageIndex,lineIndex] on a search
   onSearchChange(ev) {
-    // returns a [pageIndex,lineIndex] on a search
     let searchText = ev.detail.value;
     if (!searchText || searchText == "") return;
     searchText = this.getArabicScript(searchText);
     let arr = [];
     let result = this.pages.filter((v, pageIndex) => {
-      v = this.getArabicScript(v);
+      if (this.ignoreTashkeel)
+        v = this.tashkeelRemover(this.getArabicScript(v));
       if (v.includes(searchText)) {
         let lineIndex = v.split("\n").findIndex((l) => l.includes(searchText));
         arr.push({ pageIndex, lineIndex });
@@ -700,13 +716,46 @@ export class ReadPage implements OnInit {
   getLineTextFromIndices(pageIndex, lineIndex) {
     return this.pages[pageIndex].split("\n")[lineIndex];
   }
+  getRukuArray() {
+    // this.surah.find(rukumark)
+    // this.surah.split("\n\n");
+    // see onSearchChange for full search
+  }
   gotoPageAndHighlightLine(p, l) {
     console.log("going to page:" + p + " & line:" + l);
     this.currentPage = p + 1;
     this.lines = this.pages[this.currentPage - 1].split("\n");
     setTimeout(() => {
       let el = document.getElementById("line_" + l);
-      el.style.color = "red";
+      el.style.color = "#2a86ff";
+      el.classList.add("highlight-line");
+      setTimeout(() => {
+        el.classList.remove("highlight-line");
+      }, 1000);
     }, 100);
+  }
+  tashkeelRemover(text) {
+    return text
+      .replace(/َ/g, "")
+      .replace(/ِ/g, "")
+      .replace(/ُ/g, "")
+      .replace(/ّ/g, "")
+      .replace(/ْ/g, "")
+      .replace(/ٌ/g, "")
+      .replace(/ً/g, "")
+      .replace(/ٍ/g, "")
+      .replace(/ٌ/g, "")
+      .replace(/ۡ/g, "")
+      .replace(/ٰ/g, "")
+      .replace(/ٓ/g, "")
+      .replace(/ٗ/g, "")
+      .replace(/ۖ‏/g, "")
+      .replace(/ۚ/g, "")
+      .replace(/ؕ/g, "")
+      .replace(/ۙ/g, "")
+      .replace(/ۢ/g, "")
+      .replace(/۟/g, "")
+      .replace(/ۤ/g, "")
+      .replace(/ٖ/g, "");
   }
 }

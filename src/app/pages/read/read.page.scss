@@ -23,13 +23,17 @@ ion-content {
 .ur table {
   margin: 0 auto;
 }
+.content-wrapper {
+  max-width: 324px;
+  height: 576px;
+  padding: 7px;
+  margin: 0 auto;
+  border: 2px solid;
+}
 .ar {
   font-size: 16px; // 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
   font-family: Indopak;
   direction: rtl;
-  max-width: 390px;
-  padding: 1em;
-  margin: 0 auto;
 }
 .ar2 {
   font-family: Muhammadi;
@@ -41,7 +45,7 @@ ion-content {
 }
 .ar div {
   border-bottom: 0.5px solid #cecece;
-  height: 32px; //screen:height in px=> 345:32,300:28,250:22
+  height: 36px; //screen:height in px=> 345:32,300:28,250:22
 }
 .ar div:hover {
   background-color: var(--success-light); //#ebfef6; // #ebf2fe;
@@ -98,4 +102,18 @@ ion-footer {
   color: var(--ion-color-primary);
   // border-radius: 50%;
   // background: var(--success-light);
+}
+.highlight-line {
+  background-color: #e2edff;
+}
+.ruku-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 9px;
+  position: absolute;
+  left: -22px;
+  // top: -10px;
+  line-height: 8px;
 }

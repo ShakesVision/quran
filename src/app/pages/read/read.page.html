@@ -53,9 +53,15 @@
     <div
       *ngFor="let line of lines;let i = index"
       id="line_{{i}}"
+      style="position: relative"
       (click)="openTrans($event,i)"
     >
-      <span [innerHTML]="addSpan(line)"> </span>
+      <div
+        *ngIf='line.includes("ۧ")'
+        class="ruku-wrapper"
+        [innerHTML]="addIndicators(line)"
+      ></div>
+      <span> {{line}} </span>
     </div>
 
     <ng-container
@@ -113,11 +119,20 @@
             </ion-item>
             <ion-item>
               <ion-searchbar
-                placeholder="Search..."
+                placeholder="Search"
                 (ionChange)="onSearchChange($event)"
-                [debounce]="250"
+                [debounce]="1000"
                 showCancelButton="always"
+                class="ion-no-padding ar2"
               ></ion-searchbar>
+            </ion-item>
+            <ion-item>
+              <ion-label>Ignore Tashkeel</ion-label>
+              <ion-toggle
+                slot="end"
+                [checked]="ignoreTashkeel"
+                (ionChange)="ignoreTashkeel=!ignoreTashkeel"
+              ></ion-toggle>
             </ion-item>
             <ion-item
               button

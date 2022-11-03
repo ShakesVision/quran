@@ -1,13 +1,17 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
 
-import { ReadPage } from './read.page';
+import { ReadPage } from "./read.page";
 
 const routes: Routes = [
   {
-    path: '',
-    component: ReadPage
-  }
+    path: "",
+    component: ReadPage,
+  },
+  {
+    path: ":id",
+    component: ReadPage,
+  },
 ];
 
 @NgModule({

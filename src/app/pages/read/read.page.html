@@ -169,7 +169,9 @@
             >
               <div class="indices ion-margin-end">
                 <span class="index">{{i+1}}</span>
-                <span class="location">{{r.pageIndex +'/'+ r.lineIndex}}</span>
+                <span class="location"
+                  >{{r.pageIndex+1 +'/'+ r.lineIndex+1}}</span
+                >
               </div>
               <ion-label class="ar2 small-text"
                 >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label

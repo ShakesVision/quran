@@ -138,6 +138,13 @@ ion-footer {
     align-items: center;
     justify-content: center;
   }
+  span.location {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    rotate: -45deg;
+    font-size: x-small;
+  }
 }
 .surah-start-line {
   text-align-last: center;
@@ -145,5 +152,17 @@ ion-footer {
 }
 .bism-line {
   text-align-last: center;
-  font-size: large;
+  font-size: larger;
+  color: var(--ion-color-medium);
+}
+.page-num-input {
+  width: 50px;
+  display: inline-flex;
+  background: var(--ion-color-light);
+  border: 1px solid;
+}
+.popover-wrapper {
+  ion-item {
+    font-size: small;
+  }
 }

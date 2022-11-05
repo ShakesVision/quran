@@ -342,6 +342,7 @@ export class ReadPage implements OnInit {
   title;
   juzNumber;
   ignoreTashkeel: boolean = true;
+  juzmode: boolean;
   constructor(
     private surahService: SurahService,
     public toastController: ToastController,
@@ -357,12 +358,14 @@ export class ReadPage implements OnInit {
     console.log(id);
     console.log(this.juzNumber, juzData);
     if (juzData) {
+      this.juzmode = true;
       this.surah = juzData.data;
       this.title = juzData.title;
       this.pages = this.surah.split("\n\n");
       this.lines = this.pages[this.currentPage - 1].split("\n");
       this.getLastAyahNumberOnPage();
     } else if (!juzData) {
+      this.juzmode = false;
       this.surah = this.surahService.currentSurah;
       this.title = this.surah.name;
       this.pages = this.surah.arabic.split("\n\n");
@@ -501,12 +504,15 @@ export class ReadPage implements OnInit {
     div.style.height = document.getElementById("line_0").clientHeight + "px";
   }
   changeFontSize(val) {
-    var txt: HTMLElement = document.querySelector(".ar");
-    var style = window
-      .getComputedStyle(txt, null)
-      .getPropertyValue("font-size");
+    var el: HTMLElement = document.querySelector(".content-wrapper");
+    var style = window.getComputedStyle(el, null).getPropertyValue("font-size");
     var currentSize = parseFloat(style);
-    txt.style.fontSize = currentSize + val + "px";
+    el.style.fontSize = currentSize + val + "px";
+  }
+  changeColors(val, field = "bg") {
+    var el: HTMLElement = document.querySelector(".content-wrapper");
+    if (field === "bg") el.style.background = val;
+    if (field === "color") el.style.color = val;
   }
   translationMode(doToggle: boolean) {
     if (doToggle) this.tMode = !this.tMode;
@@ -697,6 +703,7 @@ export class ReadPage implements OnInit {
     searchText = this.getArabicScript(searchText);
     let arr = [];
     let result = this.pages.filter((v, pageIndex) => {
+      v = this.getArabicScript(v);
       if (this.ignoreTashkeel)
         v = this.tashkeelRemover(this.getArabicScript(v));
       if (v.includes(searchText)) {
@@ -722,6 +729,10 @@ export class ReadPage implements OnInit {
     // this.surah.find(rukumark)
     // this.surah.split("\n\n");
     // see onSearchChange for full search
+  }
+  gotoPageNum(p) {
+    this.currentPage = parseInt(p);
+    this.lines = this.pages[this.currentPage - 1].split("\n");
   }
   gotoPageAndHighlightLine(p, l) {
     console.log("going to page:" + p + " & line:" + l);

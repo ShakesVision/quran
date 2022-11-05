@@ -26,8 +26,4 @@ export class SurahPage implements OnInit {
       this.router.navigate(["/read"]);
     });
   }
-
-  gotoReadJuz() {
-    this.router.navigate(["/read"], { state: { juz: 1 } });
-  }
 }

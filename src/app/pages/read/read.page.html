@@ -38,7 +38,7 @@
   <div class="ar ar2 content-wrapper">
     <ng-container
       class="ion-text-center"
-      *ngIf="currentPage==1 && lines?.length<15"
+      *ngIf="currentPage==1 && lines?.length<15 && !juzmode"
     >
       <div
         class="filler-lines"
@@ -96,7 +96,7 @@
   >
     <ng-template>
       <ion-content>
-        <div>
+        <div class="popover-wrapper">
           <ion-list lines="none">
             <ion-item>
               <ion-button (click)="changeFontSize(1)" slot="end" fill="clear">
@@ -110,6 +110,26 @@
                 ></ion-icon>
               </ion-button>
             </ion-item>
+            <ion-item>
+              <ion-label>Background</ion-label>
+              <ion-input
+                slot="end"
+                placeholder="css color / url"
+                (ionChange)="changeColors($event.target.value,'bg')"
+                [debounce]="1000"
+                class="ion-no-padding ion-no-margin ion-text-center"
+              ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>Color</ion-label>
+              <ion-input
+                slot="end"
+                placeholder="css color"
+                (ionChange)="changeColors($event.target.value,'color')"
+                [debounce]="1000"
+                class="ion-no-padding ion-no-margin ion-text-center"
+              ></ion-input>
+            </ion-item>
             <ion-item button (click)="showSurahInfo()">
               <ion-icon slot="start" name="information"></ion-icon>
               <ion-label>About Surah</ion-label>
@@ -119,13 +139,13 @@
               <ion-label>Change Font</ion-label>
             </ion-item>
             <ion-card>
-              <ion-item>
+              <ion-item color="light">
                 <ion-input
-                  placeholder="Search"
+                  placeholder="بحث / SEARCH / تلاش"
                   (ionChange)="onSearchChange($event)"
                   [debounce]="1000"
-                  showCancelButton="always"
-                  class="ion-no-padding ar2"
+                  clearInput
+                  class="ion-no-padding ion-text-center ar2"
                 ></ion-input>
               </ion-item>
               <ion-item style="font-size: small">
@@ -143,12 +163,13 @@
             <ion-item
               button
               class="rtl"
+              style="position: relative"
               *ngFor="let r of searchResults;let i=index"
               (click)="gotoPageAndHighlightLine(r.pageIndex,r.lineIndex)"
             >
               <div class="indices ion-margin-end">
                 <span class="index">{{i+1}}</span>
-                <!-- <span class="location">{{r.pageIndex +'/'+ r.lineIndex}}</span> -->
+                <span class="location">{{r.pageIndex +'/'+ r.lineIndex}}</span>
               </div>
               <ion-label class="ar2 small-text"
                 >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label
@@ -171,7 +192,14 @@
       <ion-icon name="chevron-back-circle-outline"></ion-icon>
     </ion-button>
     <ion-label style="font-size: small"
-      >Page {{currentPage}} of {{pages?.length}}
+      >Page
+      <ion-input
+        class="page-num-input"
+        type="number"
+        [(ngModel)]="currentPage"
+        (keyup.enter)="gotoPageNum($event.target.value)"
+      ></ion-input>
+      of {{pages?.length}}
     </ion-label>
     <ion-button
       shape="round"

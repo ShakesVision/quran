@@ -24,11 +24,16 @@ ion-content {
   margin: 0 auto;
 }
 .content-wrapper {
-  max-width: 324px;
+  max-width: 360px; //324px;
   height: 576px;
-  padding: 7px;
+  padding: 11px;
   margin: 0 auto;
   border: 2px solid;
+  user-select: text;
+  // background-image: url("../../../assets/quran-pg466-aspect.PNG");
+}
+.rtl {
+  direction: rtl;
 }
 .ar {
   font-size: 16px; // 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
@@ -116,4 +121,29 @@ ion-footer {
   left: -22px;
   // top: -10px;
   line-height: 8px;
+}
+.result-heading {
+  background-color: black;
+  color: white;
+}
+.indices {
+  span.index {
+    font-size: xx-small;
+    font-family: sans-serif;
+    background: var(--ion-color-light);
+    padding: 2px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.surah-start-line {
+  text-align-last: center;
+  font-size: small;
+}
+.bism-line {
+  text-align-last: center;
+  font-size: large;
 }

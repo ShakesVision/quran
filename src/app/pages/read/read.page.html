@@ -54,6 +54,7 @@
       *ngFor="let line of lines;let i = index"
       id="line_{{i}}"
       style="position: relative"
+      [ngClass]="{'bism-line': line?.trim()==='﷽','surah-start-line':lines[i+1]?.trim()==='﷽'}"
       (click)="openTrans($event,i)"
     >
       <div
@@ -117,28 +118,38 @@
               <ion-icon slot="start" name="refresh"></ion-icon>
               <ion-label>Change Font</ion-label>
             </ion-item>
-            <ion-item>
-              <ion-searchbar
-                placeholder="Search"
-                (ionChange)="onSearchChange($event)"
-                [debounce]="1000"
-                showCancelButton="always"
-                class="ion-no-padding ar2"
-              ></ion-searchbar>
-            </ion-item>
-            <ion-item>
-              <ion-label>Ignore Tashkeel</ion-label>
-              <ion-toggle
-                slot="end"
-                [checked]="ignoreTashkeel"
-                (ionChange)="ignoreTashkeel=!ignoreTashkeel"
-              ></ion-toggle>
-            </ion-item>
+            <ion-card>
+              <ion-item>
+                <ion-input
+                  placeholder="Search"
+                  (ionChange)="onSearchChange($event)"
+                  [debounce]="1000"
+                  showCancelButton="always"
+                  class="ion-no-padding ar2"
+                ></ion-input>
+              </ion-item>
+              <ion-item style="font-size: small">
+                <ion-label>Ignore Tashkeel</ion-label>
+                <ion-toggle
+                  slot="end"
+                  [checked]="ignoreTashkeel"
+                  (ionChange)="ignoreTashkeel=!ignoreTashkeel"
+                ></ion-toggle>
+              </ion-item>
+            </ion-card>
+            <div *ngIf="searchResults" class="ion-text-center result-heading">
+              <ion-label>Results: {{searchResults.length}}</ion-label>
+            </div>
             <ion-item
               button
-              *ngFor="let r of searchResults"
+              class="rtl"
+              *ngFor="let r of searchResults;let i=index"
               (click)="gotoPageAndHighlightLine(r.pageIndex,r.lineIndex)"
             >
+              <div class="indices ion-margin-end">
+                <span class="index">{{i+1}}</span>
+                <!-- <span class="location">{{r.pageIndex +'/'+ r.lineIndex}}</span> -->
+              </div>
               <ion-label class="ar2 small-text"
                 >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label
               >

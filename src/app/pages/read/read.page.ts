@@ -575,17 +575,19 @@ export class ReadPage implements OnInit {
     else return (iconName += "-outline");
   }
   addSpan(line: string): string {
-    if (this.ayah_marks.some((mark) => line.includes(mark))) {
-      this.ayah_marks.forEach((mark, i) => {
-        if (line.includes(mark)) {
-          const re = new RegExp(mark, "g");
-          line = line.replace(
-            re,
-            `<span class='ayah_mark ayah_mark${i + 1}'>${mark}</span>`
-          );
-        }
-      });
-    }
+    // if (this.ayah_marks.some((mark) => line.includes(mark))) {
+    //   this.ayah_marks.forEach((mark, i) => {
+    //     if (line.includes(mark)) {
+    //       const re = new RegExp(mark, "g");
+    //       line = line.replace(
+    //         re,
+    //         `<span class='ayah_mark ayah_mark${i + 1}'>${mark}</span>`
+    //       );
+    //     }
+    //   });
+    // }
+    line = line.replace("بْ", "<span style='color:#ff2d5b'>بْ</span>");
+
     return line;
   }
   addIndicators(line: string): string {

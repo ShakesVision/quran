@@ -54,7 +54,7 @@
       *ngFor="let line of lines;let i = index"
       id="line_{{i}}"
       style="position: relative"
-      [ngClass]="{'bism-line': line?.trim()==='﷽','surah-start-line':lines[i+1]?.trim()==='﷽'}"
+      [ngClass]="{'bism-line': line?.trim()==='﷽','surah-start-line':lines[i+1]?.trim()==='﷽','surah-end-line':i===lines.length-1&&pages[currentPage].split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽'}"
       (click)="openTrans($event,i)"
     >
       <div
@@ -74,6 +74,9 @@
       ></div>
     </ng-container>
   </div>
+  <!-- <div class="next-words ar ar2 ion-text-end">
+    {{pages[currentPage]?.split("\n")[0].split(" ")[0]}}
+  </div> -->
 
   <div class="popup ion-text-center">
     <div class="popup-header"></div>
@@ -169,9 +172,7 @@
             >
               <div class="indices ion-margin-end">
                 <span class="index">{{i+1}}</span>
-                <span class="location"
-                  >{{r.pageIndex+1 +'/'+ r.lineIndex+1}}</span
-                >
+                <span class="location">{{r.pageIndex+1}}</span>
               </div>
               <ion-label class="ar2 small-text"
                 >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label

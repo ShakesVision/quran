@@ -604,7 +604,7 @@ export class ReadPage implements OnInit {
           ?.replace(/[^0-9]/g, "")
       );
       console.log(ayahNumber);
-      return `<span>#</span><span>${ayahNumber}</span><span>#</span>`;
+      return `<span>۰</span><span> ع </span><span>۰</span>`;
     } else return "";
   }
   toggleMuhammadiFont() {

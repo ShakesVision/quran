@@ -140,15 +140,19 @@ ion-footer {
   }
   span.location {
     position: absolute;
-    left: 0;
+    left: 5px;
     top: 5px;
+    color: var(--ion-color-medium);
     rotate: -45deg;
-    font-size: x-small;
+    font-size: xx-small;
   }
 }
 .surah-start-line {
   text-align-last: center;
   font-size: small;
+}
+.surah-end-line {
+  text-align-last: center;
 }
 .bism-line {
   text-align-last: center;

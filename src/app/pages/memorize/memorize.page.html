@@ -44,7 +44,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="row" *ngFor="let item of items">
+        <tr
+          class="row"
+          *ngFor="let item of items"
+          (click)="openModelWithItem(item)"
+        >
           <td>{{getFormattedDate(item.date)}}</td>
           <td>{{item.number}}</td>
           <td class="ar-text">{{item.surah}}</td>
@@ -62,7 +66,11 @@
 
   <!-- Use a trigger -->
   <!-- <ion-button id="trigger-button">Click to open modal</ion-button> -->
-  <ion-modal trigger="trigger-button" (didDismiss)="getValueFromModal($event)">
+  <ion-modal
+    trigger="trigger-button"
+    (didDismiss)="getValueFromModal($event)"
+    [isOpen]="isModalOpen"
+  >
     <ng-template>
       <ion-toolbar>
         <ion-title>Add Surah for Hifz</ion-title>

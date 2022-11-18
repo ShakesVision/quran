@@ -35,44 +35,50 @@
 </ion-header>
 
 <ion-content>
-  <div class="ar ar2 content-wrapper">
-    <ng-container
-      class="ion-text-center"
-      *ngIf="currentPage==1 && lines?.length<15 && !juzmode"
-    >
-      <div
-        class="filler-lines"
-        *ngFor="let line of [].constructor(15-lines?.length-2)"
-      ></div>
-      <div class="surah-name centered-table-text">
-        {{surah?.name?.split(' ')[1]|| title}}
-      </div>
-      <div class="bism centered-table-text">﷽</div>
-    </ng-container>
-
-    <div
-      *ngFor="let line of lines;let i = index"
-      id="line_{{i}}"
-      style="position: relative"
-      [ngClass]="{'bism-line': line?.trim()==='﷽','surah-start-line':lines[i+1]?.trim()==='﷽','surah-end-line':i===lines.length-1&&pages[currentPage].split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽'}"
-      (click)="openTrans($event,i)"
-    >
-      <div
-        *ngIf='line.includes("ۧ")'
-        class="ruku-wrapper"
-        [innerHTML]="addIndicators(line)"
-      ></div>
-      <span> {{line}} </span>
+  <div class="page-wrapper ar ar2 ion-margin-top">
+    <div class="page-top-info">
+      <span class="page-number">
+        {{surahService.e2a(currentPage.toString())}}
+      </span>
     </div>
-
-    <ng-container
-      *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15"
-    >
+    <div class="content-wrapper">
+      <ng-container
+        class="ion-text-center"
+        *ngIf="currentPage==1 && lines?.length<15 && !juzmode"
+      >
+        <div
+          class="filler-lines"
+          *ngFor="let line of [].constructor(15-lines?.length-2)"
+        ></div>
+        <div class="surah-name centered-table-text">
+          {{surah?.name?.split(' ')[1]|| title}}
+        </div>
+        <div class="bism centered-table-text">﷽</div>
+      </ng-container>
       <div
-        class="filler-lines"
-        *ngFor="let line of [].constructor(15-lines.length)"
-      ></div>
-    </ng-container>
+        *ngFor="let line of lines;let i = index"
+        id="line_{{i}}"
+        class="line"
+        style="position: relative"
+        [ngClass]="{'quran-kareem-text':currentPage==1 && juzmode,'bism-line': line?.trim()==='﷽', 'surah-start-line':lines[i+1]?.trim()==='﷽', 'surah-end-line':i===lines.length-1&&pages[currentPage].split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽'}"
+        (click)="openTrans($event,i)"
+      >
+        <div
+          *ngIf='line.includes("ۧ")'
+          class="ruku-wrapper"
+          [innerHTML]="addIndicators(line)"
+        ></div>
+        <span> {{line}} </span>
+      </div>
+      <ng-container
+        *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15"
+      >
+        <div
+          class="filler-lines"
+          *ngFor="let line of [].constructor(15-lines.length)"
+        ></div>
+      </ng-container>
+    </div>
   </div>
   <!-- <div class="next-words ar ar2 ion-text-end">
     {{pages[currentPage]?.split("\n")[0].split(" ")[0]}}

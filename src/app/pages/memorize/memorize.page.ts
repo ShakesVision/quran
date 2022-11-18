@@ -1,11 +1,11 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   Validators,
 } from "@angular/forms";
-import { AlertController, ModalController } from "@ionic/angular";
+import { AlertController, IonModal, ModalController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { Observable, Subject } from "rxjs";
 
@@ -15,10 +15,12 @@ import { Observable, Subject } from "rxjs";
   styleUrls: ["./memorize.page.scss"],
 })
 export class MemorizePage implements OnInit {
+  @ViewChild(IonModal) modal: IonModal;
   items: Array<Object> = [];
   recommendedChapters = ["الفاتحہ", "یس", "رحمن", "واقعہ", "ملک", "کہف "];
   isOpen: boolean = true;
   memorizeEntryForm: FormGroup;
+
   constructor(
     private storage: Storage,
     private alertController: AlertController,
@@ -107,6 +109,9 @@ export class MemorizePage implements OnInit {
     alert.present();
   }
   getFormattedDate = (date) => new Date(date).toLocaleDateString();
+  openModelWithItem(item) {
+    this.modal.present().then();
+  }
   closeModal() {
     this.isOpen = false;
     this.modalController.dismiss();

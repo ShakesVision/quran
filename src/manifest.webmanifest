@@ -1,7 +1,7 @@
 {
-  "name": "app",
-  "short_name": "app",
-  "theme_color": "#1976d2",
+  "name": "Quran: Hifz Helper",
+  "short_name": "Quran",
+  "theme_color": "#055533",
   "background_color": "#fafafa",
   "display": "standalone",
   "scope": "./",

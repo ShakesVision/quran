@@ -37,15 +37,20 @@
 <ion-content>
   <div class="page-wrapper ar ar2 ion-margin-top">
     <div class="page-top-info">
-      <span class="juz-number">
-        {{surahService.e2a(juzCalculated.toString())}}
-      </span>
-      <span class="page-number">
-        {{surahService.e2a(currentPage.toString())}}
-      </span>
-      <span class="surah-number">
-        {{surahService.e2a(surahCalculated.toString())}}
-      </span>
+      <ng-container *ngIf="currentPage>1">
+        <span class="juz-number">
+          {{ surahCalculated === 1?
+          'سورۃ':(surahService.juzNames[juzCalculated-1] + ' ' +
+          surahService.e2a(juzCalculated.toString())) }}
+        </span>
+        <span class="page-number">
+          {{ surahService.e2a(currentPage.toString()) }}
+        </span>
+        <span class="surah-number">
+          {{ surahService.surahNames[surahCalculated-1] + ' ' +
+          surahService.e2a(surahCalculated.toString()) }}
+        </span>
+      </ng-container>
     </div>
     <div class="content-wrapper">
       <ng-container
@@ -117,10 +122,18 @@
         <div class="popover-wrapper">
           <ion-list lines="none">
             <ion-item>
+              <ion-label>Font Size</ion-label>
               <ion-button (click)="changeFontSize(1)" slot="end" fill="clear">
                 <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
               </ion-button>
-              <ion-label>Font Size</ion-label>
+              <!-- <ion-input
+                slot="end"
+                placeholder="px"
+                (ionChange)="changeFontSize($event.target.value,true)"
+                [debounce]="500"
+                class="font-size-field ion-no-padding ion-no-margin ion-text-center"
+              ></ion-input> -->
+              <div slot="end" class="font-size-field"></div>
               <ion-button (click)="changeFontSize(-1)" slot="end" fill="clear">
                 <ion-icon
                   slot="icon-only"
@@ -128,6 +141,28 @@
                 ></ion-icon>
               </ion-button>
             </ion-item>
+            <ion-item>
+              <ion-label>Go to</ion-label>
+              <ng-container slot="end">
+                <ion-input
+                  slot="end"
+                  placeholder="juz"
+                  (ionChange)="gotoJuzSurah($event.target.value,'juz')"
+                  [debounce]="500"
+                  class="ion-no-padding ion-no-margin ion-text-center"
+                ></ion-input>
+                <ion-input
+                  slot="end"
+                  placeholder="surah"
+                  (ionChange)="gotoJuzSurah($event.target.value,'surah')"
+                  [debounce]="500"
+                  class="ion-no-padding ion-no-margin ion-text-center"
+                ></ion-input>
+              </ng-container>
+            </ion-item>
+            <!-- <ion-item>
+              <ion-label>Go to Surah</ion-label>
+            </ion-item> -->
             <ion-item>
               <ion-label>Background</ion-label>
               <ion-input
@@ -148,7 +183,7 @@
                 class="ion-no-padding ion-no-margin ion-text-center"
               ></ion-input>
             </ion-item>
-            <ion-item button (click)="showSurahInfo()">
+            <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information"></ion-icon>
               <ion-label>About Surah</ion-label>
             </ion-item>

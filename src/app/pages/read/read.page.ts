@@ -33,11 +33,17 @@ export class ReadPage implements OnInit {
 
   juzPages = [];
 
+  surahPages = [];
+
   juzCalculated = this.surahService.juzCalculated(this.currentPage);
 
   surahCalculated = this.surahService.surahCalculated(this.currentPage);
 
   rukuArray = [];
+
+  surahArray = [];
+
+  surahInfo;
 
   ayah_marks = [
     "",
@@ -513,16 +519,27 @@ export class ReadPage implements OnInit {
     let div: HTMLElement = document.querySelector(".filler-lines");
     div.style.height = document.getElementById("line_0").clientHeight + "px";
   }
-  changeFontSize(val) {
+  changeFontSize(val, inputValue: boolean = false) {
     var el: HTMLElement = document.querySelector(".content-wrapper");
+    let fontSizeField: HTMLElement = document.querySelector(".font-size-field");
     var style = window.getComputedStyle(el, null).getPropertyValue("font-size");
     var currentSize = parseFloat(style);
-    el.style.fontSize = currentSize + val + "px";
+    if (inputValue) el.style.fontSize = val + "px";
+    else {
+      el.style.fontSize = currentSize + val + "px";
+      fontSizeField.innerText = el.style.fontSize;
+    }
   }
   changeColors(val, field = "bg") {
     var el: HTMLElement = document.querySelector(".content-wrapper");
     if (field === "bg") el.style.background = val;
     if (field === "color") el.style.color = val;
+  }
+  gotoJuzSurah(val, field = "juz") {
+    if (field === "juz")
+      this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
+    if (field === "surah")
+      this.gotoPageNum(this.surahService.surahPageNumbers[parseInt(val) - 1]);
   }
   translationMode(doToggle: boolean) {
     if (doToggle) this.tMode = !this.tMode;
@@ -537,6 +554,7 @@ export class ReadPage implements OnInit {
 
   showSurahInfo() {
     this.surahService.getSurahInfo().subscribe((res: any) => {
+      this.surahInfo = res;
       this.surahService.surahInfo = [...res];
       this.currentSurahInfo = this.surahService.surahInfo.find((s) => {
         return parseInt(s.index) == parseInt(this.surah.number);
@@ -608,16 +626,16 @@ export class ReadPage implements OnInit {
   }
   addIndicators(line: string, i: number): string {
     if (line.includes(this.surahService.diacritics.RUKU_MARK)) {
-      const ayahNumber = this.surahService.e2a(
-        this.surahService
-          .a2e(this.surahService.p2e(line))
-          ?.replace(/[^0-9]/g, "")
-      );
-      const juzCalculated = this.surahService.juzCalculated(this.currentPage);
+      // const ayahNumber = this.surahService.e2a(
+      //   this.surahService
+      //     .a2e(this.surahService.p2e(line))
+      //     ?.replace(/[^0-9]/g, "")
+      // );
       let rukuNumber = 0;
-      this.rukuArray[juzCalculated - 1]?.forEach((el, index) => {
+      this.rukuArray[this.juzCalculated - 1]?.forEach((el, index) => {
         const mushafPageNumber =
-          this.surahService.juzPageNumbers[juzCalculated - 1] + el.juzPageIndex;
+          this.surahService.juzPageNumbers[this.juzCalculated - 1] +
+          el.juzPageIndex;
         if (this.currentPage === mushafPageNumber && el.lineIndex === i)
           rukuNumber = index;
       });
@@ -815,6 +833,29 @@ export class ReadPage implements OnInit {
       this.rukuArray.push(juzRukuArray);
     });
     console.log(this.rukuArray);
+    //Mistakes?
+    const surahPageNumbers = this.surahService.surahPageNumbers;
+    surahPageNumbers.forEach((pageNumber, surahIndex) => {
+      let surahRukuArray = [];
+      this.surahPages = this.pages.filter((p, i) => {
+        const issurahPage: boolean =
+          i >= pageNumber - 1 &&
+          (!!surahPageNumbers[surahIndex + 1]
+            ? i < surahPageNumbers[surahIndex + 1] - 1
+            : i < this.pages.length);
+        return issurahPage;
+      });
+      console.log(this.surahPages);
+      this.surahPages.forEach((page, surahPageIndex) => {
+        if (page.includes(this.surahService.diacritics.RUKU_MARK))
+          page.split("\n").forEach((line, lineIndex) => {
+            if (line.includes(this.surahService.diacritics.RUKU_MARK))
+              surahRukuArray.push({ surahPageIndex, lineIndex, line });
+          });
+      });
+      this.surahArray.push(surahRukuArray);
+    });
+    console.log(this.surahArray);
   }
   updateCalculatedNumbers() {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);

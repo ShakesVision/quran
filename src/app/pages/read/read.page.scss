@@ -27,12 +27,26 @@ ion-content {
   max-width: 324px; //360px;
   margin: 0 auto;
   .page-top-info {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    // justify-content: space-between;
     margin-bottom: -5px;
+    min-height: 34px;
+    span.juz-number {
+      font-size: small;
+      text-align-last: start;
+    }
+    span.page-number {
+      font-size: x-large;
+      text-align-last: center;
+    }
+    span.surah-number {
+      font-size: small;
+      text-align-last: end;
+    }
   }
   .content-wrapper {
-    height: 576px;
+    height: 576px; //height: 75vh; aspect-ratio: 9/16;
     padding: 5px;
     border: 2px solid;
     user-select: text;
@@ -57,7 +71,7 @@ ion-content {
 }
 .ar .line {
   border-bottom: 0.5px solid #cecece;
-  height: 38px; //screen:height in px=> 345:32,300:28,250:22
+  height: 38px; //screen:height in px=> 345:32,300:28,250:22. With aspect-ratio, height: calc(78vh*0.066);
 }
 .ar .line:hover {
   background-color: var(--success-light); //#ebfef6; // #ebf2fe;

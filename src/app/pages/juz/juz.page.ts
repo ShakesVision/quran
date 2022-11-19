@@ -45,6 +45,7 @@ export class JuzPage implements OnInit {
       .subscribe(
         (res) => {
           console.log("Fetch successful...");
+          // Add extra line (\n) at the end of each file to avoid truncating last line of the file in split
           const juzData = { title: juz, data: res };
           this.storage.set(juz, juzData).then((_) => {
             console.log("Have been saved in your device successfully.");

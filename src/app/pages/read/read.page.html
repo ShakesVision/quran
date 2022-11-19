@@ -60,7 +60,10 @@
         id="line_{{i}}"
         class="line"
         style="position: relative"
-        [ngClass]="{'quran-kareem-text':currentPage==1 && juzmode,'bism-line': line?.trim()==='﷽', 'surah-start-line':lines[i+1]?.trim()==='﷽', 'surah-end-line':i===lines.length-1&&pages[currentPage].split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽'}"
+        [ngClass]="{'quran-kareem-text':juzmode && pages.length ==611 && currentPage==1,
+        'bism-line': line?.trim()==='﷽' || (currentPage === pages.length && i==10), 
+        'surah-start-line':lines[i+1]?.trim()==='﷽', 
+        'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (currentPage === pages.length && (i==lines.length-1 || i==9))}"
         (click)="openTrans($event,i)"
       >
         <div
@@ -205,7 +208,7 @@
       <ion-input
         class="page-num-input"
         type="number"
-        [(ngModel)]="currentPage"
+        [ngModel]="currentPage"
         (keyup.enter)="gotoPageNum($event.target.value)"
       ></ion-input>
       of {{pages?.length}}

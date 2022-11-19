@@ -608,7 +608,7 @@ export class ReadPage implements OnInit {
     } else return "";
   }
   toggleMuhammadiFont() {
-    document.querySelector(".content-wrapper").classList.toggle("ar2");
+    document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
   getLastAyahNumberOnPage() {
     let lastAyahOnPageArray = this.lines[this.lines?.length - 1]

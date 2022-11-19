@@ -37,8 +37,14 @@
 <ion-content>
   <div class="page-wrapper ar ar2 ion-margin-top">
     <div class="page-top-info">
+      <span class="juz-number">
+        {{surahService.e2a(juzCalculated.toString())}}
+      </span>
       <span class="page-number">
         {{surahService.e2a(currentPage.toString())}}
+      </span>
+      <span class="surah-number">
+        {{surahService.e2a(surahCalculated.toString())}}
       </span>
     </div>
     <div class="content-wrapper">
@@ -67,9 +73,9 @@
         (click)="openTrans($event,i)"
       >
         <div
-          *ngIf='line.includes("ۧ")'
+          *ngIf="line.includes(surahService.diacritics.RUKU_MARK)"
           class="ruku-wrapper"
-          [innerHTML]="addIndicators(line)"
+          [innerHTML]="addIndicators(line,i)"
         ></div>
         <span> {{line}} </span>
       </div>

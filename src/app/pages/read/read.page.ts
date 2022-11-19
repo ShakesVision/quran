@@ -31,6 +31,14 @@ export class ReadPage implements OnInit {
 
   searchResults;
 
+  juzPages = [];
+
+  juzCalculated = this.surahService.juzCalculated(this.currentPage);
+
+  surahCalculated = this.surahService.surahCalculated(this.currentPage);
+
+  rukuArray = [];
+
   ayah_marks = [
     "",
     "",
@@ -343,6 +351,7 @@ export class ReadPage implements OnInit {
   juzNumber;
   ignoreTashkeel: boolean = true;
   juzmode: boolean;
+
   constructor(
     private surahService: SurahService,
     public toastController: ToastController,
@@ -378,7 +387,7 @@ export class ReadPage implements OnInit {
       }
       this.getLastAyahNumberOnPage();
     }
-
+    this.calculateRukuArray();
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -404,6 +413,7 @@ export class ReadPage implements OnInit {
   goToPage(n: number) {
     this.currentPage += n;
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+    this.updateCalculatedNumbers();
     if (this.translationExists)
       this.translationLines = this.tPages[this.currentPage - 1].split("\n");
     this.lines = this.tMode ? this.translationLines : this.arabicLines;
@@ -596,15 +606,24 @@ export class ReadPage implements OnInit {
 
     return line;
   }
-  addIndicators(line: string): string {
-    if (line.includes("ۧ")) {
+  addIndicators(line: string, i: number): string {
+    if (line.includes(this.surahService.diacritics.RUKU_MARK)) {
       const ayahNumber = this.surahService.e2a(
         this.surahService
           .a2e(this.surahService.p2e(line))
           ?.replace(/[^0-9]/g, "")
       );
-      console.log(ayahNumber);
-      return `<span>۰</span><span> ع </span><span>۰</span>`;
+      const juzCalculated = this.surahService.juzCalculated(this.currentPage);
+      let rukuNumber = 0;
+      this.rukuArray[juzCalculated - 1]?.forEach((el, index) => {
+        const mushafPageNumber =
+          this.surahService.juzPageNumbers[juzCalculated - 1] + el.juzPageIndex;
+        if (this.currentPage === mushafPageNumber && el.lineIndex === i)
+          rukuNumber = index;
+      });
+      return `<div>۰</div><div> ع </div><div style="font-size: 16px; margin-top: 3px;">${this.surahService.e2a(
+        (rukuNumber + 1).toString()
+      )}</div>`;
     } else return "";
   }
   toggleMuhammadiFont() {
@@ -614,8 +633,9 @@ export class ReadPage implements OnInit {
     let lastAyahOnPageArray = this.lines[this.lines?.length - 1]
       .trim()
       .split(" ");
-    let result =
-      lastAyahOnPageArray[lastAyahOnPageArray.length - 1]?.split("۝")[1];
+    let result = lastAyahOnPageArray[lastAyahOnPageArray.length - 1]?.split(
+      this.surahService.diacritics.AYAH_MARK
+    )[1];
     result = this.surahService
       .a2e(this.surahService.p2e(result))
       ?.replace(/[^0-9]/g, "");
@@ -733,6 +753,7 @@ export class ReadPage implements OnInit {
   gotoPageNum(p) {
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
+    this.updateCalculatedNumbers();
   }
   gotoPageAndHighlightLine(p, l) {
     console.log("going to page:" + p + " & line:" + l);
@@ -770,5 +791,33 @@ export class ReadPage implements OnInit {
       .replace(/۟/g, "")
       .replace(/ۤ/g, "")
       .replace(/ٖ/g, "");
+  }
+  calculateRukuArray() {
+    //Mistakes in juz 22,1,30
+    const juzPageNumbers = this.surahService.juzPageNumbers;
+    juzPageNumbers.forEach((pageNumber, juzIndex) => {
+      let juzRukuArray = [];
+      this.juzPages = this.pages.filter((p, i) => {
+        const isJuzPage: boolean =
+          i >= pageNumber - 1 &&
+          (!!juzPageNumbers[juzIndex + 1]
+            ? i < juzPageNumbers[juzIndex + 1] - 1
+            : i < this.pages.length);
+        return isJuzPage;
+      });
+      this.juzPages.forEach((page, juzPageIndex) => {
+        if (page.includes(this.surahService.diacritics.RUKU_MARK))
+          page.split("\n").forEach((line, lineIndex) => {
+            if (line.includes(this.surahService.diacritics.RUKU_MARK))
+              juzRukuArray.push({ juzPageIndex, lineIndex, line });
+          });
+      });
+      this.rukuArray.push(juzRukuArray);
+    });
+    console.log(this.rukuArray);
+  }
+  updateCalculatedNumbers() {
+    this.juzCalculated = this.surahService.juzCalculated(this.currentPage);
+    this.surahCalculated = this.surahService.surahCalculated(this.currentPage);
   }
 }

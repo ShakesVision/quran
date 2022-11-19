@@ -17,23 +17,23 @@ ion-content {
   -webkit-text-align-last: justify;
   -ms-text-align-last: justify;
   -o-text-align-last: justify;
-  line-height: 1.8em;
+  line-height: 2em;
 }
 .ar table,
 .ur table {
   margin: 0 auto;
 }
 .page-wrapper {
+  max-width: 324px; //360px;
+  margin: 0 auto;
   .page-top-info {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     margin-bottom: -5px;
   }
   .content-wrapper {
-    max-width: 324px; //360px;
     height: 576px;
     padding: 5px;
-    margin: 0 auto;
     border: 2px solid;
     user-select: text;
     // background-image: url("../../../assets/quran-pg466-aspect.PNG");
@@ -123,11 +123,16 @@ ion-footer {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 9px;
+  row-gap: 2px;
+  font-size: 10px;
   position: absolute;
-  left: -15px;
-  // top: -10px;
+  left: -16px;
   line-height: 8px;
+  top: 2px;
+  &.span:nth-child(3) {
+    margin-top: 3px;
+    font-size: 14px;
+  }
 }
 .result-heading {
   background-color: black;

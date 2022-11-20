@@ -45,6 +45,8 @@ export class ReadPage implements OnInit {
 
   surahArray = [];
 
+  isResultSelected: boolean = false;
+
   surahInfo;
 
   ayah_marks = [
@@ -540,13 +542,22 @@ export class ReadPage implements OnInit {
     if (field === "color") el.style.color = val;
   }
   gotoJuzSurah(val, field = "juz") {
-    console.log(val);
     if (!val || val == "" || val < 1 || typeof parseInt(val) != "number")
       return;
-    if (field === "juz")
-      this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
-    if (field === "surah")
-      this.gotoPageNum(this.surahService.surahPageNumbers[parseInt(val) - 1]);
+    switch (field) {
+      case "juz":
+        this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
+        if (val > 30) this.gotoPageNum(this.pages.length);
+        break;
+      case "surah":
+        this.gotoPageNum(this.surahService.surahPageNumbers[parseInt(val) - 1]);
+        if (val > 114) this.gotoPageNum(this.pages.length);
+        break;
+
+      default:
+        this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
+        break;
+    }
   }
   translationMode(doToggle: boolean) {
     if (doToggle) this.tMode = !this.tMode;
@@ -780,6 +791,7 @@ export class ReadPage implements OnInit {
     // see onSearchChange for full search
   }
   gotoPageNum(p) {
+    if (!p) return;
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
     this.updateCalculatedNumbers();
@@ -788,8 +800,8 @@ export class ReadPage implements OnInit {
     console.log("going to page:" + p + " & line:" + l);
     this.currentPage = p + 1;
     this.lines = this.pages[this.currentPage - 1].split("\n");
+    let el = document.getElementById("line_" + l);
     setTimeout(() => {
-      let el = document.getElementById("line_" + l);
       el.style.color = "#2a86ff";
       el.classList.add("highlight-line");
       setTimeout(() => {

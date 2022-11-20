@@ -143,7 +143,7 @@ export class ScannedPage implements OnInit {
     let juzCalculated = this.juzPageNumbers.findIndex((e) => e > p);
     let surahCalculated = this.surahPageNumbers.findIndex((e) => e > p);
     if (juzCalculated == -1) juzCalculated = 30;
-    if (surahCalculated == -1) surahCalculated = 144;
+    if (surahCalculated == -1) surahCalculated = 114;
     this.juzNumberField = juzCalculated;
     this.surahNumberField = surahCalculated;
     setTimeout(() => {

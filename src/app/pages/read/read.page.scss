@@ -136,7 +136,7 @@ ion-footer {
   row-gap: 4px;
   font-size: 14px;
   position: absolute;
-  left: -16px;
+  left: -18px;
   line-height: 8px;
   top: 2px;
   &.span:nth-child(3) {
@@ -144,10 +144,7 @@ ion-footer {
     font-size: 14px;
   }
 }
-.result-heading {
-  background-color: black;
-  color: white;
-}
+
 .indices {
   span.index {
     font-size: xx-small;
@@ -202,5 +199,12 @@ ion-footer {
 .popover-wrapper {
   ion-item {
     font-size: small;
+  }
+  .result-heading {
+    background-color: black;
+    color: white;
+  }
+  .selected-result {
+    background-color: #a3c0ff;
   }
 }

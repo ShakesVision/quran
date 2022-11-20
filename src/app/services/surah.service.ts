@@ -276,7 +276,13 @@ export class SurahService {
   p2e = (s) => s?.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
   a2e = (s) => s?.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
   e2a = (s) => s?.replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
-  juzCalculated = (p: number) => this.juzPageNumbers.findIndex((e) => e > p);
+  //Juz and Surah calculated methods, not working for last index (30 and 114)
+  juzCalculated = (p: number) =>
+    this.juzPageNumbers.findIndex((e) => e > p) == -1
+      ? 30
+      : this.juzPageNumbers.findIndex((e) => e > p);
   surahCalculated = (p: number) =>
-    this.surahPageNumbers.findIndex((e) => e > p);
+    this.surahPageNumbers.findIndex((e) => e > p) == -1
+      ? 114
+      : this.surahPageNumbers.findIndex((e) => e > p);
 }

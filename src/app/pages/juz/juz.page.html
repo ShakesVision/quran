@@ -9,9 +9,9 @@
 
 <ion-content class="ion-padding">
   <div class="juz-grid-wrapper">
-    <div class="juz-btn" (click)="gotoReadJuz('Quran_full')">
+    <div class="juz-btn" (click)="gotoReadJuz('Quran')">
       <ion-button
-        (click)="fetchAndSaveInDeviceStorage('Quran_full')"
+        (click)="fetchAndSaveInDeviceStorage('Quran')"
         fill="clear"
         color="medium"
       >
@@ -23,16 +23,9 @@
     </div>
     <div
       class="juz-btn"
-      *ngFor="let j of [].constructor(30);let i = index"
-      (click)="gotoReadJuz(i+1)"
+      *ngFor="let j of juzPages;let i = index"
+      (click)="navigate(j,i+1)"
     >
-      <ion-button
-        (click)="fetchAndSaveInDeviceStorage('Juz'+(i+1))"
-        fill="clear"
-        color="medium"
-      >
-        <ion-icon slot="icon-only" name="sync"></ion-icon>
-      </ion-button>
       <div class="juz-heading-en">JUZ</div>
       <div class="juz-number">{{i+1}}</div>
       <div class="juz-heading-ur ur">پارہ</div>

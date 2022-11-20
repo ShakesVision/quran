@@ -379,6 +379,8 @@ export class ReadPage implements OnInit {
       this.pages = this.surah.split("\n\n");
       this.lines = this.pages[this.currentPage - 1].split("\n");
       this.getLastAyahNumberOnPage();
+      // this.calculateRukuArray();
+      this.rukuArray = [...juzData.rukuArray];
     } else if (!juzData) {
       this.juzmode = false;
       this.surah = this.surahService.currentSurah;
@@ -393,7 +395,6 @@ export class ReadPage implements OnInit {
       }
       this.getLastAyahNumberOnPage();
     }
-    this.calculateRukuArray();
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -632,10 +633,15 @@ export class ReadPage implements OnInit {
       //     ?.replace(/[^0-9]/g, "")
       // );
       let rukuNumber = 0;
-      this.rukuArray[this.juzCalculated - 1]?.forEach((el, index) => {
-        const mushafPageNumber =
-          this.surahService.juzPageNumbers[this.juzCalculated - 1] +
-          el.juzPageIndex;
+      const isLastPageOfMushaf = this.pages.length === 611;
+      const juzrukuarr = isLastPageOfMushaf
+        ? this.rukuArray[this.juzCalculated - 1]
+        : this.rukuArray[parseInt(this.title) - 1];
+      juzrukuarr?.forEach((el, index) => {
+        const mushafPageNumber = isLastPageOfMushaf
+          ? this.surahService.juzPageNumbers[this.juzCalculated - 1] +
+            el.juzPageIndex
+          : el.juzPageIndex + 1;
         if (this.currentPage === mushafPageNumber && el.lineIndex === i)
           rukuNumber = index;
       });
@@ -811,7 +817,7 @@ export class ReadPage implements OnInit {
       .replace(/ٖ/g, "");
   }
   calculateRukuArray() {
-    //Mistakes in juz 22,1,30
+    //Mistakes in juz 30
     const juzPageNumbers = this.surahService.juzPageNumbers;
     juzPageNumbers.forEach((pageNumber, juzIndex) => {
       let juzRukuArray = [];
@@ -834,7 +840,7 @@ export class ReadPage implements OnInit {
     });
     console.log(this.rukuArray);
     //Mistakes?
-    const surahPageNumbers = this.surahService.surahPageNumbers;
+    /* const surahPageNumbers = this.surahService.surahPageNumbers;
     surahPageNumbers.forEach((pageNumber, surahIndex) => {
       let surahRukuArray = [];
       this.surahPages = this.pages.filter((p, i) => {
@@ -855,7 +861,7 @@ export class ReadPage implements OnInit {
       });
       this.surahArray.push(surahRukuArray);
     });
-    console.log(this.surahArray);
+    console.log(this.surahArray); */
   }
   updateCalculatedNumbers() {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);

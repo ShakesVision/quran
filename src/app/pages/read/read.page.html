@@ -37,7 +37,7 @@
 <ion-content>
   <div class="page-wrapper ar ar2 ion-margin-top">
     <div class="page-top-info">
-      <ng-container *ngIf="currentPage>1 && pages.length ===611">
+      <ng-container *ngIf="currentPage>1 && isCompleteMushaf">
         <span class="juz-number">
           {{ surahCalculated === 1?
           'سورۃ':(surahService.juzNames[juzCalculated-1] + ' ' +
@@ -71,10 +71,10 @@
         id="line_{{i}}"
         class="line"
         style="position: relative"
-        [ngClass]="{'quran-kareem-text':juzmode && pages.length ==611 && currentPage==1,
-        'bism-line': line?.trim()==='﷽' || (pages.length ===611 && currentPage === pages.length && i==10), 
+        [ngClass]="{'quran-kareem-text':juzmode && isCompleteMushaf && currentPage==1,
+        'bism-line': line?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && i==10), 
         'surah-start-line':lines[i+1]?.trim()==='﷽', 
-        'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (pages.length ===611 && currentPage === pages.length && (i==lines.length-1 || i==9))}"
+        'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))}"
         (click)="openTrans($event,i)"
       >
         <div
@@ -141,7 +141,7 @@
                 ></ion-icon>
               </ion-button>
             </ion-item>
-            <ion-item>
+            <ion-item *ngIf="isCompleteMushaf">
               <ion-label>Go to</ion-label>
               <ng-container slot="end">
                 <ion-input

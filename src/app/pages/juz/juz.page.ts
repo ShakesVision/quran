@@ -12,6 +12,7 @@ import { SurahService } from "src/app/services/surah.service";
 export class JuzPage implements OnInit {
   pages = [];
   juzPages = [];
+  surahPages = [];
   rukuArray = [];
   constructor(
     private router: Router,
@@ -71,9 +72,8 @@ export class JuzPage implements OnInit {
     this.router.navigate(["/read"], { state: { juzData } });
   }
   calculateJuzData(juzData) {
-    console.log(juzData);
-    const juzPageNumbers = this.surahService.juzPageNumbers;
     this.pages = juzData.split("\n\n");
+    const juzPageNumbers = this.surahService.juzPageNumbers;
     juzPageNumbers.forEach((pageNumber, juzIndex) => {
       let juzRukuArray = [];
       const singleJuzPages = this.pages.filter((p, i) => {
@@ -95,5 +95,21 @@ export class JuzPage implements OnInit {
       this.rukuArray.push(juzRukuArray);
     });
     console.log(this.juzPages);
+
+    // try for surahs similarly
+    /* const surahPageNumbers = this.surahService.surahPageNumbers;
+    console.log(surahPageNumbers);
+    surahPageNumbers.forEach((pageNumber, surahIndex) => {
+      const singleSurahPages = this.pages.filter((p, i) => {
+        const isSurahPage: boolean =
+          i >= pageNumber - 1 &&
+          (!!surahPageNumbers[surahIndex + 1]
+            ? i < surahPageNumbers[surahIndex + 1] - 1
+            : i < this.pages.length);
+        return isSurahPage;
+      });
+      this.surahPages.push(singleSurahPages.join("\n\n"));
+    });
+    console.log(this.surahPages); */
   }
 }

@@ -35,6 +35,8 @@ export class ReadPage implements OnInit {
 
   surahPages = [];
 
+  isCompleteMushaf: boolean;
+
   juzCalculated = this.surahService.juzCalculated(this.currentPage);
 
   surahCalculated = this.surahService.surahCalculated(this.currentPage);
@@ -395,6 +397,7 @@ export class ReadPage implements OnInit {
       }
       this.getLastAyahNumberOnPage();
     }
+    this.isCompleteMushaf = this.pages.length === 611;
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -537,6 +540,9 @@ export class ReadPage implements OnInit {
     if (field === "color") el.style.color = val;
   }
   gotoJuzSurah(val, field = "juz") {
+    console.log(val);
+    if (!val || val == "" || val < 1 || typeof parseInt(val) != "number")
+      return;
     if (field === "juz")
       this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
     if (field === "surah")
@@ -633,12 +639,11 @@ export class ReadPage implements OnInit {
       //     ?.replace(/[^0-9]/g, "")
       // );
       let rukuNumber = 0;
-      const isLastPageOfMushaf = this.pages.length === 611;
-      const juzrukuarr = isLastPageOfMushaf
+      const juzrukuarr = this.isCompleteMushaf
         ? this.rukuArray[this.juzCalculated - 1]
         : this.rukuArray[parseInt(this.title) - 1];
       juzrukuarr?.forEach((el, index) => {
-        const mushafPageNumber = isLastPageOfMushaf
+        const mushafPageNumber = this.isCompleteMushaf
           ? this.surahService.juzPageNumbers[this.juzCalculated - 1] +
             el.juzPageIndex
           : el.juzPageIndex + 1;
@@ -815,53 +820,6 @@ export class ReadPage implements OnInit {
       .replace(/۟/g, "")
       .replace(/ۤ/g, "")
       .replace(/ٖ/g, "");
-  }
-  calculateRukuArray() {
-    //Mistakes in juz 30
-    const juzPageNumbers = this.surahService.juzPageNumbers;
-    juzPageNumbers.forEach((pageNumber, juzIndex) => {
-      let juzRukuArray = [];
-      this.juzPages = this.pages.filter((p, i) => {
-        const isJuzPage: boolean =
-          i >= pageNumber - 1 &&
-          (!!juzPageNumbers[juzIndex + 1]
-            ? i < juzPageNumbers[juzIndex + 1] - 1
-            : i < this.pages.length);
-        return isJuzPage;
-      });
-      this.juzPages.forEach((page, juzPageIndex) => {
-        if (page.includes(this.surahService.diacritics.RUKU_MARK))
-          page.split("\n").forEach((line, lineIndex) => {
-            if (line.includes(this.surahService.diacritics.RUKU_MARK))
-              juzRukuArray.push({ juzPageIndex, lineIndex, line });
-          });
-      });
-      this.rukuArray.push(juzRukuArray);
-    });
-    console.log(this.rukuArray);
-    //Mistakes?
-    /* const surahPageNumbers = this.surahService.surahPageNumbers;
-    surahPageNumbers.forEach((pageNumber, surahIndex) => {
-      let surahRukuArray = [];
-      this.surahPages = this.pages.filter((p, i) => {
-        const issurahPage: boolean =
-          i >= pageNumber - 1 &&
-          (!!surahPageNumbers[surahIndex + 1]
-            ? i < surahPageNumbers[surahIndex + 1] - 1
-            : i < this.pages.length);
-        return issurahPage;
-      });
-      console.log(this.surahPages);
-      this.surahPages.forEach((page, surahPageIndex) => {
-        if (page.includes(this.surahService.diacritics.RUKU_MARK))
-          page.split("\n").forEach((line, lineIndex) => {
-            if (line.includes(this.surahService.diacritics.RUKU_MARK))
-              surahRukuArray.push({ surahPageIndex, lineIndex, line });
-          });
-      });
-      this.surahArray.push(surahRukuArray);
-    });
-    console.log(this.surahArray); */
   }
   updateCalculatedNumbers() {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);

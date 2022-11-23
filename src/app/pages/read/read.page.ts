@@ -762,14 +762,19 @@ export class ReadPage implements OnInit {
     if (!searchText || searchText == "") return;
     searchText = this.getArabicScript(searchText);
     let arr = [];
-    let result = this.pages.filter((v, pageIndex) => {
+    let result = [];
+    this.pages.forEach((v, pageIndex) => {
       v = this.getArabicScript(v);
       if (this.ignoreTashkeel)
         v = this.tashkeelRemover(this.getArabicScript(v));
       if (v.includes(searchText)) {
-        let lineIndex = v.split("\n").findIndex((l) => l.includes(searchText));
-        arr.push({ pageIndex, lineIndex });
-        return true;
+        result = v.split("\n").filter((l, lineIndex) => {
+          if (l.includes(searchText)) {
+            arr.push({ pageIndex, lineIndex });
+          }
+          return l.includes(searchText);
+        });
+        // let lineIndex = v.split("\n").findIndex((l) => l.includes(searchText));
       }
     });
     console.log(result, arr);
@@ -779,7 +784,6 @@ export class ReadPage implements OnInit {
         indices.pageIndex,
         indices.lineIndex
       );
-      console.log(output);
     });
   }
   getLineTextFromIndices(pageIndex, lineIndex) {
@@ -797,11 +801,10 @@ export class ReadPage implements OnInit {
     this.updateCalculatedNumbers();
   }
   gotoPageAndHighlightLine(p, l) {
-    console.log("going to page:" + p + " & line:" + l);
-    this.currentPage = p + 1;
+    this.gotoPageNum(p + 1);
     this.lines = this.pages[this.currentPage - 1].split("\n");
-    let el = document.getElementById("line_" + l);
     setTimeout(() => {
+      let el = document.getElementById("line_" + l);
       el.style.color = "#2a86ff";
       el.classList.add("highlight-line");
       setTimeout(() => {

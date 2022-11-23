@@ -119,7 +119,7 @@
     side="bottom"
   >
     <ng-template>
-      <ion-content>
+      <ion-content #scrollingBlock>
         <div class="popover-wrapper">
           <ion-list lines="none">
             <ion-item>
@@ -201,7 +201,7 @@
                 <ion-input
                   placeholder="بحث / SEARCH / تلاش"
                   (ionChange)="onSearchChange($event)"
-                  [debounce]="1500"
+                  [debounce]="1000"
                   clearInput
                   class="ion-no-padding ion-text-center ar2"
                 ></ion-input>
@@ -218,21 +218,30 @@
             <div *ngIf="searchResults" class="ion-text-center result-heading">
               <ion-label>Results: {{searchResults.length}}</ion-label>
             </div>
-            <ion-item
-              *ngFor="let r of searchResults;let i=index"
-              button
-              class="rtl"
-              style="position: relative"
-              (click)="gotoPageAndHighlightLine(r.pageIndex,r.lineIndex)"
+            <virtual-scroller
+              #scroll
+              [items]="searchResults"
+              [parentScroll]="scrollingBlock.nativeElement"
+              [executeRefreshOutsideAngularZone]="true"
+              (vsUpdate)="changeDetectorRef.detectChanges()"
+              (vsChange)="vsChange($event)"
             >
-              <div class="indices ion-margin-end">
-                <span class="index">{{i+1}}</span>
-                <span class="location">{{r.pageIndex+1}}</span>
-              </div>
-              <ion-label class="ar2 small-text"
-                >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label
+              <ion-item
+                *ngFor="let r of scroll.viewPortItems;let i=index"
+                button
+                class="rtl"
+                style="position: relative"
+                (click)="gotoPageAndHighlightLine(r.pageIndex,r.lineIndex)"
               >
-            </ion-item>
+                <div class="indices ion-margin-end">
+                  <span class="index">{{i+1+startIndex}}</span>
+                  <span class="location">{{r.pageIndex+1}}</span>
+                </div>
+                <ion-label class="ar2 small-text"
+                  >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label
+                >
+              </ion-item>
+            </virtual-scroller>
           </ion-list>
         </div>
       </ion-content>

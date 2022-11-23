@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { SurahService } from "./../../services/surah.service";
 import { ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
@@ -6,6 +6,7 @@ import { alertController } from "@ionic/core";
 import { MushafLines } from "src/app/services/mushaf-versions";
 import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
+import { VirtualScrollerComponent } from "ngx-virtual-scroller";
 
 @Component({
   selector: "app-read",
@@ -13,6 +14,7 @@ import { HttpClient } from "@angular/common/http";
   styleUrls: ["./read.page.scss"],
 })
 export class ReadPage implements OnInit {
+  @ViewChild(VirtualScrollerComponent, { static: false })
   surah;
   lines: string[];
   pages: string[];
@@ -29,7 +31,7 @@ export class ReadPage implements OnInit {
 
   mushafVersion = MushafLines.Fifteen;
 
-  searchResults;
+  searchResults: Array<string>;
 
   juzPages = [];
 
@@ -361,6 +363,7 @@ export class ReadPage implements OnInit {
   juzNumber;
   ignoreTashkeel: boolean = true;
   juzmode: boolean;
+  startIndex: number;
 
   constructor(
     private surahService: SurahService,
@@ -368,7 +371,8 @@ export class ReadPage implements OnInit {
     public alert: AlertController,
     private router: Router,
     private httpClient: HttpClient,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    public changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -795,14 +799,17 @@ export class ReadPage implements OnInit {
     // see onSearchChange for full search
   }
   gotoPageNum(p) {
+    console.log(p);
     if (!p) return;
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
     this.updateCalculatedNumbers();
   }
   gotoPageAndHighlightLine(p, l) {
-    this.gotoPageNum(p + 1);
+    console.log(p, l);
+    this.gotoPageNum(+p + 1);
     this.lines = this.pages[this.currentPage - 1].split("\n");
+    this.changeDetectorRef.detectChanges();
     setTimeout(() => {
       let el = document.getElementById("line_" + l);
       el.style.color = "#2a86ff";
@@ -839,5 +846,8 @@ export class ReadPage implements OnInit {
   updateCalculatedNumbers() {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);
     this.surahCalculated = this.surahService.surahCalculated(this.currentPage);
+  }
+  vsChange(ev) {
+    this.startIndex = ev.startIndex;
   }
 }

@@ -1,20 +1,22 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 
-import { IonicModule } from '@ionic/angular';
+import { IonicModule } from "@ionic/angular";
 
-import { ReadPageRoutingModule } from './read-routing.module';
+import { ReadPageRoutingModule } from "./read-routing.module";
 
-import { ReadPage } from './read.page';
+import { ReadPage } from "./read.page";
+import { VirtualScrollerModule } from "ngx-virtual-scroller";
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    ReadPageRoutingModule
+    ReadPageRoutingModule,
+    VirtualScrollerModule,
   ],
-  declarations: [ReadPage]
+  declarations: [ReadPage],
 })
 export class ReadPageModule {}

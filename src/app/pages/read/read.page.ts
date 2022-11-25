@@ -508,10 +508,11 @@ export class ReadPage implements OnInit {
     });
     toast.present();
   }
-  async presentTransAlert(translation, line) {
+  async presentAlert(header, subheader, msg) {
     const alertmsg = await this.alert.create({
-      subHeader: "ترجمہ برائے سطر " + line,
-      message: translation,
+      header: "Translation " + header,
+      subHeader: subheader,
+      message: msg,
       cssClass: "trans",
       buttons: [
         {
@@ -769,8 +770,10 @@ export class ReadPage implements OnInit {
     let result = [];
     this.pages.forEach((v, pageIndex) => {
       v = this.getArabicScript(v);
-      if (this.ignoreTashkeel)
+      if (this.ignoreTashkeel) {
         v = this.tashkeelRemover(this.getArabicScript(v));
+        searchText = this.tashkeelRemover(searchText);
+      }
       if (v.includes(searchText)) {
         result = v.split("\n").filter((l, lineIndex) => {
           if (l.includes(searchText)) {
@@ -849,5 +852,25 @@ export class ReadPage implements OnInit {
   }
   vsChange(ev) {
     this.startIndex = ev.startIndex;
+  }
+  readTafseerOf(ev) {
+    const [s, a] = ev.target.value.split(":");
+    console.log(s, a);
+    this.readTafseer(s, a);
+  }
+  readTafseer(s, a, m = "/en.itani") {
+    var url = `http://api.alquran.cloud/v1/ayah/${s}:${a}`;
+    //`https://api.quran.com/api/v4/quran/tafsirs/169?page_number=${s}`;
+    //`https://api.quran.com/api/v4/quran/tafsirs/159?chapter_number=${s}&verse_key=${a}`;
+    //`https://tafsir.app/get.php?src=${m}&s=${s}&a=${a}`
+    this.httpClient.get(url).subscribe((resAr: any) => {
+      this.httpClient.get(url + m).subscribe((resTrans: any) => {
+        this.presentAlert(
+          `${s}:${a}`,
+          resTrans.data.edition.name,
+          `${resAr.data.text} \n\n${resTrans.data.text}`
+        );
+      });
+    });
   }
 }

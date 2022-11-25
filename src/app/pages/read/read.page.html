@@ -4,6 +4,14 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title> {{title}} </ion-title>
+    <ion-input
+      slot="end"
+      placeholder="Translation - surah:ayah"
+      (ionChange)="readTafseerOf($event)"
+      [debounce]="1000"
+      clearInput
+      class="ion-no-padding ion-text-center ar2"
+    ></ion-input>
     <ion-buttons slot="end">
       <ion-button
         (click)="toggleHifzMode()"

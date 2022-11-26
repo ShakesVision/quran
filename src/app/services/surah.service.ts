@@ -220,7 +220,10 @@ export class SurahService {
     this.indexCollection = this.afs.collection<Index>("index", (ref) =>
       ref.orderBy("surahNo")
     );
-    this.getSurahInfo();
+  }
+
+  ngOnInit() {
+    this.getSurahInfo().subscribe((res: any) => (this.surahInfo = res));
   }
 
   addSurah(item: Surah) {

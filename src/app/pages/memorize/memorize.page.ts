@@ -8,6 +8,7 @@ import {
 import { AlertController, IonModal, ModalController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { Observable, Subject } from "rxjs";
+import { SurahService } from "src/app/services/surah.service";
 
 @Component({
   selector: "app-memorize",
@@ -20,16 +21,21 @@ export class MemorizePage implements OnInit {
   recommendedChapters = ["الفاتحہ", "یس", "رحمن", "واقعہ", "ملک", "کہف "];
   isOpen: boolean = true;
   memorizeEntryForm: FormGroup;
+  surahInfo = [];
 
   constructor(
     private storage: Storage,
     private alertController: AlertController,
     private modalController: ModalController,
-    public formBuilder: FormBuilder
+    public formBuilder: FormBuilder,
+    private surahService: SurahService
   ) {}
 
   ngOnInit() {
     this.setupStorage();
+    this.surahService
+      .getSurahInfo()
+      .subscribe((res: any) => (this.surahInfo = res));
     this.memorizeEntryForm = this.formBuilder.group({
       date: new FormControl(new Date().toISOString()),
       number: new FormControl(""),
@@ -48,19 +54,6 @@ export class MemorizePage implements OnInit {
       subHeader: "Add",
       inputs: [
         {
-          name: "date",
-          id: "date",
-          type: "date",
-          placeholder: "Date...",
-          value: new Date(),
-        },
-        {
-          name: "number",
-          id: "number",
-          type: "number",
-          placeholder: "Surah number...",
-        },
-        {
           name: "surah",
           id: "surah",
           type: "search",
@@ -70,26 +63,10 @@ export class MemorizePage implements OnInit {
           },
         },
         {
-          name: "from",
-          id: "from",
+          name: "completed",
+          id: "completed",
           type: "number",
-          placeholder: "From Ayah number...",
-        },
-        {
-          name: "to",
-          id: "to",
-          type: "number",
-          placeholder: "To Ayah number...",
-        },
-        {
-          name: "finished",
-          id: "finished",
-          type: "checkbox",
-          label: "Finished",
-          handler: () => {
-            console.log("checkbox selected.");
-          },
-          checked: true,
+          placeholder: "Number of Ayahs memorized...",
         },
       ],
       buttons: [
@@ -101,6 +78,8 @@ export class MemorizePage implements OnInit {
           text: "Add",
           handler: (data) => {
             console.log(data);
+            data.started = new Date();
+            data.updated = new Date();
             this.items.push(data);
           },
         },
@@ -131,5 +110,26 @@ export class MemorizePage implements OnInit {
   }
   dateChanged(ev) {
     console.log(ev.detail.value);
+  }
+  getSurahName(num) {
+    return this.surahService.surahNames[parseInt(num) - 1];
+  }
+  getSurahInfo(num, method) {
+    // this.surahService.getSurahInfo().subscribe(res=>{})
+    let selected = this.surahInfo.find(
+      (s: any) => parseInt(s.index) === parseInt(num)
+    );
+    switch (method) {
+      case "name":
+        return selected.title + selected.titleAr;
+        break;
+      case "count":
+        return selected.count;
+        break;
+
+      default:
+        return selected.title + selected.titleAr;
+        break;
+    }
   }
 }

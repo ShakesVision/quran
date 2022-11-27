@@ -8,6 +8,13 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <div class="ion-text-center ion-margin-bottom" style="font-style: italic">
+    <ion-label
+      >Read full Quran or jump to any juz. Your memorization under
+      <a [routerLink]="['/memorize']"> Memorize</a> page is also hightlighted
+      here in green.
+    </ion-label>
+  </div>
   <div class="juz-grid-wrapper">
     <div class="juz-btn" (click)="gotoReadJuz('Quran')">
       <ion-button
@@ -22,8 +29,9 @@
       <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
     </div>
     <div
-      class="juz-btn"
       *ngFor="let j of juzPages;let i = index"
+      [class]="'juz-btn juz'+(i+1)+'-btn'"
+      [ngStyle]="{'background': returnStyle(i), 'animation':'all ease 1s'}"
       (click)="navigate(j,i+1)"
     >
       <div class="juz-heading-en">JUZ</div>

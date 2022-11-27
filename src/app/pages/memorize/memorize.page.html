@@ -22,41 +22,39 @@
       >
     </ion-card-content>
   </ion-card>
-  <h2>Completion Stats</h2>
+  <!-- <h2>Completion Stats</h2>
   <table>
     <tr>
       <td>36. Yaseen یس</td>
       <td>(12%)</td>
       <td>5/30 Ayahs</td>
     </tr>
-  </table>
-  <h2>Daily Memorization Stats</h2>
+  </table> -->
+  <h2>Memorization Stats</h2>
   <div class="tableWrapper">
     <table>
       <thead>
         <tr>
           <th>Started</th>
-          <th>Surah</th>
+          <th>Juz</th>
           <th>Total</th>
           <th>Completed</th>
           <th>Updated</th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          class="row"
-          *ngFor="let item of items"
-          (click)="openModelWithItem(item)"
-        >
-          <td>{{item.started | date}}</td>
-          <td>{{item.surah + '. ' + getSurahInfo(item.surah,'name')}}</td>
+        <tr class="row" *ngFor="let item of items" (click)="add(item)">
+          <td>{{item.started.toLocaleString()}}</td>
+          <td class="ar-text2">
+            {{item.juz + '. ' + getJuzInfo(item.juz,'name')}}
+          </td>
           <!-- <td class="ar-text">{{item.surah}}</td> -->
-          <td>{{getSurahInfo(item.surah,'count')}}</td>
+          <td>{{item.total}}</td>
           <td>
             {{item.completed}}
-            ({{((item.completed/getSurahInfo(item.surah,'count'))*100).toFixed(1)}}%)
+            ({{((item.completed/item.total)*100).toFixed(1)}}%)
           </td>
-          <td>{{item.updated | date}}</td>
+          <td>{{item.updated.toLocaleString()}}</td>
         </tr>
       </tbody>
     </table>

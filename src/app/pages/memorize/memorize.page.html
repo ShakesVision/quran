@@ -52,7 +52,7 @@
           class="row"
           *ngFor="let item of items"
           (click)="add(item)"
-          [ngStyle]="{'background': 'linear-gradient(to right, #c0e9ffbf '+(item.completed/item.total)*100+'%, transparent 0)'}"
+          [ngStyle]="{'background': 'linear-gradient(to right, rgb(222 243 255 / 75%) '+(item.completed/item.total)*100+'%, transparent 0)'}"
         >
           <td>
             <span style="font-size: large" class="juz-col-num"

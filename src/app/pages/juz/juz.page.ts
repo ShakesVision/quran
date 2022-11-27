@@ -142,7 +142,7 @@ export class JuzPage implements OnInit {
     if (!this.memorizeItems) return;
     let completedCount = 0;
     this.memorizeItems.forEach((i: any) => (completedCount += i.completed));
-    const percent = ((completedCount / 611) * 100).toFixed(1);
+    const percent = ((completedCount / 610) * 100).toFixed(1);
     return `linear-gradient(to right, #cce0ce ${percent}%, var(--ion-color-light) 0)`;
   }
 }

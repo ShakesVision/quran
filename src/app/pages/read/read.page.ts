@@ -7,6 +7,7 @@ import { MushafLines } from "src/app/services/mushaf-versions";
 import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { VirtualScrollerComponent } from "ngx-virtual-scroller";
+import { Storage } from "@ionic/storage-angular";
 
 @Component({
   selector: "app-read",
@@ -372,7 +373,8 @@ export class ReadPage implements OnInit {
     private router: Router,
     private httpClient: HttpClient,
     private activatedRoute: ActivatedRoute,
-    public changeDetectorRef: ChangeDetectorRef
+    public changeDetectorRef: ChangeDetectorRef,
+    private storage: Storage
   ) {}
 
   ngOnInit() {
@@ -404,6 +406,7 @@ export class ReadPage implements OnInit {
       this.getLastAyahNumberOnPage();
     }
     this.isCompleteMushaf = this.pages.length === 611;
+    if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -417,13 +420,12 @@ export class ReadPage implements OnInit {
     });
   }
 
-  tabulate(strIn) {
-    //this.pages = strIn.split("\n\n");
-    /* strIn = strIn.replace(/^\s+|\s+$/g, "").replace(/\r?\n|\r/g, "</td></tr>\n<tr><td>");    
-    if (strIn.length != "")
-      return "<table align='center' dir='rtl'>\n<tr><td>" + strIn + "</td></tr>\n</table>";
-    else
-      return "متن موجود نہیں!"; */
+  async getBookmark() {
+    await this.storage.create();
+    this.storage.get("unicodeBookmark").then((pageNum) => {
+      console.log(pageNum);
+      if (pageNum) this.gotoPageNum(pageNum);
+    });
   }
 
   goToPage(n: number) {
@@ -453,6 +455,8 @@ export class ReadPage implements OnInit {
         .querySelector(`div#line_${this.arabicLines.length - 1}`)
         .classList.add("centered-table-text");
     }
+    if (this.juzmode && this.isCompleteMushaf)
+      this.storage.set("unicodeBookmark", this.currentPage).then((_) => {});
     this.getLastAyahNumberOnPage();
   }
 
@@ -463,7 +467,7 @@ export class ReadPage implements OnInit {
   }
 
   openTrans(event, n: number) {
-    if (this.surah.urdu && !this.tMode) {
+    if (this.surah?.urdu && !this.tMode && !this.juzmode) {
       this.translation = this.translationLines[n];
       console.log(n + 1 + ". " + this.translation);
       let popup: HTMLElement = document.querySelector(".popup");
@@ -483,7 +487,7 @@ export class ReadPage implements OnInit {
       popup.addEventListener("click", () => {
         this.resetPopup(popup);
       });
-    } else if (!this.surah.urdu) {
+    } else if (!this.surah?.urdu || this.juzmode) {
       console.log("Translation not available!");
       this.presentToastWithOptions(
         `Translation for ${this.title} is not available!`,
@@ -623,7 +627,7 @@ export class ReadPage implements OnInit {
 
   toggleHifzMode() {
     this.hMode = !this.hMode;
-    let el: HTMLElement = document.querySelector(".ar");
+    let el: HTMLElement = document.querySelector(".content-wrapper");
     el.style.color = this.hMode ? "white" : "black";
   }
 

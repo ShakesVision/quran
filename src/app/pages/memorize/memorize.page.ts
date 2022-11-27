@@ -111,8 +111,16 @@ export class MemorizePage implements OnInit {
               this.toast("Invalid juz number: " + data.juz, "danger");
               return;
             }
+            if (!data.juz || !data.completed) {
+              this.toast(
+                "Invalid entries! Both fields are required.",
+                "danger"
+              );
+              return;
+            }
+
             data.juz = parseInt(data.juz);
-            data.completed = parseInt(data.completed);
+            data.completed = parseFloat(data.completed);
             data.started = item ? item.started : new Date();
             data.updated = new Date();
             console.log(

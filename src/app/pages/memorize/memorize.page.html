@@ -48,22 +48,29 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="row" *ngFor="let item of items" (click)="add(item)">
+        <tr
+          class="row"
+          *ngFor="let item of items"
+          (click)="add(item)"
+          [ngStyle]="{'background': 'linear-gradient(to right, #c0e9ffbf '+(item.completed/item.total)*100+'%, transparent 0)'}"
+        >
           <td>
             <span style="font-size: large" class="juz-col-num"
               >{{item.juz }}</span
             >
             <br />
-            <span class="ar-text2">{{getJuzInfo(item.juz,'name')}}</span>
+            <span class="ar-text2 juz-name"
+              >{{getJuzInfo(item.juz,'name')}}</span
+            >
           </td>
           <!-- <td class="ar-text">{{item.surah}}</td> -->
           <td>
-            {{item.completed}}
-            ({{((item.completed/item.total)*100).toFixed(1)}}%)
+            {{item.completed}} <br />
+            <small>({{((item.completed/item.total)*100).toFixed(1)}}%)</small>
           </td>
           <td>{{item.total}}</td>
           <td style="font-size: xx-small">
-            <ion-icon slot="start" name="timer"></ion-icon>
+            <ion-icon slot="start" name="time-outline"></ion-icon>
             {{item.started.toLocaleString()}}
             <br />
             <ion-icon slot="start" name="sync"></ion-icon>

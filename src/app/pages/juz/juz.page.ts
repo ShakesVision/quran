@@ -23,16 +23,21 @@ export class JuzPage implements OnInit {
     private surahService: SurahService
   ) {
     this.storage.create().then((_) => console.log("storage created"));
+    this.updateMemorizeArray();
+  }
+
+  ngOnInit() {
+    this.gotoReadJuz("Quran", true);
+    this.updateMemorizeArray();
+  }
+
+  updateMemorizeArray() {
     this.storage.get("memorize").then((items) => {
       if (items) {
         console.log(items);
         this.memorizeItems = items.sort((a: any, b: any) => a.juz - b.juz);
       }
     });
-  }
-
-  ngOnInit() {
-    this.gotoReadJuz("Quran", true);
   }
 
   gotoReadJuz(juz, stopNav = false) {

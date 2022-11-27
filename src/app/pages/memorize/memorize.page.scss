@@ -1,14 +1,22 @@
-div.table-wrapper {
-}
 .table-wrapper table {
   text-align: center;
+  width: 100%;
   padding: 0;
   margin: 0;
   thead {
     tr {
-      background: var(--success-light);
+      background-color: var(--success-light);
       color: var(--ion-color-primary);
-      // text-align: left;
+      text-transform: uppercase;
+      font-size: x-small;
+    }
+  }
+  tbody {
+    vertical-align: text-top;
+  }
+  td {
+    span.juz-name {
+      font-size: small;
     }
   }
 }
@@ -16,4 +24,7 @@ div.table-wrapper {
 td {
   padding: 10px 3px;
   border: 1px solid;
+}
+ion-item {
+  --inner-padding-end: 0;
 }

@@ -106,24 +106,39 @@ export class MemorizePage implements OnInit {
           text: item ? "Update" : "Add",
           cssClass: "add-btn",
           handler: (data) => {
+            console.log(data);
             if (data.juz < 0 || data.juz > 30) {
               this.toast("Invalid juz number: " + data.juz, "danger");
-              return;
-            }
-            const totalPages = this.getJuzInfo(data.juz, "count");
-            console.log(data, totalPages);
-            if (parseInt(data.completed) > totalPages) {
-              this.toast(
-                `Juz ${data.juz} doesn't have that many pages. (${data.completed}) It only has ${totalPages}.`,
-                "danger"
-              );
               return;
             }
             data.juz = parseInt(data.juz);
             data.completed = parseInt(data.completed);
             data.started = item ? item.started : new Date();
             data.updated = new Date();
+            console.log(
+              item,
+              this.items.some((i: any) => i.juz === data.juz)
+            );
+            if (!item && this.items.some((i: any) => i.juz === data.juz)) {
+              this.toast(
+                "Entry for Juz " +
+                  data.juz +
+                  " already exists. Please edit the existing one.",
+                "danger"
+              );
+              return;
+            }
+            const totalPages = this.getJuzInfo(data.juz, "count");
             data.total = totalPages;
+            console.log(data, totalPages);
+            if (data.completed > totalPages) {
+              this.toast(
+                `Juz ${data.juz} doesn't have that many pages. (${data.completed}) It only has ${totalPages}.`,
+                "danger"
+              );
+              return;
+            }
+
             item
               ? (this.items[
                   this.items.findIndex((n: any) => n.juz === item.juz)

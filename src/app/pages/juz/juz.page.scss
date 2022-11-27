@@ -15,6 +15,13 @@
     cursor: pointer;
     padding: 5px;
     position: relative;
+    &.hifz-complete::after {
+      content: "🎉";
+      position: absolute;
+      top: -10px;
+      right: -5px;
+      font-size: small;
+    }
     ion-button {
       position: absolute;
       right: -18px;
@@ -23,7 +30,7 @@
     }
   }
   .juz-btn:hover {
-    background: aliceblue;
+    background: aliceblue !important;
   }
   .juz-heading-en {
     text-transform: capitalize;

@@ -1,11 +1,18 @@
-div.tableWrapper {
+div.table-wrapper {
 }
-.tableWrapper table {
+.table-wrapper table {
   text-align: center;
   padding: 0;
   margin: 0;
+  thead {
+    tr {
+      background: var(--success-light);
+      color: var(--ion-color-primary);
+      // text-align: left;
+    }
+  }
 }
-.tableWrapper th,
+.table-wrapper th,
 td {
   padding: 10px 3px;
   border: 1px solid;

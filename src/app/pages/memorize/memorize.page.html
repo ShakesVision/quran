@@ -6,7 +6,7 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card class="ion-no-padding ion-no-margin">
+  <ion-card class="ion-no-padding ion-no-margin ion-margin-bottom">
     <ion-card-header>
       <ion-card-title> Recommended for memorization </ion-card-title>
     </ion-card-header>
@@ -30,31 +30,45 @@
       <td>5/30 Ayahs</td>
     </tr>
   </table> -->
-  <h2>Memorization Stats</h2>
-  <div class="tableWrapper">
+  <ion-item lines="none" class="ion-no-padding ion-no-margin">
+    <ion-label slot="start">Memorization Stats</ion-label>
+    <ion-button [routerLink]="['/juz']" fill="clear" slot="end">
+      <ion-icon slot="end" name="book-outline"></ion-icon>
+      Open Quran
+    </ion-button>
+  </ion-item>
+  <div class="table-wrapper">
     <table>
       <thead>
         <tr>
-          <th>Started</th>
-          <th>Juz</th>
+          <th style="min-width: 70px">Juz</th>
+          <th>Memorized</th>
           <th>Total</th>
-          <th>Completed</th>
-          <th>Updated</th>
+          <th>Date</th>
         </tr>
       </thead>
       <tbody>
         <tr class="row" *ngFor="let item of items" (click)="add(item)">
-          <td>{{item.started.toLocaleString()}}</td>
-          <td class="ar-text2">
-            {{item.juz + '. ' + getJuzInfo(item.juz,'name')}}
+          <td>
+            <span style="font-size: large" class="juz-col-num"
+              >{{item.juz }}</span
+            >
+            <br />
+            <span class="ar-text2">{{getJuzInfo(item.juz,'name')}}</span>
           </td>
           <!-- <td class="ar-text">{{item.surah}}</td> -->
-          <td>{{item.total}}</td>
           <td>
             {{item.completed}}
             ({{((item.completed/item.total)*100).toFixed(1)}}%)
           </td>
-          <td>{{item.updated.toLocaleString()}}</td>
+          <td>{{item.total}}</td>
+          <td style="font-size: xx-small">
+            <ion-icon slot="start" name="timer"></ion-icon>
+            {{item.started.toLocaleString()}}
+            <br />
+            <ion-icon slot="start" name="sync"></ion-icon>
+            {{item.updated.toLocaleString()}}
+          </td>
         </tr>
       </tbody>
     </table>

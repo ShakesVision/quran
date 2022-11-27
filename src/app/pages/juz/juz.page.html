@@ -16,7 +16,11 @@
     </ion-label>
   </div>
   <div class="juz-grid-wrapper">
-    <div class="juz-btn" (click)="gotoReadJuz('Quran')">
+    <div
+      class="juz-btn"
+      (click)="gotoReadJuz('Quran')"
+      [ngStyle]="{'background': totalMemorizeStyle(), 'animation':'all ease 1s'}"
+    >
       <ion-button
         (click)="fetchAndSaveInDeviceStorage('Quran')"
         fill="clear"
@@ -31,6 +35,7 @@
     <div
       *ngFor="let j of juzPages;let i = index"
       [class]="'juz-btn juz'+(i+1)+'-btn'"
+      [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
       [ngStyle]="{'background': returnStyle(i), 'animation':'all ease 1s'}"
       (click)="navigate(j,i+1)"
     >

@@ -25,6 +25,7 @@ export class JuzPage implements OnInit {
     this.storage.create().then((_) => console.log("storage created"));
     this.storage.get("memorize").then((items) => {
       if (items) {
+        console.log(items);
         this.memorizeItems = items.sort((a: any, b: any) => a.juz - b.juz);
       }
     });
@@ -123,15 +124,20 @@ export class JuzPage implements OnInit {
   findMemorizeItem(index: number) {
     let selectedItem: any;
     selectedItem = this.memorizeItems?.find((item: any) => item.juz === index);
-    console.log(selectedItem);
     return ((selectedItem?.completed / selectedItem?.total) * 100).toFixed(1);
   }
   returnStyle(i: number) {
     if (this.findMemorizeItem(i + 1) === "NaN") return "";
-    const s = `linear-gradient(to left, #cce0ce ${parseFloat(
+    const s = `linear-gradient(to right, #cce0ce ${parseFloat(
       this.findMemorizeItem(i + 1)
     )}%, var(--ion-color-light) 0)`;
-    console.log(s);
     return s;
+  }
+  totalMemorizeStyle() {
+    if (!this.memorizeItems) return;
+    let completedCount = 0;
+    this.memorizeItems.forEach((i: any) => (completedCount += i.completed));
+    const percent = ((completedCount / 611) * 100).toFixed(1);
+    return `linear-gradient(to right, #cce0ce ${percent}%, var(--ion-color-light) 0)`;
   }
 }

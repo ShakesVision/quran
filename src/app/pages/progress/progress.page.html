@@ -1,13 +1,19 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/"></ion-back-button>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Progress</ion-title>
+    <ion-title style="text-transform: uppercase">{{name}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <div class="loading-wrapper ion-text-center">
+    <ion-spinner *ngIf="loading" color="primary"></ion-spinner>
+  </div>
+  <div class="remote-content-wrapper" [innerHTML]="data"></div>
   TO DOs:
   <ol>
     <li>

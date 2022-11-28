@@ -2,6 +2,11 @@
   <ion-toolbar>
     <ion-back-button slot="start" defaultHref="/"></ion-back-button>
     <ion-title>Memorize</ion-title>
+    <ion-buttons slot="end">
+      <ion-button id="popover-trigger-button" slot="end">
+        <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -147,4 +152,26 @@
       </ion-content>
     </ng-template>
   </ion-modal>
+  <ion-popover
+    [isOpen]="isPopoverOpen"
+    trigger="popover-trigger-button"
+    side="bottom"
+  >
+    <ng-template>
+      <ion-content>
+        <ion-item button (click)="import()">
+          <ion-icon slot="start" name="enter-outline"></ion-icon>
+          <ion-label>Import data</ion-label>
+        </ion-item>
+        <ion-item button (click)="export()">
+          <ion-icon slot="start" name="copy-outline"></ion-icon>
+          <ion-label>Copy data (Export)</ion-label>
+        </ion-item>
+        <ion-item button [routerLink]="['/']">
+          <ion-icon slot="start" name="home-outline"></ion-icon>
+          <ion-label>Back to Home</ion-label>
+        </ion-item>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
 </ion-content>

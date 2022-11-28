@@ -9,6 +9,7 @@ import {
   AlertController,
   IonModal,
   ModalController,
+  PopoverController,
   ToastController,
 } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
@@ -27,6 +28,7 @@ export class MemorizePage implements OnInit {
   isOpen: boolean = true;
   memorizeEntryForm: FormGroup;
   surahInfo = [];
+  isPopoverOpen: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -34,7 +36,8 @@ export class MemorizePage implements OnInit {
     private toastController: ToastController,
     private modalController: ModalController,
     public formBuilder: FormBuilder,
-    private surahService: SurahService
+    private surahService: SurahService,
+    private popoverController: PopoverController
   ) {}
 
   ngOnInit() {
@@ -215,5 +218,44 @@ export class MemorizePage implements OnInit {
         return this.surahService.juzNames[num - 1];
         break;
     }
+  }
+  export() {
+    window.navigator.clipboard.writeText(JSON.stringify(this.items));
+    this.toast("Copied!", "success");
+    this.popoverDismiss();
+  }
+  async import() {
+    const importAlert = await this.alertController.create({
+      header: "Import",
+      inputs: [
+        {
+          type: "textarea",
+          name: "textarea",
+          placeholder: "Paste the exported JSON data here...",
+        },
+      ],
+      buttons: [
+        {
+          text: "Import",
+          handler: (data) => {
+            console.log(data);
+            this.items = JSON.parse(data.textarea);
+            this.saveItems();
+          },
+        },
+        {
+          text: "Cancel",
+          role: "cancel",
+        },
+      ],
+    });
+    importAlert.present();
+    this.popoverDismiss();
+  }
+  async popoverDismiss() {
+    await this.popoverController.dismiss();
+  }
+  ionViewWillLeave() {
+    this.popoverDismiss();
   }
 }

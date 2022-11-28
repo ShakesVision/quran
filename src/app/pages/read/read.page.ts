@@ -365,6 +365,8 @@ export class ReadPage implements OnInit {
   ignoreTashkeel: boolean = true;
   juzmode: boolean;
   startIndex: number;
+  copyResultsBG = "dark";
+  searchTime;
 
   constructor(
     private surahService: SurahService,
@@ -428,6 +430,10 @@ export class ReadPage implements OnInit {
     });
   }
 
+  setBookmark() {
+    if (this.juzmode && this.isCompleteMushaf)
+      this.storage.set("unicodeBookmark", this.currentPage).then((_) => {});
+  }
   goToPage(n: number) {
     this.currentPage += n;
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
@@ -455,8 +461,7 @@ export class ReadPage implements OnInit {
         .querySelector(`div#line_${this.arabicLines.length - 1}`)
         .classList.add("centered-table-text");
     }
-    if (this.juzmode && this.isCompleteMushaf)
-      this.storage.set("unicodeBookmark", this.currentPage).then((_) => {});
+    this.setBookmark();
     this.getLastAyahNumberOnPage();
   }
 
@@ -512,9 +517,9 @@ export class ReadPage implements OnInit {
     });
     toast.present();
   }
-  async presentAlert(header, subheader, msg) {
+  async presentAlert(msg, header?, subheader?) {
     const alertmsg = await this.alert.create({
-      header: "Translation " + header,
+      // header: "Translation " + header,
       subHeader: subheader,
       message: msg,
       cssClass: "trans",
@@ -555,8 +560,22 @@ export class ReadPage implements OnInit {
       return;
     switch (field) {
       case "juz":
-        this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
-        if (val > 30) this.gotoPageNum(this.pages.length);
+        if (parseFloat(val) !== parseInt(val) && val.toString().includes(".")) {
+          let [v1, v2] = val.toString().split(".");
+          v1 = parseInt(v1);
+          v2 = parseInt(v2);
+          if (v1 > 30) this.gotoPageNum(this.pages.length);
+          if (v2 > this.rukuArray[v1 - 1].length)
+            this.gotoPageNum(this.surahService.juzPageNumbers[v1] - 1);
+          else
+            this.gotoPageNum(
+              this.surahService.juzPageNumbers[v1 - 1] +
+                this.rukuArray[v1 - 1][v2 - 1].juzPageIndex
+            );
+        } else {
+          this.gotoPageNum(this.surahService.juzPageNumbers[parseInt(val) - 1]);
+          if (val > 30) this.gotoPageNum(this.pages.length);
+        }
         break;
       case "surah":
         this.gotoPageNum(this.surahService.surahPageNumbers[parseInt(val) - 1]);
@@ -769,6 +788,7 @@ export class ReadPage implements OnInit {
   onSearchChange(ev) {
     let searchText = ev.detail.value;
     if (!searchText || searchText == "") return;
+    var start = new Date().getTime();
     searchText = this.getArabicScript(searchText);
     let arr = [];
     let result = [];
@@ -788,6 +808,7 @@ export class ReadPage implements OnInit {
         // let lineIndex = v.split("\n").findIndex((l) => l.includes(searchText));
       }
     });
+    this.searchTime = (new Date().getTime() - start) / 1000 + " sec";
     console.log(result, arr);
     this.searchResults = arr;
     arr.forEach((indices) => {
@@ -810,6 +831,7 @@ export class ReadPage implements OnInit {
     if (!p) return;
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
+    this.setBookmark();
     this.updateCalculatedNumbers();
   }
   gotoPageAndHighlightLine(p, l) {
@@ -876,5 +898,27 @@ export class ReadPage implements OnInit {
         );
       });
     });
+  }
+  copyResults(copyResultEl) {
+    let result =
+      "Found " +
+      this.searchResults.length +
+      " Results in " +
+      this.searchTime +
+      ":\n\n";
+    this.searchResults.forEach((r: any) => {
+      result += `${this.getLineTextFromIndices(
+        r.pageIndex,
+        r.lineIndex
+      )}\nPage ${r.pageIndex} Line ${
+        r.lineIndex
+      } | Juz ${this.surahService.juzCalculated(r.pageIndex)}\n\n`;
+    });
+    window.navigator.clipboard.writeText(result);
+    this.copyResultsBG = "primary";
+    setTimeout(() => {
+      this.copyResultsBG = "dark";
+    }, 1000);
+    // this.presentAlert("Copied"+ this.searchResults.length+ "results successfully!");
   }
 }

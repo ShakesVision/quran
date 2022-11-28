@@ -4,14 +4,14 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title> {{title}} </ion-title>
-    <ion-input
+    <!-- <ion-input
       slot="end"
       placeholder="Translation - surah:ayah"
       (ionChange)="readTafseerOf($event)"
       [debounce]="1000"
       clearInput
       class="ion-no-padding ion-text-center ar2"
-    ></ion-input>
+    ></ion-input> -->
     <ion-buttons slot="end">
       <ion-button
         (click)="toggleHifzMode()"
@@ -209,7 +209,7 @@
                 <ion-input
                   placeholder="بحث / SEARCH / تلاش"
                   (ionChange)="onSearchChange($event)"
-                  [debounce]="1000"
+                  [debounce]="500"
                   clearInput
                   class="ion-no-padding ion-text-center ar2"
                 ></ion-input>
@@ -224,7 +224,21 @@
               </ion-item>
             </ion-card>
             <div *ngIf="searchResults" class="ion-text-center result-heading">
-              <ion-label>Results: {{searchResults.length}}</ion-label>
+              <ion-item
+                button
+                (click)="copyResults($event.target)"
+                [color]="copyResultsBG"
+              >
+                <ion-label
+                  >Results: {{searchResults.length}}
+                  <small>⏲ {{searchTime}}</small>
+                </ion-label>
+                <ion-icon
+                  color="light"
+                  slot="end"
+                  name="copy-outline"
+                ></ion-icon>
+              </ion-item>
             </div>
             <virtual-scroller
               #scroll

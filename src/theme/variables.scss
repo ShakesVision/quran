@@ -75,5 +75,21 @@
   --ion-color-light-shade: #d7d8da;
   --ion-color-light-tint: #f5f6f9;
 
+  // Success light
+  --ion-color-success-light: #ebfef6;
+  --ion-color-success-light-rgb: 235, 254, 246;
+  --ion-color-success-light-contrast: #000000;
+  --ion-color-success-light-contrast-rgb: 0, 0, 0;
+  --ion-color-success-light-shade: #cfe0d8;
+  --ion-color-success-light-tint: #edfef7;
+
   --success-light: #ebfef6;
+}
+.ion-color-success-light {
+  --ion-color-base: var(--ion-color-success-light);
+  --ion-color-base-rgb: var(--ion-color-success-light-rgb);
+  --ion-color-contrast: var(--ion-color-success-light-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-success-light-contrast-rgb);
+  --ion-color-shade: var(--ion-color-success-light-shade);
+  --ion-color-tint: var(--ion-color-success-light-tint);
 }

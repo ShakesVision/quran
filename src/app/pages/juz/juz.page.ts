@@ -61,7 +61,7 @@ export class JuzPage implements OnInit {
   fetchAndSaveInDeviceStorage(juz, stopNav = false) {
     this.httpClient
       .get(
-        `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/${juz}.txt`,
+        `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@master/15Lines/${juz}.txt`,
         { responseType: "text" }
       )
       .subscribe(

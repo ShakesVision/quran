@@ -237,6 +237,7 @@ export class MemorizePage implements OnInit {
       buttons: [
         {
           text: "Import",
+          cssClass: "import-btn-alert",
           handler: (data) => {
             console.log(data);
             this.items = JSON.parse(data.textarea);

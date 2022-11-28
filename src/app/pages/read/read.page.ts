@@ -828,7 +828,7 @@ export class ReadPage implements OnInit {
   }
   gotoPageNum(p) {
     console.log(p);
-    if (!p) return;
+    if (!p || p > 611 || p < 1) return;
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
     this.setBookmark();

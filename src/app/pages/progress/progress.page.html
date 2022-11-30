@@ -14,45 +14,4 @@
     <ion-spinner *ngIf="loading" color="primary"></ion-spinner>
   </div>
   <div class="remote-content-wrapper" [innerHTML]="data"></div>
-  TO DOs:
-  <ol>
-    <li>
-      Go to ayah number using: map of ayah-end-mark and english numbers. e.g. 4
-      => specialCharacterFor4 . Search in ~whole~ speculate page-number based
-      on end-page ayah number and total ayahs.
-      <br />
-      Or maybe get a way to remove everything from pages except ayah marks and
-      quickly jump to that page. then highlight for few seconds.
-      <pre><code>
-      var e = document.querySelectorAll('.ar div span')[8];
-      e.innerText.includes('')? e.parentElement.style.color='red':'';
-    </code></pre>
-    </li>
-    <li>
-      Bug fix for rendering coz of ayah number character. each ayah character in
-      span tag with <code>display:inline-block;</code>.
-    </li>
-    <li>Blogger pages integration for help and download.</li>
-    <li>
-      Pass target surah pages by filtering full quran by index. e.g: To read 36.
-      Yaseen, pass pages for surahs 36 & 37 i.e. 441-446. (surahPageNumbers
-      array) Can use startLineNumber for precise content serve.
-    </li>
-    <li>
-      Export text for user's choice. Instead of pointing to githubraw, extract
-      say juz 29 using page numbers and allow copy/save text file etc.
-      <p>
-        Can also give options to copy: line, page, surah, juz, ayah, ruku &&
-        same for translation.
-      </p>
-    </li>
-    <li>
-      Click - open translation, Double click - copy, Long press - more options
-      (copy ayah, ruku, page, same for translation)
-    </li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-  </ol>
 </ion-content>

@@ -519,7 +519,7 @@ export class ReadPage implements OnInit {
   }
   async presentAlert(msg, header?, subheader?) {
     const alertmsg = await this.alert.create({
-      // header: "Translation " + header,
+      header: header,
       subHeader: subheader,
       message: msg,
       cssClass: "trans",
@@ -880,9 +880,10 @@ export class ReadPage implements OnInit {
     this.startIndex = ev.startIndex;
   }
   readTafseerOf(ev) {
-    const [s, a] = ev.target.value.split(":");
-    console.log(s, a);
-    this.readTafseer(s, a);
+    // const [s, a] = ev.target.value.split(":");
+    // console.log(s, a);
+    // this.readTafseer(s, a);
+    this.readTrans(ev.target.value);
   }
   readTafseer(s, a, m = "/en.itani") {
     var url = `http://api.alquran.cloud/v1/ayah/${s}:${a}`;
@@ -897,6 +898,17 @@ export class ReadPage implements OnInit {
           `${resAr.data.text} \n\n${resTrans.data.text}`
         );
       });
+    });
+  }
+  readTrans(verseKey) {
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=en&words=true&word_fields=text_indopak&translations=en&audio=2`;
+    this.httpClient.get(url).subscribe((res: any) => {
+      console.log(res);
+      let msg = "";
+      res.verse.words.forEach((w) => {
+        msg += `${w.text_indopak} ${w.translation.text} <br>`;
+      });
+      this.presentAlert(msg, res.verse.verse_key);
     });
   }
   copyResults(copyResultEl) {

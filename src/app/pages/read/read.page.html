@@ -4,14 +4,6 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title> {{title}} </ion-title>
-    <ion-input
-      slot="end"
-      placeholder="Translation - surah:ayah"
-      (ionChange)="readTafseerOf($event)"
-      [debounce]="1000"
-      clearInput
-      class="ion-no-padding ion-text-center ar2"
-    ></ion-input>
     <ion-buttons slot="end">
       <ion-button
         (click)="toggleHifzMode()"
@@ -195,6 +187,24 @@
                 [debounce]="1000"
                 class="ion-no-padding ion-no-margin ion-text-center"
               ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>Translation</ion-label>
+              <ion-input
+                #verseIdInput
+                placeholder="2:125"
+                (ionChange)="readTrans($event.target.value)"
+                [debounce]="1000"
+                class="ion-no-padding ion-no-margin ion-text-center"
+              ></ion-input>
+              <ion-select
+                value="en"
+                placeholder="Language"
+                (ionChange)="readTrans(verseIdInput.value,$event.target.value)"
+              >
+                <ion-select-option value="en">English</ion-select-option>
+                <ion-select-option value="ur">Urdu</ion-select-option>
+              </ion-select>
             </ion-item>
             <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information"></ion-icon>

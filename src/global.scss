@@ -40,8 +40,8 @@
 }
 
 @font-face {
-  font-family: "MuhammadiChar";
-  // font-family: "UrduChar";
+  font-family: "UrduChar";
+  // font-family: "MuhammadiChar";
   src: url("assets/fonts/muhammadi.ttf");
   unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
 }
@@ -106,7 +106,7 @@ span.ayah_mark {
 }
 
 .trans {
-  font-family: "MuhammadiChar", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "UrduChar", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   .alert-message {
     max-height: fit-content;

@@ -499,7 +499,7 @@ export class ReadPage implements OnInit {
           `Translation for ${this.title} is not available!`,
           "top"
         );
-      else {
+      else if (this.isCompleteMushaf) {
         const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
         let lineCounter = n;
         let txt = "";
@@ -933,7 +933,7 @@ export class ReadPage implements OnInit {
     });
   }
   readTrans(verseKey, lang = "en") {
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,234&translation_fields=resource_name&audio=2`;
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158&translation_fields=resource_name&audio=2`;
     // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name,language_id&per_page=15&fields=text_uthmani,chapter_id,hizb_number,text_imlaei_simple&translations=131,151,234,158&reciter=7&word_translation_language=en&page=1&from=52:35&to=52:49&word_fields=verse_key,verse_id,page_number,location,text_uthmani,code_v1,qpc_uthmani_hafs&mushaf=2"
     this.httpClient.get(url).subscribe((res: any) => {
       console.log(res);
@@ -941,7 +941,7 @@ export class ReadPage implements OnInit {
       let msg = "";
       msg += `${verse.text_indopak}<br>`;
       verse.translations.forEach((trans) => {
-        msg += `${trans.text} <br> — <i>${trans.resource_name}</i> <br><br>`;
+        msg += `${trans.text} <br> <small>— <i>${trans.resource_name}</i> </small> <br><br>`;
       });
       verse.words.forEach((w) => {
         msg += `${w.text_indopak} — ${w.translation.text} <br>`;

@@ -552,15 +552,10 @@ export class ReadPage implements OnInit {
         {
           text: "Copy",
           handler: () => {
-            this.copyAnything(this.convertToPlain(`<div>${msg}</div>`));
+            this.copyAnything(
+              this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`)
+            );
             this.presentToastWithOptions("Copied successfully!", "bottom");
-          },
-        },
-        {
-          text: "Next",
-          handler: () => {
-            const [surah, ayah] = header?.split(":");
-            this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
           },
         },
         {
@@ -568,6 +563,13 @@ export class ReadPage implements OnInit {
           handler: () => {
             const [surah, ayah] = header?.split(":");
             this.readTrans(`${surah}:${parseInt(ayah) - 1}`);
+          },
+        },
+        {
+          text: "Next",
+          handler: () => {
+            const [surah, ayah] = header?.split(":");
+            this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
           },
         },
       ],

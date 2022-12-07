@@ -165,25 +165,17 @@
                 ></ion-input>
               </ng-container>
             </ion-item>
-            <!-- <ion-item>
-              <ion-label>Go to Surah</ion-label>
-            </ion-item> -->
             <ion-item>
-              <ion-label>Background</ion-label>
+              <ion-label>Colors</ion-label>
               <ion-input
-                slot="end"
-                placeholder="css color / url"
-                (ionChange)="changeColors($event.target.value,'bg')"
+                placeholder="css color"
+                (ionChange)="changeColors($event.target.value,'color')"
                 [debounce]="1000"
                 class="ion-no-padding ion-no-margin ion-text-center"
               ></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label>Color</ion-label>
               <ion-input
-                slot="end"
-                placeholder="css color"
-                (ionChange)="changeColors($event.target.value,'color')"
+                placeholder="bg"
+                (ionChange)="changeColors($event.target.value,'bg')"
                 [debounce]="1000"
                 class="ion-no-padding ion-no-margin ion-text-center"
               ></ion-input>

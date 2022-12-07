@@ -919,7 +919,7 @@ export class ReadPage implements OnInit {
     });
   }
   readTrans(verseKey, lang = "en") {
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,158,151,234&translation_fields=resource_name&audio=2`;
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,234&translation_fields=resource_name&audio=2`;
     // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name%2Clanguage_id&per_page=15&fields=text_uthmani%2Cchapter_id%2Chizb_number%2Ctext_imlaei_simple&translations=131%2C151%2C234%2C158&reciter=7&word_translation_language=en&page=1&from=52%3A35&to=52%3A49&word_fields=verse_key%2Cverse_id%2Cpage_number%2Clocation%2Ctext_uthmani%2Ccode_v1%2Cqpc_uthmani_hafs&mushaf=2"
     this.httpClient.get(url).subscribe((res: any) => {
       console.log(res);

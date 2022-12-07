@@ -543,22 +543,24 @@ export class ReadPage implements OnInit {
       cssClass: "trans",
       buttons: [
         {
-          text: "OK",
-          role: "cancel",
-        },
-        {
           text: "Copy",
           handler: () => {
-            this.copyAnything(this.convertToPlain(msg));
+            this.copyAnything(this.convertToPlain(`<div>${msg}</div>`));
             this.presentToastWithOptions("Copied successfully!", "bottom");
           },
         },
         {
           text: "Next",
-          role: "cancel",
           handler: () => {
-            const [surah, ayah] = header?.split(":")[1];
+            const [surah, ayah] = header?.split(":");
             this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
+          },
+        },
+        {
+          text: "Previous",
+          handler: () => {
+            const [surah, ayah] = header?.split(":");
+            this.readTrans(`${surah}:${parseInt(ayah) - 1}`);
           },
         },
       ],

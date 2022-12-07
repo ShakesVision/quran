@@ -22,7 +22,7 @@
       <span class="ar-text" *ngFor="let chapter of recommendedChapters">
         {{chapter}} .
       </span>
-      <ion-button size="small" fill="outline"
+      <ion-button (click)="open('recommended')" size="small" fill="outline"
         >See supporting ahadith</ion-button
       >
     </ion-card-content>

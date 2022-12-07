@@ -15,6 +15,7 @@ import {
 import { Storage } from "@ionic/storage-angular";
 import { Observable, Subject } from "rxjs";
 import { SurahService } from "src/app/services/surah.service";
+import { ProgressPage } from "../progress/progress.page";
 
 @Component({
   selector: "app-memorize",
@@ -255,6 +256,14 @@ export class MemorizePage implements OnInit {
   }
   async popoverDismiss() {
     await this.popoverController.dismiss();
+  }
+  async open(name) {
+    const modal = await this.modalController.create({
+      component: ProgressPage,
+      componentProps: { name },
+      swipeToClose: true,
+    });
+    modal.present();
   }
   ionViewWillLeave() {
     this.popoverDismiss();

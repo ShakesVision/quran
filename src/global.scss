@@ -109,6 +109,9 @@ span.ayah_mark {
   font-family: "UrduChar", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   user-select: text;
+  .alert-wrapper {
+    min-width: 90vw;
+  }
   .alert-message {
     max-height: fit-content;
   }

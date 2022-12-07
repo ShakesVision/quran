@@ -545,8 +545,20 @@ export class ReadPage implements OnInit {
         {
           text: "OK",
           role: "cancel",
+        },
+        {
+          text: "Copy",
           handler: () => {
-            console.log("Cancel clicked.");
+            this.copyAnything(this.convertToPlain(msg));
+            this.presentToastWithOptions("Copied successfully!", "bottom");
+          },
+        },
+        {
+          text: "Next",
+          role: "cancel",
+          handler: () => {
+            const [surah, ayah] = header?.split(":")[1];
+            this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
           },
         },
       ],
@@ -920,7 +932,7 @@ export class ReadPage implements OnInit {
   }
   readTrans(verseKey, lang = "en") {
     let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,234&translation_fields=resource_name&audio=2`;
-    // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name%2Clanguage_id&per_page=15&fields=text_uthmani%2Cchapter_id%2Chizb_number%2Ctext_imlaei_simple&translations=131%2C151%2C234%2C158&reciter=7&word_translation_language=en&page=1&from=52%3A35&to=52%3A49&word_fields=verse_key%2Cverse_id%2Cpage_number%2Clocation%2Ctext_uthmani%2Ccode_v1%2Cqpc_uthmani_hafs&mushaf=2"
+    // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name,language_id&per_page=15&fields=text_uthmani,chapter_id,hizb_number,text_imlaei_simple&translations=131,151,234,158&reciter=7&word_translation_language=en&page=1&from=52:35&to=52:49&word_fields=verse_key,verse_id,page_number,location,text_uthmani,code_v1,qpc_uthmani_hafs&mushaf=2"
     this.httpClient.get(url).subscribe((res: any) => {
       console.log(res);
       let verse = res.verse;
@@ -935,7 +947,12 @@ export class ReadPage implements OnInit {
       this.presentAlert(msg, verse.verse_key);
     });
   }
-  changeTranslationLang(lang) {}
+  copyAnything = (text: string) => window.navigator.clipboard.writeText(text);
+  convertToPlain(html) {
+    let divEl = document.createElement("div");
+    divEl.innerHTML = html;
+    return divEl.textContent || divEl.innerText || "";
+  }
   copyResults(copyResultEl) {
     let result =
       "Found " +
@@ -951,7 +968,7 @@ export class ReadPage implements OnInit {
         r.lineIndex
       } | Juz ${this.surahService.juzCalculated(r.pageIndex)}\n\n`;
     });
-    window.navigator.clipboard.writeText(result);
+    this.copyAnything(result);
     this.copyResultsBG = "primary";
     setTimeout(() => {
       this.copyResultsBG = "dark";

@@ -425,7 +425,7 @@ export class ReadPage implements OnInit {
   async getBookmark() {
     await this.storage.create();
     this.storage.get("unicodeBookmark").then((pageNum) => {
-      console.log(pageNum);
+      console.log("bookmark fetched:", pageNum);
       if (pageNum) this.gotoPageNum(pageNum);
     });
   }
@@ -494,10 +494,28 @@ export class ReadPage implements OnInit {
       });
     } else if (!this.surah?.urdu || this.juzmode) {
       console.log("Translation not available!");
-      this.presentToastWithOptions(
-        `Translation for ${this.title} is not available!`,
-        "top"
-      );
+      if (!this.juzmode)
+        this.presentToastWithOptions(
+          `Translation for ${this.title} is not available!`,
+          "top"
+        );
+      else {
+        const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
+        let lineCounter = n;
+        let txt = "";
+        do {
+          txt = this.lines[lineCounter];
+          lineCounter++;
+        } while (!re.test(txt));
+        console.log(txt);
+        let verseNum = txt
+          .split(" ")
+          .find((word) => re.test(word))
+          .split(this.surahService.diacritics.AYAH_MARK)[1];
+        verseNum = this.getEnNumber(verseNum);
+        console.log(txt);
+        this.readTrans(`${this.surahCalculated}:${verseNum}`);
+      }
     }
   }
   async presentToastWithOptions(msg, pos) {
@@ -525,7 +543,7 @@ export class ReadPage implements OnInit {
       cssClass: "trans",
       buttons: [
         {
-          text: "سبحان اللہ",
+          text: "OK",
           role: "cancel",
           handler: () => {
             console.log("Cancel clicked.");
@@ -698,17 +716,18 @@ export class ReadPage implements OnInit {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
   getLastAyahNumberOnPage() {
-    let lastAyahOnPageArray = this.lines[this.lines?.length - 1]
-      .trim()
-      .split(" ");
-    let result = lastAyahOnPageArray[lastAyahOnPageArray.length - 1]?.split(
+    let lastLineWordsArr = this.lines[this.lines?.length - 1].trim().split(" ");
+    let result = lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
       this.surahService.diacritics.AYAH_MARK
     )[1];
-    result = this.surahService
-      .a2e(this.surahService.p2e(result))
-      ?.replace(/[^0-9]/g, "");
+    result = this.getEnNumber(result);
     console.log("LAST AYAH ON THIS PAGE: " + result);
     return result;
+  }
+  getEnNumber(num: string) {
+    return this.surahService
+      .a2e(this.surahService.p2e(num))
+      ?.replace(/[^0-9]/g, "");
   }
   getArabicScript(text) {
     return text
@@ -827,7 +846,6 @@ export class ReadPage implements OnInit {
     // see onSearchChange for full search
   }
   gotoPageNum(p) {
-    console.log(p);
     if (!p || p > 611 || p < 1) return;
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");

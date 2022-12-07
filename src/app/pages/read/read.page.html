@@ -243,6 +243,7 @@
               </ion-item>
             </div>
             <virtual-scroller
+              *ngIf="searchResults"
               #scroll
               [items]="searchResults"
               [parentScroll]="scrollingBlock.nativeElement"

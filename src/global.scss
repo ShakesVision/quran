@@ -108,6 +108,7 @@ span.ayah_mark {
 .trans {
   font-family: "UrduChar", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
+  user-select: text;
   .alert-message {
     max-height: fit-content;
   }

@@ -265,7 +265,8 @@ export class MemorizePage implements OnInit {
     });
     modal.present();
   }
-  ionViewWillLeave() {
-    this.popoverDismiss();
+  async ionViewWillLeave() {
+    const popover = await this.popoverController.getTop();
+    if (popover) this.popoverDismiss();
   }
 }

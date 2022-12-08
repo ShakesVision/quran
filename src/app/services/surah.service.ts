@@ -20,6 +20,7 @@ export class SurahService {
   diacritics = {
     RUKU_MARK: "ۧ",
     AYAH_MARK: "۝",
+    BISM: "﷽",
   };
   surahPageNumbers = [
     2, 3, 51, 78, 107, 129, 152, 178, 188, 209, 222, 236, 250, 256, 262, 268,

@@ -388,7 +388,6 @@ export class ReadPage implements OnInit {
       this.title = juzData.title;
       this.pages = this.surah.split("\n\n");
       this.lines = this.pages[this.currentPage - 1].split("\n");
-      this.getLastAyahNumberOnPage();
       // this.calculateRukuArray();
       this.rukuArray = [...juzData.rukuArray];
     } else if (!juzData) {
@@ -403,8 +402,8 @@ export class ReadPage implements OnInit {
         this.tPages = this.surah.urdu.split("\n\n");
         this.translationLines = this.tPages[this.currentPage - 1].split("\n");
       }
-      this.getLastAyahNumberOnPage();
     }
+    this.getLastAyahNumberOnPage();
     this.isCompleteMushaf = this.pages.length === 611;
     if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
     //highlight helper listener
@@ -512,7 +511,14 @@ export class ReadPage implements OnInit {
           .split(this.surahService.diacritics.AYAH_MARK)[1];
         verseNum = this.getEnNumber(verseNum);
         console.log(txt);
-        this.readTrans(`${this.surahCalculated}:${verseNum}`);
+        const lineNumbers = this.lines
+          .map((l, i) => {
+            if (l.includes(this.surahService.diacritics.BISM)) return i;
+          })
+          .filter(Boolean);
+        const correctedSurahNum =
+          this.surahCalculated - lineNumbers.filter((l) => l > n).length;
+        this.readTrans(`${correctedSurahNum}:${verseNum}`);
       }
     }
   }
@@ -541,19 +547,19 @@ export class ReadPage implements OnInit {
       cssClass: "trans",
       buttons: [
         {
-          text: "-1",
-          handler: () => {
-            const [surah, ayah] = header?.split(":");
-            this.readTrans(`${parseInt(surah) - 1}:${ayah}`);
-          },
-        },
-        {
           text: "Copy",
           handler: () => {
             this.copyAnything(
               this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`)
             );
             this.presentToastWithOptions("Copied successfully!", "bottom");
+          },
+        },
+        {
+          text: "Next",
+          handler: () => {
+            const [surah, ayah] = header?.split(":");
+            this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
           },
         },
         {
@@ -564,11 +570,8 @@ export class ReadPage implements OnInit {
           },
         },
         {
-          text: "Next",
-          handler: () => {
-            const [surah, ayah] = header?.split(":");
-            this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
-          },
+          text: "OK",
+          role: "cancel",
         },
       ],
     });

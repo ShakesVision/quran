@@ -58,13 +58,13 @@
         *ngIf="currentPage==1 && lines?.length<15 && !juzmode"
       >
         <div
-          class="filler-lines"
-          *ngFor="let line of [].constructor(15-lines?.length-2)"
+          class="filler-lines line"
+          *ngFor="let line of [].constructor(15 - (lines?.length+2))"
         ></div>
-        <div class="surah-name centered-table-text">
-          {{surah?.name?.split(' ')[1]|| title}}
+        <div class="surah-name line centered-table-text">
+          {{title.split(' ')[1]}}
         </div>
-        <div class="bism centered-table-text">﷽</div>
+        <div class="line bism centered-table-text">﷽</div>
       </ng-container>
       <div
         *ngFor="let line of lines;let i = index"
@@ -75,7 +75,7 @@
         'quran-kareem-text':juzmode && isCompleteMushaf && currentPage==1,
         'bism-line': line?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && i==10), 
         'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPage==188 && i==0), 
-        'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))}"
+        'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))|| (currentPage===pages.length && i===lines.length-1 && !juzmode)}"
         (click)="openTrans($event,i)"
       >
         <div
@@ -89,8 +89,8 @@
         *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15"
       >
         <div
-          class="filler-lines"
-          *ngFor="let line of [].constructor(15-lines.length)"
+          class="filler-lines line"
+          *ngFor="let line of [].constructor(15 - lines.length)"
         ></div>
       </ng-container>
     </div>

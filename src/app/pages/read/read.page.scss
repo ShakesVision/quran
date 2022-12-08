@@ -47,6 +47,13 @@ ion-content {
     border: 2px solid;
     user-select: text;
     // background-image: url("../../../assets/quran-pg466-aspect.PNG");
+    .line {
+      border-bottom: 0.5px solid #cecece;
+      height: 38px; //screen:height in px=> 345:32,300:28,250:22. With aspect-ratio, height: calc(78vh*0.066);
+    }
+    .line:hover {
+      background-color: var(--success-light); //#ebfef6; // #ebf2fe;
+    }
   }
 }
 .rtl {
@@ -64,13 +71,6 @@ ion-content {
 }
 .small-text {
   font-size: small;
-}
-.ar .line {
-  border-bottom: 0.5px solid #cecece;
-  height: 38px; //screen:height in px=> 345:32,300:28,250:22. With aspect-ratio, height: calc(78vh*0.066);
-}
-.ar .line:hover {
-  background-color: var(--success-light); //#ebfef6; // #ebf2fe;
 }
 .ur {
   font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
@@ -129,6 +129,7 @@ ion-footer {
   background-color: #e2edff;
 }
 .ruku-wrapper {
+  user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -246,6 +246,13 @@
                   name="copy-outline"
                 ></ion-icon>
               </ion-item>
+              <ion-label
+                *ngIf="!isCompleteMushaf"
+                color="warning"
+                style="font-style: italic"
+              >
+                <small>(searched only in Juz {{title}}) </small>
+              </ion-label>
             </div>
             <virtual-scroller
               *ngIf="searchResults"

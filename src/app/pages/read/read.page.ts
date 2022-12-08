@@ -501,7 +501,7 @@ export class ReadPage implements OnInit {
           `Translation for ${this.title} is not available!`,
           "top"
         );
-      else if (this.isCompleteMushaf) {
+      else {
         const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
         let lineCounter = n;
         let txt = "";
@@ -522,7 +522,10 @@ export class ReadPage implements OnInit {
           })
           .filter(Boolean);
         const correctedSurahNum =
-          this.surahCalculated - lineNumbers.filter((l) => l > n).length;
+          (this.isCompleteMushaf
+            ? this.surahCalculated
+            : this.surahCalculatedForJuz) -
+          lineNumbers.filter((l) => l > n).length;
         this.readTrans(`${correctedSurahNum}:${verseNum}`);
       }
     }

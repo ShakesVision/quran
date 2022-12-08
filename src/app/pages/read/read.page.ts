@@ -966,7 +966,7 @@ export class ReadPage implements OnInit {
       console.log(res);
       let verse = res.verse;
       let msg = "";
-      msg += `${verse.text_indopak}<br>`;
+      msg += `${verse.text_indopak.replace(/ۡ/g, "ْ")}<br>`;
       verse.translations.forEach((trans) => {
         msg += `${trans.text} <br> <small>— <i>${trans.resource_name}</i> </small> <br><br>`;
       });

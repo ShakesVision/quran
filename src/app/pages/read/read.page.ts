@@ -382,8 +382,6 @@ export class ReadPage implements OnInit {
   ngOnInit() {
     const juzData = this.router.getCurrentNavigation().extras.state?.juzData;
     const id = this.activatedRoute.snapshot.params.id;
-    console.log(id);
-    console.log(this.juzNumber, juzData);
     if (juzData) {
       this.juzmode = true;
       this.surah = juzData.data;
@@ -472,7 +470,7 @@ export class ReadPage implements OnInit {
   }
 
   openTrans(event, n: number) {
-    if (this.surah?.urdu && !this.tMode && !this.juzmode) {
+    if (this.translationExists && !this.tMode && !this.juzmode) {
       this.translation = this.translationLines[n];
       console.log(n + 1 + ". " + this.translation);
       let popup: HTMLElement = document.querySelector(".popup");

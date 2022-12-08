@@ -117,5 +117,6 @@ span.ayah_mark {
   }
   .alert-button-group-vertical {
     flex-direction: row;
+    user-select: none;
   }
 }

@@ -15,6 +15,7 @@ export class JuzPage implements OnInit {
   surahPages = [];
   rukuArray = [];
   memorizeItems: [];
+  unicodeBookmarkPageNum: number;
 
   constructor(
     private router: Router,
@@ -29,6 +30,7 @@ export class JuzPage implements OnInit {
   ngOnInit() {
     this.gotoReadJuz("Quran", true);
     this.updateMemorizeArray();
+    this.setupBookmark();
   }
 
   updateMemorizeArray() {
@@ -142,7 +144,17 @@ export class JuzPage implements OnInit {
     if (!this.memorizeItems) return;
     let completedCount = 0;
     this.memorizeItems.forEach((i: any) => (completedCount += i.completed));
-    const percent = ((completedCount / 610) * 100).toFixed(1);
+    const percent = ((completedCount / 611) * 100).toFixed(1);
     return `linear-gradient(to right, #cce0ce ${percent}%, var(--ion-color-light) 0)`;
+  }
+  setupBookmark() {
+    this.storage.get("unicodeBookmark").then((pageNum) => {
+      this.unicodeBookmarkPageNum = pageNum;
+      console.log("BOOKMARK: " + this.unicodeBookmarkPageNum);
+    });
+  }
+
+  ionViewWillEnter() {
+    this.setupBookmark();
   }
 }

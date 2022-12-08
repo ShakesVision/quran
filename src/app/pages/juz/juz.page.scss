@@ -32,6 +32,17 @@
   .juz-btn:hover {
     background: aliceblue !important;
   }
+  .juz-btn-full::after {
+    content: attr(data-bookmarkPercentage);
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: var(--bookmarkPercentage);
+    height: 1px;
+    font-size: 6px;
+  }
   .juz-heading-en {
     text-transform: capitalize;
     font-size: xx-small;

@@ -17,9 +17,11 @@
   </div>
   <div class="juz-grid-wrapper">
     <div
-      class="juz-btn"
+      class="juz-btn juz-btn-full"
       (click)="gotoReadJuz('Quran')"
-      [ngStyle]="{'background': totalMemorizeStyle(), 'animation':'all ease 1s'}"
+      [ngStyle]="{'background': totalMemorizeStyle(), 'animation':'all ease 1s' }"
+      [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
+      attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"
     >
       <ion-button
         (click)="fetchAndSaveInDeviceStorage('Quran')"

@@ -40,9 +40,13 @@ export class ReadPage implements OnInit {
 
   isCompleteMushaf: boolean;
 
-  juzCalculated = this.surahService.juzCalculated(this.currentPage);
+  juzCalculated: number;
 
-  surahCalculated = this.surahService.surahCalculated(this.currentPage);
+  surahCalculated: number;
+
+  currentPageCalculated: number;
+
+  surahCalculatedForJuz: number;
 
   rukuArray = [];
 
@@ -403,8 +407,9 @@ export class ReadPage implements OnInit {
         this.translationLines = this.tPages[this.currentPage - 1].split("\n");
       }
     }
-    this.getLastAyahNumberOnPage();
     this.isCompleteMushaf = this.pages.length === 611;
+    this.updateCalculatedNumbers();
+    this.getLastAyahNumberOnPage();
     if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
@@ -547,7 +552,7 @@ export class ReadPage implements OnInit {
       cssClass: "trans",
       buttons: [
         {
-          text: "Copy",
+          text: "⧉ Copy",
           handler: () => {
             this.copyAnything(
               this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`)
@@ -917,6 +922,15 @@ export class ReadPage implements OnInit {
   updateCalculatedNumbers() {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);
     this.surahCalculated = this.surahService.surahCalculated(this.currentPage);
+    if (!this.isCompleteMushaf) {
+      this.currentPageCalculated =
+        this.currentPage +
+        this.surahService.juzPageNumbers[parseInt(this.title) - 1] -
+        1;
+      this.surahCalculatedForJuz = this.surahService.surahCalculated(
+        this.currentPageCalculated
+      );
+    }
   }
   vsChange(ev) {
     this.startIndex = ev.startIndex;

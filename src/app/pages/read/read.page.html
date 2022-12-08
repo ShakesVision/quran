@@ -37,18 +37,23 @@
 <ion-content>
   <div class="page-wrapper ar ar2 ion-margin-top">
     <div class="page-top-info">
-      <ng-container *ngIf="currentPage>1 && isCompleteMushaf">
+      <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || juzmode">
         <span class="juz-number">
-          {{ surahCalculated === 1?
-          'سورۃ':(surahService.juzNames[juzCalculated-1] + ' ' +
-          surahService.e2a(juzCalculated.toString())) }}
+          {{ isCompleteMushaf? (surahCalculated === 1? 'سورۃ' :
+          (surahService.juzNames[juzCalculated-1] + ' ' +
+          surahService.e2a(juzCalculated.toString()))) : (surahCalculatedForJuz
+          === 1? 'سورۃ' : (surahService.juzNames[+title-1] + ' ' +
+          surahService.e2a(title.toString()))) }}
         </span>
         <span class="page-number">
-          {{ surahService.e2a(currentPage.toString()) }}
+          {{ isCompleteMushaf? surahService.e2a(currentPage.toString()):
+          surahService.e2a(currentPageCalculated.toString()) }}
         </span>
         <span class="surah-number">
-          {{ surahService.surahNames[surahCalculated-1] + ' ' +
-          surahService.e2a(surahCalculated.toString()) }}
+          {{ isCompleteMushaf? surahService.surahNames[surahCalculated-1] + ' '
+          + surahService.e2a(surahCalculated.toString()) :
+          surahService.surahNames[surahCalculatedForJuz-1] + ' ' +
+          surahService.e2a(surahCalculatedForJuz.toString())}}
         </span>
       </ng-container>
     </div>
@@ -62,7 +67,7 @@
           *ngFor="let line of [].constructor(15 - (lines?.length+2))"
         ></div>
         <div class="surah-name line centered-table-text">
-          {{title.split(' ')[1]}}
+          {{title?.split(' ')[1]}}
         </div>
         <div class="line bism centered-table-text">﷽</div>
       </ng-container>

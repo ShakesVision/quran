@@ -15,6 +15,7 @@ export class HomePage {
       component: ProgressPage,
       componentProps: { name },
       swipeToClose: true,
+      mode: "ios",
     });
     modal.present();
   }

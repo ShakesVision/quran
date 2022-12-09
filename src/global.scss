@@ -79,19 +79,17 @@ span.ayah_mark {
   padding: 3px;
   border-radius: 3px;
 }
-.custom-alert button.alert-button-group {
-  width: 33.33%;
-}
-.delete-btn {
-  color: var(--ion-color-danger) !important;
-}
-.add-btn {
-  background-color: var(--ion-color-primary) !important;
-  color: var(--ion-color-light) !important;
-  border-radius: 10% !important;
-}
-
 .custom-alert {
+  .delete-btn {
+    color: var(--ion-color-danger) !important;
+  }
+  .add-btn {
+    background-color: var(--ion-color-primary) !important;
+    color: var(--ion-color-light) !important;
+  }
+  .signup-btn {
+    border: 1px solid var(--ion-color-primary) !important;
+  }
   .alert-button-group .button-inner {
     -webkit-box-pack: center;
     -webkit-justify-content: center;
@@ -102,6 +100,9 @@ span.ayah_mark {
     -webkit-flex-direction: row;
     -ms-flex-direction: row;
     flex-direction: row;
+  }
+  button.alert-button-group {
+    width: 33.33%;
   }
 }
 

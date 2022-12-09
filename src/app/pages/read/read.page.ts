@@ -837,9 +837,15 @@ export class ReadPage implements OnInit {
       .replace(/ صلي /g, " صلى ");
   }
 
+  toggleIgnoreTashkeel(val) {
+    this.ignoreTashkeel = !this.ignoreTashkeel;
+    this.onSearchChange(val);
+  }
+
   // returns a [pageIndex,lineIndex] on a search
-  onSearchChange(ev) {
-    let searchText = ev.detail.value;
+  onSearchChange(val) {
+    console.log(this.ignoreTashkeel);
+    let searchText = val;
     if (!searchText || searchText == "") return;
     var start = new Date().getTime();
     searchText = this.getArabicScript(searchText);

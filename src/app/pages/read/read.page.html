@@ -214,8 +214,9 @@
             <ion-card>
               <ion-item color="light">
                 <ion-input
+                  #searchInput
                   placeholder="بحث / SEARCH / تلاش"
-                  (ionChange)="onSearchChange($event)"
+                  (ionChange)="onSearchChange($event.target.value)"
                   [debounce]="500"
                   clearInput
                   class="ion-no-padding ion-text-center ar2"
@@ -226,7 +227,7 @@
                 <ion-toggle
                   slot="end"
                   [checked]="ignoreTashkeel"
-                  (ionChange)="ignoreTashkeel=!ignoreTashkeel"
+                  (ionChange)="toggleIgnoreTashkeel(searchInput.value)"
                 ></ion-toggle>
               </ion-item>
             </ion-card>

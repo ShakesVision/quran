@@ -7,6 +7,7 @@ import {
 import { map, take } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -216,7 +217,12 @@ export class SurahService {
     "الفـلق",
     "النـاس",
   ];
-  constructor(private afs: AngularFirestore, private http: HttpClient) {
+  isLoggedIn = this.afAuth.authState;
+  constructor(
+    private afs: AngularFirestore,
+    private http: HttpClient,
+    private afAuth: AngularFireAuth
+  ) {
     this.surahCollection = this.afs.collection<Surah>("surahs");
     this.indexCollection = this.afs.collection<Index>("index", (ref) =>
       ref.orderBy("surahNo")
@@ -225,6 +231,16 @@ export class SurahService {
 
   ngOnInit() {
     this.getSurahInfo().subscribe((res: any) => (this.surahInfo = res));
+  }
+
+  signup(email, password) {
+    return this.afAuth.auth.createUserWithEmailAndPassword(email, password);
+  }
+  signin(email, password) {
+    return this.afAuth.auth.signInWithEmailAndPassword(email, password);
+  }
+  signout() {
+    return this.afAuth.auth.signOut();
   }
 
   addSurah(item: Surah) {

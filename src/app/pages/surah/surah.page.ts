@@ -3,7 +3,8 @@ import { Observable } from "rxjs";
 import { Router, ActivatedRoute } from "@angular/router";
 import { SurahService } from "./../../services/surah.service";
 import { Surah, Index } from "./../../services/surah";
-import { AlertController } from "@ionic/angular";
+import { AlertController, ToastController } from "@ionic/angular";
+import { User } from "firebase";
 
 @Component({
   selector: "app-surah",
@@ -12,16 +13,24 @@ import { AlertController } from "@ionic/angular";
 })
 export class SurahPage implements OnInit {
   items: Observable<Index[]>;
-
+  user;
+  private loggedInUser: User;
+  isLoggedIn: boolean = false;
   constructor(
     private surahService: SurahService,
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController
   ) {}
   ngOnInit() {
     // this.items = this.surahService.getSurahs();
     this.items = this.surahService.getIndexes();
     this.items.subscribe((res) => console.log(res));
+    this.surahService.isLoggedIn.subscribe((val) => {
+      console.log(val);
+      this.loggedInUser = val;
+      this.isLoggedIn = val !== null;
+    });
   }
 
   gotoRead(item) {
@@ -32,8 +41,8 @@ export class SurahPage implements OnInit {
     });
   }
 
-  async loginAlert(item?) {
-    console.log(item);
+  async loginAlert() {
+    console.log(this.loggedInUser);
     const alert = await this.alertController.create({
       header: "Login / Signup",
       cssClass: "custom-alert",
@@ -43,23 +52,32 @@ export class SurahPage implements OnInit {
           id: "email",
           type: "email",
           placeholder: "Email...",
-          value: item ? item.email : null,
+          value: this.loggedInUser ? this.loggedInUser.email : null,
         },
         {
           name: "password",
           id: "password",
           type: "password",
           placeholder: "Password...",
-          value: item ? item.password : null,
         },
       ],
       buttons: [
         {
-          ...(item
+          ...(this.loggedInUser
             ? {
                 text: "Logout",
                 handler: (data) => {
-                  console.log("Logout");
+                  console.log("Logout: ");
+                  this.surahService
+                    .signout()
+                    .then((res: any) => {
+                      console.log(res);
+                      this.toast("Logged out successfully!", "sucesslight");
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                      this.toast(err.message, "danger");
+                    });
                 },
                 cssClass: "delete-btn",
               }
@@ -69,18 +87,52 @@ export class SurahPage implements OnInit {
           text: "Signup",
           cssClass: "signup-btn",
           handler: (data) => {
-            console.log(data);
+            console.log("In Signup:", data);
+            this.surahService
+              .signup(data.email, data.password)
+              .then((res: any) => {
+                console.log(res);
+                this.toast(
+                  `Account created! Logged in as ${res.user.email}`,
+                  "success-light"
+                );
+              })
+              .catch((err) => {
+                console.log(err);
+                this.toast(err.message, "danger");
+              });
           },
         },
         {
           text: "Login",
           cssClass: "add-btn",
           handler: (data) => {
-            console.log(data);
+            console.log("In Login:", data);
+            this.surahService
+              .signin(data.email, data.password)
+              .then((res: any) => {
+                console.log(res);
+                this.toast(
+                  `Login successful as ${res.user.email}`,
+                  "success-light"
+                );
+              })
+              .catch((err) => {
+                console.log(err);
+                this.toast(err.message, "danger");
+              });
           },
         },
       ],
     });
     alert.present();
+  }
+  async toast(msg, clr = "primary") {
+    const t = await this.toastController.create({
+      message: msg,
+      color: clr,
+      duration: 5000,
+    });
+    t.present();
   }
 }

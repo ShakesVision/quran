@@ -233,9 +233,9 @@ export class SurahService {
     this.getSurahInfo().subscribe((res: any) => (this.surahInfo = res));
   }
 
-  signup(email, password) {
-    return this.afAuth.auth.createUserWithEmailAndPassword(email, password);
-  }
+  // signup(email, password) {
+  //   return this.afAuth.auth.createUserWithEmailAndPassword(email, password);
+  // }
   signin(email, password) {
     return this.afAuth.auth.signInWithEmailAndPassword(email, password);
   }

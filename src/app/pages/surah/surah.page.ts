@@ -85,7 +85,7 @@ export class SurahPage implements OnInit {
               }
             : null),
         },
-        {
+        /* {
           text: "Signup",
           cssClass: "signup-btn",
           handler: (data) => {
@@ -104,7 +104,7 @@ export class SurahPage implements OnInit {
                 this.toast(err.message, "danger");
               });
           },
-        },
+        }, */
         {
           text: "Login",
           cssClass: "add-btn",

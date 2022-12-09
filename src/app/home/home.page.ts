@@ -19,4 +19,7 @@ export class HomePage {
     });
     modal.present();
   }
+  darkModeToggle() {
+    document.body.classList.toggle("dark");
+  }
 }

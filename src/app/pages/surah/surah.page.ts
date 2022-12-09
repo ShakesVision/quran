@@ -14,7 +14,7 @@ import { User } from "firebase";
 export class SurahPage implements OnInit {
   items: Observable<Index[]>;
   user;
-  private loggedInUser: User;
+  loggedInUser: User;
   isLoggedIn: boolean = false;
   isAdmin: boolean = false;
   constructor(
@@ -28,9 +28,9 @@ export class SurahPage implements OnInit {
     this.items = this.surahService.getIndexes();
     this.items.subscribe((res) => console.log(res));
     this.surahService.isLoggedIn.subscribe((user) => {
-      console.log(user);
+      console.log("subscription authstate", user);
       this.loggedInUser = user;
-      this.isLoggedIn = user !== null;
+      this.isLoggedIn = !!user;
       this.isAdmin = user.email == "sarbakafgroup@gmail.com";
     });
   }
@@ -74,7 +74,7 @@ export class SurahPage implements OnInit {
                     .signout()
                     .then((res: any) => {
                       console.log(res);
-                      this.toast("Logged out successfully!", "successlight");
+                      this.toast("Logged out successfully!", "success-light");
                     })
                     .catch((err) => {
                       console.log(err);

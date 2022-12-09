@@ -31,7 +31,7 @@
         <span class="ar-text">{{ item.surahName.split(' ')[1] }}</span>
       </ion-label>
       <ion-button
-        *ngIf="isLoggedIn"
+        *ngIf="isLoggedIn && isAdmin"
         fill="clear"
         slot="end"
         [routerLink]="[item.remoteId]"
@@ -43,7 +43,12 @@
       </ion-button>
     </ion-item>
   </ion-list>
-  <ion-fab *ngIf="isLoggedIn" vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab
+    *ngIf="isLoggedIn && isAdmin"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
     <ion-fab-button [routerLink]="['null']">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

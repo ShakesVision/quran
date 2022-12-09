@@ -16,6 +16,7 @@ export class SurahPage implements OnInit {
   user;
   private loggedInUser: User;
   isLoggedIn: boolean = false;
+  isAdmin: boolean = false;
   constructor(
     private surahService: SurahService,
     private router: Router,
@@ -26,10 +27,11 @@ export class SurahPage implements OnInit {
     // this.items = this.surahService.getSurahs();
     this.items = this.surahService.getIndexes();
     this.items.subscribe((res) => console.log(res));
-    this.surahService.isLoggedIn.subscribe((val) => {
-      console.log(val);
-      this.loggedInUser = val;
-      this.isLoggedIn = val !== null;
+    this.surahService.isLoggedIn.subscribe((user) => {
+      console.log(user);
+      this.loggedInUser = user;
+      this.isLoggedIn = user !== null;
+      this.isAdmin = user.email === "sarbakafgroup@gmail.com";
     });
   }
 

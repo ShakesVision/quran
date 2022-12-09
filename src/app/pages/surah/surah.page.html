@@ -6,7 +6,7 @@
     <ion-buttons slot="end">
       <ion-button
         (click)="loginAlert()"
-        [color]="isLoggedIn? 'success':'light'"
+        [color]="loggedInUser? (isAdmin? 'success': 'warning'):'light'"
       >
         <ion-icon slot="icon-only" name="shield-checkmark-outline"></ion-icon>
       </ion-button>
@@ -31,7 +31,7 @@
         <span class="ar-text">{{ item.surahName.split(' ')[1] }}</span>
       </ion-label>
       <ion-button
-        *ngIf="isLoggedIn && isAdmin"
+        *ngIf="loggedInUser && isAdmin"
         fill="clear"
         slot="end"
         [routerLink]="[item.remoteId]"
@@ -43,12 +43,7 @@
       </ion-button>
     </ion-item>
   </ion-list>
-  <ion-fab
-    *ngIf="isLoggedIn && isAdmin"
-    vertical="bottom"
-    horizontal="end"
-    slot="fixed"
-  >
+  <ion-fab *ngIf="loggedInUser" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button [routerLink]="['null']">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

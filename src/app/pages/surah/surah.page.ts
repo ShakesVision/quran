@@ -31,7 +31,7 @@ export class SurahPage implements OnInit {
       console.log(user);
       this.loggedInUser = user;
       this.isLoggedIn = user !== null;
-      this.isAdmin = user.email === "sarbakafgroup@gmail.com";
+      this.isAdmin = user.email == "sarbakafgroup@gmail.com";
     });
   }
 
@@ -74,7 +74,7 @@ export class SurahPage implements OnInit {
                     .signout()
                     .then((res: any) => {
                       console.log(res);
-                      this.toast("Logged out successfully!", "sucesslight");
+                      this.toast("Logged out successfully!", "successlight");
                     })
                     .catch((err) => {
                       console.log(err);
@@ -109,7 +109,7 @@ export class SurahPage implements OnInit {
           text: "Login",
           cssClass: "add-btn",
           handler: (data) => {
-            console.log("In Login:", data);
+            console.log("In Login:");
             this.surahService
               .signin(data.email, data.password)
               .then((res: any) => {
@@ -118,6 +118,7 @@ export class SurahPage implements OnInit {
                   `Login successful as ${res.user.email}`,
                   "success-light"
                 );
+                this.loggedInUser = res.user;
               })
               .catch((err) => {
                 console.log(err);

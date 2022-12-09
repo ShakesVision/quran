@@ -396,6 +396,7 @@ export class ReadPage implements OnInit {
       // this.calculateRukuArray();
       this.rukuArray = [...juzData.rukuArray];
     } else if (!juzData) {
+      console.log("not jz mode", this.surah);
       this.juzmode = false;
       this.surah = this.surahService.currentSurah;
       this.title = this.surah.name;

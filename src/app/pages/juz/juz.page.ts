@@ -24,13 +24,10 @@ export class JuzPage implements OnInit {
     private surahService: SurahService
   ) {
     this.storage.create().then((_) => console.log("storage created"));
-    this.updateMemorizeArray();
   }
 
   ngOnInit() {
     this.gotoReadJuz("Quran", true);
-    this.updateMemorizeArray();
-    this.setupBookmark();
   }
 
   updateMemorizeArray() {
@@ -156,5 +153,6 @@ export class JuzPage implements OnInit {
 
   ionViewWillEnter() {
     this.setupBookmark();
+    this.updateMemorizeArray();
   }
 }

@@ -295,16 +295,17 @@
     >
       <ion-icon name="chevron-back-circle-outline"></ion-icon>
     </ion-button>
-    <ion-label style="font-size: small"
-      >Page
+    <div style="font-size: small">
+      <ion-label color="dark">Page </ion-label>
       <ion-input
+        color="dark"
         class="page-num-input"
         type="number"
         [ngModel]="currentPage"
         (keyup.enter)="gotoPageNum($event.target.value)"
       ></ion-input>
-      of {{pages?.length}}
-    </ion-label>
+      <ion-label color="dark"> of {{pages?.length}}</ion-label>
+    </div>
     <ion-button
       shape="round"
       fill="clear"

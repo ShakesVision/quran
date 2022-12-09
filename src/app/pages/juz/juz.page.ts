@@ -132,7 +132,7 @@ export class JuzPage implements OnInit {
   }
   returnStyle(i: number) {
     if (this.findMemorizeItem(i + 1) === "NaN") return "";
-    const s = `linear-gradient(to right, #cce0ce ${parseFloat(
+    const s = `linear-gradient(to right, var(--green-highlight) ${parseFloat(
       this.findMemorizeItem(i + 1)
     )}%, var(--ion-color-light) 0)`;
     return s;
@@ -142,7 +142,7 @@ export class JuzPage implements OnInit {
     let completedCount = 0;
     this.memorizeItems.forEach((i: any) => (completedCount += i.completed));
     const percent = ((completedCount / 611) * 100).toFixed(1);
-    return `linear-gradient(to right, #cce0ce ${percent}%, var(--ion-color-light) 0)`;
+    return `linear-gradient(to right, var(--green-highlight) ${percent}%, var(--ion-color-light) 0)`;
   }
   setupBookmark() {
     this.storage.get("unicodeBookmark").then((pageNum) => {

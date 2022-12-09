@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { SurahService } from "./../../services/surah.service";
-import { ToastController } from "@ionic/angular";
+import { PopoverController, ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
 import { alertController } from "@ionic/core";
 import { MushafLines } from "src/app/services/mushaf-versions";
@@ -380,7 +380,8 @@ export class ReadPage implements OnInit {
     private httpClient: HttpClient,
     private activatedRoute: ActivatedRoute,
     public changeDetectorRef: ChangeDetectorRef,
-    private storage: Storage
+    private storage: Storage,
+    private popoverController: PopoverController
   ) {}
 
   ngOnInit() {
@@ -1003,5 +1004,9 @@ export class ReadPage implements OnInit {
       this.copyResultsBG = "dark";
     }, 1000);
     // this.presentAlert("Copied"+ this.searchResults.length+ "results successfully!");
+  }
+  async ionViewWillLeave() {
+    const popover = await this.popoverController.getTop();
+    if (popover) this.popoverController.dismiss();
   }
 }

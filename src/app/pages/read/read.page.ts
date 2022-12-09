@@ -373,7 +373,7 @@ export class ReadPage implements OnInit {
   searchTime;
 
   constructor(
-    private surahService: SurahService,
+    public surahService: SurahService,
     public toastController: ToastController,
     public alert: AlertController,
     private router: Router,

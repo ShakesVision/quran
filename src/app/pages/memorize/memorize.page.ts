@@ -30,6 +30,7 @@ export class MemorizePage implements OnInit {
   memorizeEntryForm: FormGroup;
   surahInfo = [];
   isPopoverOpen: boolean = false;
+  isModalOpen: boolean = false;
 
   constructor(
     private storage: Storage,

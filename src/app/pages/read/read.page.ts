@@ -375,7 +375,7 @@ export class ReadPage implements OnInit {
   constructor(
     public surahService: SurahService,
     public toastController: ToastController,
-    public alert: AlertController,
+    public alertController: AlertController,
     private router: Router,
     private httpClient: HttpClient,
     private activatedRoute: ActivatedRoute,
@@ -550,7 +550,7 @@ export class ReadPage implements OnInit {
     toast.present();
   }
   async presentAlert(msg, header?, subheader?) {
-    const alertmsg = await this.alert.create({
+    const alertmsg = await this.alertController.create({
       header: header,
       subHeader: subheader,
       message: msg,
@@ -1015,5 +1015,7 @@ export class ReadPage implements OnInit {
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();
     if (popover) this.popoverController.dismiss();
+    const alert = await this.alertController.getTop();
+    if (alert) this.alertController.dismiss();
   }
 }

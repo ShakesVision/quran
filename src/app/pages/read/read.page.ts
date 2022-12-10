@@ -8,6 +8,7 @@ import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { VirtualScrollerComponent } from "ngx-virtual-scroller";
 import { Storage } from "@ionic/storage-angular";
+import { FirstLastAyah } from "src/app/services/firstLastModels";
 
 @Component({
   selector: "app-read",
@@ -754,7 +755,7 @@ export class ReadPage implements OnInit {
   toggleMuhammadiFont() {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
-  getFirstAndLastAyahNumberOnPage() {
+  getFirstAndLastAyahNumberOnPage(): FirstLastAyah {
     //firat ayah
     const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
     let lineCounter = 0;
@@ -763,19 +764,23 @@ export class ReadPage implements OnInit {
       txt = this.lines[lineCounter];
       lineCounter++;
     } while (!re.test(txt));
-    console.log(txt);
-    let firstVerseNum = txt
-      .split(" ")
-      .find((word) => re.test(word))
-      .split(this.surahService.diacritics.AYAH_MARK)[1];
-    firstVerseNum = this.getEnNumber(firstVerseNum);
+    let firstVerseNum = parseInt(
+      this.getEnNumber(
+        txt
+          .split(" ")
+          .find((word) => re.test(word))
+          .split(this.surahService.diacritics.AYAH_MARK)[1]
+      )
+    );
     //last ayah
     let lastLineWordsArr = this.lines[this.lines?.length - 1].trim().split(" ");
-    let lastVerseNum = lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
-      this.surahService.diacritics.AYAH_MARK
-    )[1];
-    console.log(lastLineWordsArr);
-    lastVerseNum = this.getEnNumber(lastVerseNum);
+    let lastVerseNum = parseInt(
+      this.getEnNumber(
+        lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
+          this.surahService.diacritics.AYAH_MARK
+        )[1]
+      )
+    );
     console.log(
       `FIRST AND LAST AYAH ON PAGE: ${firstVerseNum} ${lastVerseNum}`
     );
@@ -783,8 +788,20 @@ export class ReadPage implements OnInit {
     let lastSurahNum = this.getCorrectedSurahNumberWithRespectTo(
       this.lines?.length - 1
     );
-    console.log(firstSurahNum, lastSurahNum);
-    return [firstVerseNum, lastVerseNum];
+    const firstLastAyah = {
+      first: {
+        firstSurahNum,
+        firstVerseNum,
+        verseId: `${firstSurahNum}:${firstVerseNum}`,
+      },
+      last: {
+        lastSurahNum,
+        lastVerseNum,
+        verseId: `${lastSurahNum}:${lastVerseNum}`,
+      },
+    };
+    console.log(firstLastAyah);
+    return firstLastAyah;
   }
   getEnNumber(num: string) {
     return this.surahService

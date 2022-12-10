@@ -411,7 +411,6 @@ export class ReadPage implements OnInit {
     }
     this.isCompleteMushaf = this.pages.length === 611;
     this.updateCalculatedNumbers();
-    this.getLastAyahNumberOnPage();
     if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
@@ -466,7 +465,7 @@ export class ReadPage implements OnInit {
         .classList.add("centered-table-text");
     }
     this.setBookmark();
-    this.getLastAyahNumberOnPage();
+    this.getFirstAndLastAyahNumberOnPage();
   }
 
   resetPopup(popup: HTMLElement) {
@@ -518,20 +517,25 @@ export class ReadPage implements OnInit {
           .split(this.surahService.diacritics.AYAH_MARK)[1];
         verseNum = this.getEnNumber(verseNum);
         console.log(txt);
-        const lineNumbers = this.lines
-          .map((l, i) => {
-            if (l.includes(this.surahService.diacritics.BISM) && n != i - 1)
-              return i;
-          })
-          .filter(Boolean);
-        const correctedSurahNum =
-          (this.isCompleteMushaf
-            ? this.surahCalculated
-            : this.surahCalculatedForJuz) -
-          lineNumbers.filter((l) => l > n).length;
-        this.readTrans(`${correctedSurahNum}:${verseNum}`);
+        this.readTrans(
+          `${this.getCorrectedSurahNumberWithRespectTo(n)}:${verseNum}`
+        );
       }
     }
+  }
+  getCorrectedSurahNumberWithRespectTo(lineNo) {
+    let lineNumbers = this.lines
+      .map((l, i) => {
+        if (l.includes(this.surahService.diacritics.BISM) && lineNo != i - 1)
+          return i;
+      })
+      .filter(Boolean);
+    const correctedSurahNum =
+      (this.isCompleteMushaf
+        ? this.surahCalculated
+        : this.surahCalculatedForJuz) -
+      lineNumbers.filter((l) => l > lineNo).length;
+    return correctedSurahNum;
   }
   async presentToastWithOptions(msg, pos) {
     const toast = await this.toastController.create({
@@ -750,14 +754,37 @@ export class ReadPage implements OnInit {
   toggleMuhammadiFont() {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
-  getLastAyahNumberOnPage() {
+  getFirstAndLastAyahNumberOnPage() {
+    //firat ayah
+    const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
+    let lineCounter = 0;
+    let txt = "";
+    do {
+      txt = this.lines[lineCounter];
+      lineCounter++;
+    } while (!re.test(txt));
+    console.log(txt);
+    let firstVerseNum = txt
+      .split(" ")
+      .find((word) => re.test(word))
+      .split(this.surahService.diacritics.AYAH_MARK)[1];
+    firstVerseNum = this.getEnNumber(firstVerseNum);
+    //last ayah
     let lastLineWordsArr = this.lines[this.lines?.length - 1].trim().split(" ");
-    let result = lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
+    let lastVerseNum = lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
       this.surahService.diacritics.AYAH_MARK
     )[1];
-    result = this.getEnNumber(result);
-    console.log("LAST AYAH ON THIS PAGE: " + result);
-    return result;
+    console.log(lastLineWordsArr);
+    lastVerseNum = this.getEnNumber(lastVerseNum);
+    console.log(
+      `FIRST AND LAST AYAH ON PAGE: ${firstVerseNum} ${lastVerseNum}`
+    );
+    let firstSurahNum = this.getCorrectedSurahNumberWithRespectTo(0);
+    let lastSurahNum = this.getCorrectedSurahNumberWithRespectTo(
+      this.lines?.length - 1
+    );
+    console.log(firstSurahNum, lastSurahNum);
+    return [firstVerseNum, lastVerseNum];
   }
   getEnNumber(num: string) {
     return this.surahService
@@ -892,6 +919,7 @@ export class ReadPage implements OnInit {
     this.lines = this.pages[this.currentPage - 1].split("\n");
     this.setBookmark();
     this.updateCalculatedNumbers();
+    this.getFirstAndLastAyahNumberOnPage();
   }
   gotoPageAndHighlightLine(p, l) {
     console.log(p, l);

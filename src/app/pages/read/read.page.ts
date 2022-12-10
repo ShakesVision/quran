@@ -520,7 +520,8 @@ export class ReadPage implements OnInit {
         console.log(txt);
         const lineNumbers = this.lines
           .map((l, i) => {
-            if (l.includes(this.surahService.diacritics.BISM)) return i;
+            if (l.includes(this.surahService.diacritics.BISM) && n != i - 1)
+              return i;
           })
           .filter(Boolean);
         const correctedSurahNum =

@@ -32,7 +32,8 @@ export class ReadPage implements OnInit {
   currentSurahInfo;
   audioSrc: string;
   audio: HTMLAudioElement;
-
+  audioPlaying = false;
+  audioPlayIndex = 1;
   mushafVersion = MushafLines.Fifteen;
 
   searchResults: Array<string>;
@@ -1065,32 +1066,64 @@ export class ReadPage implements OnInit {
     }, 1000);
     // this.presentAlert("Copied"+ this.searchResults.length+ "results successfully!");
   }
-  playAudio(lang = "en") {
+  playAudio(reciterId = 7, lang = "en") {
     const ayahList = this.getAyahsListOnPage();
     const [verseIdList, verseIdListForAudio] = [
       ayahList.verseIdList,
       ayahList.verseIdListForAudio,
     ];
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=4`;
-    this.httpClient.get(url).subscribe((res: any) => {
-      console.log(res);
-      this.audioSrc = "https://verses.quran.com/" + res.verse.audio.url;
-      // https://verses.quran.com/Shatri/mp3/059010.mp3 or https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/001005.mp3
-      this.audio = new Audio(this.audioSrc);
-      this.audio.play();
-      let index = 1;
-      // for (let index = 0; index < verseIdListForAudio.length; index++) {
-      this.audio.onended = (ev) => {
-        //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
-        if (index < verseIdListForAudio.length) {
-          const re = "mp3/" + verseIdListForAudio[index] + ".mp3";
-          this.audio.src = this.audioSrc.replace(/mp3\/(.*?)\.mp3/, re);
-          this.audio.play();
-          console.log(this.audio.src);
-          index++;
-        }
-      };
-    });
+
+    // Audio already playing
+    if (this.audioPlaying) {
+      console.log("Audio already playing");
+      this.audio.pause();
+      this.audioPlaying = false;
+      return;
+    }
+    console.log(this.audio?.src);
+    // Audio not playing and not paused
+    if (!this.audio) {
+      console.log("// Audio not playing and not paused");
+      let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=${reciterId}`;
+      this.httpClient.get(url).subscribe((res: any) => {
+        console.log(res);
+        this.audioSrc = "https://verses.quran.com/" + res.verse.audio.url;
+        // https://verses.quran.com/Shatri/mp3/059010.mp3 or https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/001005.mp3
+        this.audio = new Audio(this.audioSrc);
+        this.audioPlayRoutine(verseIdListForAudio);
+      });
+    }
+
+    // Audio not playing but paused
+    else if (this.audio.paused) {
+      console.log("Audio not playing but paused");
+
+      this.audioPlayRoutine(verseIdListForAudio);
+    }
+  }
+  audioPlayRoutine(verseIdListForAudio) {
+    this.audio.play();
+    this.audioPlaying = true;
+    // for (let index = 0; index < verseIdListForAudio.length; index++) {
+    this.audio.onended = (ev) => {
+      //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
+      if (this.audioPlayIndex < verseIdListForAudio.length) {
+        const re = "mp3/" + verseIdListForAudio[this.audioPlayIndex] + ".mp3";
+        this.audio.src = this.audioSrc.replace(/mp3\/(.*?)\.mp3/, re);
+        this.audio.play();
+        console.log(this.audio.src);
+        this.audioPlayIndex++;
+      }
+      if (this.audioPlayIndex == verseIdListForAudio.length) {
+        this.stopAudio();
+      }
+    };
+  }
+  stopAudio() {
+    // this.audio.src = "";
+    this.audio.pause();
+    this.audio = undefined;
+    this.audioPlaying = false;
   }
   getAyahsListOnPage(): {
     verseIdList: Array<string>;

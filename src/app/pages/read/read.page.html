@@ -6,7 +6,13 @@
     <ion-title> {{title}} </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="playAudio()">
-        <ion-icon slot="icon-only" name="play"></ion-icon>
+        <ion-icon
+          slot="icon-only"
+          [name]="audioPlaying?'pause':'play'"
+        ></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="audioPlaying" (click)="stopAudio()">
+        <ion-icon slot="icon-only" name="stop"></ion-icon>
       </ion-button>
       <audio id="ayah-audio" [src]="audioSrc"></audio>
       <ion-button

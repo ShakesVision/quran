@@ -1066,9 +1066,12 @@ export class ReadPage implements OnInit {
     // this.presentAlert("Copied"+ this.searchResults.length+ "results successfully!");
   }
   playAudio(lang = "en") {
-    const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
-    const firstVerseKey = firstAndLast.first.verseId;
-    let url = `https://api.quran.com/api/v4/verses/by_key/${firstVerseKey}?language=${lang}&audio=4`;
+    const ayahList = this.getAyahsListOnPage();
+    const [verseIdList, verseIdListForAudio] = [
+      ayahList.verseIdList,
+      ayahList.verseIdListForAudio,
+    ];
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=4`;
     this.httpClient.get(url).subscribe((res: any) => {
       console.log(res);
       this.audioSrc = "https://verses.quran.com/" + res.verse.audio.url;
@@ -1076,49 +1079,66 @@ export class ReadPage implements OnInit {
       this.audio = new Audio(this.audioSrc);
       this.audio.play();
       let index = 1;
-      const firstSurahInfo = this.surahInfo.find((s) => {
-        return parseInt(s.index) == firstAndLast.first.firstSurahNum;
-      });
-      const lastSurahInfo = this.surahService.surahInfo.find((s) => {
-        return parseInt(s.index) == firstAndLast.last.lastSurahNum;
-      });
-      console.log(firstSurahInfo, lastSurahInfo);
-      let counter = 0;
-      for (
-        let i = firstAndLast.first.firstSurahNum;
-        i <= firstAndLast.last.lastSurahNum;
-        i++
-      ) {
-        for (
-          let j =
-            i > firstAndLast.first.firstSurahNum
-              ? 1
-              : firstAndLast.first.firstVerseNum;
-          j <= firstSurahInfo.count + counter;
-          j++
-        ) {
-          console.log(i + ":" + j);
-        }
-        counter++;
-      }
+      // for (let index = 0; index < verseIdListForAudio.length; index++) {
       this.audio.onended = (ev) => {
         //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
-        if (firstAndLast.last.verseId) {
-          const versePadded =
-            this.padStart(firstAndLast.first.firstSurahNum) +
-            this.padStart(firstAndLast.first.firstVerseNum + index);
-          const re = "mp3/" + versePadded + ".mp3";
+        if (index < verseIdListForAudio.length) {
+          const re = "mp3/" + verseIdListForAudio[index] + ".mp3";
           this.audio.src = this.audioSrc.replace(/mp3\/(.*?)\.mp3/, re);
-          console.log(this.audio.src);
-          // audio.src='http://translate.google.com/translate_tts?&tl=en&q=' + strings[index];
           this.audio.play();
+          console.log(this.audio.src);
           index++;
         }
       };
-      // (<HTMLAudioElement>document.querySelector("#ayah-audio"))
-      //   .play()
-      //   .then((_) => {});
     });
+  }
+  getAyahsListOnPage(): {
+    verseIdList: Array<string>;
+    verseIdListForAudio: Array<string>;
+  } {
+    const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
+    let verseIdList = [];
+    let verseIdListForAudio = [];
+    const firstSurahInfo = this.surahInfo.find((s) => {
+      return parseInt(s.index) == firstAndLast.first.firstSurahNum;
+    });
+    const lastSurahInfo = this.surahInfo.find((s) => {
+      return parseInt(s.index) == firstAndLast.last.lastSurahNum;
+    });
+    console.log(firstSurahInfo, lastSurahInfo);
+
+    let counter = 0;
+    for (
+      let i = firstAndLast.first.firstSurahNum;
+      i <= firstAndLast.last.lastSurahNum;
+      i++
+    ) {
+      let countTill = firstSurahInfo.count + counter;
+      if (i > firstAndLast.first.firstSurahNum) {
+        if (i == firstAndLast.last.lastSurahNum)
+          countTill = firstAndLast.last.lastVerseNum;
+        else
+          countTill = this.surahInfo.find((s) => {
+            return (
+              parseInt(s.index) == firstAndLast.first.firstSurahNum + counter
+            );
+          }).count;
+      }
+      for (
+        let j =
+          i > firstAndLast.first.firstSurahNum
+            ? 1
+            : firstAndLast.first.firstVerseNum;
+        j <= countTill;
+        j++
+      ) {
+        verseIdList.push(`${i}:${j}`);
+        verseIdListForAudio.push(`${this.padStart(i) + this.padStart(j)}`);
+      }
+      counter++;
+    }
+    console.log(verseIdList);
+    return { verseIdList, verseIdListForAudio };
   }
   padStart(val, num = 3) {
     return val.toString().padStart(3, "0");

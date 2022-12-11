@@ -5,6 +5,10 @@
     </ion-buttons>
     <ion-title> {{title}} </ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="playAudio()">
+        <ion-icon slot="icon-only" name="play"></ion-icon>
+      </ion-button>
+      <audio id="ayah-audio" [src]="audioSrc"></audio>
       <ion-button
         (click)="toggleHifzMode()"
         slot="end"

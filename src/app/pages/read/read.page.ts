@@ -30,6 +30,8 @@ export class ReadPage implements OnInit {
   translationExists: boolean = false;
   isPopoverOpen: boolean = false;
   currentSurahInfo;
+  audioSrc: string;
+  audio: HTMLAudioElement;
 
   mushafVersion = MushafLines.Fifteen;
 
@@ -413,6 +415,11 @@ export class ReadPage implements OnInit {
     this.isCompleteMushaf = this.pages.length === 611;
     this.updateCalculatedNumbers();
     if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
+    //get surah info file
+    this.surahService.getSurahInfo().subscribe((res: any) => {
+      this.surahInfo = res;
+      this.surahService.surahInfo = res;
+    });
     //highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -1057,6 +1064,64 @@ export class ReadPage implements OnInit {
       this.copyResultsBG = "dark";
     }, 1000);
     // this.presentAlert("Copied"+ this.searchResults.length+ "results successfully!");
+  }
+  playAudio(lang = "en") {
+    const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
+    const firstVerseKey = firstAndLast.first.verseId;
+    let url = `https://api.quran.com/api/v4/verses/by_key/${firstVerseKey}?language=${lang}&audio=4`;
+    this.httpClient.get(url).subscribe((res: any) => {
+      console.log(res);
+      this.audioSrc = "https://verses.quran.com/" + res.verse.audio.url;
+      // https://verses.quran.com/Shatri/mp3/059010.mp3 or https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/001005.mp3
+      this.audio = new Audio(this.audioSrc);
+      this.audio.play();
+      let index = 1;
+      const firstSurahInfo = this.surahInfo.find((s) => {
+        return parseInt(s.index) == firstAndLast.first.firstSurahNum;
+      });
+      const lastSurahInfo = this.surahService.surahInfo.find((s) => {
+        return parseInt(s.index) == firstAndLast.last.lastSurahNum;
+      });
+      console.log(firstSurahInfo, lastSurahInfo);
+      let counter = 0;
+      for (
+        let i = firstAndLast.first.firstSurahNum;
+        i <= firstAndLast.last.lastSurahNum;
+        i++
+      ) {
+        for (
+          let j =
+            i > firstAndLast.first.firstSurahNum
+              ? 1
+              : firstAndLast.first.firstVerseNum;
+          j <= firstSurahInfo.count + counter;
+          j++
+        ) {
+          console.log(i + ":" + j);
+        }
+        counter++;
+      }
+      this.audio.onended = (ev) => {
+        //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
+        if (firstAndLast.last.verseId) {
+          const versePadded =
+            this.padStart(firstAndLast.first.firstSurahNum) +
+            this.padStart(firstAndLast.first.firstVerseNum + index);
+          const re = "mp3/" + versePadded + ".mp3";
+          this.audio.src = this.audioSrc.replace(/mp3\/(.*?)\.mp3/, re);
+          console.log(this.audio.src);
+          // audio.src='http://translate.google.com/translate_tts?&tl=en&q=' + strings[index];
+          this.audio.play();
+          index++;
+        }
+      };
+      // (<HTMLAudioElement>document.querySelector("#ayah-audio"))
+      //   .play()
+      //   .then((_) => {});
+    });
+  }
+  padStart(val, num = 3) {
+    return val.toString().padStart(3, "0");
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

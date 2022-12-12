@@ -417,13 +417,15 @@ export class ReadPage implements OnInit {
     }
     this.isCompleteMushaf = this.pages.length === 611;
     this.updateCalculatedNumbers();
+    // get bookmark
     if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
-    //get surah info file
+
+    // get surah info file
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = res;
       this.surahService.surahInfo = res;
     });
-    //highlight helper listener
+    // highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
       var selection = window.getSelection();

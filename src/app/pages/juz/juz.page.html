@@ -19,7 +19,7 @@
     <div
       class="juz-btn juz-btn-full"
       (click)="gotoReadJuz('Quran')"
-      [ngStyle]="{'background': totalMemorizeStyle(), 'animation':'all ease 1s' }"
+      [ngStyle]="{'background': totalMemorizeStyle(),'background-position': 'left'}"
       [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
       attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"
     >
@@ -38,7 +38,7 @@
       *ngFor="let j of juzPages;let i = index"
       [class]="'juz-btn juz'+(i+1)+'-btn'"
       [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
-      [ngStyle]="{'background': returnStyle(i), 'animation':'all ease 1s'}"
+      [ngStyle]="{'background': returnStyle(i), 'transition':'all 1s ease'}"
       (click)="navigate(j,i+1)"
     >
       <div class="juz-heading-en">JUZ</div>

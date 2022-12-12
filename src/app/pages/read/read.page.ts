@@ -945,7 +945,9 @@ export class ReadPage implements OnInit {
   gotoPageNum(p) {
     if (!p || p > 611 || p < 1) return;
     this.currentPage = parseInt(p);
-    this.lines = this.pages[this.currentPage - 1].split("\n");
+    const content = this.pages[this.currentPage - 1];
+    this.lines = content.includes("\n") ? content.split("\n") : [content];
+    console.log(content, this.lines);
     this.setBookmark();
     this.updateCalculatedNumbers();
     this.getFirstAndLastAyahNumberOnPage();
@@ -953,7 +955,8 @@ export class ReadPage implements OnInit {
   gotoPageAndHighlightLine(p, l) {
     console.log(p, l);
     this.gotoPageNum(+p + 1);
-    this.lines = this.pages[this.currentPage - 1].split("\n");
+    const content = this.pages[this.currentPage - 1];
+    this.lines = content.includes("\n") ? content.split("\n") : [content];
     this.changeDetectorRef.detectChanges();
     setTimeout(() => {
       let el = document.getElementById("line_" + l);

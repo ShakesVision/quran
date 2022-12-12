@@ -14,14 +14,18 @@
     class="ion-margin ion-padding"
     style="
       box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-      background-image: linear-gradient(288deg, #fcfff0 0%, #f1f8f2b0 100%);
+      background-image: linear-gradient(
+        288deg,
+        var(--ion-color-secondary) 0%,
+        var(--ion-color-light) 100%
+      );
     "
   >
     <div>
-      <p>
+      <ion-text>
         We are digitizing the 15 Lines Quran & translation in Unicode, which is
         a work in progress. You can also help us complete this project.
-      </p>
+      </ion-text>
       <div class="ion-text-right ion-no-margin">
         <ion-button size="small" fill="outline" (click)="open('about')">
           <ion-icon

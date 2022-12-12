@@ -12,7 +12,7 @@
     align-items: center;
     justify-content: center;
     background-color: var(--ion-color-light);
-    transition: all 2s ease-in-out;
+    transition: background-color 0.3s ease;
     cursor: pointer;
     padding: 5px;
     position: relative;
@@ -22,6 +22,7 @@
       top: -10px;
       right: -5px;
       font-size: small;
+      display: inline-flex;
     }
     ion-button {
       position: absolute;
@@ -43,6 +44,8 @@
     width: var(--bookmarkPercentage);
     height: 1px;
     font-size: 6px;
+    display: inline-flex;
+    justify-content: flex-start;
   }
   .juz-heading-en {
     text-transform: capitalize;

@@ -1114,10 +1114,24 @@ export class ReadPage implements OnInit {
     this.audioPlaying = true;
     this.audio.play();
     this.playingVerseNum = verseIdList[this.audioPlayIndex - 1];
+    let pageFlipping = true;
     this.audio.onended = (ev) => {
+      console.log("PLAY ENDED event");
       //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
+      // Finished playing last ayah on page
       if (this.audioPlayIndex == verseIdListForAudio.length) {
-        this.stopAudio();
+        if (pageFlipping) {
+          console.log("IF part pageflip");
+
+          this.audio.src = "assets/page-flip.mp3";
+          this.audio.play();
+          pageFlipping = false;
+        } else {
+          console.log("ELSE part pageflip");
+          this.stopAudio();
+          this.gotoPageNum(this.currentPage + 1);
+          this.playAudio();
+        }
       }
       if (this.audioPlayIndex < verseIdListForAudio.length) {
         const re = "mp3/" + verseIdListForAudio[this.audioPlayIndex] + ".mp3";
@@ -1130,12 +1144,12 @@ export class ReadPage implements OnInit {
       }
     };
   }
-  stopAudio() {
+  stopAudio(persistIndex?: boolean) {
     // this.audio.src = "";
     this.audio.pause();
     this.audio = undefined;
     this.audioPlaying = false;
-    this.audioPlayIndex = 1;
+    if (!persistIndex) this.audioPlayIndex = 1;
   }
   setAudioSpeed(s) {
     if (this.audio) this.audio.playbackRate = s;
@@ -1162,6 +1176,10 @@ export class ReadPage implements OnInit {
       i++
     ) {
       let countTill = firstSurahInfo.count + counter;
+      console.log({ countTill, fCounter: firstSurahInfo.count, counter });
+      if (firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum) {
+        countTill = firstAndLast.last.lastVerseNum;
+      }
       if (i > firstAndLast.first.firstSurahNum) {
         if (i == firstAndLast.last.lastSurahNum)
           countTill = firstAndLast.last.lastVerseNum;

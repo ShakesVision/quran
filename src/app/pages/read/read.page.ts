@@ -37,6 +37,7 @@ export class ReadPage implements OnInit {
   audioSpeed = "1";
   playingVerseNum: string;
   mushafVersion = MushafLines.Fifteen;
+  isFullscreen: boolean = false;
 
   searchResults: Array<string>;
 
@@ -399,6 +400,7 @@ export class ReadPage implements OnInit {
       this.title = juzData.title;
       this.pages = this.surah.split("\n\n");
       this.lines = this.pages[this.currentPage - 1].split("\n");
+      console.log(this.lines);
       // this.calculateRukuArray();
       this.rukuArray = [...juzData.rukuArray];
     } else if (!juzData) {
@@ -419,7 +421,6 @@ export class ReadPage implements OnInit {
     this.updateCalculatedNumbers();
     // get bookmark
     if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
-
     // get surah info file
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = res;
@@ -768,7 +769,8 @@ export class ReadPage implements OnInit {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
   getFirstAndLastAyahNumberOnPage(): FirstLastAyah {
-    //firat ayah
+    if (this.currentPage === 1) return;
+    //first ayah
     const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
     let lineCounter = 0;
     let txt = "";
@@ -945,9 +947,8 @@ export class ReadPage implements OnInit {
   gotoPageNum(p) {
     if (!p || p > 611 || p < 1) return;
     this.currentPage = parseInt(p);
-    const content = this.pages[this.currentPage - 1];
-    this.lines = content.includes("\n") ? content.split("\n") : [content];
-    console.log(content, this.lines);
+    this.lines = this.pages[this.currentPage - 1].split("\n");
+
     this.setBookmark();
     this.updateCalculatedNumbers();
     this.getFirstAndLastAyahNumberOnPage();
@@ -955,8 +956,7 @@ export class ReadPage implements OnInit {
   gotoPageAndHighlightLine(p, l) {
     console.log(p, l);
     this.gotoPageNum(+p + 1);
-    const content = this.pages[this.currentPage - 1];
-    this.lines = content.includes("\n") ? content.split("\n") : [content];
+    this.lines = this.pages[this.currentPage - 1].split("\n");
     this.changeDetectorRef.detectChanges();
     setTimeout(() => {
       let el = document.getElementById("line_" + l);
@@ -1122,7 +1122,6 @@ export class ReadPage implements OnInit {
       if (this.audioPlayIndex == verseIdListForAudio.length) {
         if (pageFlipping) {
           console.log("IF part pageflip");
-
           this.audio.src = "assets/page-flip.mp3";
           this.audio.play();
           pageFlipping = false;
@@ -1218,5 +1217,6 @@ export class ReadPage implements OnInit {
     if (popover) this.popoverController.dismiss();
     const alert = await this.alertController.getTop();
     if (alert) this.alertController.dismiss();
+    if (this.audio) this.stopAudio();
   }
 }

@@ -86,6 +86,9 @@ ion-footer {
   align-items: center;
   width: 100%;
   justify-content: center;
+  ion-button {
+    font-size: x-small;
+  }
 }
 .popup,
 .trans {

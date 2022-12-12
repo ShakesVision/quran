@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage-angular";
+import { throwIfEmpty } from "rxjs/operators";
 import { SurahService } from "src/app/services/surah.service";
 
 @Component({
@@ -16,6 +17,8 @@ export class JuzPage implements OnInit {
   rukuArray = [];
   memorizeItems: [];
   unicodeBookmarkPageNum: number;
+  lastSyncedAt: Date;
+  syncing = false;
 
   constructor(
     private router: Router,
@@ -28,8 +31,17 @@ export class JuzPage implements OnInit {
 
   ngOnInit() {
     this.gotoReadJuz("Quran", true);
+    this.lastSynced();
   }
 
+  lastSynced() {
+    this.storage.get("synced").then((time) => {
+      if (time) {
+        console.log(time);
+        this.lastSyncedAt = time;
+      }
+    });
+  }
   updateMemorizeArray() {
     this.storage.get("memorize").then((items) => {
       if (items) {
@@ -58,6 +70,7 @@ export class JuzPage implements OnInit {
       });
   }
   fetchAndSaveInDeviceStorage(juz, stopNav = false) {
+    this.syncing = true;
     this.httpClient
       .get(
         `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@master/15Lines/${juz}.txt`,
@@ -66,11 +79,15 @@ export class JuzPage implements OnInit {
       .subscribe(
         (res) => {
           console.log("Fetch successful...");
+          this.syncing = false;
+          this.juzPages = [];
           if (stopNav) this.calculateJuzData(res);
           // Add extra line (\n) at the end of each file to avoid truncating last line of the file in split
           const juzData = { title: juz, data: res, rukuArray: this.rukuArray };
           this.storage.set(juz, juzData).then((_) => {
             console.log("Have been saved in your device successfully.");
+            this.lastSyncedAt = new Date();
+            this.storage.set("synced", this.lastSyncedAt).then((_) => {});
           });
           if (!stopNav) this.navigate(juzData);
         },

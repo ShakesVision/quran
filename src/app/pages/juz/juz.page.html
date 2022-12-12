@@ -4,6 +4,24 @@
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title>Juz</ion-title>
+    <ion-buttons slot="end">
+      <div class="last-synced-time ion-margin-end">
+        <span class="date">{{lastSyncedAt | date: 'd/M/yy'}}</span>
+        <span class="time">{{lastSyncedAt | date: 'h:mm:ss a'}}</span>
+      </div>
+      <div class="sync-btn-wrapper">
+        <ion-button
+          (click)="fetchAndSaveInDeviceStorage('Quran',true)"
+          fill="clear"
+          color="medium"
+          size="small"
+        >
+          <ion-icon *ngIf="!syncing" slot="start" name="sync"></ion-icon>
+          <ion-spinner *ngIf="syncing" name="crescent"></ion-spinner>
+          Sync
+        </ion-button>
+      </div>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -23,13 +41,6 @@
       [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
       attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"
     >
-      <ion-button
-        (click)="fetchAndSaveInDeviceStorage('Quran')"
-        fill="clear"
-        color="medium"
-      >
-        <ion-icon slot="icon-only" name="sync"></ion-icon>
-      </ion-button>
       <div class="juz-heading-en">Read Complete Quran</div>
       <div class="juz-number">1-30</div>
       <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>

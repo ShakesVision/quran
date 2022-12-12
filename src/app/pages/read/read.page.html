@@ -16,11 +16,13 @@
             <ion-text class="verse-num">{{playingVerseNum}}</ion-text>
           </div>
           <ion-select
+            style="font-size: small"
             placeholder="Speed"
             value="1"
             [(ngModel)]="audioSpeed"
             (ionChange)="setAudioSpeed($event.target.value)"
           >
+            <ion-select-option value="3">3x</ion-select-option>
             <ion-select-option value="2.5">2.5x</ion-select-option>
             <ion-select-option value="2">2x</ion-select-option>
             <ion-select-option value="1.75">1.75x</ion-select-option>
@@ -74,7 +76,9 @@
 <ion-content>
   <div class="page-wrapper ar ar2 ion-margin-top">
     <div class="page-top-info">
-      <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || juzmode">
+      <ng-container
+        *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)"
+      >
         <span class="juz-number">
           {{ isCompleteMushaf? (surahCalculated === 1? 'سورۃ' :
           (surahService.juzNames[juzCalculated-1] + ' ' +
@@ -327,14 +331,22 @@
 <ion-footer>
   <div class="btmNav">
     <ion-button
-      shape="round"
+      class="nav-btns"
+      fill="clear"
+      [disabled]="currentPage==pages?.length"
+      (click)="gotoPageNum(pages?.length)"
+    >
+      <ion-icon name="chevron-back-circle-outline"></ion-icon>
+    </ion-button>
+    <ion-button
+      class="nav-btns"
       fill="clear"
       [disabled]="currentPage==pages?.length"
       (click)="goToPage(1)"
     >
-      <ion-icon name="chevron-back-circle-outline"></ion-icon>
+      <ion-icon name="chevron-back-outline"></ion-icon>
     </ion-button>
-    <div style="font-size: small">
+    <div style="font-size: x-small">
       <ion-label color="dark">Page </ion-label>
       <ion-input
         color="dark"
@@ -346,12 +358,23 @@
       <ion-label color="dark"> of {{pages?.length}}</ion-label>
     </div>
     <ion-button
-      shape="round"
+      class="nav-btns"
       fill="clear"
       [disabled]="currentPage==1"
       (click)="goToPage(-1)"
     >
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </ion-button>
+    <ion-button
+      class="nav-btns"
+      fill="clear"
+      [disabled]="currentPage==1"
+      (click)="gotoPageNum(1)"
+    >
       <ion-icon name="chevron-forward-circle-outline"></ion-icon>
     </ion-button>
   </div>
+  <!-- <ion-button (click)="isFullscreen=!isFullscreen" fill="clear">
+    <ion-icon slot="icon-only" name="resize"></ion-icon>
+  </ion-button> -->
 </ion-footer>

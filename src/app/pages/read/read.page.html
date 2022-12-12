@@ -3,18 +3,45 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title> {{title}} </ion-title>
+    <ion-title
+      [ngStyle]="{'visibility': audioPlaying?'hidden':'visible', 'max-width':audioPlaying?'0':'100%'}"
+    >
+      {{title}}
+    </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="playAudio()">
-        <ion-icon
-          slot="icon-only"
-          [name]="audioPlaying?'pause':'play'"
-        ></ion-icon>
-      </ion-button>
-      <ion-button *ngIf="audioPlaying" (click)="stopAudio()">
-        <ion-icon slot="icon-only" name="stop"></ion-icon>
-      </ion-button>
-      <audio id="ayah-audio" [src]="audioSrc"></audio>
+      <div *ngIf="juzmode" class="aud-controls-wrapper">
+        <div *ngIf="audioPlaying" class="aud-controls">
+          <div class="gif-text">
+            <ion-img src="assets/audio-playing.gif" class="gif"></ion-img>
+            <ion-text class="verse-num">{{playingVerseNum}}</ion-text>
+          </div>
+          <ion-select
+            placeholder="Speed"
+            value="1"
+            [(ngModel)]="audioSpeed"
+            (ionChange)="setAudioSpeed($event.target.value)"
+          >
+            <ion-select-option value="2.5">2.5x</ion-select-option>
+            <ion-select-option value="2">2x</ion-select-option>
+            <ion-select-option value="1.75">1.75x</ion-select-option>
+            <ion-select-option value="1.5">1.5x</ion-select-option>
+            <ion-select-option value="1.25">1.25x</ion-select-option>
+            <ion-select-option value="1">1x</ion-select-option>
+            <ion-select-option value="0.5">0.5x</ion-select-option>
+            <ion-select-option value="0.25">0.25x</ion-select-option>
+          </ion-select>
+          <ion-button (click)="stopAudio()" class="stop-btn">
+            <ion-icon slot="icon-only" name="stop"></ion-icon>
+          </ion-button>
+        </div>
+        <ion-button (click)="playAudio()">
+          <ion-icon
+            slot="icon-only"
+            [name]="audioPlaying?'pause':'play'"
+          ></ion-icon>
+        </ion-button>
+        <audio id="ayah-audio" [src]="audioSrc"></audio>
+      </div>
       <ion-button
         (click)="toggleHifzMode()"
         slot="end"

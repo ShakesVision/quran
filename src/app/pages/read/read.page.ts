@@ -34,6 +34,8 @@ export class ReadPage implements OnInit {
   audio: HTMLAudioElement;
   audioPlaying = false;
   audioPlayIndex = 1;
+  audioSpeed = "1";
+  playingVerseNum: string;
   mushafVersion = MushafLines.Fifteen;
 
   searchResults: Array<string>;
@@ -1090,7 +1092,7 @@ export class ReadPage implements OnInit {
         this.audioSrc = "https://verses.quran.com/" + res.verse.audio.url;
         // https://verses.quran.com/Shatri/mp3/059010.mp3 or https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/001005.mp3
         this.audio = new Audio(this.audioSrc);
-        this.audioPlayRoutine(verseIdListForAudio);
+        this.audioPlayRoutine(verseIdListForAudio, verseIdList);
       });
     }
 
@@ -1098,24 +1100,28 @@ export class ReadPage implements OnInit {
     else if (this.audio.paused) {
       console.log("Audio not playing but paused");
 
-      this.audioPlayRoutine(verseIdListForAudio);
+      this.audioPlayRoutine(verseIdListForAudio, verseIdList);
     }
   }
-  audioPlayRoutine(verseIdListForAudio) {
-    this.audio.play();
+  audioPlayRoutine(verseIdListForAudio, verseIdList) {
+    console.log(verseIdListForAudio);
+    this.setAudioSpeed(this.audioSpeed);
     this.audioPlaying = true;
-    // for (let index = 0; index < verseIdListForAudio.length; index++) {
+    this.audio.play();
+    this.playingVerseNum = verseIdList[this.audioPlayIndex - 1];
     this.audio.onended = (ev) => {
       //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
+      if (this.audioPlayIndex == verseIdListForAudio.length) {
+        this.stopAudio();
+      }
       if (this.audioPlayIndex < verseIdListForAudio.length) {
         const re = "mp3/" + verseIdListForAudio[this.audioPlayIndex] + ".mp3";
         this.audio.src = this.audioSrc.replace(/mp3\/(.*?)\.mp3/, re);
+        this.setAudioSpeed(this.audioSpeed);
         this.audio.play();
+        this.playingVerseNum = verseIdList[this.audioPlayIndex];
         console.log(this.audio.src);
         this.audioPlayIndex++;
-      }
-      if (this.audioPlayIndex == verseIdListForAudio.length) {
-        this.stopAudio();
       }
     };
   }
@@ -1124,6 +1130,10 @@ export class ReadPage implements OnInit {
     this.audio.pause();
     this.audio = undefined;
     this.audioPlaying = false;
+    this.audioPlayIndex = 1;
+  }
+  setAudioSpeed(s) {
+    if (this.audio) this.audio.playbackRate = s;
   }
   getAyahsListOnPage(): {
     verseIdList: Array<string>;
@@ -1156,6 +1166,10 @@ export class ReadPage implements OnInit {
               parseInt(s.index) == firstAndLast.first.firstSurahNum + counter
             );
           }).count;
+
+        // Add Bism line before each 'next surah'
+        verseIdList.push(`${1}:${1}`);
+        verseIdListForAudio.push(`${this.padStart(1) + this.padStart(1)}`);
       }
       for (
         let j =

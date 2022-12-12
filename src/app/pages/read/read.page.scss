@@ -212,3 +212,27 @@ virtual-scroller {
     background-color: #a3c0ff;
   }
 }
+.aud-controls-wrapper {
+  display: flex;
+  .aud-controls {
+    display: inline-flex;
+    align-items: center;
+    font-size: small;
+    .verse-num {
+      font-size: 10px;
+      padding-left: 2px;
+    }
+    .gif-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .gif {
+      width: 24px;
+    }
+    .stop-btn {
+      width: 38px;
+    }
+  }
+}

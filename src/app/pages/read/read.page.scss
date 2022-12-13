@@ -217,6 +217,11 @@ virtual-scroller {
 }
 .aud-controls-wrapper {
   display: flex;
+  .qari-wrapper {
+    margin-top: 5px;
+    width: 100px;
+    font-size: xx-small;
+  }
   .aud-controls {
     display: inline-flex;
     align-items: center;

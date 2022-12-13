@@ -16,6 +16,7 @@
             <ion-text class="verse-num">{{playingVerseNum}}</ion-text>
           </div>
           <ion-select
+            interface="popover"
             style="font-size: small"
             placeholder="Speed"
             value="1"
@@ -35,6 +36,18 @@
           <ion-button (click)="stopAudio()" class="stop-btn">
             <ion-icon slot="icon-only" name="stop"></ion-icon>
           </ion-button>
+        </div>
+        <div *ngIf="!audioPlaying" class="qari-wrapper">
+          <ion-select
+            *ngIf="reciters"
+            interface="popover"
+            (ionChange)="qariChanged($event.target.value)"
+            placeholder="Qaari"
+          >
+            <ion-select-option *ngFor="let r of reciters" [value]="r.id"
+              >{{r.id+'. '+r.name}}</ion-select-option
+            >
+          </ion-select>
         </div>
         <ion-button (click)="playAudio()">
           <ion-icon

@@ -292,6 +292,10 @@ export class SurahService {
   getSurahInfo() {
     return this.http.get("assets/surah.json");
   }
+  fetchQariList() {
+    const url = `https://api.quran.com/api/v4/resources/chapter_reciters?language=ar`;
+    return this.http.get(url);
+  }
 
   p2e = (s) => s?.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
   a2e = (s) => s?.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));

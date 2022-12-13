@@ -80,8 +80,7 @@ export class ListenPage implements OnInit {
     });
   }
   fetchQariList() {
-    const url = `https://api.quran.com/api/v4/resources/chapter_reciters?language=ar`;
-    this.http.get(url).subscribe((res: any) => {
+    this.surahService.fetchQariList().subscribe((res: any) => {
       console.log(res);
       this.reciters = res.reciters;
     });

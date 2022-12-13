@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChild,
+} from "@angular/core";
 import { SurahService } from "./../../services/surah.service";
 import { PopoverController, ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
@@ -15,7 +21,7 @@ import { FirstLastAyah } from "src/app/services/firstLastModels";
   templateUrl: "./read.page.html",
   styleUrls: ["./read.page.scss"],
 })
-export class ReadPage implements OnInit {
+export class ReadPage implements OnInit, AfterViewInit {
   @ViewChild(VirtualScrollerComponent, { static: false })
   surah;
   lines: string[];
@@ -36,6 +42,8 @@ export class ReadPage implements OnInit {
   audioPlayIndex = 1;
   audioSpeed = "1";
   playingVerseNum: string;
+  reciters = [];
+  qariId: number = 7;
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
 
@@ -131,6 +139,10 @@ export class ReadPage implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    this.fetchQariList();
+  }
+
   async getBookmark() {
     await this.storage.create();
     this.storage.get("unicodeBookmark").then((pageNum) => {
@@ -206,6 +218,7 @@ export class ReadPage implements OnInit {
       if (!this.juzmode)
         this.presentToastWithOptions(
           `Translation for ${this.title} is not available!`,
+          "dark",
           "top"
         );
       else {
@@ -243,11 +256,12 @@ export class ReadPage implements OnInit {
       lineNumbers.filter((l) => l > lineNo).length;
     return correctedSurahNum;
   }
-  async presentToastWithOptions(msg, pos) {
+  async presentToastWithOptions(msg, color, pos, duration = 3000) {
     const toast = await this.toastController.create({
       message: msg,
       position: pos,
-      duration: 2000,
+      color: color,
+      duration: duration,
       buttons: [
         {
           text: "Ok",
@@ -273,7 +287,11 @@ export class ReadPage implements OnInit {
             this.copyAnything(
               this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`)
             );
-            this.presentToastWithOptions("Copied successfully!", "bottom");
+            this.presentToastWithOptions(
+              "Copied successfully!",
+              "success-light",
+              "bottom"
+            );
           },
         },
         {
@@ -765,7 +783,7 @@ export class ReadPage implements OnInit {
     }, 1000);
     // this.presentAlert("Copied"+ this.searchResults.length+ "results successfully!");
   }
-  playAudio(reciterId = 7, lang = "en") {
+  playAudio(lang = "en") {
     const ayahList = this.getAyahsListOnPage();
     const [verseIdList, verseIdListForAudio] = [
       ayahList.verseIdList,
@@ -783,10 +801,19 @@ export class ReadPage implements OnInit {
     // Audio not playing and not paused
     if (!this.audio) {
       console.log("// Audio not playing and not paused");
-      let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=${reciterId}`;
+      console.log(this.qariId);
+      let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=${this.qariId}`;
       this.httpClient.get(url).subscribe((res: any) => {
         console.log(res);
-        this.audioSrc = "https://verses.quran.com/" + res.verse.audio.url;
+        this.audioSrc = "https://verses.quran.com/" + res.verse.audio?.url;
+        if (!res.verse.audio) {
+          this.presentToastWithOptions(
+            `The selected Qari might not have the audio for the verse ${verseIdList[0]}. Try another Qaris from the list.`,
+            "warning",
+            "middle"
+          );
+          return;
+        }
         // https://verses.quran.com/Shatri/mp3/059010.mp3 or https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/001005.mp3
         this.audio = new Audio(this.audioSrc);
         this.audioPlayRoutine(verseIdListForAudio, verseIdList);
@@ -918,6 +945,16 @@ export class ReadPage implements OnInit {
   }
   padStart(val, num = 3) {
     return val.toString().padStart(3, "0");
+  }
+  fetchQariList() {
+    this.surahService.fetchQariList().subscribe((res: any) => {
+      console.log(res);
+      this.reciters = res.reciters?.sort((a, b) => a.id - b.id);
+    });
+  }
+  qariChanged(e) {
+    console.log(e);
+    this.qariId = parseInt(e);
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

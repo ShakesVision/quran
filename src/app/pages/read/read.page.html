@@ -1,14 +1,14 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title
       [ngStyle]="{'visibility': audioPlaying?'hidden':'visible', 'max-width':audioPlaying?'0':'100%'}"
     >
       {{title}}
     </ion-title>
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" class="btn-controls-top">
       <div *ngIf="juzmode" class="aud-controls-wrapper">
         <div *ngIf="audioPlaying" class="aud-controls">
           <div class="gif-text">
@@ -42,9 +42,13 @@
             *ngIf="reciters"
             interface="popover"
             (ionChange)="qariChanged($event.target.value)"
-            placeholder="Qaari"
+            [placeholder]="selectedQari?selectedQari?.id+'. '+selectedQari?.name:'Qaari'"
+            [(ngModel)]="qariId"
           >
-            <ion-select-option *ngFor="let r of reciters" [value]="r.id"
+            <ion-select-option
+              style="font-size: small"
+              *ngFor="let r of reciters"
+              [value]="r.id"
               >{{r.id+'. '+r.name}}</ion-select-option
             >
           </ion-select>

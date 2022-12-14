@@ -43,7 +43,8 @@ export class ReadPage implements OnInit, AfterViewInit {
   audioSpeed = "1";
   playingVerseNum: string;
   reciters = [];
-  qariId: number = 7;
+  qariId: number;
+  selectedQari;
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
 
@@ -141,6 +142,7 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.fetchQariList();
+    this.qariId = 7;
   }
 
   async getBookmark() {
@@ -801,7 +803,6 @@ export class ReadPage implements OnInit, AfterViewInit {
     // Audio not playing and not paused
     if (!this.audio) {
       console.log("// Audio not playing and not paused");
-      console.log(this.qariId);
       let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=${this.qariId}`;
       this.httpClient.get(url).subscribe((res: any) => {
         console.log(res);
@@ -833,21 +834,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.audioPlaying = true;
     this.audio.play();
     this.playingVerseNum = verseIdList[this.audioPlayIndex - 1];
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: `Quran ${this.playingVerseNum} | P ${
-          this.isCompleteMushaf ? this.currentPage : this.currentPageCalculated
-        }`,
-        artist: `${
-          this.surahService.surahNames[
-            verseIdListForAudio[this.audioPlayIndex - 1] - 1
-          ]
-        }`,
-        album: `Juz ${this.juzCalculated} ${
-          this.surahService.juzNames[this.juzCalculated - 1]
-        }`,
-      });
-    }
+
     let pageFlipping = true;
     this.audio.onended = (ev) => {
       console.log("PLAY ENDED event");
@@ -872,6 +859,23 @@ export class ReadPage implements OnInit, AfterViewInit {
         this.setAudioSpeed(this.audioSpeed);
         this.audio.play();
         this.playingVerseNum = verseIdList[this.audioPlayIndex];
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: `Quran ${this.playingVerseNum} | Page ${
+              this.isCompleteMushaf
+                ? this.currentPage
+                : this.currentPageCalculated
+            }`,
+            artist: `Surah ${
+              this.surahService.surahNames[
+                parseInt(this.playingVerseNum.split(":")[0]) - 1
+              ]
+            }`,
+            album: `Juz ${this.juzCalculated} ${
+              this.surahService.juzNames[this.juzCalculated - 1]
+            }`,
+          });
+        }
         console.log(this.audio.src);
         this.audioPlayIndex++;
       }
@@ -950,11 +954,15 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.surahService.fetchQariList().subscribe((res: any) => {
       console.log(res);
       this.reciters = res.reciters?.sort((a, b) => a.id - b.id);
+      this.qariId = 7;
+      this.selectedQari = this.reciters.find((r) => r.id == this.qariId);
+      console.log(this.selectedQari);
     });
   }
-  qariChanged(e) {
-    console.log(e);
-    this.qariId = parseInt(e);
+  qariChanged(r) {
+    console.log(r);
+    this.selectedQari = r;
+    this.qariId = parseInt(r);
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

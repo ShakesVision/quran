@@ -16,7 +16,7 @@
   "dependencies": {
     "@angular/common": "~13.2.6",
     "@angular/core": "~13.2.6",
-    "@angular/fire": "^5.2.3",
+    "@angular/fire": "^7.5.0",
     "@angular/forms": "~13.2.6",
     "@angular/platform-browser": "~13.2.6",
     "@angular/platform-browser-dynamic": "~13.2.6",
@@ -38,7 +38,7 @@
     "firebase": "^7.5.2",
     "ngx-pinch-zoom": "^2.6.2",
     "ngx-virtual-scroller": "^4.0.3",
-    "rxjs": "~6.5.1",
+    "rxjs": "^6.5.3",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.4"
   },

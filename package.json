@@ -16,7 +16,7 @@
   "dependencies": {
     "@angular/common": "~13.2.6",
     "@angular/core": "~13.2.6",
-    "@angular/fire": "^7.5.0",
+    "@angular/fire": "^7.0.0",
     "@angular/forms": "~13.2.6",
     "@angular/platform-browser": "~13.2.6",
     "@angular/platform-browser-dynamic": "~13.2.6",
@@ -35,7 +35,7 @@
     "cordova-plugin-ionic": "5.4.7",
     "core-js": "^2.5.4",
     "deta": "^1.1.0",
-    "firebase": "^7.5.2",
+    "firebase": "^9.15.0",
     "ngx-pinch-zoom": "^2.6.2",
     "ngx-virtual-scroller": "^4.0.3",
     "rxjs": "^6.5.3",

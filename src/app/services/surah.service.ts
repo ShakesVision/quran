@@ -3,11 +3,11 @@ import { Injectable } from "@angular/core";
 import {
   AngularFirestore,
   AngularFirestoreCollection,
-} from "@angular/fire/firestore";
+} from "@angular/fire/compat/firestore";
 import { map, take } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 @Injectable({
   providedIn: "root",
@@ -217,7 +217,7 @@ export class SurahService {
     "الفـلق",
     "النـاس",
   ];
-  isLoggedIn = this.afAuth.authState;
+  isLoggedIn = this.afAuth.onAuthStateChanged; //this.afAuth.authState;
   constructor(
     private afs: AngularFirestore,
     private http: HttpClient,
@@ -237,10 +237,10 @@ export class SurahService {
   //   return this.afAuth.auth.createUserWithEmailAndPassword(email, password);
   // }
   signin(email, password) {
-    return this.afAuth.auth.signInWithEmailAndPassword(email, password);
+    return this.afAuth.signInWithEmailAndPassword(email, password);
   }
   signout() {
-    return this.afAuth.auth.signOut();
+    return this.afAuth.signOut();
   }
 
   addSurah(item: Surah) {

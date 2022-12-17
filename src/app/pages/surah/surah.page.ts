@@ -4,7 +4,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { SurahService } from "./../../services/surah.service";
 import { Surah, Index } from "./../../services/surah";
 import { AlertController, ToastController } from "@ionic/angular";
-import { User } from "firebase";
+import { User } from "firebase/auth";
 
 @Component({
   selector: "app-surah",
@@ -27,7 +27,10 @@ export class SurahPage implements OnInit {
     // this.items = this.surahService.getSurahs();
     this.items = this.surahService.getIndexes();
     this.items.subscribe((res) => console.log(res));
-    this.surahService.isLoggedIn.subscribe((user) => {
+  }
+
+  ionViewWillEnter() {
+    this.surahService.isLoggedIn((user: User) => {
       console.log("subscription authstate", user);
       this.loggedInUser = user;
       this.isLoggedIn = !!user;

@@ -182,7 +182,7 @@ export class ReadPage implements OnInit, AfterViewInit {
       console.log("running");
       document
         .querySelector(`div#line_${this.arabicLines.length - 1}`)
-        .classList.add("centered-table-text");
+        ?.classList.add("centered-table-text");
     }
     this.setBookmark();
     this.getFirstAndLastAyahNumberOnPage();
@@ -481,7 +481,11 @@ export class ReadPage implements OnInit, AfterViewInit {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
   getFirstAndLastAyahNumberOnPage(): FirstLastAyah {
-    if (this.juzmode && this.isCompleteMushaf && this.currentPage === 1) return;
+    if (
+      (this.juzmode && this.isCompleteMushaf && this.currentPage === 1) ||
+      !this.juzmode
+    )
+      return;
     //first ayah
     const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
     let lineCounter = 0;

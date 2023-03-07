@@ -34,7 +34,7 @@ export class SurahPage implements OnInit {
       console.log("subscription authstate", user);
       this.loggedInUser = user;
       this.isLoggedIn = !!user;
-      this.isAdmin = user.email == "sarbakafgroup@gmail.com";
+      this.isAdmin = user?.email == "sarbakafgroup@gmail.com";
     });
   }
 

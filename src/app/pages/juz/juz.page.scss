@@ -18,7 +18,8 @@ ion-header {
   display: grid;
   grid-template-columns: auto auto auto;
   grid-gap: 15px;
-  .juz-btn:first-child {
+  .juz-btn:first-child,
+  ion-segment {
     grid-column: 1/4;
   }
   .juz-btn {

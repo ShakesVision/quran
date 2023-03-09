@@ -19,6 +19,7 @@ export class JuzPage implements OnInit {
   unicodeBookmarkPageNum: number;
   lastSyncedAt: Date;
   syncing = false;
+  segment: "juz" | "surah" = "surah";
 
   constructor(
     private router: Router,
@@ -127,20 +128,40 @@ export class JuzPage implements OnInit {
     console.log(this.juzPages);
 
     // try for surahs similarly
-    /* const surahPageNumbers = this.surahService.surahPageNumbers;
+    const surahPageNumbers = this.surahService.surahPageNumbers;
+    const repeatedItems = this.findRepeatedItems(surahPageNumbers);
     console.log(surahPageNumbers);
     surahPageNumbers.forEach((pageNumber, surahIndex) => {
       const singleSurahPages = this.pages.filter((p, i) => {
-        const isSurahPage: boolean =
-          i >= pageNumber - 1 &&
-          (!!surahPageNumbers[surahIndex + 1]
-            ? i < surahPageNumbers[surahIndex + 1] - 1
-            : i < this.pages.length);
+        let isSurahPage: boolean;
+        const a = i >= pageNumber - 1; // start pages index should be >= surah's starting page number
+        let b: boolean; // and this for the end page number
+        // the next index doesn't exist in surahPageNumbers (meaning surah 114)
+        if (!!surahPageNumbers[surahIndex + 1]) {
+          if (surahIndex === 35 && i === 445)
+            console.log(
+              surahPageNumbers[surahIndex + 1],
+              pageNumber,
+              this.pages[surahPageNumbers[surahIndex + 1]]
+            );
+          if (pageNumber === surahPageNumbers[surahIndex + 1]) {
+            b = i <= surahPageNumbers[surahIndex + 1] - 1;
+          } else if (
+            !this.pages[surahPageNumbers[surahIndex + 1] - 1]
+              .split("\n")[1]
+              .includes(this.surahService.diacritics.BISM)
+          ) {
+            b = i < surahPageNumbers[surahIndex + 1];
+            // console.log(surahPageNumbers[surahIndex + 1]);
+          } else b = i < surahPageNumbers[surahIndex + 1] - 1; // agli jo bhi surah hai, uske page number se 1 kam (coz i is index)
+        } else b = i < this.pages.length; // For surah 114 only
+        isSurahPage = a && b;
         return isSurahPage;
       });
       this.surahPages.push(singleSurahPages.join("\n\n"));
     });
-    console.log(this.surahPages); */
+    console.log(this.surahPages);
+    // console.log(this.surahPages.filter((_, i) => i > 77));
   }
   findMemorizeItem(index: number) {
     let selectedItem: any;
@@ -170,6 +191,14 @@ export class JuzPage implements OnInit {
       console.log("BOOKMARK: " + this.unicodeBookmarkPageNum);
     });
   }
+
+  getSurahName(num: number) {
+    return this.surahService.surahNames[num];
+  }
+
+  findRepeatedItems = (arr) => [
+    ...new Set(arr.filter((item, index) => arr.indexOf(item) !== index)),
+  ];
 
   ionViewWillEnter() {
     this.setupBookmark();

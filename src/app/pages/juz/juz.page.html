@@ -33,7 +33,8 @@
       here in green.
     </ion-label>
   </div>
-  <div class="juz-grid-wrapper">
+
+  <div class="juz-grid-wrapper" [ngSwitch]="segment">
     <div
       class="juz-btn juz-btn-full"
       (click)="gotoReadJuz('Quran')"
@@ -45,16 +46,42 @@
       <div class="juz-number">1-30</div>
       <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
     </div>
-    <div
-      *ngFor="let j of juzPages;let i = index"
-      [class]="'juz-btn juz'+(i+1)+'-btn'"
-      [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
-      [ngStyle]="{'background': returnStyle(i), 'transition':'all 1s ease'}"
-      (click)="navigate(j,i+1)"
-    >
-      <div class="juz-heading-en">JUZ</div>
-      <div class="juz-number">{{i+1}}</div>
-      <div class="juz-heading-ur ur">پارہ</div>
-    </div>
+    <ion-segment color="primary" [(ngModel)]="segment" mode="ios">
+      <ion-segment-button value="juz" checked>
+        <ion-label>Juz</ion-label>
+        <ion-icon name="apps"></ion-icon>
+      </ion-segment-button>
+      <ion-segment-button value="surah">
+        <ion-label>Surah</ion-label>
+        <ion-icon name="list"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
+
+    <ng-container *ngSwitchCase="'juz'">
+      <div
+        *ngFor="let j of juzPages;let i = index"
+        [class]="'juz-btn juz'+(i+1)+'-btn'"
+        [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
+        [ngStyle]="{'background': returnStyle(i), 'transition':'all 1s ease'}"
+        (click)="navigate(j,i+1)"
+      >
+        <div class="juz-heading-en">JUZ</div>
+        <div class="juz-number">{{i+1}}</div>
+        <div class="juz-heading-ur ur">پارہ</div>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'surah'">
+      <div
+        *ngFor="let j of surahPages;let i = index"
+        [class]="'juz-btn surah'+(i+1)+'-btn'"
+        [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
+        [ngStyle]="{'background': returnStyle(i), 'transition':'all 1s ease'}"
+        (click)="navigate(j,i+1)"
+      >
+        <div class="juz-heading-en">SURAH</div>
+        <div class="juz-number">{{i+1}}</div>
+        <div class="juz-heading-ur ur">سورۃ {{getSurahName(i)}}</div>
+      </div>
+    </ng-container>
   </div>
 </ion-content>

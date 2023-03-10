@@ -1,10 +1,7 @@
 {
   "hosting": {
+    "site": "hifz-helper",
     "public": "www",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
   }
 }

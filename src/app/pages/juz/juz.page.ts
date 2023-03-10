@@ -97,9 +97,9 @@ export class JuzPage implements OnInit {
         }
       );
   }
-  navigate(juzData, i = 0) {
+  navigate(juzData, i = 0, mode = "juz") {
     if (i != 0)
-      juzData = { title: i, data: juzData, rukuArray: this.rukuArray };
+      juzData = { title: i, data: juzData, rukuArray: this.rukuArray, mode };
     this.router.navigate(["/read"], { state: { juzData } });
   }
   calculateJuzData(juzData) {

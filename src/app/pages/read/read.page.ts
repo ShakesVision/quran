@@ -76,6 +76,7 @@ export class ReadPage implements OnInit, AfterViewInit {
   juzNumber;
   ignoreTashkeel: boolean = true;
   juzmode: boolean;
+  juzsurahmode: boolean;
   startIndex: number;
   copyResultsBG = "dark";
   searchTime;
@@ -97,6 +98,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     const id = this.activatedRoute.snapshot.params.id;
     if (juzData) {
       this.juzmode = true;
+      this.juzsurahmode = juzData.mode === "surah";
       this.surah = juzData.data;
       this.title = juzData.title;
       this.pages = this.surah.split("\n\n");
@@ -711,14 +713,31 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);
     this.surahCalculated = this.surahService.surahCalculated(this.currentPage);
     if (!this.isCompleteMushaf) {
-      this.currentPageCalculated =
-        this.currentPage +
-        this.surahService.juzPageNumbers[parseInt(this.title) - 1] -
-        1;
+      if (this.juzsurahmode)
+        this.currentPageCalculated =
+          this.currentPage +
+          this.surahService.surahPageNumbers[parseInt(this.title) - 1] -
+          1;
+      else
+        this.currentPageCalculated =
+          this.currentPage +
+          this.surahService.juzPageNumbers[parseInt(this.title) - 1] -
+          1;
       this.surahCalculatedForJuz = this.surahService.surahCalculated(
         this.currentPageCalculated
       );
+      this.juzCalculated = this.surahService.juzCalculated(
+        this.currentPageCalculated
+      );
+      this.surahCalculated = this.surahService.surahCalculated(
+        this.currentPageCalculated
+      );
     }
+    console.log(
+      "JUZ-SURAH CALCULATED",
+      this.juzCalculated,
+      this.surahCalculated
+    );
   }
   vsChange(ev) {
     this.startIndex = ev.startIndex;
@@ -967,6 +986,28 @@ export class ReadPage implements OnInit, AfterViewInit {
     console.log(r);
     this.selectedQari = r;
     this.qariId = parseInt(r);
+  }
+  getJuzNumber() {
+    let result = "";
+    if (this.isCompleteMushaf) {
+      if (this.surahCalculated === 1) result = "سورۃ";
+      else
+        result =
+          this.surahService.juzNames[this.juzCalculated - 1] +
+          " " +
+          this.surahService.e2a(this.juzCalculated.toString());
+    } else if (this.surahCalculatedForJuz === 1) result = "سورۃ";
+    else if (this.juzsurahmode)
+      result =
+        this.surahService.juzNames[this.juzCalculated - 1] +
+        " " +
+        this.surahService.e2a(this.juzCalculated.toString());
+    else
+      result =
+        this.surahService.juzNames[+this.title - 1] +
+        " " +
+        this.surahService.e2a(this.title.toString());
+    return result;
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

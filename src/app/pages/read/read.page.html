@@ -96,13 +96,7 @@
       <ng-container
         *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)"
       >
-        <span class="juz-number">
-          {{ isCompleteMushaf? (surahCalculated === 1? 'سورۃ' :
-          (surahService.juzNames[juzCalculated-1] + ' ' +
-          surahService.e2a(juzCalculated.toString()))) : (surahCalculatedForJuz
-          === 1? 'سورۃ' : (surahService.juzNames[+title-1] + ' ' +
-          surahService.e2a(title.toString()))) }}
-        </span>
+        <span class="juz-number"> {{ getJuzNumber() }} </span>
         <span class="page-number">
           {{ isCompleteMushaf? surahService.e2a(currentPage.toString()):
           surahService.e2a(currentPageCalculated.toString()) }}

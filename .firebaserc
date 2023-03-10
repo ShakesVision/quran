@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "hifz-helper-pwa"
+  },
+  "targets": {
+    "hifz-helper-pwa": {
+      "hosting": {
+        "hifz-helper": [
+          "hifz-helper"
+        ],
+        "hh-pwa": [
+          "hifz-helper-pwa"
+        ]
+      }
+    }
   }
 }

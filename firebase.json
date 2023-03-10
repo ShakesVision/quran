@@ -1,7 +1,13 @@
 {
   "hosting": {
-    "site": "hifz-helper",
+    "target": "hifz-helper",
     "public": "www",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

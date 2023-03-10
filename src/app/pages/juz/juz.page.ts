@@ -180,9 +180,6 @@ export class JuzPage implements OnInit {
     let completedCount = 0;
     this.memorizeItems.forEach((i: any) => (completedCount += i.completed));
     const percent = ((completedCount / 611) * 100).toFixed(1);
-    // setTimeout(() => {
-
-    // }, 1000);
     return `linear-gradient(to right, var(--green-highlight) ${percent}%, var(--ion-color-light) 0)`;
   }
   setupBookmark() {

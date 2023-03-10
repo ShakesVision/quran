@@ -68,19 +68,29 @@
         <div class="juz-heading-en">JUZ</div>
         <div class="juz-number">{{i+1}}</div>
         <div class="juz-heading-ur ur">پارہ</div>
+        <div class="pages-count-wrapper">
+          <div class="pages-count">
+            <div>{{j.split('\n\n').length}}</div>
+            <ion-icon name="document-outline" color="secondary"></ion-icon>
+          </div>
+        </div>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'surah'">
       <div
         *ngFor="let j of surahPages;let i = index"
         [class]="'juz-btn surah'+(i+1)+'-btn'"
-        [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
-        [ngStyle]="{'background': returnStyle(i), 'transition':'all 1s ease'}"
         (click)="navigate(j,i+1)"
       >
         <div class="juz-heading-en">SURAH</div>
         <div class="juz-number">{{i+1}}</div>
-        <div class="juz-heading-ur ur">سورۃ {{getSurahName(i)}}</div>
+        <div class="juz-heading-ur ur">{{getSurahName(i)}}</div>
+        <div class="pages-count-wrapper">
+          <div class="pages-count">
+            <div>{{j.split('\n\n').length}}</div>
+            <ion-icon name="document-outline" color="secondary"></ion-icon>
+          </div>
+        </div>
       </div>
     </ng-container>
   </div>

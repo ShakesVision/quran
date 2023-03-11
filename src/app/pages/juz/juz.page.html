@@ -59,18 +59,18 @@
 
     <ng-container *ngSwitchCase="'juz'">
       <div
-        *ngFor="let j of juzPages;let i = index"
-        [class]="'juz-btn juz'+(i+1)+'-btn'"
-        [ngClass]="{'hifz-complete': findMemorizeItem(i+1)=='100.0'}"
-        [ngStyle]="{'background': returnStyle(i), 'transition':'all 1s ease'}"
-        (click)="navigate(j,i+1)"
+        *ngFor="let j of juzPages"
+        [class]="'juz-btn juz'+j.juzNo+'-btn'"
+        [ngClass]="{'hifz-complete': findMemorizeItem(j.juzNo)=='100.0'}"
+        [ngStyle]="{'background': returnStyle(j.juzNo-1), 'transition':'all 1s ease'}"
+        (click)="navigate(j.pages,j.juzNo)"
       >
         <div class="juz-heading-en">JUZ</div>
-        <div class="juz-number">{{i+1}}</div>
-        <div class="juz-heading-ur ur">پارہ</div>
+        <div class="juz-number">{{j.juzNo}}</div>
+        <div class="juz-heading-ar ar-text2">{{getJuzName(j.juzNo-1)}}</div>
         <div class="pages-count-wrapper">
           <div class="pages-count">
-            <div>{{j.split('\n\n').length}}</div>
+            <div>{{j.length}}</div>
             <ion-icon name="document-outline" color="secondary"></ion-icon>
           </div>
         </div>
@@ -78,16 +78,16 @@
     </ng-container>
     <ng-container *ngSwitchCase="'surah'">
       <div
-        *ngFor="let j of surahPages;let i = index"
-        [class]="'juz-btn surah'+(i+1)+'-btn'"
-        (click)="navigate(j,i+1,'surah')"
+        *ngFor="let j of surahPages"
+        [class]="'juz-btn surah'+j.surahNo+'-btn'"
+        (click)="navigate(j.pages,j.surahNo,'surah')"
       >
         <div class="juz-heading-en">SURAH</div>
-        <div class="juz-number">{{i+1}}</div>
-        <div class="juz-heading-ur ur">{{getSurahName(i)}}</div>
+        <div class="juz-number">{{j.surahNo}}</div>
+        <div class="juz-heading-ar ar-text2">{{getSurahName(j.surahNo-1)}}</div>
         <div class="pages-count-wrapper">
           <div class="pages-count">
-            <div>{{j.split('\n\n').length}}</div>
+            <div>{{j.length}}</div>
             <ion-icon name="document-outline" color="secondary"></ion-icon>
           </div>
         </div>

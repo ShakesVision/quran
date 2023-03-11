@@ -12,8 +12,8 @@ import { SurahService } from "src/app/services/surah.service";
 })
 export class JuzPage implements OnInit {
   pages = [];
-  juzPages = [];
-  surahPages = [];
+  juzPages: { juzNo: number; pages: string; length: number }[] = [];
+  surahPages: { surahNo: number; pages: string; length: number }[] = [];
   rukuArray = [];
   memorizeItems: [];
   unicodeBookmarkPageNum: number;
@@ -115,7 +115,12 @@ export class JuzPage implements OnInit {
             : i < this.pages.length);
         return isJuzPage;
       });
-      this.juzPages.push(singleJuzPages.join("\n\n"));
+      this.juzPages.push({
+        juzNo: juzIndex + 1,
+        pages: singleJuzPages.join("\n\n"),
+        length: singleJuzPages.length,
+      });
+
       singleJuzPages.forEach((page, juzPageIndex) => {
         if (page.includes(this.surahService.diacritics.RUKU_MARK))
           page.split("\n").forEach((line, lineIndex) => {
@@ -158,7 +163,12 @@ export class JuzPage implements OnInit {
         isSurahPage = a && b;
         return isSurahPage;
       });
-      this.surahPages.push(singleSurahPages.join("\n\n"));
+
+      this.surahPages.push({
+        surahNo: surahIndex + 1,
+        pages: singleSurahPages.join("\n\n"),
+        length: singleSurahPages.length,
+      });
     });
     console.log(this.surahPages);
     // console.log(this.surahPages.filter((_, i) => i > 77));
@@ -191,6 +201,9 @@ export class JuzPage implements OnInit {
 
   getSurahName(num: number) {
     return this.surahService.surahNames[num];
+  }
+  getJuzName(num: number) {
+    return this.surahService.juzNames[num];
   }
 
   findRepeatedItems = (arr) => [

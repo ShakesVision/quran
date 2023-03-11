@@ -19,8 +19,12 @@ ion-header {
   grid-template-columns: auto auto auto;
   grid-gap: 15px;
   .juz-btn:first-child,
-  ion-segment {
+  .list-controls {
     grid-column: 1/4;
+  }
+  .list-controls ion-searchbar {
+    width: 60%;
+    margin: -5px auto auto auto;
   }
   .juz-btn {
     /* text-align: center; */

@@ -46,28 +46,36 @@
       <div class="juz-number">1-30</div>
       <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
     </div>
-    <ion-segment color="primary" [(ngModel)]="segment" mode="ios">
-      <ion-segment-button value="juz" checked>
-        <ion-label>Juz</ion-label>
-        <ion-icon name="apps"></ion-icon>
-      </ion-segment-button>
-      <ion-segment-button value="surah">
-        <ion-label>Surah</ion-label>
-        <ion-icon name="list"></ion-icon>
-      </ion-segment-button>
-    </ion-segment>
-
+    <div class="list-controls">
+      <ion-segment color="primary" [(ngModel)]="segment" mode="ios">
+        <ion-segment-button value="juz" checked>
+          <ion-label>Juz</ion-label>
+          <ion-icon name="apps"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button value="surah">
+          <ion-label>Surah</ion-label>
+          <ion-icon name="list"></ion-icon>
+        </ion-segment-button>
+      </ion-segment>
+      <ion-searchbar
+        type="text"
+        class="ion-text-center ion-no-padding ar-text2"
+        [placeholder]="segment==='juz'?'عم / 30 / ۳۰':'فلق / 113 / ۱۱۳'"
+        (ionChange)="queryChanged($event.target.value)"
+        mode="ios"
+      ></ion-searchbar>
+    </div>
     <ng-container *ngSwitchCase="'juz'">
       <div
         *ngFor="let j of juzPages"
-        [class]="'juz-btn juz'+j.juzNo+'-btn'"
-        [ngClass]="{'hifz-complete': findMemorizeItem(j.juzNo)=='100.0'}"
-        [ngStyle]="{'background': returnStyle(j.juzNo-1), 'transition':'all 1s ease'}"
-        (click)="navigate(j.pages,j.juzNo)"
+        [class]="'juz-btn juz'+j.id+'-btn'"
+        [ngClass]="{'hifz-complete': findMemorizeItem(j.id)=='100.0'}"
+        [ngStyle]="{'background': returnStyle(j.id-1), 'transition':'all 1s ease'}"
+        (click)="navigate(j.pages,j.id)"
       >
         <div class="juz-heading-en">JUZ</div>
-        <div class="juz-number">{{j.juzNo}}</div>
-        <div class="juz-heading-ar ar-text2">{{getJuzName(j.juzNo-1)}}</div>
+        <div class="juz-number">{{j.id}}</div>
+        <div class="juz-heading-ar ar-text2">{{j.name}}</div>
         <div class="pages-count-wrapper">
           <div class="pages-count">
             <div>{{j.length}}</div>
@@ -79,12 +87,12 @@
     <ng-container *ngSwitchCase="'surah'">
       <div
         *ngFor="let j of surahPages"
-        [class]="'juz-btn surah'+j.surahNo+'-btn'"
-        (click)="navigate(j.pages,j.surahNo,'surah')"
+        [class]="'juz-btn surah'+j.id+'-btn'"
+        (click)="navigate(j.pages,j.id,'surah')"
       >
         <div class="juz-heading-en">SURAH</div>
-        <div class="juz-number">{{j.surahNo}}</div>
-        <div class="juz-heading-ar ar-text2">{{getSurahName(j.surahNo-1)}}</div>
+        <div class="juz-number">{{j.id}}</div>
+        <div class="juz-heading-ar ar-text2">{{j.name}}</div>
         <div class="pages-count-wrapper">
           <div class="pages-count">
             <div>{{j.length}}</div>

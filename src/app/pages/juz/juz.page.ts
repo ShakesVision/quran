@@ -3,6 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage-angular";
 import { throwIfEmpty } from "rxjs/operators";
+import { ListType, SurahOrJuzListItem } from "src/app/models/common";
 import { SurahService } from "src/app/services/surah.service";
 
 @Component({
@@ -12,14 +13,16 @@ import { SurahService } from "src/app/services/surah.service";
 })
 export class JuzPage implements OnInit {
   pages = [];
-  juzPages: { juzNo: number; pages: string; length: number }[] = [];
-  surahPages: { surahNo: number; pages: string; length: number }[] = [];
+  juzPages: SurahOrJuzListItem[] = [];
+  surahPages: SurahOrJuzListItem[] = [];
+  juzPagesCopy: SurahOrJuzListItem[] = [];
+  surahPagesCopy: SurahOrJuzListItem[] = [];
   rukuArray = [];
   memorizeItems: [];
   unicodeBookmarkPageNum: number;
   lastSyncedAt: Date;
   syncing = false;
-  segment: "juz" | "surah" = "surah";
+  segment: ListType = ListType.SURAH;
 
   constructor(
     private router: Router,
@@ -82,6 +85,7 @@ export class JuzPage implements OnInit {
           console.log("Fetch successful...");
           this.syncing = false;
           this.juzPages = [];
+          this.juzPagesCopy = [];
           if (stopNav) this.calculateJuzData(res);
           // Add extra line (\n) at the end of each file to avoid truncating last line of the file in split
           const juzData = { title: juz, data: res, rukuArray: this.rukuArray };
@@ -115,11 +119,14 @@ export class JuzPage implements OnInit {
             : i < this.pages.length);
         return isJuzPage;
       });
-      this.juzPages.push({
-        juzNo: juzIndex + 1,
+      const juzPagesData: SurahOrJuzListItem = {
+        id: juzIndex + 1,
+        name: this.getJuzName(juzIndex),
         pages: singleJuzPages.join("\n\n"),
         length: singleJuzPages.length,
-      });
+      };
+      this.juzPages.push(juzPagesData);
+      this.juzPagesCopy.push(juzPagesData);
 
       singleJuzPages.forEach((page, juzPageIndex) => {
         if (page.includes(this.surahService.diacritics.RUKU_MARK))
@@ -130,12 +137,9 @@ export class JuzPage implements OnInit {
       });
       this.rukuArray.push(juzRukuArray);
     });
-    console.log(this.juzPages);
 
     // try for surahs similarly
     const surahPageNumbers = this.surahService.surahPageNumbers;
-    const repeatedItems = this.findRepeatedItems(surahPageNumbers);
-    console.log(surahPageNumbers);
     surahPageNumbers.forEach((pageNumber, surahIndex) => {
       const singleSurahPages = this.pages.filter((p, i) => {
         let isSurahPage: boolean;
@@ -143,12 +147,6 @@ export class JuzPage implements OnInit {
         let b: boolean; // and this for the end page number
         // the next index doesn't exist in surahPageNumbers (meaning surah 114)
         if (!!surahPageNumbers[surahIndex + 1]) {
-          if (surahIndex === 35 && i === 445)
-            console.log(
-              surahPageNumbers[surahIndex + 1],
-              pageNumber,
-              this.pages[surahPageNumbers[surahIndex + 1]]
-            );
           if (pageNumber === surahPageNumbers[surahIndex + 1]) {
             b = i <= surahPageNumbers[surahIndex + 1] - 1;
           } else if (
@@ -157,21 +155,20 @@ export class JuzPage implements OnInit {
               .includes(this.surahService.diacritics.BISM)
           ) {
             b = i < surahPageNumbers[surahIndex + 1];
-            // console.log(surahPageNumbers[surahIndex + 1]);
           } else b = i < surahPageNumbers[surahIndex + 1] - 1; // agli jo bhi surah hai, uske page number se 1 kam (coz i is index)
         } else b = i < this.pages.length; // For surah 114 only
         isSurahPage = a && b;
         return isSurahPage;
       });
-
-      this.surahPages.push({
-        surahNo: surahIndex + 1,
+      const surahPagesData: SurahOrJuzListItem = {
+        id: surahIndex + 1,
+        name: this.getSurahName(surahIndex),
         pages: singleSurahPages.join("\n\n"),
         length: singleSurahPages.length,
-      });
+      };
+      this.surahPages.push(surahPagesData);
+      this.surahPagesCopy.push(surahPagesData);
     });
-    console.log(this.surahPages);
-    // console.log(this.surahPages.filter((_, i) => i > 77));
   }
   findMemorizeItem(index: number) {
     let selectedItem: any;
@@ -206,9 +203,20 @@ export class JuzPage implements OnInit {
     return this.surahService.juzNames[num];
   }
 
-  findRepeatedItems = (arr) => [
-    ...new Set(arr.filter((item, index) => arr.indexOf(item) !== index)),
-  ];
+  queryChanged(ip: string) {
+    let temp: string = ip.toLowerCase();
+    temp = this.surahService.a2e(this.surahService.p2e(temp));
+
+    const filterOn =
+      (this.segment === "juz" ? ListType.JUZ : ListType.SURAH) + "Pages";
+    const filterOnCopy = filterOn + "Copy";
+
+    if (!temp) this[filterOn] = this[filterOnCopy];
+    console.log(this[filterOn], this[filterOnCopy]);
+    this[filterOn] = this[filterOnCopy].filter((d: SurahOrJuzListItem) => {
+      return d.id.toString().indexOf(temp) > -1 || d.name.indexOf(temp) > -1;
+    });
+  }
 
   ionViewWillEnter() {
     this.setupBookmark();

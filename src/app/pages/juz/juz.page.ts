@@ -22,6 +22,7 @@ export class JuzPage implements OnInit {
   unicodeBookmarkPageNum: number;
   lastSyncedAt: Date;
   syncing = false;
+  isPopoverOpen = false;
   segment: ListType = ListType.SURAH;
 
   constructor(
@@ -216,6 +217,41 @@ export class JuzPage implements OnInit {
     this[filterOn] = this[filterOnCopy].filter((d: SurahOrJuzListItem) => {
       return d.id.toString().indexOf(temp) > -1 || d.name.indexOf(temp) > -1;
     });
+  }
+
+  sortBy(field: string) {
+    const filterOn =
+      (this.segment === "juz" ? ListType.JUZ : ListType.SURAH) + "Pages";
+    const filterOnCopy = filterOn + "Copy";
+
+    switch (field) {
+      case "pages":
+        this[filterOn] = [...this[filterOnCopy]].sort(
+          (a, b) => b.length - a.length
+        );
+        break;
+      case "words":
+        this[filterOn] = [...this[filterOnCopy]].sort(
+          (a, b) => b.pages.split(" ").length - a.pages.split(" ").length
+        );
+        break;
+
+      default:
+        this[filterOn] = [...this[filterOnCopy]].sort(
+          (a, b) => b.length - a.length
+        );
+        break;
+    }
+    this.closePopover();
+  }
+
+  resetLists() {
+    this.juzPages = [...this.juzPagesCopy];
+    this.surahPages = [...this.surahPagesCopy];
+    this.closePopover();
+  }
+  closePopover() {
+    this.isPopoverOpen = false;
   }
 
   ionViewWillEnter() {

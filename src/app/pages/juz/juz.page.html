@@ -46,7 +46,7 @@
       <div class="juz-number">1-30</div>
       <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
     </div>
-    <div class="list-controls">
+    <div class="list-controls ion-text-center">
       <ion-segment color="primary" [(ngModel)]="segment" mode="ios">
         <ion-segment-button value="juz" checked>
           <ion-label>Juz</ion-label>
@@ -57,13 +57,24 @@
           <ion-icon name="list"></ion-icon>
         </ion-segment-button>
       </ion-segment>
-      <ion-searchbar
-        type="text"
-        class="ion-text-center ion-no-padding ar-text2"
-        [placeholder]="segment==='juz'?'عم / 30 / ۳۰':'فلق / 113 / ۱۱۳'"
-        (ionChange)="queryChanged($event.target.value)"
-        mode="ios"
-      ></ion-searchbar>
+      <div class="search-controls">
+        <ion-searchbar
+          type="text"
+          class="ion-text-center ion-no-padding ar-text2"
+          [placeholder]="segment==='juz'?'عم / 30 / ۳۰':'فلق / 113 / ۱۱۳'"
+          (ionChange)="queryChanged($event.target.value)"
+          mode="ios"
+        ></ion-searchbar>
+        <ion-button id="popover-trigger" slot="end" fill="clear" size="small">
+          <ion-icon slot="icon-only" name="options-outline"></ion-icon>
+        </ion-button>
+      </div>
+      <ion-label *ngIf="segment==='juz'" color="secondary">
+        <small><i>{{juzPages.length}} of {{juzPagesCopy.length}}</i></small>
+      </ion-label>
+      <ion-label *ngIf="segment==='surah'" color="secondary">
+        <small><i>{{surahPages.length}} of {{surahPagesCopy.length}}</i></small>
+      </ion-label>
     </div>
     <ng-container *ngSwitchCase="'juz'">
       <div
@@ -102,4 +113,27 @@
       </div>
     </ng-container>
   </div>
+  <!-- Popover content for filters -->
+  <ion-popover
+    [isOpen]="isPopoverOpen"
+    trigger="popover-trigger"
+    side="bottom"
+    (didDismiss)="isPopoverOpen = false"
+  >
+    <ng-template>
+      <ion-content>
+        <ion-list>
+          <ion-item button (click)="sortBy('pages')">
+            <ion-label>Sort by no. of pages</ion-label>
+          </ion-item>
+          <ion-item button (click)="sortBy('words')">
+            <ion-label>Sort by no. of words</ion-label>
+          </ion-item>
+          <ion-item button (click)="resetLists()">
+            <ion-label>Reset</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
 </ion-content>

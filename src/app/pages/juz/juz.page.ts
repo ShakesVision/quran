@@ -225,25 +225,15 @@ export class JuzPage implements OnInit {
     const filterOnCopy = filterOn + "Copy";
 
     switch (field) {
-      case "pages":
+      case "pageCount":
         this[filterOn] = [...this[filterOnCopy]].sort(
           (a, b) => b.length - a.length
         );
         break;
-      case "words":
-        this[filterOn] = [...this[filterOnCopy]].sort((a, b) => {
-          console.log(b.pages.split(`${this.surahService.diacritics.BISM}`));
-          if (b.pages.includes(`${this.surahService.diacritics.BISM}`))
-            return (
-              b.pages
-                .split(`${this.surahService.diacritics.BISM}`)[1]
-                .split(" ").length -
-              b.pages
-                .split(`${this.surahService.diacritics.BISM}`)[1]
-                .split(" ").length
-            );
-          else return b.pages.split(" ").length - a.pages.split(" ").length;
-        });
+      case "name":
+        this[filterOn] = [...this[filterOnCopy]].sort(
+          (a, b) => -1 * b.name.localeCompare(a.name)
+        );
         break;
       case "direction":
         this[filterOn] = [...this[filterOn]].reverse();

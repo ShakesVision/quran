@@ -16,6 +16,17 @@ export interface SurahOrJuzListItem {
    */
   length: number;
 }
+export interface SearchResultsList {
+  pageIndex: number;
+  lineIndex: number;
+  charIndices: number[];
+  lineText: string;
+  searchText: string;
+}
+export interface SearchResults {
+  results: SearchResultsList[];
+  total: number;
+}
 export enum ListType {
   JUZ = "juz",
   SURAH = "surah",

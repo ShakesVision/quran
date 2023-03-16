@@ -9,12 +9,13 @@ import { SurahService } from "./../../services/surah.service";
 import { PopoverController, ToastController } from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
 import { alertController } from "@ionic/core";
-import { MushafLines } from "src/app/services/mushaf-versions";
 import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { VirtualScrollerComponent } from "ngx-virtual-scroller";
 import { Storage } from "@ionic/storage-angular";
-import { FirstLastAyah } from "src/app/services/firstLastModels";
+import { FirstLastAyah } from "src/app/models/firstLastModels";
+import { SearchResults, SearchResultsList } from "src/app/models/common";
+import { MushafLines } from "src/app/models/mushaf-versions";
 
 @Component({
   selector: "app-read",
@@ -48,7 +49,7 @@ export class ReadPage implements OnInit, AfterViewInit {
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
 
-  searchResults: Array<string>;
+  searchResults: SearchResults;
 
   juzPages = [];
 
@@ -553,7 +554,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     if (!searchText || searchText == "") return;
     var start = new Date().getTime();
     searchText = this.surahService.getArabicScript(searchText);
-    let arr = [];
+    let arr: SearchResultsList[] = [];
+    let cumulativeTotal = 0;
     let result = [];
     this.pages.forEach((v, pageIndex) => {
       v = this.surahService.getArabicScript(v);
@@ -564,7 +566,23 @@ export class ReadPage implements OnInit, AfterViewInit {
       if (v.includes(searchText)) {
         result = v.split("\n").filter((l, lineIndex) => {
           if (l.includes(searchText)) {
-            arr.push({ pageIndex, lineIndex });
+            const charIndices = l
+              .split(searchText)
+              .map(
+                function (culm) {
+                  return (this.pos += culm.length + searchText.length);
+                },
+                { pos: -searchText.length }
+              )
+              .slice(0, -1);
+            cumulativeTotal += charIndices.length;
+            arr.push({
+              lineText: l,
+              searchText,
+              pageIndex,
+              lineIndex,
+              charIndices,
+            });
           }
           return l.includes(searchText);
         });
@@ -573,7 +591,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     });
     this.searchTime = (new Date().getTime() - start) / 1000 + " sec";
     console.log(result, arr);
-    this.searchResults = arr;
+    this.searchResults = { results: arr, total: cumulativeTotal };
     arr.forEach((indices) => {
       let output = this.getLineTextFromIndices(
         indices.pageIndex,
@@ -598,14 +616,41 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.updateCalculatedNumbers();
     this.getFirstAndLastAyahNumberOnPage();
   }
-  gotoPageAndHighlightLine(p, l) {
-    console.log(p, l);
-    this.gotoPageNum(+p + 1);
+  gotoPageAndHighlightLine(r: SearchResultsList) {
+    console.log(r.pageIndex, r.lineIndex);
+    this.gotoPageNum(+r.pageIndex + 1);
     this.lines = this.pages[this.currentPage - 1].split("\n");
     this.changeDetectorRef.detectChanges();
     setTimeout(() => {
-      let el = document.getElementById("line_" + l);
+      let el = document.querySelector(
+        `#line_${r.lineIndex} span`
+      ) as HTMLElement;
       el.style.color = "#2a86ff";
+
+      /*
+       * Logic - Hightlight multiple matches in same line
+       * Working, but match is on text without tashkeel, hence can't "show it properly
+       */
+
+      /* const lineText = r.lineText; //el.innerText;
+      let highlightedText = "";
+      let currentIndex = 0;
+
+      for (let i = 0; i < r.charIndices.length; i++) {
+        const charIndex = r.charIndices[i];
+        const match = lineText.substring(
+          charIndex,
+          charIndex + r.searchText.length
+        );
+
+        highlightedText += lineText.substring(currentIndex, charIndex);
+        highlightedText += `<span style="background-color: yellow">${match}</span>`;
+        currentIndex = charIndex + r.searchText.length;
+      }
+
+      highlightedText += lineText.substring(currentIndex);
+      el.innerHTML = highlightedText; */
+
       el.classList.add("highlight-line");
       setTimeout(() => {
         el.classList.remove("highlight-line");
@@ -714,13 +759,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     return divEl.textContent || divEl.innerText || "";
   }
   copyResults(copyResultEl) {
-    let result =
-      "Found " +
-      this.searchResults.length +
-      " Results in " +
-      this.searchTime +
-      ":\n\n";
-    this.searchResults.forEach((r: any) => {
+    let result = `Found ${this.searchResults.results.length} (${this.searchResults.total}) Results in ${this.searchTime}:\n\n`;
+    this.searchResults.results.forEach((r: any) => {
       result += `${this.getLineTextFromIndices(
         r.pageIndex,
         r.lineIndex

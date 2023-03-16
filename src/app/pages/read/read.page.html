@@ -291,8 +291,16 @@
                 [color]="copyResultsBG"
               >
                 <ion-label
-                  >Results: {{searchResults.length}}
-                  <small>⏲ {{searchTime}}</small>
+                  ><span
+                    [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}"
+                    >Results:</span
+                  >
+                  {{searchResults.results.length}}
+                  <span
+                    *ngIf="searchResults.total!==searchResults.results.length"
+                    >({{searchResults.total}})</span
+                  >
+                  <small> ⏲ {{searchTime}}</small>
                 </ion-label>
                 <ion-icon
                   color="light"
@@ -313,7 +321,7 @@
             <virtual-scroller
               *ngIf="searchResults"
               #scroll
-              [items]="searchResults"
+              [items]="searchResults.results"
               [parentScroll]="scrollingBlock.nativeElement"
               [executeRefreshOutsideAngularZone]="true"
               (vsUpdate)="changeDetectorRef.detectChanges()"
@@ -324,10 +332,13 @@
                 button
                 class="rtl"
                 style="position: relative"
-                (click)="gotoPageAndHighlightLine(r.pageIndex,r.lineIndex)"
+                (click)="gotoPageAndHighlightLine(r)"
               >
                 <div class="indices ion-margin-end">
                   <span class="index">{{i+1+startIndex}}</span>
+                  <span class="frequency" *ngIf="r.charIndices.length>1"
+                    >{{r.charIndices.length}}</span
+                  >
                   <span class="location">{{r.pageIndex+1}}</span>
                 </div>
                 <ion-label class="ar2 small-text"

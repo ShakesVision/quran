@@ -123,13 +123,20 @@
     <ng-template>
       <ion-content>
         <ion-list>
+          <ion-item button (click)="sortBy('direction')">
+            <ion-icon name="swap-vertical" slot="start"></ion-icon>
+            <ion-label>Reverse</ion-label>
+          </ion-item>
           <ion-item button (click)="sortBy('pages')">
+            <ion-icon name="document-outline" slot="start"></ion-icon>
             <ion-label>Sort by no. of pages</ion-label>
           </ion-item>
           <ion-item button (click)="sortBy('words')">
+            <ion-icon name="text-outline" slot="start"></ion-icon>
             <ion-label>Sort by no. of words</ion-label>
           </ion-item>
           <ion-item button (click)="resetLists()">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
             <ion-label>Reset</ion-label>
           </ion-item>
         </ion-list>

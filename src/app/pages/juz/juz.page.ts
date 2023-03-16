@@ -231,9 +231,22 @@ export class JuzPage implements OnInit {
         );
         break;
       case "words":
-        this[filterOn] = [...this[filterOnCopy]].sort(
-          (a, b) => b.pages.split(" ").length - a.pages.split(" ").length
-        );
+        this[filterOn] = [...this[filterOnCopy]].sort((a, b) => {
+          console.log(b.pages.split(`${this.surahService.diacritics.BISM}`));
+          if (b.pages.includes(`${this.surahService.diacritics.BISM}`))
+            return (
+              b.pages
+                .split(`${this.surahService.diacritics.BISM}`)[1]
+                .split(" ").length -
+              b.pages
+                .split(`${this.surahService.diacritics.BISM}`)[1]
+                .split(" ").length
+            );
+          else return b.pages.split(" ").length - a.pages.split(" ").length;
+        });
+        break;
+      case "direction":
+        this[filterOn] = [...this[filterOn]].reverse();
         break;
 
       default:

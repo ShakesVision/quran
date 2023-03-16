@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { PopoverController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { throwIfEmpty } from "rxjs/operators";
 import { ListType, SurahOrJuzListItem } from "src/app/models/common";
@@ -29,7 +30,8 @@ export class JuzPage implements OnInit {
     private router: Router,
     private storage: Storage,
     private httpClient: HttpClient,
-    private surahService: SurahService
+    private surahService: SurahService,
+    private popoverController: PopoverController
   ) {
     this.storage.create().then((_) => console.log("storage created"));
   }
@@ -206,16 +208,27 @@ export class JuzPage implements OnInit {
 
   queryChanged(ip: string) {
     let temp: string = ip.toLowerCase();
-    temp = this.surahService.a2e(this.surahService.p2e(temp));
+    temp = this.surahService.a2e(
+      this.surahService.p2e(this.surahService.getArabicScript(temp))
+    );
 
     const filterOn =
       (this.segment === "juz" ? ListType.JUZ : ListType.SURAH) + "Pages";
     const filterOnCopy = filterOn + "Copy";
 
     if (!temp) this[filterOn] = this[filterOnCopy];
-    console.log(this[filterOn], this[filterOnCopy]);
-    this[filterOn] = this[filterOnCopy].filter((d: SurahOrJuzListItem) => {
-      return d.id.toString().indexOf(temp) > -1 || d.name.indexOf(temp) > -1;
+    this.surahService.getSurahInfo().subscribe((surahInfo: any) => {
+      this[filterOn] = this[filterOnCopy].filter((d: SurahOrJuzListItem) => {
+        return (
+          d.id.toString().indexOf(temp) > -1 ||
+          this.surahService.getArabicScript(d.name).includes(temp) ||
+          (this.segment === ListType.SURAH &&
+            surahInfo
+              .find((s) => parseInt(s.index) === d.id)
+              .title.toLowerCase()
+              .includes(temp))
+        );
+      });
     });
   }
 
@@ -260,5 +273,9 @@ export class JuzPage implements OnInit {
   ionViewWillEnter() {
     this.setupBookmark();
     this.updateMemorizeArray();
+  }
+  async ionViewWillLeave() {
+    const popover = await this.popoverController.getTop();
+    if (popover) this.popoverController.dismiss();
   }
 }

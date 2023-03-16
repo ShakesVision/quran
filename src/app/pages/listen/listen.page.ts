@@ -65,14 +65,16 @@ export class ListenPage implements OnInit {
 
   queryChanged(ip: string) {
     let temp: string = ip.toLowerCase();
-    temp = this.surahService.a2e(this.surahService.p2e(temp));
+    temp = this.surahService.a2e(
+      this.surahService.p2e(this.surahService.getArabicScript(temp))
+    );
 
     if (temp === "") this.surahInfo = this.surahInfoCopy;
     this.surahInfo = this.surahInfoCopy.filter((d) => {
       return (
         parseInt(d.index).toString().indexOf(temp) > -1 ||
         d.title.toLowerCase().indexOf(temp) > -1 ||
-        d.titleAr.indexOf(temp) > -1
+        this.surahService.getArabicScript(d.titleAr).includes(temp)
       );
     });
   }

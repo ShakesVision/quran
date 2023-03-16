@@ -540,79 +540,6 @@ export class ReadPage implements OnInit, AfterViewInit {
       .a2e(this.surahService.p2e(num))
       ?.replace(/[^0-9]/g, "");
   }
-  getArabicScript(text) {
-    return text
-      .replace(/آ/g, "آ")
-      .replace(/ا/g, "ا")
-      .replace(/ب/g, "ب")
-      .replace(/پ/g, "پ")
-      .replace(/ت/g, "ت")
-      .replace(/ٹ/g, "ٹ")
-      .replace(/ث/g, "ث")
-      .replace(/ج/g, "ج")
-      .replace(/چ/g, "چ")
-      .replace(/خ/g, "خ")
-      .replace(/ح/g, "ح")
-      .replace(/د/g, "د")
-      .replace(/ڈ/g, "ڈ")
-      .replace(/ذ/g, "ذ")
-      .replace(/ر/g, "ر")
-      .replace(/ڑ/g, "ڑ")
-      .replace(/ز/g, "ز")
-      .replace(/ژ/g, "ژ")
-      .replace(/س/g, "س")
-      .replace(/ش/g, "ش")
-      .replace(/ص/g, "ص")
-      .replace(/ض/g, "ض")
-      .replace(/ط/g, "ط")
-      .replace(/ظ/g, "ظ")
-      .replace(/ع/g, "ع")
-      .replace(/غ/g, "غ")
-      .replace(/ف/g, "ف")
-      .replace(/ک/g, "ك")
-      .replace(/ق/g, "ق")
-      .replace(/گ/g, "گ")
-      .replace(/ل/g, "ل")
-      .replace(/م/g, "م")
-      .replace(/ن/g, "ن")
-      .replace(/و/g, "و")
-      .replace(/ہ/g, "ه")
-      .replace(/ء/g, "ء")
-      .replace(/ی/g, "ي")
-      .replace(/ئ/g, "ئ")
-      .replace(/ے/g, "ے")
-      .replace(/ۃ/g, "ة")
-      .replace(/ؤ/g, "ؤ")
-      .replace(/إ/g, "إ")
-      .replace(/أ/g, "أ")
-      .replace(/ھ/g, "ه")
-      .replace(/ الذي /g, " الذى ")
-      .replace(/ علي /g, " على ")
-      .replace(/ معني /g, " معنى ")
-      .replace(/ إلي /g, " إلى ")
-      .replace(/ تعاليٰ /g, " تعالىٰ ")
-      .replace(/ النبي /g, " النبى ")
-      .replace(/صلي الله عليه وسلم/g, "صلى الله عليه وسلم")
-      .replace(/ في /g, " فى ")
-      .replace(/ أبي /g, " أبى ")
-      .replace(/ رضي الله عنه /g, " رضى الله عنه ")
-      .replace(/ يري /g, " يرى ")
-      .replace(/ وهي /g, " وهى ")
-      .replace(/ أي /g, " أى ")
-      .replace(/ التي /g, " التى ")
-      .replace(/ فسيأتي /g, " فسيأتى ")
-      .replace(/ الذي /g, " الذى ")
-      .replace(/ إلي /g, " إلى ")
-      .replace(/ فنفي /g, " فنفى ")
-      .replace(/ الّذي /g, " الّذى ")
-      .replace(/ النبي /g, " النبى ")
-      .replace(/ صلّي /g, " صلّى ")
-      .replace(/ إحدي /g, " إحدى ")
-      .replace(/ يأتي /g, " يأتى ")
-      .replace(/أي /g, " أى ")
-      .replace(/ والدواعي /g, " والدواعى ")
-      .replace(/ صلي /g, " صلى ");
-  }
 
   toggleIgnoreTashkeel(val) {
     this.ignoreTashkeel = !this.ignoreTashkeel;
@@ -625,13 +552,13 @@ export class ReadPage implements OnInit, AfterViewInit {
     let searchText = val;
     if (!searchText || searchText == "") return;
     var start = new Date().getTime();
-    searchText = this.getArabicScript(searchText);
+    searchText = this.surahService.getArabicScript(searchText);
     let arr = [];
     let result = [];
     this.pages.forEach((v, pageIndex) => {
-      v = this.getArabicScript(v);
+      v = this.surahService.getArabicScript(v);
       if (this.ignoreTashkeel) {
-        v = this.tashkeelRemover(this.getArabicScript(v));
+        v = this.tashkeelRemover(this.surahService.getArabicScript(v));
         searchText = this.tashkeelRemover(searchText);
       }
       if (v.includes(searchText)) {

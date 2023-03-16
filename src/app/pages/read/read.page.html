@@ -300,7 +300,7 @@
                     *ngIf="searchResults.total!==searchResults.results.length"
                     >({{searchResults.total}})</span
                   >
-                  <small> ⏲ {{searchTime}}</small>
+                  <small> ⏲ {{searchResults.searchTimeSecs}} sec</small>
                 </ion-label>
                 <ion-icon
                   color="light"

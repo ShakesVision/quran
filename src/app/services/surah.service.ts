@@ -307,6 +307,31 @@ export class SurahService {
       .replace(/ صلي /g, " صلى ");
   }
 
+  tashkeelRemover(text) {
+    return text
+      .replace(/َ/g, "")
+      .replace(/ِ/g, "")
+      .replace(/ُ/g, "")
+      .replace(/ّ/g, "")
+      .replace(/ْ/g, "")
+      .replace(/ٌ/g, "")
+      .replace(/ً/g, "")
+      .replace(/ٍ/g, "")
+      .replace(/ٌ/g, "")
+      .replace(/ۡ/g, "")
+      .replace(/ٰ/g, "")
+      .replace(/ٓ/g, "")
+      .replace(/ٗ/g, "")
+      .replace(/ۖ‏/g, "")
+      .replace(/ۚ/g, "")
+      .replace(/ؕ/g, "")
+      .replace(/ۙ/g, "")
+      .replace(/ۢ/g, "")
+      .replace(/۟/g, "")
+      .replace(/ۤ/g, "")
+      .replace(/ٖ/g, "");
+  }
+
   // signup(email, password) {
   //   return this.afAuth.auth.createUserWithEmailAndPassword(email, password);
   // }

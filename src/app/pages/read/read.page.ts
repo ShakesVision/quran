@@ -80,7 +80,6 @@ export class ReadPage implements OnInit, AfterViewInit {
   juzsurahmode: boolean;
   startIndex: number;
   copyResultsBG = "dark";
-  searchTime;
 
   constructor(
     public surahService: SurahService,
@@ -560,8 +559,10 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.pages.forEach((v, pageIndex) => {
       v = this.surahService.getArabicScript(v);
       if (this.ignoreTashkeel) {
-        v = this.tashkeelRemover(this.surahService.getArabicScript(v));
-        searchText = this.tashkeelRemover(searchText);
+        v = this.surahService.tashkeelRemover(
+          this.surahService.getArabicScript(v)
+        );
+        searchText = this.surahService.tashkeelRemover(searchText);
       }
       if (v.includes(searchText)) {
         result = v.split("\n").filter((l, lineIndex) => {
@@ -589,9 +590,13 @@ export class ReadPage implements OnInit, AfterViewInit {
         // let lineIndex = v.split("\n").findIndex((l) => l.includes(searchText));
       }
     });
-    this.searchTime = (new Date().getTime() - start) / 1000 + " sec";
+    const searchTimeSecs = (new Date().getTime() - start) / 1000;
     console.log(result, arr);
-    this.searchResults = { results: arr, total: cumulativeTotal };
+    this.searchResults = {
+      results: arr,
+      total: cumulativeTotal,
+      searchTimeSecs,
+    };
     arr.forEach((indices) => {
       let output = this.getLineTextFromIndices(
         indices.pageIndex,
@@ -656,30 +661,6 @@ export class ReadPage implements OnInit, AfterViewInit {
         el.classList.remove("highlight-line");
       }, 1000);
     }, 100);
-  }
-  tashkeelRemover(text) {
-    return text
-      .replace(/َ/g, "")
-      .replace(/ِ/g, "")
-      .replace(/ُ/g, "")
-      .replace(/ّ/g, "")
-      .replace(/ْ/g, "")
-      .replace(/ٌ/g, "")
-      .replace(/ً/g, "")
-      .replace(/ٍ/g, "")
-      .replace(/ٌ/g, "")
-      .replace(/ۡ/g, "")
-      .replace(/ٰ/g, "")
-      .replace(/ٓ/g, "")
-      .replace(/ٗ/g, "")
-      .replace(/ۖ‏/g, "")
-      .replace(/ۚ/g, "")
-      .replace(/ؕ/g, "")
-      .replace(/ۙ/g, "")
-      .replace(/ۢ/g, "")
-      .replace(/۟/g, "")
-      .replace(/ۤ/g, "")
-      .replace(/ٖ/g, "");
   }
   updateCalculatedNumbers() {
     this.juzCalculated = this.surahService.juzCalculated(this.currentPage);
@@ -759,7 +740,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     return divEl.textContent || divEl.innerText || "";
   }
   copyResults(copyResultEl) {
-    let result = `Found ${this.searchResults.results.length} (${this.searchResults.total}) Results in ${this.searchTime}:\n\n`;
+    let result = `Found ${this.searchResults.results.length} (${this.searchResults.total}) Results in ${this.searchResults.searchTimeSecs} sec:\n\n`;
     this.searchResults.results.forEach((r: any) => {
       result += `${this.getLineTextFromIndices(
         r.pageIndex,

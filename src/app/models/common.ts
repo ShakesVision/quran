@@ -26,6 +26,7 @@ export interface SearchResultsList {
 export interface SearchResults {
   results: SearchResultsList[];
   total: number;
+  searchTimeSecs: number;
 }
 export enum ListType {
   JUZ = "juz",

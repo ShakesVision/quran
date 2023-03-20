@@ -14,7 +14,11 @@ import { HttpClient } from "@angular/common/http";
 import { VirtualScrollerComponent } from "ngx-virtual-scroller";
 import { Storage } from "@ionic/storage-angular";
 import { FirstLastAyah } from "src/app/models/firstLastModels";
-import { SearchResults, SearchResultsList } from "src/app/models/common";
+import {
+  RukuLocationItem,
+  SearchResults,
+  SearchResultsList,
+} from "src/app/models/common";
 import { MushafLines } from "src/app/models/mushaf-versions";
 
 @Component({
@@ -65,7 +69,7 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   surahCalculatedForJuz: number;
 
-  rukuArray = [];
+  rukuArray: RukuLocationItem[][] = [];
 
   surahArray = [];
 
@@ -104,7 +108,6 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.pages = this.surah.split("\n\n");
       this.lines = this.pages[this.currentPage - 1].split("\n");
       console.log(this.lines);
-      // this.calculateRukuArray();
       this.rukuArray = [...juzData.rukuArray];
     } else if (!juzData) {
       console.log("not jz mode", this.surah);
@@ -463,15 +466,17 @@ export class ReadPage implements OnInit, AfterViewInit {
       //     ?.replace(/[^0-9]/g, "")
       // );
       let rukuNumber = 0;
-      const juzrukuarr = this.isCompleteMushaf
-        ? this.rukuArray[this.juzCalculated - 1]
-        : this.rukuArray[parseInt(this.title) - 1];
+      const juzrukuarr = this.rukuArray[this.juzCalculated - 1];
+      console.log(this.juzCalculated, this.currentPageCalculated, juzrukuarr);
       juzrukuarr?.forEach((el, index) => {
-        const mushafPageNumber = this.isCompleteMushaf
-          ? this.surahService.juzPageNumbers[this.juzCalculated - 1] +
-            el.juzPageIndex
-          : el.juzPageIndex + 1;
-        if (this.currentPage === mushafPageNumber && el.lineIndex === i)
+        const mushafPageNumber =
+          el.pageNumber ||
+          this.surahService.juzPageNumbers[this.juzCalculated - 1] +
+            el.juzPageIndex;
+        if (
+          this.currentPageCalculated === mushafPageNumber &&
+          el.lineIndex === i
+        )
           rukuNumber = index;
       });
       return `<div>۰</div><div> ع </div><div style="font-size: 16px; margin-top: 3px;">${this.surahService.e2a(
@@ -607,11 +612,6 @@ export class ReadPage implements OnInit, AfterViewInit {
   getLineTextFromIndices(pageIndex, lineIndex) {
     return this.pages[pageIndex].split("\n")[lineIndex];
   }
-  getRukuArray() {
-    // this.surah.find(rukumark)
-    // this.surah.split("\n\n");
-    // see onSearchChange for full search
-  }
   gotoPageNum(p) {
     if (!p || p > 611 || p < 1) return;
     this.currentPage = parseInt(p);
@@ -685,7 +685,8 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.surahCalculated = this.surahService.surahCalculated(
         this.currentPageCalculated
       );
-    }
+    } else if (this.isCompleteMushaf)
+      this.currentPageCalculated = this.currentPage;
     console.log(
       "JUZ-SURAH CALCULATED",
       this.juzCalculated,

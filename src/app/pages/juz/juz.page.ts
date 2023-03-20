@@ -4,7 +4,11 @@ import { Router } from "@angular/router";
 import { PopoverController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { throwIfEmpty } from "rxjs/operators";
-import { ListType, SurahOrJuzListItem } from "src/app/models/common";
+import {
+  ListType,
+  RukuLocationItem,
+  SurahOrJuzListItem,
+} from "src/app/models/common";
 import { SurahService } from "src/app/services/surah.service";
 
 @Component({
@@ -18,7 +22,7 @@ export class JuzPage implements OnInit {
   surahPages: SurahOrJuzListItem[] = [];
   juzPagesCopy: SurahOrJuzListItem[] = [];
   surahPagesCopy: SurahOrJuzListItem[] = [];
-  rukuArray = [];
+  rukuArray: RukuLocationItem[][] = [];
   memorizeItems: [];
   unicodeBookmarkPageNum: number;
   lastSyncedAt: Date;
@@ -113,7 +117,7 @@ export class JuzPage implements OnInit {
     this.pages = juzData.split("\n\n");
     const juzPageNumbers = this.surahService.juzPageNumbers;
     juzPageNumbers.forEach((pageNumber, juzIndex) => {
-      let juzRukuArray = [];
+      let juzRukuArray: RukuLocationItem[] = [];
       const singleJuzPages = this.pages.filter((p, i) => {
         const isJuzPage: boolean =
           i >= pageNumber - 1 &&
@@ -135,12 +139,17 @@ export class JuzPage implements OnInit {
         if (page.includes(this.surahService.diacritics.RUKU_MARK))
           page.split("\n").forEach((line, lineIndex) => {
             if (line.includes(this.surahService.diacritics.RUKU_MARK))
-              juzRukuArray.push({ juzPageIndex, lineIndex, line });
+              juzRukuArray.push({
+                juzPageIndex,
+                lineIndex,
+                line,
+                pageNumber:
+                  juzPageIndex + this.surahService.juzPageNumbers[juzIndex],
+              });
           });
       });
       this.rukuArray.push(juzRukuArray);
     });
-
     // try for surahs similarly
     const surahPageNumbers = this.surahService.surahPageNumbers;
     surahPageNumbers.forEach((pageNumber, surahIndex) => {

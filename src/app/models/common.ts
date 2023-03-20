@@ -32,3 +32,22 @@ export enum ListType {
   JUZ = "juz",
   SURAH = "surah",
 }
+
+export interface RukuLocationItem {
+  /**
+   * Mushaf page numbers. Count starts from 1.
+   */
+  pageNumber: number;
+  /**
+   * Juz page index, starts from 0 for easy calculation.
+   */
+  juzPageIndex: number;
+  /**
+   * Line index for the juzPageIndex, starts from 0 for easy calculation.
+   */
+  lineIndex: number;
+  /**
+   * Line text where ruku mark is present.
+   */
+  line: string;
+}

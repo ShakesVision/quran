@@ -397,6 +397,41 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.presentSurahInfo(this.currentSurahInfo);
     });
   }
+  async showPageInfo() {
+    const page = this.pages[this.currentPage - 1];
+    const words = [...this.lines]
+      .filter(
+        (a, i, r) =>
+          !(
+            a.includes(this.surahService.diacritics.BISM) ||
+            r[i + 1]?.includes(this.surahService.diacritics.BISM)
+          )
+      )
+      .join("\n")
+      .split(" ");
+    const alert = await alertController.create({
+      header: `On this page (#${this.currentPage})`,
+      subHeader: `Detailed analysis...`,
+      message: `Words: ${words.length} <br />
+      Unique Words: ${new Set(words).size} <br />
+      Unique Words w/o Diacritics: ${
+        new Set(this.surahService.tashkeelRemover(words.join(" ")).split(" "))
+          .size
+      } <br />
+      Ayahs: ${
+        page.split(this.surahService.diacritics.AYAH_MARK).length - 1
+      } <br />
+      Surah Beginnings: ${
+        page.split(this.surahService.diacritics.BISM).length - 1
+      } <br />
+      Ruku Ends: ${
+        page.split(this.surahService.diacritics.RUKU_MARK).length - 1
+      } <br />
+      Lines: ${this.lines.length} <br />
+      Mushaf Page No.: ${this.currentPageCalculated}`,
+    });
+    alert.present();
+  }
 
   async presentSurahInfo(s) {
     const alert = await alertController.create({
@@ -553,7 +588,6 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   // returns a [pageIndex,lineIndex] on a search
   onSearchChange(val) {
-    console.log(this.ignoreTashkeel);
     let searchText = val;
     if (!searchText || searchText == "") return;
     var start = new Date().getTime();
@@ -742,13 +776,24 @@ export class ReadPage implements OnInit, AfterViewInit {
   }
   copyResults(copyResultEl) {
     let result = `Found ${this.searchResults.results.length} (${this.searchResults.total}) Results in ${this.searchResults.searchTimeSecs} sec:\n\n`;
-    this.searchResults.results.forEach((r: any) => {
+    this.searchResults.results.forEach((r) => {
+      let juzNum: number;
+      if (this.isCompleteMushaf)
+        juzNum = this.surahService.juzCalculated(r.pageIndex);
+      else if (this.juzmode)
+        juzNum = this.surahService.juzCalculated(
+          r.pageIndex +
+            this.surahService.juzPageNumbers[parseInt(this.title) - 1]
+        );
+      else if (this.juzsurahmode)
+        juzNum = this.surahService.juzCalculated(
+          r.pageIndex +
+            this.surahService.surahPageNumbers[parseInt(this.title) - 1]
+        );
       result += `${this.getLineTextFromIndices(
         r.pageIndex,
         r.lineIndex
-      )}\nPage ${r.pageIndex} Line ${
-        r.lineIndex
-      } | Juz ${this.surahService.juzCalculated(r.pageIndex)}\n\n`;
+      )}\nPage ${r.pageIndex + 1} Line ${r.lineIndex + 1} | Juz ${juzNum}\n\n`;
     });
     this.copyAnything(result);
     this.copyResultsBG = "primary";
@@ -938,6 +983,7 @@ export class ReadPage implements OnInit, AfterViewInit {
   }
   getJuzNumber() {
     let result = "";
+    // Complete Mushaf mode
     if (this.isCompleteMushaf) {
       if (this.surahCalculated === 1) result = "سورۃ";
       else
@@ -946,11 +992,13 @@ export class ReadPage implements OnInit, AfterViewInit {
           " " +
           this.surahService.e2a(this.juzCalculated.toString());
     } else if (this.surahCalculatedForJuz === 1) result = "سورۃ";
+    // Surah mode
     else if (this.juzsurahmode)
       result =
         this.surahService.juzNames[this.juzCalculated - 1] +
         " " +
         this.surahService.e2a(this.juzCalculated.toString());
+    // Juz mode
     else
       result =
         this.surahService.juzNames[+this.title - 1] +

@@ -307,7 +307,7 @@ export class SurahService {
       .replace(/ صلي /g, " صلى ");
   }
 
-  tashkeelRemover(text) {
+  tashkeelRemover(text: string) {
     return text
       .replace(/َ/g, "")
       .replace(/ِ/g, "")

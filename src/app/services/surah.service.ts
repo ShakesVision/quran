@@ -8,6 +8,8 @@ import { map, take } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { ToastController } from "@ionic/angular";
+import { Subject } from "rxjs/internal/Subject";
 
 @Injectable({
   providedIn: "root",
@@ -17,6 +19,12 @@ export class SurahService {
   indexCollection: AngularFirestoreCollection<Index>;
   currentSurah;
   surahInfo = [];
+
+  scanLinkData$ = new Subject<{
+    loading?: boolean;
+    identifier?: string;
+    incompleteUrl?: string;
+  }>();
 
   diacritics = {
     RUKU_MARK: "ۧ",
@@ -221,16 +229,20 @@ export class SurahService {
   constructor(
     private afs: AngularFirestore,
     private http: HttpClient,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private toastController: ToastController,
+    private httpClient: HttpClient
   ) {
     this.surahCollection = this.afs.collection<Surah>("surahs");
     this.indexCollection = this.afs.collection<Index>("index", (ref) =>
       ref.orderBy("surahNo")
     );
+    this.setupLinks();
   }
 
   ngOnInit() {
     this.getSurahInfo().subscribe((res: any) => (this.surahInfo = res));
+    this.setupLinks();
   }
 
   getArabicScript(text) {
@@ -394,6 +406,56 @@ export class SurahService {
   fetchQariList() {
     const url = `https://api.quran.com/api/v4/resources/chapter_reciters?language=ar`;
     return this.http.get(url);
+  }
+  async presentToastWithOptions(msg, color, pos, duration = 3000) {
+    const toast = await this.toastController.create({
+      message: msg,
+      position: pos,
+      color: color,
+      duration: duration,
+      buttons: [
+        {
+          text: "Ok",
+          role: "cancel",
+          handler: () => {
+            console.log("Cancel clicked.");
+          },
+        },
+      ],
+    });
+    toast.present();
+  }
+  setupLinks() {
+    this.httpClient
+      .get("https://archive.org/metadata/15-lined-saudi")
+      .subscribe((res: any) => {
+        console.log(
+          res.files
+            .filter((f) => f.size == "43240062")[0]
+            .name.replace(".pdf", "")
+        );
+        if (res.files.filter((f) => f.size == "43240062")[0]) {
+          const fileNameIdentifier = res.files
+            .filter((f) => f.size == "43240062")[0]
+            ?.name?.replace(".pdf", "")
+            .trim();
+          const identifier = res.metadata.identifier;
+          const incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
+          this.scanLinkData$.next({ identifier, incompleteUrl, loading: true });
+        } else {
+          this.httpClient
+            .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
+            .subscribe((res: any) => {
+              const identifier = res.metadata.identifier;
+              const incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${identifier}_`;
+              this.scanLinkData$.next({
+                identifier,
+                incompleteUrl,
+                loading: false,
+              });
+            });
+        }
+      });
   }
 
   p2e = (s) => s?.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));

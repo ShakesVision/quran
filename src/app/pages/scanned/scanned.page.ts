@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from "@angular/core";
 import { Storage } from "@ionic/storage-angular";
+import { SurahService } from "src/app/services/surah.service";
 
 @Component({
   selector: "app-scanned",
@@ -72,11 +73,16 @@ export class ScannedPage implements OnInit {
     disableZoomControl: "disable", // stops showing zoom + and zoom - images.
     backgroundColor: "rgba(0,0,0,0)", // Makes the pinch zoom container color to transparent. So that ionic themes can be applied without issues.
   };
-  constructor(private httpClient: HttpClient, private storage: Storage) {}
+  constructor(
+    private httpClient: HttpClient,
+    private storage: Storage,
+    private surahService: SurahService
+  ) {
+    this.setupLinks();
+  }
 
   ngOnInit() {
     this.getBookmark();
-    this.setupLinks();
   }
   async getBookmark() {
     await this.storage.create();
@@ -86,34 +92,41 @@ export class ScannedPage implements OnInit {
     });
   }
   setupLinks() {
-    this.loading = true;
-    this.httpClient
-      .get("https://archive.org/metadata/15-lined-saudi")
-      .subscribe((res: any) => {
-        console.log(
-          res.files
-            .filter((f) => f.size == "43240062")[0]
-            .name.replace(".pdf", "")
-        );
-        if (res.files.filter((f) => f.size == "43240062")[0]) {
-          const fileNameIdentifier = res.files
-            .filter((f) => f.size == "43240062")[0]
-            ?.name?.replace(".pdf", "")
-            .trim();
-          this.identifier = res.metadata.identifier;
-          this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
-          this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
-        } else {
-          this.httpClient
-            .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
-            .subscribe((res: any) => {
-              this.identifier = res.metadata.identifier;
-              this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
-              this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
-            });
-        }
-        this.loading = false;
-      });
+    this.surahService.scanLinkData$.subscribe((res) => {
+      console.log(res);
+      this.loading = res.loading;
+      this.identifier = res.identifier;
+      this.incompleteUrl = res.incompleteUrl;
+      this.loadImg(this.page, ImageQuality.High);
+    });
+    // this.loading = true;
+    // this.httpClient
+    //   .get("https://archive.org/metadata/15-lined-saudi")
+    //   .subscribe((res: any) => {
+    //     console.log(
+    //       res.files
+    //         .filter((f) => f.size == "43240062")[0]
+    //         .name.replace(".pdf", "")
+    //     );
+    //     if (res.files.filter((f) => f.size == "43240062")[0]) {
+    //       const fileNameIdentifier = res.files
+    //         .filter((f) => f.size == "43240062")[0]
+    //         ?.name?.replace(".pdf", "")
+    //         .trim();
+    //       this.identifier = res.metadata.identifier;
+    //       this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
+    //       this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+    //     } else {
+    //       this.httpClient
+    //         .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
+    //         .subscribe((res: any) => {
+    //           this.identifier = res.metadata.identifier;
+    //           this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
+    //           this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+    //         });
+    //     }
+    //     this.loading = false;
+    //   });
   }
   getPaddedNumber(n: number) {
     return String(n).padStart(4, "0");
@@ -121,13 +134,13 @@ export class ScannedPage implements OnInit {
   loadImg(p: number, quality: ImageQuality) {
     this.loading = true;
     this.page = p;
-    console.log(p, quality);
     this.url = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
       this.identifier
     }&scale=${quality}&rotate=0`;
     this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
       this.identifier
     }&scale=${quality}&rotate=0`;
+    console.log(p, quality, this.url);
 
     // setTimeout(() => {
     //   this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${

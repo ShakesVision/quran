@@ -3,7 +3,6 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { PopoverController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
-import { throwIfEmpty } from "rxjs/operators";
 import {
   ListType,
   RukuLocationItem,
@@ -93,11 +92,18 @@ export class JuzPage implements OnInit {
           this.syncing = false;
           this.juzPages = [];
           this.juzPagesCopy = [];
+          this.surahPages = [];
+          this.surahPagesCopy = [];
           if (stopNav) this.calculateJuzData(res);
           // Add extra line (\n) at the end of each file to avoid truncating last line of the file in split
           const juzData = { title: juz, data: res, rukuArray: this.rukuArray };
           this.storage.set(juz, juzData).then((_) => {
             console.log("Have been saved in your device successfully.");
+            this.surahService.presentToastWithOptions(
+              `Fetch complete! Updated data have been saved in your device successfully.`,
+              "primary",
+              "bottom"
+            );
             this.lastSyncedAt = new Date();
             this.storage.set("synced", this.lastSyncedAt).then((_) => {});
           });
@@ -278,6 +284,7 @@ export class JuzPage implements OnInit {
   closePopover() {
     this.isPopoverOpen = false;
   }
+  presentToast() {}
 
   ionViewWillEnter() {
     this.setupBookmark();

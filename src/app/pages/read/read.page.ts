@@ -223,7 +223,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     } else if (!this.surah?.urdu || this.juzmode) {
       console.log("Translation not available!");
       if (!this.juzmode)
-        this.presentToastWithOptions(
+        this.surahService.presentToastWithOptions(
           `Translation for ${this.title} is not available!`,
           "dark",
           "top"
@@ -263,24 +263,7 @@ export class ReadPage implements OnInit, AfterViewInit {
       lineNumbers.filter((l) => l > lineNo).length;
     return correctedSurahNum;
   }
-  async presentToastWithOptions(msg, color, pos, duration = 3000) {
-    const toast = await this.toastController.create({
-      message: msg,
-      position: pos,
-      color: color,
-      duration: duration,
-      buttons: [
-        {
-          text: "Ok",
-          role: "cancel",
-          handler: () => {
-            console.log("Cancel clicked.");
-          },
-        },
-      ],
-    });
-    toast.present();
-  }
+
   async presentAlert(msg, header?, subheader?) {
     const alertmsg = await this.alertController.create({
       header: header,
@@ -294,7 +277,7 @@ export class ReadPage implements OnInit, AfterViewInit {
             this.copyAnything(
               this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`)
             );
-            this.presentToastWithOptions(
+            this.surahService.presentToastWithOptions(
               "Copied successfully!",
               "success-light",
               "bottom"
@@ -419,6 +402,7 @@ export class ReadPage implements OnInit, AfterViewInit {
           .size
       } <br />
       Ayahs: ${
+        // Need to add number in the equation too, const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
         page.split(this.surahService.diacritics.AYAH_MARK).length - 1
       } <br />
       Surah Beginnings: ${
@@ -825,7 +809,7 @@ export class ReadPage implements OnInit, AfterViewInit {
         console.log(res);
         this.audioSrc = "https://verses.quran.com/" + res.verse.audio?.url;
         if (!res.verse.audio) {
-          this.presentToastWithOptions(
+          this.surahService.presentToastWithOptions(
             `The selected Qari might not have the audio for the verse ${verseIdList[0]}. Try another Qaris from the list.`,
             "warning",
             "middle"

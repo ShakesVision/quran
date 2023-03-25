@@ -91,10 +91,16 @@
 </ion-header>
 
 <ion-content>
-  <!-- <div class="scan-view" *ngIf="scanView">
-    <ion-img [src]="fullImageUrl"></ion-img>
-  </div> -->
-  <div class="page-wrapper ar ar2 ion-margin-top unicode-view">
+  <div class="scan-view" [hidden]="!scanView">
+    <pinch-zoom [properties]="zoomProperties">
+      <div class="scan-image-wrapper">
+        <ion-img [src]="fullImageUrl"></ion-img></div
+    ></pinch-zoom>
+  </div>
+  <div
+    class="page-wrapper ar ar2 ion-margin-top unicode-view"
+    [hidden]="scanView"
+  >
     <div class="page-top-info">
       <ng-container
         *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)"
@@ -273,6 +279,11 @@
               <ion-icon slot="start" name="image-outline"></ion-icon>
               <ion-label>{{'View Scan'}}</ion-label>
               <!-- <ion-label>{{scanView? 'View Scan': 'View Text'}}</ion-label> -->
+              <ion-toggle
+                slot="end"
+                [checked]="scanView"
+                (ionChange)="scanView=!scanView"
+              ></ion-toggle>
             </ion-item>
             <ion-item button (click)="toggleMuhammadiFont()">
               <ion-icon slot="start" name="refresh"></ion-icon>

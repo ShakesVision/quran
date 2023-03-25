@@ -89,7 +89,13 @@ export class ReadPage implements OnInit, AfterViewInit {
   fullImageUrl: string;
   identifier;
   incompleteUrl;
-
+  zoomProperties = {
+    "double-tap": true, // double tap to zoom in and out.
+    overflow: "hidden", // Am not sure. But Documentation says, it will not render elements outside the container.
+    wheel: false, // Disables mouse - To enable scrolling. Else mouse scrolling will be used to zoom in and out on web.
+    disableZoomControl: "disable", // stops showing zoom + and zoom - images.
+    backgroundColor: "rgba(0,0,0,0)", // Makes the pinch zoom container color to transparent. So that ionic themes can be applied without issues.
+  };
   constructor(
     public surahService: SurahService,
     public toastController: ToastController,
@@ -178,6 +184,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.currentPage += n;
     this.arabicLines = this.pages[this.currentPage - 1].split("\n");
     this.updateCalculatedNumbers();
+    this.scanView = false;
     if (this.translationExists)
       this.translationLines = this.tPages[this.currentPage - 1].split("\n");
     this.lines = this.tMode ? this.translationLines : this.arabicLines;
@@ -1019,6 +1026,12 @@ export class ReadPage implements OnInit, AfterViewInit {
             .subscribe((res: any) => {
               this.identifier = res.metadata.identifier;
               this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
+              const fullUrl = `${
+                this.incompleteUrl
+              }${this.surahService.getPaddedNumber(
+                this.currentPageCalculated
+              )}.jp2&id=${this.identifier}&scale=${ImageQuality.High}&rotate=0`;
+              this.fullImageUrl = fullUrl;
             });
         }
       });
@@ -1027,19 +1040,19 @@ export class ReadPage implements OnInit, AfterViewInit {
     const fullUrl = `${this.incompleteUrl}${this.surahService.getPaddedNumber(
       p
     )}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
-    console.log(fullUrl);
-    const alertmsg = await this.alertController.create({
-      message: `<img src='${fullUrl}' />`,
-      header: `Page #${this.currentPageCalculated}`,
-      cssClass: "scanImgAlertBox",
-      buttons: [
-        {
-          text: "Ok",
-          role: "cancel",
-        },
-      ],
-    });
-    alertmsg.present();
+    this.fullImageUrl = fullUrl;
+    // const alertmsg = await this.alertController.create({
+    //   message: `<img src='${fullUrl}' />`,
+    //   header: `Page #${this.currentPageCalculated}`,
+    //   cssClass: "scanImgAlertBox",
+    //   buttons: [
+    //     {
+    //       text: "Ok",
+    //       role: "cancel",
+    //     },
+    //   ],
+    // });
+    // alertmsg.present();
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

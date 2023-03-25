@@ -8,6 +8,7 @@ import { ReadPageRoutingModule } from "./read-routing.module";
 
 import { ReadPage } from "./read.page";
 import { VirtualScrollerModule } from "ngx-virtual-scroller";
+import { PinchZoomModule } from "ngx-pinch-zoom";
 
 @NgModule({
   imports: [
@@ -16,6 +17,7 @@ import { VirtualScrollerModule } from "ngx-virtual-scroller";
     IonicModule,
     ReadPageRoutingModule,
     VirtualScrollerModule,
+    PinchZoomModule,
   ],
   declarations: [ReadPage],
 })

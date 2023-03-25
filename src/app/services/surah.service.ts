@@ -30,6 +30,12 @@ export class SurahService {
     RUKU_MARK: "ۧ",
     AYAH_MARK: "۝",
     BISM: "﷽",
+    SAJDAH_MARK: "۞",
+    NOON_MUTTASIL: "ۨ",
+    WAQF_LAZIM: "ۘ",
+    WAQF_LAZIM2: "ۢ",
+    WAQF_NABI: "ؔ",
+    JAZM: "ْ",
   };
   surahPageNumbers = [
     2, 3, 51, 78, 107, 129, 152, 178, 188, 209, 222, 236, 250, 256, 262, 268,
@@ -237,12 +243,10 @@ export class SurahService {
     this.indexCollection = this.afs.collection<Index>("index", (ref) =>
       ref.orderBy("surahNo")
     );
-    this.setupLinks();
   }
 
   ngOnInit() {
     this.getSurahInfo().subscribe((res: any) => (this.surahInfo = res));
-    this.setupLinks();
   }
 
   getArabicScript(text) {
@@ -425,37 +429,9 @@ export class SurahService {
     });
     toast.present();
   }
-  setupLinks() {
-    this.httpClient
-      .get("https://archive.org/metadata/15-lined-saudi")
-      .subscribe((res: any) => {
-        console.log(
-          res.files
-            .filter((f) => f.size == "43240062")[0]
-            .name.replace(".pdf", "")
-        );
-        if (res.files.filter((f) => f.size == "43240062")[0]) {
-          const fileNameIdentifier = res.files
-            .filter((f) => f.size == "43240062")[0]
-            ?.name?.replace(".pdf", "")
-            .trim();
-          const identifier = res.metadata.identifier;
-          const incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
-          this.scanLinkData$.next({ identifier, incompleteUrl, loading: true });
-        } else {
-          this.httpClient
-            .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
-            .subscribe((res: any) => {
-              const identifier = res.metadata.identifier;
-              const incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${identifier}_`;
-              this.scanLinkData$.next({
-                identifier,
-                incompleteUrl,
-                loading: false,
-              });
-            });
-        }
-      });
+
+  getPaddedNumber(n: number) {
+    return String(n).padStart(4, "0");
   }
 
   p2e = (s) => s?.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));

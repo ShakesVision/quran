@@ -121,3 +121,13 @@ span.ayah_mark {
     user-select: none;
   }
 }
+.scanImgAlertBox {
+  .alert-wrapper {
+    max-width: 96vw;
+    aspect-ratio: 9/16;
+  }
+  .alert-message {
+    max-height: fit-content;
+    padding: 0;
+  }
+}

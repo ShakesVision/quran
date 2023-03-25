@@ -20,6 +20,7 @@ import {
   SearchResultsList,
 } from "src/app/models/common";
 import { MushafLines } from "src/app/models/mushaf-versions";
+import { ImageQuality } from "../scanned/scanned.page";
 
 @Component({
   selector: "app-read",
@@ -84,6 +85,10 @@ export class ReadPage implements OnInit, AfterViewInit {
   juzsurahmode: boolean;
   startIndex: number;
   copyResultsBG = "dark";
+  scanView: boolean = false;
+  fullImageUrl: string;
+  identifier;
+  incompleteUrl;
 
   constructor(
     public surahService: SurahService,
@@ -132,6 +137,8 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.surahInfo = res;
       this.surahService.surahInfo = res;
     });
+    // Get scan info
+    this.setupLinks();
     // highlight helper listener
     document.querySelector(".ar").addEventListener("mouseup", function (e) {
       var txt = this.innerText;
@@ -159,7 +166,12 @@ export class ReadPage implements OnInit, AfterViewInit {
   }
 
   setBookmark() {
-    if (this.juzmode && this.isCompleteMushaf)
+    if (
+      this.juzmode &&
+      this.isCompleteMushaf &&
+      this.currentPage !== 1 &&
+      this.currentPage !== this.pages.length
+    )
       this.storage.set("unicodeBookmark", this.currentPage).then((_) => {});
   }
   goToPage(n: number) {
@@ -989,6 +1001,45 @@ export class ReadPage implements OnInit, AfterViewInit {
         " " +
         this.surahService.e2a(this.title.toString());
     return result;
+  }
+  setupLinks() {
+    this.httpClient
+      .get("https://archive.org/metadata/15-lined-saudi")
+      .subscribe((res: any) => {
+        if (res.files.filter((f) => f.size == "43240062")[0]) {
+          const fileNameIdentifier = res.files
+            .filter((f) => f.size == "43240062")[0]
+            ?.name?.replace(".pdf", "")
+            .trim();
+          this.identifier = res.metadata.identifier;
+          this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
+        } else {
+          this.httpClient
+            .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
+            .subscribe((res: any) => {
+              this.identifier = res.metadata.identifier;
+              this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
+            });
+        }
+      });
+  }
+  async loadImg(p: number, quality: ImageQuality = ImageQuality.High) {
+    const fullUrl = `${this.incompleteUrl}${this.surahService.getPaddedNumber(
+      p
+    )}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
+    console.log(fullUrl);
+    const alertmsg = await this.alertController.create({
+      message: `<img src='${fullUrl}' />`,
+      header: `Page #${this.currentPageCalculated}`,
+      cssClass: "scanImgAlertBox",
+      buttons: [
+        {
+          text: "Ok",
+          role: "cancel",
+        },
+      ],
+    });
+    alertmsg.present();
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

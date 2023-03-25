@@ -92,41 +92,34 @@ export class ScannedPage implements OnInit {
     });
   }
   setupLinks() {
-    this.surahService.scanLinkData$.subscribe((res) => {
-      console.log(res);
-      this.loading = res.loading;
-      this.identifier = res.identifier;
-      this.incompleteUrl = res.incompleteUrl;
-      this.loadImg(this.page, ImageQuality.High);
-    });
-    // this.loading = true;
-    // this.httpClient
-    //   .get("https://archive.org/metadata/15-lined-saudi")
-    //   .subscribe((res: any) => {
-    //     console.log(
-    //       res.files
-    //         .filter((f) => f.size == "43240062")[0]
-    //         .name.replace(".pdf", "")
-    //     );
-    //     if (res.files.filter((f) => f.size == "43240062")[0]) {
-    //       const fileNameIdentifier = res.files
-    //         .filter((f) => f.size == "43240062")[0]
-    //         ?.name?.replace(".pdf", "")
-    //         .trim();
-    //       this.identifier = res.metadata.identifier;
-    //       this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
-    //       this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
-    //     } else {
-    //       this.httpClient
-    //         .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
-    //         .subscribe((res: any) => {
-    //           this.identifier = res.metadata.identifier;
-    //           this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
-    //           this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
-    //         });
-    //     }
-    //     this.loading = false;
-    //   });
+    this.loading = true;
+    this.httpClient
+      .get("https://archive.org/metadata/15-lined-saudi")
+      .subscribe((res: any) => {
+        console.log(
+          res.files
+            .filter((f) => f.size == "43240062")[0]
+            .name.replace(".pdf", "")
+        );
+        if (res.files.filter((f) => f.size == "43240062")[0]) {
+          const fileNameIdentifier = res.files
+            .filter((f) => f.size == "43240062")[0]
+            ?.name?.replace(".pdf", "")
+            .trim();
+          this.identifier = res.metadata.identifier;
+          this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
+          this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+        } else {
+          this.httpClient
+            .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
+            .subscribe((res: any) => {
+              this.identifier = res.metadata.identifier;
+              this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
+              this.loadImg(this.page, ImageQuality.High); //use for showing 'last opened page' initially
+            });
+        }
+        this.loading = false;
+      });
   }
   getPaddedNumber(n: number) {
     return String(n).padStart(4, "0");

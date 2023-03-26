@@ -40,7 +40,7 @@ export class HomePage {
   ) {}
   ngOnInit() {
     this.loading = true;
-    const url = `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@master/App/HomePageBanner.json`;
+    const url = `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/App/HomePageBanner.json`;
     this.httpClient
       .get(url, { responseType: "json" })
       .subscribe((res: HomePageBanner) => {

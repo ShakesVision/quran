@@ -141,7 +141,7 @@
         'quran-kareem-text':juzmode && isCompleteMushaf && currentPage==1,
         'bism-line': line?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && i==10), 
         'juz-start-line': ![2,3].includes(currentPageCalculated) && surahService.juzPageNumbers.includes(currentPageCalculated) && (lines[1].trim()==='﷽' ? i===2 : i===0),
-        'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPage==188 && i==0), 
+        'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPageCalculated==188 && i==0), 
         'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))|| (currentPage===pages.length && i===lines.length-1 && !juzmode)}"
         (click)="openTrans($event,i)"
       >
@@ -294,6 +294,7 @@
                 <ion-input
                   #searchInput
                   placeholder="بحث / SEARCH / تلاش"
+                  [value]="queryString"
                   (ionChange)="onSearchChange($event.target.value)"
                   [debounce]="500"
                   clearInput

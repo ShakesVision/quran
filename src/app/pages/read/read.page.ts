@@ -74,7 +74,7 @@ export class ReadPage implements OnInit, AfterViewInit {
   rukuArray: RukuLocationItem[][] = [];
 
   surahArray = [];
-
+  queryString: string;
   isResultSelected: boolean = false;
 
   surahInfo;
@@ -594,6 +594,7 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   // returns a [pageIndex,lineIndex] on a search
   onSearchChange(val) {
+    this.queryString = val;
     let searchText = val;
     if (!searchText || searchText == "") return;
     var start = new Date().getTime();

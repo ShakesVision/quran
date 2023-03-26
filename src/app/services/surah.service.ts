@@ -36,6 +36,7 @@ export class SurahService {
     WAQF_LAZIM2: "ۢ",
     WAQF_NABI: "ؔ",
     JAZM: "ْ",
+    TATWEEL: "ـ",
   };
   surahPageNumbers = [
     2, 3, 51, 78, 107, 129, 152, 178, 188, 209, 222, 236, 250, 256, 262, 268,
@@ -346,6 +347,11 @@ export class SurahService {
       .replace(/۟/g, "")
       .replace(/ۤ/g, "")
       .replace(/ٖ/g, "");
+  }
+
+  removeTatweel(text: string) {
+    const re = new RegExp(this.diacritics.TATWEEL, "g");
+    return text.replace(re, "");
   }
 
   // signup(email, password) {

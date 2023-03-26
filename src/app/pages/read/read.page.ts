@@ -598,12 +598,14 @@ export class ReadPage implements OnInit, AfterViewInit {
     let searchText = val;
     if (!searchText || searchText == "") return;
     var start = new Date().getTime();
-    searchText = this.surahService.getArabicScript(searchText);
+    searchText = this.surahService.removeTatweel(
+      this.surahService.getArabicScript(searchText)
+    );
     let arr: SearchResultsList[] = [];
     let cumulativeTotal = 0;
     let result = [];
     this.pages.forEach((v, pageIndex) => {
-      v = this.surahService.getArabicScript(v);
+      v = this.surahService.removeTatweel(this.surahService.getArabicScript(v));
       if (this.ignoreTashkeel) {
         v = this.surahService.tashkeelRemover(
           this.surahService.getArabicScript(v)

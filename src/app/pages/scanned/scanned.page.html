@@ -27,7 +27,7 @@
           <ion-select
             #juzSection
             [disabled]="!juzInput"
-            value="0"
+            [value]="0"
             (ionChange)="jumpToSection($event.target.value)"
             placeholder="Section"
             class="juz-section-dropdown"

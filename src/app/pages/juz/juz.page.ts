@@ -66,7 +66,7 @@ export class JuzPage implements OnInit {
     this.storage
       .get(juz)
       .then((res) => {
-        if (res) {
+        if (res && !navigator.onLine) {
           console.log("found in device storage", res);
           if (stopNav) this.calculateJuzData(res.data);
           if (!stopNav) this.navigate(res);
@@ -83,7 +83,8 @@ export class JuzPage implements OnInit {
     this.syncing = true;
     this.httpClient
       .get(
-        `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@master/15Lines/${juz}.txt`,
+        // `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@master/15Lines/${juz}.txt`,
+        `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@tatweel-fix/15Lines/${juz}.txt`,
         { responseType: "text" }
       )
       .subscribe(

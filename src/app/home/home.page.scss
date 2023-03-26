@@ -29,3 +29,19 @@
 ion-content ion-toolbar {
   --background: translucent;
 }
+.links {
+  margin: 20px;
+  ion-col {
+    display: inline-flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    row-gap: 5px;
+    ion-icon {
+      font-size: x-large;
+    }
+    ion-label {
+      font-size: x-small;
+    }
+  }
+}

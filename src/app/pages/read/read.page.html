@@ -192,23 +192,23 @@
           <ion-list lines="none">
             <ion-item>
               <ion-label>Font Size</ion-label>
-              <ion-button (click)="changeFontSize(1)" slot="end" fill="clear">
-                <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
-              </ion-button>
-              <!-- <ion-input
-                slot="end"
+              <ion-input
                 placeholder="px"
+                [value]="pageFontSize"
                 (ionChange)="changeFontSize($event.target.value,true)"
                 [debounce]="500"
                 class="font-size-field ion-no-padding ion-no-margin ion-text-center"
-              ></ion-input> -->
-              <div slot="end" class="font-size-field"></div>
-              <ion-button (click)="changeFontSize(-1)" slot="end" fill="clear">
-                <ion-icon
-                  slot="icon-only"
-                  name="remove-circle-outline"
-                ></ion-icon>
-              </ion-button>
+              ></ion-input>
+              <ion-buttons slot="end" class="ion-no-margin">
+                <ion-button (click)="changeFontSize(1)">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+                </ion-button>
+
+                <!-- <div slot="end" class="font-size-field">{{pageFontSize}}</div> -->
+                <ion-button (click)="changeFontSize(-1)">
+                  <ion-icon name="remove-circle-outline"></ion-icon>
+                </ion-button>
+              </ion-buttons>
             </ion-item>
             <ion-item *ngIf="isCompleteMushaf">
               <ion-label>Go to</ion-label>

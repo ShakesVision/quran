@@ -42,6 +42,7 @@ export class ReadPage implements OnInit, AfterViewInit {
   translationExists: boolean = false;
   isPopoverOpen: boolean = false;
   currentSurahInfo;
+  pageFontSize: string;
   audioSrc: string;
   audio: HTMLAudioElement;
   audioPlaying = false;
@@ -161,6 +162,10 @@ export class ReadPage implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.fetchQariList();
     this.qariId = 7;
+    var el: HTMLElement = document.querySelector(".content-wrapper");
+    this.pageFontSize = window
+      .getComputedStyle(el, null)
+      .getPropertyValue("font-size");
   }
 
   async getBookmark() {
@@ -331,14 +336,12 @@ export class ReadPage implements OnInit, AfterViewInit {
   }
   changeFontSize(val, inputValue: boolean = false) {
     var el: HTMLElement = document.querySelector(".content-wrapper");
-    let fontSizeField: HTMLElement = document.querySelector(".font-size-field");
-    var style = window.getComputedStyle(el, null).getPropertyValue("font-size");
-    var currentSize = parseFloat(style);
-    if (inputValue) el.style.fontSize = val + "px";
+    var currentSize = parseFloat(this.pageFontSize);
+    if (inputValue) el.style.fontSize = parseFloat(val) + "px";
     else {
       el.style.fontSize = currentSize + val + "px";
-      fontSizeField.innerText = el.style.fontSize;
     }
+    this.pageFontSize = el.style.fontSize;
   }
   changeColors(val, field = "bg") {
     var el: HTMLElement = document.querySelector(".content-wrapper");

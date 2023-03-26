@@ -227,6 +227,11 @@ virtual-scroller {
   ion-item {
     font-size: small;
   }
+  .font-size-field {
+    max-width: 60px;
+    margin-left: 15px;
+    border-bottom: 1px dashed var(--ion-color-medium);
+  }
   .selected-result {
     background-color: #a3c0ff;
   }

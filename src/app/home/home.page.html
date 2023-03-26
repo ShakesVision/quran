@@ -11,30 +11,35 @@
 
 <ion-content>
   <div
-    class="ion-margin ion-padding"
-    style="
-      box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-      background-image: linear-gradient(
-        288deg,
-        var(--ion-color-secondary) 0%,
-        var(--ion-color-light) 100%
-      );
-    "
+    class="top-banner-wrapper"
+    (click)="!banner.button.show && open(banner.clickAction)"
   >
-    <div>
-      <ion-text>
-        We are digitizing the 15 Lines Quran & translation in Unicode, which is
-        a work in progress. You can also help us complete this project.
-      </ion-text>
-      <div class="ion-text-right ion-no-margin">
-        <ion-button size="small" fill="outline" (click)="open('about')">
-          <ion-icon
-            color="primary"
-            slot="start"
-            src="assets/icon/hand-holding.svg"
-          ></ion-icon>
-          Contribute</ion-button
-        >
+    <div
+      class="ion-margin ion-padding top-banner"
+      [style.box-shadow]="banner.style.boxShadow"
+      [style.background-image]="banner.style.backgroundImage"
+      [style]="banner.style.common"
+    >
+      <div class="banner-inner">
+        <ion-text [innerHTML]="banner.text"></ion-text>
+        <div class="ion-text-right ion-no-margin" *ngIf="banner.button.show">
+          <ion-button
+            size="small"
+            [fill]="banner.button.fill"
+            [color]="banner.button.color"
+            (click)="open(banner.clickAction)"
+          >
+            <ion-icon
+              *ngIf="banner.button.icon.show"
+              [src]="banner.button.icon.src"
+              [name]="banner.button.icon.src"
+              [color]="banner.button.icon.color"
+              slot="start"
+            >
+            </ion-icon>
+            {{ banner.button.text }}
+          </ion-button>
+        </div>
       </div>
     </div>
   </div>

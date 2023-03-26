@@ -1,3 +1,5 @@
+import { SafeHtml } from "@angular/platform-browser";
+
 export interface SurahOrJuzListItem {
   /**
    * Juz or Surah number e.g. 1 is Juz الم and Surah فاتحہ
@@ -50,4 +52,25 @@ export interface RukuLocationItem {
    * Line text where ruku mark is present.
    */
   line: string;
+}
+
+export interface HomePageBanner {
+  text: SafeHtml;
+  button: {
+    show: boolean;
+    text: string;
+    color: string;
+    fill: string;
+    icon: {
+      show: boolean;
+      src: string;
+      color: string;
+    };
+  };
+  clickAction: string;
+  style: {
+    boxShadow: string;
+    backgroundImage: string;
+    common: string;
+  };
 }

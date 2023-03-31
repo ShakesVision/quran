@@ -37,7 +37,7 @@
   <div class="juz-grid-wrapper" [ngSwitch]="segment">
     <div
       class="juz-btn juz-btn-full"
-      (click)="gotoReadJuz('Quran')"
+      (click)="navigate()"
       [ngStyle]="{'background': totalMemorizeStyle(),'background-position': 'left'}"
       [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
       attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"

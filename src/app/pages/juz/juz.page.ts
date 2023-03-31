@@ -16,6 +16,12 @@ import { SurahService } from "src/app/services/surah.service";
   styleUrls: ["./juz.page.scss"],
 })
 export class JuzPage implements OnInit {
+  quranData: {
+    title: string;
+    data: string;
+    rukuArray: RukuLocationItem[][];
+    mode: string;
+  };
   pages = [];
   juzPages: SurahOrJuzListItem[] = [];
   surahPages: SurahOrJuzListItem[] = [];
@@ -28,6 +34,7 @@ export class JuzPage implements OnInit {
   syncing = false;
   isPopoverOpen = false;
   segment: ListType = ListType.SURAH;
+  isOnline: boolean = false;
 
   constructor(
     private router: Router,
@@ -40,7 +47,8 @@ export class JuzPage implements OnInit {
   }
 
   ngOnInit() {
-    this.gotoReadJuz("Quran", true);
+    this.checkOnlineStatus();
+    this.loadQuran("Quran");
     this.lastSynced();
   }
 
@@ -60,26 +68,37 @@ export class JuzPage implements OnInit {
       }
     });
   }
+  checkOnlineStatus() {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = () => {
+      this.isOnline = true;
+    };
+    xhr.onerror = () => {
+      this.isOnline = false;
+    };
+    xhr.open("GET", "https://www.google.com", true);
+    xhr.send();
+  }
 
-  gotoReadJuz(juz, stopNav = false) {
-    if (typeof juz === "number") juz = "Juz" + juz;
+  loadQuran(juz) {
+    console.log("called loadQuran:", juz, "offline? ", !navigator.onLine);
     this.storage
       .get(juz)
       .then((res) => {
-        if (res && !navigator.onLine) {
+        if (!this.isOnline) {
           console.log("found in device storage", res);
-          if (stopNav) this.calculateJuzData(res.data);
-          if (!stopNav) this.navigate(res);
+          this.quranData = res;
+          this.calculateJuzData(res.data);
         } else {
-          console.log("NOT found in local storage, fetching from server...");
-          this.fetchAndSaveInDeviceStorage(juz, true);
+          console.log("Found internet, fetching from server...");
+          this.fetchAndSaveInDeviceStorage(juz);
         }
       })
       .catch((err) => {
         console.log("error reading the database.");
       });
   }
-  fetchAndSaveInDeviceStorage(juz, stopNav = false) {
+  fetchAndSaveInDeviceStorage(juz) {
     this.syncing = true;
     this.httpClient
       .get(
@@ -94,9 +113,15 @@ export class JuzPage implements OnInit {
           this.juzPagesCopy = [];
           this.surahPages = [];
           this.surahPagesCopy = [];
-          if (stopNav) this.calculateJuzData(res);
+          this.calculateJuzData(res);
           // Add extra line (\n) at the end of each file to avoid truncating last line of the file in split
-          const juzData = { title: juz, data: res, rukuArray: this.rukuArray };
+          const juzData = {
+            title: "Quran",
+            data: res,
+            rukuArray: this.rukuArray,
+            mode: "juz",
+          };
+          this.quranData = juzData;
           this.storage.set(juz, juzData).then((_) => {
             console.log("Have been saved in your device successfully.");
             this.surahService.presentToastWithOptions(
@@ -107,17 +132,17 @@ export class JuzPage implements OnInit {
             this.lastSyncedAt = new Date();
             this.storage.set("synced", this.lastSyncedAt).then((_) => {});
           });
-          if (!stopNav) this.navigate(juzData);
         },
         (err) => {
           console.log("fetch failed.");
         }
       );
   }
-  navigate(juzData, i = 0, mode = "juz") {
-    if (i != 0)
-      juzData = { title: i, data: juzData, rukuArray: this.rukuArray, mode };
-    this.router.navigate(["/read"], { state: { juzData } });
+  navigate(data?, id = 0, mode = "juz") {
+    if (id != 0)
+      data = { title: id, data: data, rukuArray: this.rukuArray, mode };
+    if (!data) data = this.quranData;
+    this.router.navigate(["/read"], { state: { juzData: data } });
   }
   calculateJuzData(juzData) {
     this.pages = juzData.split("\n\n");

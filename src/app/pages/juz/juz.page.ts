@@ -3,6 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { PopoverController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
+import { BookmarkCalculation, Bookmarks } from "src/app/models/bookmarks";
 import {
   ListType,
   RukuLocationItem,
@@ -30,6 +31,7 @@ export class JuzPage implements OnInit {
   rukuArray: RukuLocationItem[][] = [];
   memorizeItems: [];
   unicodeBookmarkPageNum: number;
+  bookmarks: Bookmarks;
   lastSyncedAt: Date;
   syncing = false;
   isPopoverOpen = false;
@@ -225,6 +227,27 @@ export class JuzPage implements OnInit {
     )}%, var(--ion-color-light) 0)`;
     return s;
   }
+  returnBookmarkCalc(p: SurahOrJuzListItem): BookmarkCalculation {
+    let result: BookmarkCalculation;
+    let pageValue: number;
+    // Juz calculations
+    if (this.segment === "juz") {
+      pageValue = this.bookmarks?.auto?.juz?.find((j) => j.juz === p.id)?.page;
+    }
+    // Surah calculations
+    else {
+      pageValue = this.bookmarks?.auto?.surah?.find(
+        (j) => j.surah === p.id
+      )?.page;
+    }
+    //If data is not found, i.e. No pages read and bookmark doesn't exist
+    if (!pageValue) return null;
+    else
+      return {
+        perc: `${((pageValue / p.length) * 100).toFixed(1)}%`,
+        page: pageValue,
+      };
+  }
   totalMemorizeStyle() {
     if (!this.memorizeItems) return;
     let completedCount = 0;
@@ -236,6 +259,9 @@ export class JuzPage implements OnInit {
     this.storage.get("unicodeBookmark").then((pageNum) => {
       this.unicodeBookmarkPageNum = pageNum;
       console.log("BOOKMARK: " + this.unicodeBookmarkPageNum);
+    });
+    this.storage.get("bookmarks").then((res: Bookmarks) => {
+      this.bookmarks = res;
     });
   }
 

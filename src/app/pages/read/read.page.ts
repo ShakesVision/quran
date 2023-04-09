@@ -21,6 +21,7 @@ import {
 } from "src/app/models/common";
 import { MushafLines } from "src/app/models/mushaf-versions";
 import { ImageQuality } from "../scanned/scanned.page";
+import { Bookmarks } from "src/app/models/bookmarks";
 
 @Component({
   selector: "app-read",
@@ -76,6 +77,14 @@ export class ReadPage implements OnInit, AfterViewInit {
   surahArray = [];
   queryString: string;
   isResultSelected: boolean = false;
+
+  bookmarks: Bookmarks;
+
+  MUSHAF_MODE: {
+    COMPLETE_MUSHAF: boolean;
+    JUZ_VERSION: boolean;
+    SURAH_VERSION: boolean;
+  };
 
   surahInfo;
 
@@ -136,9 +145,16 @@ export class ReadPage implements OnInit, AfterViewInit {
       }
     }
     this.isCompleteMushaf = this.pages.length === 611;
-    this.updateCalculatedNumbers();
+    this.MUSHAF_MODE = {
+      COMPLETE_MUSHAF: this.juzmode && this.isCompleteMushaf,
+      JUZ_VERSION: this.juzmode && !this.isCompleteMushaf && !this.juzsurahmode,
+      SURAH_VERSION:
+        this.juzmode && !this.isCompleteMushaf && this.juzsurahmode,
+    };
+
     // get bookmark
-    if (this.juzmode && this.isCompleteMushaf) this.getBookmark();
+    this.getBookmark();
+    this.updateCalculatedNumbers();
     // get surah info file
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = res;
@@ -170,13 +186,40 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   async getBookmark() {
     await this.storage.create();
-    this.storage.get("unicodeBookmark").then((pageNum) => {
-      console.log("bookmark fetched:", pageNum);
-      if (pageNum) this.gotoPageNum(pageNum);
-    });
+    // this.storage.get("unicodeBookmark").then((pageNum) => {
+    //   console.log("bookmark fetched:", pageNum);
+    //   if (pageNum) this.gotoPageNum(pageNum);
+    // });
+    this.bookmarks = await this.storage.get("bookmarks");
+    if (this.bookmarks) {
+      let pageNumberToJumpTo: number;
+      if (this.MUSHAF_MODE.COMPLETE_MUSHAF)
+        pageNumberToJumpTo = this.bookmarks?.auto?.unicode;
+      if (this.MUSHAF_MODE.JUZ_VERSION)
+        pageNumberToJumpTo = this.bookmarks?.auto?.juz?.find(
+          (j) => j.juz === parseInt(this.title)
+        )?.page;
+      if (this.MUSHAF_MODE.SURAH_VERSION)
+        pageNumberToJumpTo = this.bookmarks?.auto?.surah?.find(
+          (j) => j.surah === parseInt(this.title)
+        )?.page;
+      this.gotoPageNum(pageNumberToJumpTo);
+    } else {
+      this.bookmarks = {
+        auto: {
+          unicode: 0,
+          scanned: 0,
+          juz: [],
+          surah: [],
+        },
+        manual: [],
+      };
+    }
+    console.log("bookmarks fetched:", this.bookmarks);
   }
 
   setBookmark() {
+    console.log("setting bookmarks: ", this.bookmarks, this.MUSHAF_MODE);
     if (
       this.juzmode &&
       this.isCompleteMushaf &&
@@ -184,6 +227,41 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.currentPage !== this.pages.length
     )
       this.storage.set("unicodeBookmark", this.currentPage).then((_) => {});
+
+    // complete mushaf
+    if (this.MUSHAF_MODE.COMPLETE_MUSHAF)
+      this.bookmarks.auto.unicode = this.currentPage;
+
+    // juz version
+    if (this.MUSHAF_MODE.JUZ_VERSION) {
+      const index = this.bookmarks.auto.juz.findIndex(
+        (bookmark) => bookmark.juz === parseInt(this.title)
+      );
+      if (index !== -1) {
+        this.bookmarks.auto.juz[index].page = this.currentPage;
+      } else {
+        this.bookmarks.auto.juz.push({
+          juz: parseInt(this.title),
+          page: this.currentPage,
+        });
+      }
+    }
+    // surah (juzsurah) version
+    if (this.MUSHAF_MODE.SURAH_VERSION) {
+      console.log("surah version =>", this.bookmarks.auto.surah);
+      const index = this.bookmarks.auto.surah.findIndex(
+        (bookmark) => bookmark.surah === parseInt(this.title)
+      );
+      if (index !== -1) {
+        this.bookmarks.auto.surah[index].page = this.currentPage;
+      } else {
+        this.bookmarks.auto.surah.push({
+          surah: parseInt(this.title),
+          page: this.currentPage,
+        });
+      }
+    }
+    this.storage.set("bookmarks", this.bookmarks).then((_) => {});
   }
   goToPage(n: number) {
     this.currentPage += n;
@@ -508,7 +586,6 @@ export class ReadPage implements OnInit, AfterViewInit {
       // );
       let rukuNumber = 0;
       const juzrukuarr = this.rukuArray[this.juzCalculated - 1];
-      console.log(this.juzCalculated, this.currentPageCalculated, juzrukuarr);
       juzrukuarr?.forEach((el, index) => {
         const mushafPageNumber =
           el.pageNumber ||

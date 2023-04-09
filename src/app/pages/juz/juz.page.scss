@@ -60,7 +60,7 @@ ion-header {
   .juz-btn:hover {
     background: aliceblue !important;
   }
-  .juz-btn-full::after {
+  .juz-btn::after {
     content: attr(data-bookmarkPercentage);
     background: var(--ion-color-primary);
     color: var(--ion-color-primary);

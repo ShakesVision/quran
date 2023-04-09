@@ -11,7 +11,7 @@
       </div>
       <div class="sync-btn-wrapper">
         <ion-button
-          (click)="fetchAndSaveInDeviceStorage('Quran',true)"
+          (click)="fetchAndSaveInDeviceStorage('Quran')"
           fill="clear"
           color="medium"
           size="small"
@@ -82,6 +82,8 @@
         [class]="'juz-btn juz'+j.id+'-btn'"
         [ngClass]="{'hifz-complete': findMemorizeItem(j.id)=='100.0'}"
         [ngStyle]="{'background': returnStyle(j.id-1), 'transition':'all 1s ease'}"
+        [style]="'--bookmarkPercentage:'+!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc"
+        attr.data-bookmarkPercentage="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
         (click)="navigate(j.pages,j.id)"
       >
         <div class="juz-heading-en">JUZ</div>
@@ -99,6 +101,8 @@
       <div
         *ngFor="let j of surahPages"
         [class]="'juz-btn surah'+j.id+'-btn'"
+        [style]="'--bookmarkPercentage:'+!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc"
+        attr.data-bookmarkPercentage="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
         (click)="navigate(j.pages,j.id,'surah')"
       >
         <div class="juz-heading-en">SURAH</div>

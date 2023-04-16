@@ -41,6 +41,7 @@
       [ngStyle]="{'background': totalMemorizeStyle(),'background-position': 'left'}"
       [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
       attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"
+      attr.data-bookmarkPercentageContent="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'+ ' ('+unicodeBookmarkPageNum+')'}}"
     >
       <div class="juz-heading-en">Read Complete Quran</div>
       <div class="juz-number">1-30</div>
@@ -82,8 +83,8 @@
         [class]="'juz-btn juz'+j.id+'-btn'"
         [ngClass]="{'hifz-complete': findMemorizeItem(j.id)=='100.0'}"
         [ngStyle]="{'background': returnStyle(j.id-1), 'transition':'all 1s ease'}"
-        [style]="'--bookmarkPercentage:'+!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc"
-        attr.data-bookmarkPercentage="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
+        [style]="'--bookmarkPercentage:'+returnBookmarkCalc(j)?.perc"
+        attr.data-bookmarkPercentageContent="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
         (click)="navigate(j.pages,j.id)"
       >
         <div class="juz-heading-en">JUZ</div>
@@ -101,8 +102,8 @@
       <div
         *ngFor="let j of surahPages"
         [class]="'juz-btn surah'+j.id+'-btn'"
-        [style]="'--bookmarkPercentage:'+!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc"
-        attr.data-bookmarkPercentage="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
+        [style]="'--bookmarkPercentage:'+returnBookmarkCalc(j)?.perc"
+        attr.data-bookmarkPercentageContent="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
         (click)="navigate(j.pages,j.id,'surah')"
       >
         <div class="juz-heading-en">SURAH</div>

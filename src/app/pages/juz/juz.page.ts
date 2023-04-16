@@ -230,23 +230,25 @@ export class JuzPage implements OnInit {
   returnBookmarkCalc(p: SurahOrJuzListItem): BookmarkCalculation {
     let result: BookmarkCalculation;
     let pageValue: number;
-    // Juz calculations
     if (this.segment === "juz") {
+      // Juz calculations
       pageValue = this.bookmarks?.auto?.juz?.find((j) => j.juz === p.id)?.page;
-    }
-    // Surah calculations
-    else {
+    } else {
+      // Surah calculations
       pageValue = this.bookmarks?.auto?.surah?.find(
         (j) => j.surah === p.id
       )?.page;
     }
     //If data is not found, i.e. No pages read and bookmark doesn't exist
     if (!pageValue) return null;
-    else
-      return {
+    else {
+      result = {
         perc: `${((pageValue / p.length) * 100).toFixed(1)}%`,
         page: pageValue,
       };
+      console.log(result);
+      return result;
+    }
   }
   totalMemorizeStyle() {
     if (!this.memorizeItems) return;
@@ -256,12 +258,13 @@ export class JuzPage implements OnInit {
     return `linear-gradient(to right, var(--green-highlight) ${percent}%, var(--ion-color-light) 0)`;
   }
   setupBookmark() {
-    this.storage.get("unicodeBookmark").then((pageNum) => {
-      this.unicodeBookmarkPageNum = pageNum;
-      console.log("BOOKMARK: " + this.unicodeBookmarkPageNum);
-    });
+    // this.storage.get("unicodeBookmark").then((pageNum) => {
+    //   this.unicodeBookmarkPageNum = pageNum;
+    //   console.log("BOOKMARK: " + this.unicodeBookmarkPageNum);
+    // });
     this.storage.get("bookmarks").then((res: Bookmarks) => {
       this.bookmarks = res;
+      this.unicodeBookmarkPageNum = res?.auto?.unicode;
     });
   }
 

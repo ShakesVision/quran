@@ -61,7 +61,7 @@ ion-header {
     background: aliceblue !important;
   }
   .juz-btn::after {
-    content: attr(data-bookmarkPercentage);
+    content: attr(data-bookmarkPercentageContent);
     background: var(--ion-color-primary);
     color: var(--ion-color-primary);
     position: absolute;

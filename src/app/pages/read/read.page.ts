@@ -207,8 +207,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     } else {
       this.bookmarks = {
         auto: {
-          unicode: 0,
-          scanned: 0,
+          unicode: 1,
+          scanned: 1,
           juz: [],
           surah: [],
         },

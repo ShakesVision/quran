@@ -49,7 +49,6 @@ export class JuzPage implements OnInit {
   }
 
   ngOnInit() {
-    this.checkOnlineStatus();
     this.loadQuran("Quran");
     this.lastSynced();
   }
@@ -70,24 +69,12 @@ export class JuzPage implements OnInit {
       }
     });
   }
-  checkOnlineStatus() {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = () => {
-      this.isOnline = true;
-    };
-    xhr.onerror = () => {
-      this.isOnline = false;
-    };
-    xhr.open("GET", "https://www.google.com", true);
-    xhr.send();
-  }
-
   loadQuran(juz) {
     console.log("called loadQuran:", juz, "offline? ", !navigator.onLine);
     this.storage
       .get(juz)
       .then((res) => {
-        if (!this.isOnline) {
+        if (res && !navigator.onLine) {
           console.log("found in device storage", res);
           this.quranData = res;
           this.calculateJuzData(res.data);

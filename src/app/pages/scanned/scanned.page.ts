@@ -12,6 +12,8 @@ export class ScannedPage implements OnInit {
   url: string;
   url2: string;
   url3: string;
+  currentImageIndex = 1;
+  urls = [];
   incompleteUrl: string;
   identifier: string;
   imgQuality: ImageQuality = ImageQuality.High;
@@ -120,14 +122,36 @@ export class ScannedPage implements OnInit {
   }
   loadImg(p: number, quality: ImageQuality) {
     this.loading = true;
+    // Get 3 urls
+    const u0 = `${this.incompleteUrl}${this.getPaddedNumber(p - 1)}.jp2&id=${
+      this.identifier
+    }&scale=${quality}&rotate=0`;
+    const u1 = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
+      this.identifier
+    }&scale=${quality}&rotate=0`;
+    const u2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
+      this.identifier
+    }&scale=${quality}&rotate=0`;
+
+    // Set urls properly
+    if (p > this.page) {
+      // direction === 'next'
+      this.urls.shift();
+      this.urls.push(u2);
+    } else if (p < this.page) {
+      this.urls.pop();
+      this.urls.unshift(u0);
+    }
     this.page = p;
-    this.url = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
-      this.identifier
-    }&scale=${quality}&rotate=0`;
-    this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
-      this.identifier
-    }&scale=${quality}&rotate=0`;
-    console.log(p, quality, this.url);
+    // this.url = `${this.incompleteUrl}${this.getPaddedNumber(p)}.jp2&id=${
+    //   this.identifier
+    // }&scale=${quality}&rotate=0`;
+    // this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${
+    //   this.identifier
+    // }&scale=${quality}&rotate=0`;
+
+    this.urls = [u0, u1, u2];
+    console.log(this.urls, p);
 
     // setTimeout(() => {
     //   this.url2 = `${this.incompleteUrl}${this.getPaddedNumber(p + 1)}.jp2&id=${

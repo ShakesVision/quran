@@ -66,7 +66,10 @@
 <ion-content scrollX="true" scrollY="true">
   <pinch-zoom [properties]="zoomProperties">
     <div class="image-wrapper">
-      <ion-img [src]="url"></ion-img>
+      <ion-img style="visibility: hidden" [src]="urls[0]"></ion-img>
+      <ion-img [src]="urls[1]"></ion-img>
+      <ion-img style="visibility: hidden" [src]="urls[2]"></ion-img>
+      <!-- <ion-img [src]="url"></ion-img> -->
       <!-- <ion-img [src]="url2"></ion-img> -->
 
       <!-- <div

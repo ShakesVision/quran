@@ -35,7 +35,7 @@ export class JuzPage implements OnInit {
   lastSyncedAt: Date;
   syncing = false;
   isPopoverOpen = false;
-  segment: ListType = ListType.SURAH;
+  segment: `${ListType}` = "juz";
   isOnline: boolean = false;
 
   constructor(

@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title> Hifz Helper </ion-title>
+    <ion-title>Quran: Hifz Helper <small><sup>BETA</sup></small> </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="darkModeToggle()">
         <ion-icon slot="start" name="contrast"></ion-icon>
@@ -10,32 +10,16 @@
 </ion-header>
 
 <ion-content>
-  <div
-    class="top-banner-wrapper"
-    (click)="!banner.button.show && open(banner.clickAction)"
-  >
-    <div
-      class="ion-margin ion-padding top-banner"
-      [style.box-shadow]="banner.style.boxShadow"
-      [style.background-image]="banner.style.backgroundImage"
-      [style]="banner.style.common"
-    >
+  <div class="top-banner-wrapper" (click)="!banner.button.show && open(banner.clickAction)">
+    <div class="ion-margin ion-padding top-banner" [style.box-shadow]="banner.style.boxShadow"
+      [style.background-image]="banner.style.backgroundImage" [style]="banner.style.common">
       <div class="banner-inner">
         <ion-text [innerHTML]="banner.text"></ion-text>
         <div class="ion-text-right ion-no-margin" *ngIf="banner.button.show">
-          <ion-button
-            size="small"
-            [fill]="banner.button.fill"
-            [color]="banner.button.color"
-            (click)="open(banner.clickAction)"
-          >
-            <ion-icon
-              *ngIf="banner.button.icon.show"
-              [src]="banner.button.icon.src"
-              [name]="banner.button.icon.src"
-              [color]="banner.button.icon.color"
-              slot="start"
-            >
+          <ion-button size="small" [fill]="banner.button.fill" [color]="banner.button.color"
+            (click)="open(banner.clickAction)">
+            <ion-icon *ngIf="banner.button.icon.show" [src]="banner.button.icon.src" [name]="banner.button.icon.src"
+              [color]="banner.button.icon.color" slot="start">
             </ion-icon>
             {{ banner.button.text }}
           </ion-button>
@@ -48,12 +32,7 @@
     <ion-item button routerLink="/surahs">
       <ion-icon name="list" slot="start" color="medium"></ion-icon>
       <ion-label color="medium"> Surahs </ion-label>
-      <ion-label
-        slot="end"
-        color="medium"
-        style="font-style: italic; font-size: small"
-        >In Progress</ion-label
-      >
+      <ion-label slot="end" color="medium" style="font-style: italic; font-size: small">In Progress</ion-label>
     </ion-item>
     <ion-item button routerLink="/juz">
       <ion-icon name="apps-outline" slot="start"></ion-icon>
@@ -99,10 +78,7 @@
     <ion-grid>
       <ion-row>
         <ion-col>
-          <ion-button
-            fill="clear"
-            href="https://play.google.com/store/apps/dev?id=8917194327395382081"
-          >
+          <ion-button fill="clear" href="https://play.google.com/store/apps/dev?id=8917194327395382081">
             <ion-icon slot="icon-only" name="logo-google-playstore"></ion-icon>
           </ion-button>
           <br />

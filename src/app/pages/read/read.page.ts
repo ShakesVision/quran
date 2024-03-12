@@ -160,6 +160,8 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.surahInfo = res;
       this.surahService.surahInfo = res;
     });
+    // Adjust font size
+    this.adjustFontsize();
     // Get scan info
     this.setupLinks();
     // highlight helper listener
@@ -293,6 +295,9 @@ export class ReadPage implements OnInit, AfterViewInit {
     }
     this.setBookmark();
     this.getFirstAndLastAyahNumberOnPage();
+    setTimeout(() => {
+      this.adjustFontsize();
+    }, 100);
   }
 
   resetPopup(popup: HTMLElement) {
@@ -412,15 +417,25 @@ export class ReadPage implements OnInit, AfterViewInit {
     let div: HTMLElement = document.querySelector(".filler-lines");
     div.style.height = document.getElementById("line_0").clientHeight + "px";
   }
+
   changeFontSize(val, inputValue: boolean = false) {
     var el: HTMLElement = document.querySelector(".content-wrapper");
     var currentSize = parseFloat(this.pageFontSize);
+    // Reset all line fontsizes - remove all inline styles for font-size
+    document.querySelectorAll(".line").forEach((e: any) => {
+      if (e.style.removeProperty) {
+        e.style.removeProperty("font-size");
+      } else {
+        e.style.removeAttribute("font-size");
+      }
+    });
     if (inputValue) el.style.fontSize = parseFloat(val) + "px";
     else {
       el.style.fontSize = currentSize + val + "px";
     }
     this.pageFontSize = el.style.fontSize;
   }
+
   changeColors(val, field = "bg") {
     var el: HTMLElement = document.querySelector(".content-wrapper");
     if (field === "bg") el.style.background = val;
@@ -740,6 +755,9 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.setBookmark();
     this.updateCalculatedNumbers();
     this.getFirstAndLastAyahNumberOnPage();
+    setTimeout(() => {
+      this.adjustFontsize();
+    }, 1000);
   }
   gotoPageAndHighlightLine(r: SearchResultsList) {
     console.log(r.pageIndex, r.lineIndex);
@@ -1137,6 +1155,37 @@ export class ReadPage implements OnInit, AfterViewInit {
     // });
     // alertmsg.present();
   }
+
+  textWidth(text, fontProp) {
+    var tag = document.createElement("div");
+    tag.style.position = "absolute";
+    tag.style.left = "-99in";
+    tag.style.whiteSpace = "nowrap";
+    tag.style.font = fontProp;
+    tag.innerHTML = text;
+
+    document.body.appendChild(tag);
+    var result = tag.clientWidth;
+    document.body.removeChild(tag);
+    return result;
+  }
+
+  adjustFontsize() {
+    console.log("adjusting fontsize size");
+    document.querySelectorAll(".line").forEach((el: HTMLElement) => {
+      while (
+        el.clientWidth <
+        this.textWidth(
+          el.innerText,
+          window.getComputedStyle(el).fontSize + " Muhammadi"
+        )
+      )
+        el.style.fontSize =
+          (parseFloat(window.getComputedStyle(el).fontSize) - 1).toString() +
+          "px";
+    });
+  }
+
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();
     if (popover) this.popoverController.dismiss();

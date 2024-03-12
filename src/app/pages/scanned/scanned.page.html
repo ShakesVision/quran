@@ -4,34 +4,15 @@
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <div class="header-controls">
-      <ion-input
-        type="number"
-        [min]="1"
-        [max]="114"
-        (keyup.enter)="jumpToSurah($event.target.value)"
-        placeholder="Surah no."
-        [(ngModel)]="surahNumberField"
-      ></ion-input>
+      <ion-input type="number" [min]="1" [max]="114" (keyup.enter)="jumpToSurah($event.target.value)"
+        placeholder="Surah no." [(ngModel)]="surahNumberField"></ion-input>
       <div class="juz-controls-wrapper">
         <div class="juz-controls">
-          <ion-input
-            #juzInput
-            type="number"
-            [(ngModel)]="juzNumberField"
-            (keyup.enter)="jumpToSection(juzSection.value)"
-            [min]="1"
-            [max]="30"
-            placeholder="Juz no."
-            style="max-width: 40px"
-          ></ion-input>
-          <ion-select
-            #juzSection
-            [disabled]="!juzInput"
-            [value]="0"
-            (ionChange)="jumpToSection($event.target.value)"
-            placeholder="Section"
-            class="juz-section-dropdown"
-          >
+          <ion-input #juzInput type="number" [(ngModel)]="juzNumberField"
+            (keyup.enter)="jumpToSection(juzSection.value)" [min]="1" [max]="30" placeholder="Juz no."
+            style="max-width: 40px"></ion-input>
+          <ion-select #juzSection [disabled]="!juzInput" [value]="0" (ionChange)="jumpToSection($event.target.value)"
+            placeholder="Section" class="juz-section-dropdown">
             <ion-select-option [value]="0">Start</ion-select-option>
             <ion-select-option [value]="0.25">¼</ion-select-option>
             <ion-select-option [value]="0.5">½</ion-select-option>
@@ -41,13 +22,8 @@
         </div>
         <div class="small-label" style="position: absolute">Juz</div>
       </div>
-      <ion-select
-        slot="end"
-        value="imgQuality"
-        [(ngModel)]="imgQuality"
-        (ionChange)="loadImg(page,imgQuality)"
-        placeholder="Image Quality"
-      >
+      <ion-select slot="end" value="imgQuality" [(ngModel)]="imgQuality" (ionChange)="loadImg(page,imgQuality)"
+        placeholder="Image Quality">
         <ion-select-option [value]="ImageQuality.Low">Low</ion-select-option>
         <ion-select-option [value]="ImageQuality.High">High</ion-select-option>
         <ion-select-option [value]="ImageQuality.HD">HD</ion-select-option>
@@ -55,20 +31,15 @@
     </div>
   </ion-toolbar>
 
-  <ion-progress-bar
-    type="indeterminate"
-    reversed="true"
-    *ngIf="loading"
-    color="primary"
-  ></ion-progress-bar>
+  <ion-progress-bar type="indeterminate" reversed="true" *ngIf="loading" color="primary"></ion-progress-bar>
 </ion-header>
 
 <ion-content scrollX="true" scrollY="true">
   <pinch-zoom [properties]="zoomProperties">
     <div class="image-wrapper">
-      <ion-img style="visibility: hidden" [src]="urls[0]"></ion-img>
+      <ion-img style="visibility: hidden;width: 0;" [src]="urls[0]"></ion-img>
       <ion-img [src]="urls[1]"></ion-img>
-      <ion-img style="visibility: hidden" [src]="urls[2]"></ion-img>
+      <ion-img style="visibility: hidden;width: 0;" [src]="urls[2]"></ion-img>
       <!-- <ion-img [src]="url"></ion-img> -->
       <!-- <ion-img [src]="url2"></ion-img> -->
 
@@ -79,34 +50,19 @@
       ></div> -->
       <!--<div #two [style.background-image]="'url('+url2+')'"></div>
       <div [style.background-image]="'url('+url3+')'"></div> -->
-    </div></pinch-zoom
-  >
+    </div>
+  </pinch-zoom>
 </ion-content>
 
 <ion-footer>
   <ion-toolbar>
     <div class="btmNav">
-      <ion-button
-        shape="round"
-        fill="clear"
-        [disabled]="page > 616"
-        (click)="loadImg((+page)+1,imgQuality)"
-      >
+      <ion-button shape="round" fill="clear" [disabled]="page > 616" (click)="loadImg((+page)+1,imgQuality)">
         <ion-icon name="chevron-back-circle-outline"></ion-icon>
       </ion-button>
-      <ion-input
-        (keyup.enter)="loadImg(page,imgQuality)"
-        type="number"
-        placeholder="Page number..."
-        [(ngModel)]="page"
-        class="page-number-input"
-      ></ion-input>
-      <ion-button
-        shape="round"
-        fill="clear"
-        [disabled]="page<0"
-        (click)="loadImg(page-1,imgQuality)"
-      >
+      <ion-input (keyup.enter)="loadImg(page,imgQuality)" type="number" placeholder="Page number..." [(ngModel)]="page"
+        class="page-number-input"></ion-input>
+      <ion-button shape="round" fill="clear" [disabled]="page<0" (click)="loadImg(page-1,imgQuality)">
         <ion-icon name="chevron-forward-circle-outline"></ion-icon>
       </ion-button>
       <!-- <ion-button

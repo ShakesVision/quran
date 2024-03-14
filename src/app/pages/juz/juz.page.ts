@@ -91,7 +91,7 @@ export class JuzPage implements OnInit {
     this.syncing = true;
     this.httpClient
       .get(
-        `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@latest/15Lines/${juz}.txt`,
+        `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/${juz}.txt`,
         { responseType: "text" }
       )
       .subscribe(

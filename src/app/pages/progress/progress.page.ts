@@ -23,7 +23,7 @@ export class ProgressPage implements OnInit {
 
   ngOnInit() {
     this.loading = true;
-    this.url = `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@master/App/${this.name}.html`;
+    this.url = `https://cdn.jsdelivr.net/gh/ShakesVision/Quran_archive@latest/App/${this.name}.html`;
     this.httpClient.get(this.url, { responseType: "text" }).subscribe((res) => {
       this.data = this.domSanatizer.bypassSecurityTrustHtml(res);
       this.loading = false;

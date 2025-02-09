@@ -2,6 +2,9 @@
     <ion-toolbar>
         <ion-title>Ayah {{ verse.verse_key }}</ion-title>
         <ion-buttons slot="end">
+            <ion-button [href]="'https://tafsir.app/'+verse.verse_key.replace(':','/')">
+                <ion-icon name="globe"></ion-icon>
+            </ion-button>
             <ion-button (click)="dismissModal()">
                 <ion-icon slot="icon-only" name="close"></ion-icon>
             </ion-button>
@@ -14,21 +17,49 @@
             <ion-card-title>{{ editionName }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <p class="ar-text2">{{ verse.text_indopak }}</p>
-            <div *ngFor="let translation of verse.translations"
-                [ngClass]="{'ur': translation.language_name === 'urdu'}">
+            <p class="verse ar-text rtl">{{ verse.text_indopak }}</p>
+            <div *ngFor="let translation of verse.translations" [ngClass]="{'ur': translation.language_name === 'urdu'}"
+                class="ion-margin-vertical">
                 <p [innerHTML]="translation.text"></p>
-                <small>{{ translation.resource_name }}</small>
+                <small>— {{ translation.resource_name }}</small>
             </div>
 
-            <div class="ion-text-center">
+            <div class="ion-text-center ion-margin-top">
                 <audio controls [src]="audioSrc"></audio>
-                <p class="verse-words" *ngFor="let word of verse.words" (click)="playWord(word)">
-                    <span class="translation">{{ word.translation.text }}</span>
-                    <span class="transliteration">{{ word.transliteration.text }}</span>
-                    <span class="word ar-text2">{{ word.text }}</span>
-                </p>
+                <!-- Word by Word -->
+                <h2 class="ion-margin-top">WORD BY WORD</h2>
+                <ion-label color="medium">
+                    <ion-icon slot="start" name="musical-notes"></ion-icon>
+                    Click on each row to listen! </ion-label>
+
+                <table class="verse-words-table ion-margin-top">
+                    <tr *ngFor="let word of verse.words" (click)="playWord(word)" class="ion-activatable"
+                        style="position: relative;">
+                        <ion-ripple-effect></ion-ripple-effect>
+                        <td class="translation">{{ word.translation.text }}</td>
+                        <td class="transliteration">{{ word.transliteration.text }}</td>
+                        <td class="word ar-text2">{{ word.text }}</td>
+                    </tr>
+                </table>
             </div>
         </ion-card-content>
+    </ion-card>
+    <ion-card>
+        <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" expand="block" fill="clear" shape="round">
+            Load Arabic Tafseer (Ibn Kathir)
+        </ion-button>
+        <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
+        <div *ngIf="tafsir.ar" class="ar-text2 rtl">
+            <h2>ابن کثیر (عَرَبِی)</h2>
+            <p class="ion-text-justify ion-padding">{{tafsir.ar}}</p>
+        </div>
+        <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" expand="block" fill="clear" shape="round">
+            Load Urdu Tafseer (Ibn Kathir)
+        </ion-button>
+        <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
+        <div *ngIf="tafsir.ur" class="ur rtl">
+            <h2>ابن کثیر (اُردو)</h2>
+            <p class="ion-text-justify ion-padding">{{tafsir.ur}}</p>
+        </div>
     </ion-card>
 </ion-content>

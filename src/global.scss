@@ -66,8 +66,18 @@ ion-title.title-large {
   font-size: 13px;
 }
 
+.rtl {
+  direction: rtl;
+}
+
 span.ayah_mark {
   display: inline-block !important;
+}
+
+.flex-center-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .total {

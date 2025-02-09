@@ -1,7 +1,18 @@
+.verse {
+  font-size: large;
+}
 p.verse-words span {
   display: inline-flex;
   padding: 0.5rem;
   background: var(--ion-color-secondary);
   margin: 0.25rem;
   color: var(--ion-color-primary);
+}
+.verse-words-table {
+  width: 100%;
+  .translation,
+  .transliteration,
+  .word {
+    text-align: start;
+  }
 }

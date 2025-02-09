@@ -55,5 +55,14 @@
       "type": "image/png",
       "purpose": "maskable any"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Full Quran",
+      "short_name": "Quran",
+      "url": "/juz",
+      "description": "Open the page of full Quran with Juz & Surah list",
+      "icons": ["svg/apps-outline.svg"]
+    }
   ]
 }

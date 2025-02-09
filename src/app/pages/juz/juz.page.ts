@@ -74,6 +74,7 @@ export class JuzPage implements OnInit {
     this.storage
       .get(juz)
       .then((res) => {
+        console.log(res);
         if (res && !navigator.onLine) {
           console.log("found in device storage", res);
           this.quranData = res;
@@ -124,6 +125,21 @@ export class JuzPage implements OnInit {
         },
         (err) => {
           console.log("fetch failed.");
+          this.syncing = false;
+          // Let's see if we find it in storage
+          this.storage.get(juz).then((res) => {
+            console.log(res);
+            if (res) {
+              console.log("fetch failed, but found in device storage", res);
+              this.quranData = res;
+              this.calculateJuzData(res.data);
+              this.surahService.presentToastWithOptions(
+                `Fetch failed, but found in device storage.`,
+                "warning",
+                "bottom"
+              );
+            }
+          });
         }
       );
   }

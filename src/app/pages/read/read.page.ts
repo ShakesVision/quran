@@ -6,7 +6,11 @@ import {
   ViewChild,
 } from "@angular/core";
 import { SurahService } from "./../../services/surah.service";
-import { PopoverController, ToastController } from "@ionic/angular";
+import {
+  ModalController,
+  PopoverController,
+  ToastController,
+} from "@ionic/angular";
 import { AlertController } from "@ionic/angular";
 import { alertController } from "@ionic/core";
 import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
@@ -22,6 +26,7 @@ import {
 import { MushafLines } from "src/app/models/mushaf-versions";
 import { ImageQuality } from "../scanned/scanned.page";
 import { Bookmarks } from "src/app/models/bookmarks";
+import { TafseerModalComponent } from "src/app/components/tafseer-modal";
 
 @Component({
   selector: "app-read",
@@ -115,7 +120,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     private activatedRoute: ActivatedRoute,
     public changeDetectorRef: ChangeDetectorRef,
     private storage: Storage,
-    private popoverController: PopoverController
+    private popoverController: PopoverController,
+    private modalController: ModalController
   ) {}
 
   ngOnInit() {
@@ -845,6 +851,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     //`https://api.quran.com/api/v4/quran/tafsirs/169?page_number=${s}`;
     //`https://api.quran.com/api/v4/quran/tafsirs/159?chapter_number=${s}&verse_key=${a}`;
     //`https://tafsir.app/get.php?src=${m}&s=${s}&a=${a}`
+
     this.httpClient.get(url).subscribe((resAr: any) => {
       this.httpClient.get(url + m).subscribe((resTrans: any) => {
         this.presentAlert(
@@ -856,7 +863,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     });
   }
   readTrans(verseKey, lang = "en") {
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,84&translation_fields=resource_name&audio=2`;
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
     // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name,language_id&per_page=15&fields=text_uthmani,chapter_id,hizb_number,text_imlaei_simple&translations=131,151,234,158&reciter=7&word_translation_language=en&page=1&from=52:35&to=52:49&word_fields=verse_key,verse_id,page_number,location,text_uthmani,code_v1,qpc_uthmani_hafs&mushaf=2"
     this.httpClient.get(url).subscribe((res: any) => {
       console.log(res);
@@ -869,8 +876,19 @@ export class ReadPage implements OnInit, AfterViewInit {
       verse.words.forEach((w) => {
         msg += `${w.text_indopak} — ${w.translation.text} <br>`;
       });
-      this.presentAlert(msg, verse.verse_key);
+      // this.presentAlert(msg, verse.verse_key);
+      this.presentModal(verse, verse.verse_key);
     });
+  }
+  async presentModal(verse, key) {
+    const [s, a] = key.split(":");
+    const modal = await this.modalController.create({
+      component: TafseerModalComponent,
+      componentProps: {
+        verse,
+      },
+    });
+    modal.present();
   }
   copyAnything = (text: string) => window.navigator.clipboard.writeText(text);
   convertToPlain(html) {

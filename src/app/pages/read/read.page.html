@@ -3,9 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title
-      [ngStyle]="{'visibility': audioPlaying?'hidden':'visible', 'max-width':audioPlaying?'0':'100%'}"
-    >
+    <ion-title [ngStyle]="{'visibility': audioPlaying?'hidden':'visible', 'max-width':audioPlaying?'0':'100%'}">
       {{title}}
     </ion-title>
     <ion-buttons slot="end" class="btn-controls-top">
@@ -15,14 +13,8 @@
             <ion-img src="assets/audio-playing.gif" class="gif"></ion-img>
             <ion-text class="verse-num">{{playingVerseNum}}</ion-text>
           </div>
-          <ion-select
-            interface="popover"
-            style="font-size: small"
-            placeholder="Speed"
-            value="1"
-            [(ngModel)]="audioSpeed"
-            (ionChange)="setAudioSpeed($event.target.value)"
-          >
+          <ion-select interface="popover" style="font-size: small" placeholder="Speed" value="1"
+            [(ngModel)]="audioSpeed" (ionChange)="setAudioSpeed($event.target.value)">
             <ion-select-option value="3">3x</ion-select-option>
             <ion-select-option value="2.5">2.5x</ion-select-option>
             <ion-select-option value="2">2x</ion-select-option>
@@ -38,49 +30,24 @@
           </ion-button>
         </div>
         <div *ngIf="!audioPlaying" class="qari-wrapper">
-          <ion-select
-            *ngIf="reciters"
-            interface="popover"
-            (ionChange)="qariChanged($event.target.value)"
-            [placeholder]="selectedQari?selectedQari?.id+'. '+selectedQari?.name:'Qaari'"
-            [(ngModel)]="qariId"
-          >
-            <ion-select-option
-              style="font-size: small"
-              *ngFor="let r of reciters"
-              [value]="r.id"
-              >{{r.id+'. '+r.name}}</ion-select-option
-            >
+          <ion-select *ngIf="reciters" interface="popover" (ionChange)="qariChanged($event.target.value)"
+            [placeholder]="selectedQari?selectedQari?.id+'. '+selectedQari?.name:'Qaari'" [(ngModel)]="qariId">
+            <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.id+'.
+              '+r.name}}</ion-select-option>
           </ion-select>
         </div>
         <ion-button (click)="playAudio()">
-          <ion-icon
-            slot="icon-only"
-            [name]="audioPlaying?'pause':'play'"
-          ></ion-icon>
+          <ion-icon slot="icon-only" [name]="audioPlaying?'pause':'play'"></ion-icon>
         </ion-button>
         <audio id="ayah-audio" [src]="audioSrc"></audio>
       </div>
-      <ion-button
-        (click)="toggleHifzMode()"
-        slot="end"
-        [ngClass]="!hMode?'emphasize-btn':''"
-      >
-        <ion-icon
-          slot="icon-only"
-          [name]="hMode?toggleIconOutline('eye'):toggleIconOutline('eye-outline')"
-        ></ion-icon>
+      <ion-button (click)="toggleHifzMode()" slot="end" [ngClass]="!hMode?'emphasize-btn':''">
+        <ion-icon slot="icon-only" [name]="hMode?toggleIconOutline('eye'):toggleIconOutline('eye-outline')"></ion-icon>
       </ion-button>
-      <ion-button
-        *ngIf="translationExists"
-        (click)="translationMode(true)"
-        slot="end"
-        [ngClass]="tMode?'emphasize-btn':''"
-      >
-        <ion-icon
-          slot="icon-only"
-          [name]="tMode?toggleIconOutline('language-outline'):toggleIconOutline('language')"
-        ></ion-icon>
+      <ion-button *ngIf="translationExists" (click)="translationMode(true)" slot="end"
+        [ngClass]="tMode?'emphasize-btn':''">
+        <ion-icon slot="icon-only"
+          [name]="tMode?toggleIconOutline('language-outline'):toggleIconOutline('language')"></ion-icon>
       </ion-button>
 
       <ion-button id="popover-trigger-btn" slot="end">
@@ -94,17 +61,13 @@
   <div class="scan-view" [hidden]="!scanView">
     <pinch-zoom [properties]="zoomProperties">
       <div class="scan-image-wrapper">
-        <ion-img [src]="fullImageUrl"></ion-img></div
-    ></pinch-zoom>
+        <ion-img [src]="fullImageUrl"></ion-img>
+      </div>
+    </pinch-zoom>
   </div>
-  <div
-    class="page-wrapper ar ar2 ion-margin-top unicode-view"
-    [hidden]="scanView"
-  >
+  <div class="page-wrapper ar ar2 ion-margin-top unicode-view" [hidden]="scanView">
     <div class="page-top-info">
-      <ng-container
-        *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)"
-      >
+      <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
         <span class="juz-number"> {{ getJuzNumber() }} </span>
         <span class="page-number">
           {{ isCompleteMushaf? surahService.e2a(currentPage.toString()):
@@ -119,46 +82,27 @@
       </ng-container>
     </div>
     <div class="content-wrapper">
-      <ng-container
-        class="ion-text-center"
-        *ngIf="currentPage==1 && lines?.length<15 && !juzmode"
-      >
-        <div
-          class="filler-lines line"
-          *ngFor="let line of [].constructor(15 - (lines?.length+2))"
-        ></div>
+      <ng-container class="ion-text-center" *ngIf="currentPage==1 && lines?.length<15 && !juzmode">
+        <div class="filler-lines line" *ngFor="let line of [].constructor(15 - (lines?.length+2))"></div>
         <div class="surah-name line centered-table-text">
           {{title?.split(' ')[1]}}
         </div>
         <div class="line bism centered-table-text">﷽</div>
       </ng-container>
-      <div
-        *ngFor="let line of lines;let i = index"
-        id="line_{{i}}"
-        class="line"
-        style="position: relative"
+      <div *ngFor="let line of lines;let i = index" id="line_{{i}}" class="line" style="position: relative"
         [ngClass]="{
         'quran-kareem-text':juzmode && isCompleteMushaf && currentPage==1,
         'bism-line': line?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && i==10), 
         'juz-start-line': ![2,3].includes(currentPageCalculated) && surahService.juzPageNumbers.includes(currentPageCalculated) && (lines[1].trim()==='﷽' ? i===2 : i===0),
         'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPageCalculated==188 && i==0), 
         'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))|| (currentPage===pages.length && i===lines.length-1 && !juzmode)}"
-        (click)="openTrans($event,i)"
-      >
-        <div
-          *ngIf="line.includes(surahService.diacritics.RUKU_MARK)"
-          class="ruku-wrapper"
-          [innerHTML]="addIndicators(line,i)"
-        ></div>
+        (click)="openTrans($event,i)">
+        <div *ngIf="line.includes(surahService.diacritics.RUKU_MARK)" class="ruku-wrapper"
+          [innerHTML]="addIndicators(line,i)"></div>
         <span> {{line}} </span>
       </div>
-      <ng-container
-        *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15"
-      >
-        <div
-          class="filler-lines line"
-          *ngFor="let line of [].constructor(15 - lines.length)"
-        ></div>
+      <ng-container *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15">
+        <div class="filler-lines line" *ngFor="let line of [].constructor(15 - lines.length)"></div>
       </ng-container>
     </div>
   </div>
@@ -169,36 +113,21 @@
   <div class="popup ion-text-center">
     <div class="popup-header"></div>
     <div class="popup-text"></div>
-    <ion-button
-      style="font-size: x-small"
-      fill="outline"
-      size="small"
-      color="dark"
-      class="cross"
-    >
+    <ion-button style="font-size: x-small" fill="outline" size="small" color="dark" class="cross">
       <ion-icon slot="icon-only" name="close"></ion-icon>
     </ion-button>
   </div>
 
-  <ion-popover
-    [isOpen]="isPopoverOpen"
-    trigger="popover-trigger-btn"
-    side="bottom"
-    (didDismiss)="isPopoverOpen = false"
-  >
+  <ion-popover [isOpen]="isPopoverOpen" trigger="popover-trigger-btn" side="bottom"
+    (didDismiss)="isPopoverOpen = false">
     <ng-template>
       <ion-content>
         <div class="popover-wrapper" #scrollingBlock>
           <ion-list lines="none">
             <ion-item>
               <ion-label>Font Size</ion-label>
-              <ion-input
-                placeholder="px"
-                [value]="pageFontSize"
-                (ionChange)="changeFontSize($event.target.value,true)"
-                [debounce]="500"
-                class="font-size-field ion-no-padding ion-no-margin ion-text-center"
-              ></ion-input>
+              <ion-input placeholder="px" [value]="pageFontSize" (ionChange)="changeFontSize($event.target.value,true)"
+                [debounce]="500" class="font-size-field ion-no-padding ion-no-margin ion-text-center"></ion-input>
               <ion-buttons slot="end" class="ion-no-margin">
                 <ion-button (click)="changeFontSize(1)">
                   <ion-icon name="add-circle-outline"></ion-icon>
@@ -213,58 +142,35 @@
             <ion-item *ngIf="isCompleteMushaf">
               <ion-label>Go to</ion-label>
               <ng-container slot="end">
-                <ion-input
-                  slot="end"
-                  placeholder="juz"
-                  type="number"
-                  maxlength="2"
-                  (ionChange)="gotoJuzSurah($event.target.value,'juz')"
-                  [debounce]="500"
-                  class="ion-no-padding ion-no-margin ion-text-center"
-                ></ion-input>
-                <ion-input
-                  slot="end"
-                  placeholder="surah"
-                  type="number"
-                  maxlength="3"
-                  (ionChange)="gotoJuzSurah($event.target.value,'surah')"
-                  [debounce]="500"
-                  class="ion-no-padding ion-no-margin ion-text-center"
-                ></ion-input>
+                <ion-input slot="end" placeholder="juz" type="number" maxlength="2"
+                  (ionChange)="gotoJuzSurah($event.target.value,'juz')" [debounce]="500"
+                  class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
+                <ion-input slot="end" placeholder="surah" type="number" maxlength="3"
+                  (ionChange)="gotoJuzSurah($event.target.value,'surah')" [debounce]="500"
+                  class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
               </ng-container>
             </ion-item>
             <ion-item>
               <ion-label>Colors</ion-label>
-              <ion-input
-                placeholder="css color"
-                (ionChange)="changeColors($event.target.value,'color')"
-                [debounce]="1000"
-                class="ion-no-padding ion-no-margin ion-text-center"
-              ></ion-input>
-              <ion-input
-                placeholder="bg"
-                (ionChange)="changeColors($event.target.value,'bg')"
-                [debounce]="1000"
-                class="ion-no-padding ion-no-margin ion-text-center"
-              ></ion-input>
+              <ion-input placeholder="css color" (ionChange)="changeColors($event.target.value,'color')"
+                [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
+              <ion-input placeholder="bg" (ionChange)="changeColors($event.target.value,'bg')" [debounce]="1000"
+                class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
             </ion-item>
             <ion-item>
               <ion-label>Translation</ion-label>
-              <ion-input
-                #verseIdInput
-                placeholder="2:125"
-                (ionChange)="readTrans($event.target.value)"
-                [debounce]="1000"
-                class="ion-no-padding ion-no-margin ion-text-center"
-              ></ion-input>
-              <ion-select
-                value="en"
-                placeholder="Language"
-                (ionChange)="readTrans(verseIdInput.value,$event.target.value)"
-              >
+              <ion-input #verseIdInput placeholder="2:125" (ionChange)="readTrans($event.target.value)"
+                [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
+              <ion-select value="en" placeholder="Language"
+                (ionChange)="readTrans(verseIdInput.value,$event.target.value)">
                 <ion-select-option value="en">English</ion-select-option>
                 <ion-select-option value="ur">Urdu</ion-select-option>
               </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-label>Tafseer</ion-label>
+              <ion-input #verseIdInput placeholder="2:125" (ionChange)="readTrans($event.target.value)"
+                [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
             </ion-item>
             <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information"></ion-icon>
@@ -279,11 +185,7 @@
               <ion-icon slot="start" name="image-outline"></ion-icon>
               <ion-label>{{'View Scan'}}</ion-label>
               <!-- <ion-label>{{scanView? 'View Scan': 'View Text'}}</ion-label> -->
-              <ion-toggle
-                slot="end"
-                [checked]="scanView"
-                (ionChange)="scanView=!scanView"
-              ></ion-toggle>
+              <ion-toggle slot="end" [checked]="scanView" (ionChange)="scanView=!scanView"></ion-toggle>
             </ion-item>
             <ion-item button (click)="toggleMuhammadiFont()">
               <ion-icon slot="start" name="refresh"></ion-icon>
@@ -291,85 +193,42 @@
             </ion-item>
             <ion-card>
               <ion-item color="light">
-                <ion-input
-                  #searchInput
-                  placeholder="بحث / SEARCH / تلاش"
-                  [value]="queryString"
-                  (ionChange)="onSearchChange($event.target.value)"
-                  [debounce]="500"
-                  clearInput
-                  class="ion-no-padding ion-text-center ar2"
-                ></ion-input>
+                <ion-input #searchInput placeholder="بحث / SEARCH / تلاش" [value]="queryString"
+                  (ionChange)="onSearchChange($event.target.value)" [debounce]="500" clearInput
+                  class="ion-no-padding ion-text-center ar2"></ion-input>
               </ion-item>
               <ion-item style="font-size: small">
                 <ion-label>Ignore Tashkeel</ion-label>
-                <ion-toggle
-                  slot="end"
-                  [checked]="ignoreTashkeel"
-                  (ionChange)="toggleIgnoreTashkeel(searchInput.value)"
-                ></ion-toggle>
+                <ion-toggle slot="end" [checked]="ignoreTashkeel"
+                  (ionChange)="toggleIgnoreTashkeel(searchInput.value)"></ion-toggle>
               </ion-item>
             </ion-card>
             <div *ngIf="searchResults" class="ion-text-center result-heading">
-              <ion-item
-                button
-                (click)="copyResults($event.target)"
-                [color]="copyResultsBG"
-              >
-                <ion-label
-                  ><span
-                    [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}"
-                    >Results:</span
-                  >
+              <ion-item button (click)="copyResults($event.target)" [color]="copyResultsBG">
+                <ion-label><span
+                    [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}">Results:</span>
                   {{searchResults.results.length}}
-                  <span
-                    *ngIf="searchResults.total!==searchResults.results.length"
-                    >({{searchResults.total}})</span
-                  >
+                  <span *ngIf="searchResults.total!==searchResults.results.length">({{searchResults.total}})</span>
                   <small> ⏲ {{searchResults.searchTimeSecs}} sec</small>
                 </ion-label>
-                <ion-icon
-                  color="light"
-                  slot="end"
-                  name="copy-outline"
-                ></ion-icon>
+                <ion-icon color="light" slot="end" name="copy-outline"></ion-icon>
               </ion-item>
-              <ion-label
-                *ngIf="!isCompleteMushaf"
-                color="warning"
-                style="font-style: italic"
-              >
-                <small
-                  >(searched only in {{juzsurahmode?'Surah':'Juz'}} {{title}})
+              <ion-label *ngIf="!isCompleteMushaf" color="warning" style="font-style: italic">
+                <small>(searched only in {{juzsurahmode?'Surah':'Juz'}} {{title}})
                 </small>
               </ion-label>
             </div>
-            <virtual-scroller
-              *ngIf="searchResults"
-              #scroll
-              [items]="searchResults.results"
-              [parentScroll]="scrollingBlock.nativeElement"
-              [executeRefreshOutsideAngularZone]="true"
-              (vsUpdate)="changeDetectorRef.detectChanges()"
-              (vsChange)="vsChange($event)"
-            >
-              <ion-item
-                *ngFor="let r of scroll.viewPortItems;let i=index"
-                button
-                class="rtl"
-                style="position: relative"
-                (click)="gotoPageAndHighlightLine(r)"
-              >
+            <virtual-scroller *ngIf="searchResults" #scroll [items]="searchResults.results"
+              [parentScroll]="scrollingBlock.nativeElement" [executeRefreshOutsideAngularZone]="true"
+              (vsUpdate)="changeDetectorRef.detectChanges()" (vsChange)="vsChange($event)">
+              <ion-item *ngFor="let r of scroll.viewPortItems;let i=index" button class="rtl" style="position: relative"
+                (click)="gotoPageAndHighlightLine(r)">
                 <div class="indices ion-margin-end">
                   <span class="index">{{i+1+startIndex}}</span>
-                  <span class="frequency" *ngIf="r.charIndices.length>1"
-                    >{{r.charIndices.length}}</span
-                  >
+                  <span class="frequency" *ngIf="r.charIndices.length>1">{{r.charIndices.length}}</span>
                   <span class="location">{{r.pageIndex+1}}</span>
                 </div>
-                <ion-label class="ar2 small-text"
-                  >{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label
-                >
+                <ion-label class="ar2 small-text">{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label>
               </ion-item>
             </virtual-scroller>
           </ion-list>
@@ -380,47 +239,23 @@
 </ion-content>
 <ion-footer>
   <div class="btmNav">
-    <ion-button
-      class="nav-btns"
-      fill="clear"
-      [disabled]="currentPage==pages?.length"
-      (click)="gotoPageNum(pages?.length)"
-    >
+    <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==pages?.length"
+      (click)="gotoPageNum(pages?.length)">
       <ion-icon name="play-skip-back-outline"></ion-icon>
     </ion-button>
-    <ion-button
-      class="nav-btns"
-      fill="clear"
-      [disabled]="currentPage==pages?.length"
-      (click)="goToPage(1)"
-    >
+    <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==pages?.length" (click)="goToPage(1)">
       <ion-icon name="chevron-back-outline"></ion-icon>
     </ion-button>
     <div style="font-size: x-small">
       <ion-label color="dark">Page </ion-label>
-      <ion-input
-        color="dark"
-        class="page-num-input"
-        type="number"
-        [ngModel]="currentPage"
-        (keyup.enter)="gotoPageNum($event.target.value)"
-      ></ion-input>
+      <ion-input color="dark" class="page-num-input" type="number" [ngModel]="currentPage"
+        (keyup.enter)="gotoPageNum($event.target.value)"></ion-input>
       <ion-label color="dark"> of {{pages?.length}}</ion-label>
     </div>
-    <ion-button
-      class="nav-btns"
-      fill="clear"
-      [disabled]="currentPage==1"
-      (click)="goToPage(-1)"
-    >
+    <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==1" (click)="goToPage(-1)">
       <ion-icon name="chevron-forward-outline"></ion-icon>
     </ion-button>
-    <ion-button
-      class="nav-btns"
-      fill="clear"
-      [disabled]="currentPage==1"
-      (click)="gotoPageNum(1)"
-    >
+    <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==1" (click)="gotoPageNum(1)">
       <ion-icon name="play-skip-forward-outline"></ion-icon>
     </ion-button>
   </div>

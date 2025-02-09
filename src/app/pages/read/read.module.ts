@@ -9,6 +9,7 @@ import { ReadPageRoutingModule } from "./read-routing.module";
 import { ReadPage } from "./read.page";
 import { VirtualScrollerModule } from "ngx-virtual-scroller";
 import { PinchZoomModule } from "ngx-pinch-zoom";
+import { TafseerModalComponent } from "src/app/components/tafseer-modal";
 
 @NgModule({
   imports: [
@@ -19,6 +20,6 @@ import { PinchZoomModule } from "ngx-pinch-zoom";
     VirtualScrollerModule,
     PinchZoomModule,
   ],
-  declarations: [ReadPage],
+  declarations: [ReadPage, TafseerModalComponent],
 })
 export class ReadPageModule {}

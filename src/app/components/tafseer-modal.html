@@ -1,0 +1,34 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>Ayah {{ verse.verse_key }}</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="dismissModal()">
+                <ion-icon slot="icon-only" name="close"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-card>
+        <ion-card-header>
+            <ion-card-title>{{ editionName }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <p class="ar-text2">{{ verse.text_indopak }}</p>
+            <div *ngFor="let translation of verse.translations"
+                [ngClass]="{'ur': translation.language_name === 'urdu'}">
+                <p [innerHTML]="translation.text"></p>
+                <small>{{ translation.resource_name }}</small>
+            </div>
+
+            <div class="ion-text-center">
+                <audio controls [src]="audioSrc"></audio>
+                <p class="verse-words" *ngFor="let word of verse.words" (click)="playWord(word)">
+                    <span class="translation">{{ word.translation.text }}</span>
+                    <span class="transliteration">{{ word.transliteration.text }}</span>
+                    <span class="word ar-text2">{{ word.text }}</span>
+                </p>
+            </div>
+        </ion-card-content>
+    </ion-card>
+</ion-content>

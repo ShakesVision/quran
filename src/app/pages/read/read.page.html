@@ -167,11 +167,6 @@
                 <ion-select-option value="ur">Urdu</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-item>
-              <ion-label>Tafseer</ion-label>
-              <ion-input #verseIdInput placeholder="2:125" (ionChange)="readTrans($event.target.value)"
-                [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
-            </ion-item>
             <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information"></ion-icon>
               <ion-label>About Surah</ion-label>

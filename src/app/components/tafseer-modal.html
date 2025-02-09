@@ -2,7 +2,7 @@
     <ion-toolbar>
         <ion-title>Ayah {{ verse.verse_key }}</ion-title>
         <ion-buttons slot="end">
-            <ion-button [href]="'https://tafsir.app/'+verse.verse_key.replace(':','/')">
+            <ion-button [href]="'https://tafsir.app/'+verse.verse_key.replace(':','/')" target="_blank">
                 <ion-icon name="globe"></ion-icon>
             </ion-button>
             <ion-button (click)="dismissModal()">
@@ -13,9 +13,6 @@
 </ion-header>
 <ion-content>
     <ion-card>
-        <ion-card-header>
-            <ion-card-title>{{ editionName }}</ion-card-title>
-        </ion-card-header>
         <ion-card-content>
             <p class="verse ar-text rtl">{{ verse.text_indopak }}</p>
             <div *ngFor="let translation of verse.translations" [ngClass]="{'ur': translation.language_name === 'urdu'}"

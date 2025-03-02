@@ -129,8 +129,9 @@ export class TafseerModalComponent {
       (res: any) => {
         console.log(res, QuranData);
         this.verse = res.verse;
-        this.tafsir = { ur: null, ar: null, en: null };
+        this.audioSrc = `${this.baseurl}${this.verse.audio.url}`;
         this.checkIfAyahHasSajdah();
+        this.tafsir = { ur: null, ar: null, en: null };
       },
       (error) => {
         console.log(error);

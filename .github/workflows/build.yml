@@ -13,10 +13,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Use Node 20
+      - name: Use Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "18.19.1"
       - name: Install dependencies
         run: npm ci
       - name: Build

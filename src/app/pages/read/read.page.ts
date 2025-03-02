@@ -881,7 +881,6 @@ export class ReadPage implements OnInit, AfterViewInit {
     });
   }
   async presentModal(verse, key) {
-    const [s, a] = key.split(":");
     const modal = await this.modalController.create({
       component: TafseerModalComponent,
       componentProps: {

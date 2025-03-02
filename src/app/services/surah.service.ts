@@ -8,7 +8,7 @@ import { map, take } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { ToastController } from "@ionic/angular";
+import { ToastController, ToastOptions } from "@ionic/angular";
 import { Subject } from "rxjs/internal/Subject";
 
 @Injectable({
@@ -411,18 +411,28 @@ export class SurahService {
   }
 
   getSurahInfo() {
-    return this.http.get("assets/surah.json");
+    return this.http.get("assets/data/surah.json");
   }
   fetchQariList() {
     const url = `https://api.quran.com/api/v4/resources/chapter_reciters?language=ar`;
     return this.http.get(url);
   }
-  async presentToastWithOptions(msg, color, pos, duration = 3000) {
+
+  fetchTrans(verseKey, lang = "en") {
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
+    return this.httpClient.get(url);
+  }
+  async presentToastWithOptions(
+    msg,
+    color,
+    position: ToastOptions["position"],
+    duration = 3000
+  ) {
     const toast = await this.toastController.create({
       message: msg,
-      position: pos,
-      color: color,
-      duration: duration,
+      position,
+      color,
+      duration,
       buttons: [
         {
           text: "Ok",

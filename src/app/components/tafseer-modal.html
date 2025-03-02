@@ -1,6 +1,6 @@
 <ion-header>
     <ion-toolbar>
-        <ion-title>Ayah {{ verse.verse_key }}</ion-title>
+        <ion-title>Ayah <span class="verse-key" (click)="loadAnyAyah()">{{ verse.verse_key }}</span> </ion-title>
         <ion-buttons slot="end">
             <ion-button [href]="'https://tafsir.app/'+verse.verse_key.replace(':','/')" target="_blank">
                 <ion-icon name="globe"></ion-icon>
@@ -15,6 +15,7 @@
     <ion-card>
         <ion-card-content>
             <p class="verse ar-text rtl">{{ verse.text_indopak }}</p>
+            <ion-label color="warning"> <i>{{sajdahMessage}}</i> </ion-label>
             <div *ngFor="let translation of verse.translations" [ngClass]="{'ur': translation.language_name === 'urdu'}"
                 class="ion-margin-vertical">
                 <p [innerHTML]="translation.text"></p>
@@ -41,22 +42,60 @@
             </div>
         </ion-card-content>
     </ion-card>
-    <ion-card>
-        <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" expand="block" fill="clear" shape="round">
-            Load Arabic Tafseer (Ibn Kathir)
+    <div>
+        <!-- Arabic Button -->
+        <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" expand="block" fill="solid" color="primary"
+            shape="round" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="bubbles" slot="start"></ion-spinner>
+            View Arabic Tafseer (Ibn Kathir)
         </ion-button>
-        <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
+
         <div *ngIf="tafsir.ar" class="ar-text2 rtl">
             <h2>ابن کثیر (عَرَبِی)</h2>
             <p class="ion-text-justify ion-padding">{{tafsir.ar}}</p>
         </div>
-        <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" expand="block" fill="clear" shape="round">
-            Load Urdu Tafseer (Ibn Kathir)
+
+        <!-- Urdu Button -->
+        <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" expand="block" fill="solid" color="secondary"
+            shape="round" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="bubbles" slot="start"></ion-spinner>
+            View Urdu Tafseer (Ibn Kathir)
         </ion-button>
-        <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
+
         <div *ngIf="tafsir.ur" class="ur rtl">
             <h2>ابن کثیر (اُردو)</h2>
             <p class="ion-text-justify ion-padding">{{tafsir.ur}}</p>
         </div>
-    </ion-card>
+
+        <!-- English Button -->
+        <ion-button *ngIf="!tafsir.en" (click)="loadTafsir('en')" expand="block" fill="solid" color="light"
+            shape="round" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="bubbles" slot="start"></ion-spinner>
+            View English Tafseer (Mufti Shafi Usmani)
+        </ion-button>
+
+        <div *ngIf="tafsir.en" class="en">
+            <h2>Ma'arif ul Quran (Mufti Shafi Usmani)</h2>
+            <p class="ion-text-justify ion-padding" style="    line-height: 1.6;
+">{{tafsir.en}}</p>
+        </div>
+    </div>
+
 </ion-content>
+<ion-footer>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="loadNextAyah(1)">
+                <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+                <ion-label>Next</ion-label>
+            </ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+            <ion-button (click)="loadNextAyah(-1)">
+                <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+                <ion-label>Previous</ion-label>
+            </ion-button>
+
+        </ion-buttons>
+    </ion-toolbar>
+</ion-footer>

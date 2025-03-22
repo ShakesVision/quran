@@ -62,7 +62,7 @@
       "short_name": "Quran",
       "url": "/juz",
       "description": "Open the page of full Quran with Juz & Surah list",
-      "icons": ["svg/apps-outline.svg"]
+      "icons": ["src/assets/quran.png"]
     }
   ]
 }

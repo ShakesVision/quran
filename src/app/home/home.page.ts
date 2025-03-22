@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Component } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
-import { ModalController } from "@ionic/angular";
+import { AlertController, ModalController } from "@ionic/angular";
 import { HomePageBanner } from "../models/common";
 import { ProgressPage } from "../pages/progress/progress.page";
 
@@ -34,6 +34,7 @@ export class HomePage {
     },
   };
   constructor(
+    private alertController: AlertController,
     private modalController: ModalController,
     private httpClient: HttpClient,
     private domSanatizer: DomSanitizer

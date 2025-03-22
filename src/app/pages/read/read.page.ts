@@ -111,6 +111,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     disableZoomControl: "disable", // stops showing zoom + and zoom - images.
     backgroundColor: "rgba(0,0,0,0)", // Makes the pinch zoom container color to transparent. So that ionic themes can be applied without issues.
   };
+  longPressTimer: any; // Holds timeout reference
+
   constructor(
     public surahService: SurahService,
     public toastController: ToastController,
@@ -179,6 +181,16 @@ export class ReadPage implements OnInit, AfterViewInit {
       if (start >= 0 && end >= 0) {
         console.log("start: " + start);
         console.log("end: " + end);
+      }
+    });
+    document.querySelector(".ar").addEventListener("selectstart", function (e) {
+      let selection = window.getSelection();
+      var txt = selection.toString();
+      if (txt && txt != "") {
+        var selectedElement = selection.anchorNode?.parentElement;
+        if (selectedElement) {
+          console.log("Element where selection happened:", selectedElement);
+        }
       }
     });
   }
@@ -1209,5 +1221,76 @@ export class ReadPage implements OnInit, AfterViewInit {
     const alert = await this.alertController.getTop();
     if (alert) this.alertController.dismiss();
     if (this.audio) this.stopAudio();
+  }
+
+  // Start long-press timer
+  onPressStart(line, i) {
+    this.longPressTimer = setTimeout(() => {
+      this.presenttAlert(line, i + 1); // Show alert after long press
+    }, 1000);
+  }
+
+  // Cancel long press if user releases before timer completes
+  onPressEnd() {
+    clearTimeout(this.longPressTimer);
+  }
+
+  // Show Ionic alert
+  async presenttAlert(line, i) {
+    console.log("line to report: " + i, line);
+    let msg = `${line}<br>Selected: ${window.getSelection().toString()}`;
+    const alert = await this.alertController.create({
+      header: `Report Pg${this.currentPage}:L${i}`,
+      message: msg,
+      inputs: [
+        {
+          name: "note",
+          type: "text",
+          placeholder: "Enter note (Optional)",
+        },
+      ],
+      buttons: [
+        {
+          text: "Copy",
+          /**
+           * Handler for the "Copy" button in the alert. Copies the selected text and the note (if any) entered by the user to the clipboard.
+           * @param {object} data - The input data from the alert.
+           * @param {string} data.note - The note entered by the user.
+           */
+          handler: (data) => {
+            const textToCopy = `${msg.replace("<br>", "\n")}\n\nNote: ${
+              data.note
+            }`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+              this.surahService.presentToastWithOptions(
+                "Copied to clipboard",
+                "dark",
+                "top"
+              );
+            });
+          },
+        },
+
+        {
+          text: "OK",
+          /**
+           * Handler for the "OK" button in the alert. Opens a telegram link to report the issue with the selected text and the note (if any) entered by the user.
+           * @param {object} data - The input data from the alert.
+           * @param {string} data.note - The note entered by the user.
+           */
+          handler: (data) => {
+            window.open(
+              `https://t.me/ShakesVision?text=${msg}
+              
+              Note: ${data.note}`,
+              "_system",
+              "location=yes"
+            );
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

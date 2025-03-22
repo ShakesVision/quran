@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Quran: Hifz Helper <small><sup>BETA</sup></small> </ion-title>
+    <ion-icon src="/assets/icon/hifz-helper-logo.svg" size="large" slot="start" color="light"
+      class="ion-padding-horizontal">
+    </ion-icon>
+    <ion-title class="ion-no-padding">Quran: Hifz Helper <small><sup>BETA</sup></small> </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="darkModeToggle()">
         <ion-icon slot="start" name="contrast"></ion-icon>
@@ -28,53 +31,78 @@
     </div>
   </div>
 
-  <ion-list lines="none">
-    <ion-item button routerLink="/surahs">
-      <ion-icon name="list" slot="start" color="medium"></ion-icon>
-      <ion-label color="medium"> Surahs </ion-label>
-      <ion-label slot="end" color="medium" style="font-style: italic; font-size: small">In Progress</ion-label>
-    </ion-item>
-    <ion-item button routerLink="/juz">
-      <ion-icon name="apps-outline" slot="start"></ion-icon>
-      <ion-label> Full Quran (Juz & Surah) </ion-label>
-    </ion-item>
-    <ion-item button routerLink="/scanned">
-      <ion-icon name="images-outline" slot="start"></ion-icon>
-      <ion-label> Scanned Version </ion-label>
-    </ion-item>
-    <ion-item button routerLink="/memorize">
-      <ion-icon name="bulb-outline" slot="start"></ion-icon>
-      <ion-label> Memorize </ion-label>
-    </ion-item>
-    <ion-item button routerLink="/listen">
-      <ion-icon name="volume-medium-outline" slot="start"></ion-icon>
-      <ion-label> Listen to Recitations </ion-label>
-    </ion-item>
-    <ion-item button (click)="open('download')">
-      <ion-icon name="download-outline" slot="start"></ion-icon>
-      <ion-label> Download Section</ion-label>
-    </ion-item>
-  </ion-list>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6" size-md="4">
+        <ion-card button routerLink="/juz" class="card">
+          <img src="/assets/icon/app-icons-grid.png" style="object-position: 0 0; width: 40px; height: 40px;"
+            class="icon" />
+
+          <ion-icon name="book-outline" class="icon"></ion-icon>
+          <ion-label class="label">Full Quran</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card button routerLink="/scanned" class="card">
+          <ion-icon name="images-outline" class="icon"></ion-icon>
+          <ion-label class="label">Scanned Version</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card button routerLink="/memorize" class="card">
+          <ion-icon name="bulb-outline" class="icon"></ion-icon>
+          <ion-label class="label">Memorize</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card button routerLink="/listen" class="card">
+          <ion-icon name="volume-medium-outline" class="icon"></ion-icon>
+          <ion-label class="label">Listen</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card button (click)="open('download')" class="card">
+          <ion-icon name="download-outline" class="icon"></ion-icon>
+          <ion-label class="label">Download</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card button routerLink="/surahs" class="card">
+          <ion-icon name="list" class="icon primary"></ion-icon>
+          <ion-label class="label">LbL Translation</ion-label>
+          <ion-badge class="badge">In Progress</ion-badge>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
   <hr />
 
-  <ion-list lines="none">
-    <ion-item button (click)="open('help')">
-      <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-      <ion-label> Help </ion-label>
-    </ion-item>
-    <ion-item button (click)="open('about')">
-      <ion-icon name="information-circle-outline" slot="start"></ion-icon>
-      <ion-label> About </ion-label>
-    </ion-item>
-    <ion-item button (click)="open('progress')">
-      <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
-      <ion-label> Progress & Future Plans</ion-label>
-    </ion-item>
-  </ion-list>
+  <ion-grid class="ion-text-center">
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="4">
+        <ion-card button (click)="open('help')" class="secondary-card">
+          <ion-icon name="help-circle-outline" class="icon"></ion-icon>
+          <ion-label class="label">Help</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="4">
+        <ion-card button (click)="open('about')" class="secondary-card">
+          <ion-icon name="information-circle-outline" class="icon"></ion-icon>
+          <ion-label class="label">About</ion-label>
+        </ion-card>
+      </ion-col>
+      <ion-col size="4">
+        <ion-card button (click)="open('progress')" class="secondary-card">
+          <ion-icon name="stats-chart-outline" class="icon"></ion-icon>
+          <ion-label class="label">Progress</ion-label>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
   <div class="links">
-    <h6>LINKS</h6>
+    <h6 class="ion-text-center">MORE</h6>
     <ion-grid>
       <ion-row>
         <ion-col>

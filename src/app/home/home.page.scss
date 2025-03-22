@@ -53,3 +53,101 @@ ion-content ion-toolbar {
     text-align: center;
   }
 }
+
+ion-grid {
+  .card {
+    position: relative;
+    text-align: center;
+    padding: 20px;
+    transition: transform 0.2s ease-in-out;
+    // background: linear-gradient(135deg, #42a5f5, #478ed1);
+    background-color: var(--ion-color-light);
+    opacity: 0.8;
+    background-image: linear-gradient(
+        30deg,
+        #a9ded2 12%,
+        transparent 12.5%,
+        transparent 87%,
+        #a9ded2 87.5%,
+        #a9ded2
+      ),
+      linear-gradient(
+        150deg,
+        #a9ded2 12%,
+        transparent 12.5%,
+        transparent 87%,
+        #a9ded2 87.5%,
+        #a9ded2
+      ),
+      linear-gradient(
+        30deg,
+        #a9ded2 12%,
+        transparent 12.5%,
+        transparent 87%,
+        #a9ded2 87.5%,
+        #a9ded2
+      ),
+      linear-gradient(
+        150deg,
+        #a9ded2 12%,
+        transparent 12.5%,
+        transparent 87%,
+        #a9ded2 87.5%,
+        #a9ded2
+      ),
+      linear-gradient(
+        60deg,
+        #a9ded277 25%,
+        transparent 25.5%,
+        transparent 75%,
+        #a9ded277 75%,
+        #a9ded277
+      ),
+      linear-gradient(
+        60deg,
+        #a9ded277 25%,
+        transparent 25.5%,
+        transparent 75%,
+        #a9ded277 75%,
+        #a9ded277
+      );
+    background-size: 26px 46px;
+    background-position: 0 0, 0 0, 13px 23px, 13px 23px, 0 0, 13px 23px;
+    color: #0f2306;
+    border-radius: 15px;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+  }
+  .icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+  .label {
+    display: block;
+  }
+  .badge {
+    position: absolute;
+    top: 0;
+    right: 2px;
+    font-size: 8px;
+    background: var(--ion-color-warning);
+    color: black;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-top: 5px;
+  }
+  .secondary-card {
+    background: var(--ion-color-light);
+    color: var(--ion-color-dark);
+    padding-bottom: 1rem;
+    .icon {
+      font-size: 30px;
+      padding-top: 1rem;
+    }
+    .label {
+      font-size: x-small;
+    }
+  }
+}

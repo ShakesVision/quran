@@ -17,25 +17,89 @@ import { SurahService } from "src/app/services/surah.service";
   styleUrls: ["./juz.page.scss"],
 })
 export class JuzPage implements OnInit {
+  /**
+   * The Quran data with ruku information
+   */
   quranData: {
     title: string;
     data: string;
     rukuArray: RukuLocationItem[][];
     mode: string;
   };
+
+  /**
+   * Quran pages
+   */
   pages = [];
+
+  /**
+   * Juz pages
+   */
   juzPages: SurahOrJuzListItem[] = [];
+
+  /**
+   * Surah pages
+   */
   surahPages: SurahOrJuzListItem[] = [];
+
+  /**
+   * Juz pages copy
+   */
   juzPagesCopy: SurahOrJuzListItem[] = [];
+
+  /**
+   * Surah pages copy
+   */
   surahPagesCopy: SurahOrJuzListItem[] = [];
+
+  /**
+   * Ruku array
+   */
   rukuArray: RukuLocationItem[][] = [];
+
+  /**
+   * Memorization items
+   */
   memorizeItems: [];
+
+  /**
+   * Bookmark page number in unicode
+   */
   unicodeBookmarkPageNum: number;
+
+  /**
+   * Bookmarks
+   */
   bookmarks: Bookmarks;
+
+  /**
+   * Last synced at
+   */
   lastSyncedAt: Date;
+
+  /**
+   * Syncing in progress
+   */
   syncing = false;
+
+  /**
+   * Has been saved
+   */
+  hasSaved = false;
+
+  /**
+   * Is popover open
+   */
   isPopoverOpen = false;
+
+  /**
+   * Segment
+   */
   segment: `${ListType}` = "juz";
+
+  /**
+   * Is online
+   */
   isOnline: boolean = false;
 
   constructor(
@@ -114,11 +178,9 @@ export class JuzPage implements OnInit {
           this.quranData = juzData;
           this.storage.set(juz, juzData).then((_) => {
             console.log("Have been saved in your device successfully.");
-            this.surahService.presentToastWithOptions(
-              `Fetch complete! Updated data have been saved in your device successfully.`,
-              "primary",
-              "bottom"
-            );
+            // instead of toast that gets in the way - use save icon on title bar to depict Saved status.
+            this.hasSaved = true;
+            setTimeout(() => (this.hasSaved = false), 1000);
             this.lastSyncedAt = new Date();
             this.storage.set("synced", this.lastSyncedAt).then((_) => {});
           });

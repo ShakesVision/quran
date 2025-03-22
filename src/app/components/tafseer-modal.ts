@@ -12,8 +12,10 @@ import { QuranData } from "src/assets/data/quran-data";
   styleUrls: ["tafseer-modal.scss"],
 })
 export class TafseerModalComponent {
+  // Input from read page
+  @Input() verseKey;
   // Verse object from API.
-  @Input() verse;
+  verse;
   audioSrc: string;
   baseurl = "https://verses.quran.com/";
   tafsir = {
@@ -32,8 +34,9 @@ export class TafseerModalComponent {
   ) {}
 
   ngOnInit() {
-    this.audioSrc = `${this.baseurl}${this.verse.audio.url}`;
-    this.checkIfAyahHasSajdah();
+    // this.audioSrc = `${this.baseurl}${this.verse.audio.url}`;
+    // this.checkIfAyahHasSajdah();
+    this.fetchTrans(this.verseKey);
   }
 
   playWord(word) {
@@ -125,23 +128,27 @@ export class TafseerModalComponent {
     await alert.present();
   }
   fetchTrans(verse_key: string) {
-    this.surahService.fetchTrans(verse_key).subscribe(
-      (res: any) => {
-        console.log(res, QuranData);
-        this.verse = res.verse;
-        this.audioSrc = `${this.baseurl}${this.verse.audio.url}`;
-        this.checkIfAyahHasSajdah();
-        this.tafsir = { ur: null, ar: null, en: null };
-      },
-      (error) => {
-        console.log(error);
-        this.surahService.presentToastWithOptions(
-          `${error.error?.status}: ${error.error?.error}`,
-          "danger",
-          "middle"
-        );
-      }
-    );
+    this.loading = true;
+    this.surahService
+      .fetchTrans(verse_key)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe(
+        (res: any) => {
+          console.log(res, QuranData);
+          this.verse = res.verse;
+          this.audioSrc = `${this.baseurl}${this.verse.audio.url}`;
+          this.checkIfAyahHasSajdah();
+          this.tafsir = { ur: null, ar: null, en: null };
+        },
+        (error) => {
+          console.log(error);
+          this.surahService.presentToastWithOptions(
+            `${error.error?.status}: ${error.error?.error}`,
+            "danger",
+            "middle"
+          );
+        }
+      );
   }
 
   getAyahOrVerseNumberFromKey(whatToGet: "surah" | "ayah", key: string) {

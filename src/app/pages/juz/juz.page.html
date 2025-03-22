@@ -10,15 +10,11 @@
         <span class="time">{{lastSyncedAt | date: 'h:mm:ss a'}}</span>
       </div>
       <div class="sync-btn-wrapper">
-        <ion-button
-          (click)="fetchAndSaveInDeviceStorage('Quran')"
-          fill="clear"
-          color="medium"
-          size="small"
-        >
-          <ion-icon *ngIf="!syncing" slot="start" name="sync"></ion-icon>
+        <ion-button (click)="fetchAndSaveInDeviceStorage('Quran')" fill="clear" color="medium" size="small">
+          <ion-icon *ngIf="!syncing && !hasSaved" slot="start" name="sync"></ion-icon>
+          <ion-icon *ngIf="hasSaved" slot="start" color="primary" name="save"></ion-icon>
           <ion-spinner *ngIf="syncing" name="crescent"></ion-spinner>
-          Sync
+          {{ hasSaved ? 'Saved!' : 'Sync' }}
         </ion-button>
       </div>
     </ion-buttons>
@@ -27,22 +23,18 @@
 
 <ion-content class="ion-padding">
   <div class="ion-text-center ion-margin-bottom" style="font-style: italic">
-    <ion-label
-      >Read full Quran or jump to any juz. Your memorization under
+    <ion-label>Read full Quran or jump to any juz. Your memorization under
       <a [routerLink]="['/memorize']"> Memorize</a> page is also hightlighted
       here in green.
     </ion-label>
   </div>
 
   <div class="juz-grid-wrapper" [ngSwitch]="segment">
-    <div
-      class="juz-btn juz-btn-full"
-      (click)="navigate()"
+    <div class="juz-btn juz-btn-full" (click)="navigate()"
       [ngStyle]="{'background': totalMemorizeStyle(),'background-position': 'left'}"
       [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
       attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"
-      attr.data-bookmarkPercentageContent="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'+ ' ('+unicodeBookmarkPageNum+')'}}"
-    >
+      attr.data-bookmarkPercentageContent="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'+ ' ('+unicodeBookmarkPageNum+')'}}">
       <div class="juz-heading-en">Read Complete Quran</div>
       <div class="juz-number">1-30</div>
       <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
@@ -59,13 +51,9 @@
         </ion-segment-button>
       </ion-segment>
       <div class="search-controls">
-        <ion-searchbar
-          type="text"
-          class="ion-text-center ion-no-padding ar-text2"
+        <ion-searchbar type="text" class="ion-text-center ion-no-padding ar-text2"
           [placeholder]="segment==='juz'?'عم / 30 / ۳۰':'فلق / 113 / ۱۱۳ / falaq'"
-          (ionChange)="queryChanged($event.target.value)"
-          mode="ios"
-        ></ion-searchbar>
+          (ionChange)="queryChanged($event.target.value)" mode="ios"></ion-searchbar>
         <ion-button id="popover-trigger" slot="end" fill="clear" size="small">
           <ion-icon slot="icon-only" name="options-outline"></ion-icon>
         </ion-button>
@@ -78,15 +66,12 @@
       </ion-label>
     </div>
     <ng-container *ngSwitchCase="'juz'">
-      <div
-        *ngFor="let j of juzPages"
-        [class]="'juz-btn juz'+j.id+'-btn'"
+      <div *ngFor="let j of juzPages" [class]="'juz-btn juz'+j.id+'-btn'"
         [ngClass]="{'hifz-complete': findMemorizeItem(j.id)=='100.0'}"
         [ngStyle]="{'background': returnStyle(j.id-1), 'transition':'all 1s ease'}"
         [style]="'--bookmarkPercentage:'+returnBookmarkCalc(j)?.perc"
         attr.data-bookmarkPercentageContent="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
-        (click)="navigate(j.pages,j.id)"
-      >
+        (click)="navigate(j.pages,j.id)">
         <div class="juz-heading-en">JUZ</div>
         <div class="juz-number">{{j.id}}</div>
         <div class="juz-heading-ar ar-text2">{{j.name}}</div>
@@ -99,13 +84,10 @@
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'surah'">
-      <div
-        *ngFor="let j of surahPages"
-        [class]="'juz-btn surah'+j.id+'-btn'"
+      <div *ngFor="let j of surahPages" [class]="'juz-btn surah'+j.id+'-btn'"
         [style]="'--bookmarkPercentage:'+returnBookmarkCalc(j)?.perc"
         attr.data-bookmarkPercentageContent="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
-        (click)="navigate(j.pages,j.id,'surah')"
-      >
+        (click)="navigate(j.pages,j.id,'surah')">
         <div class="juz-heading-en">SURAH</div>
         <div class="juz-number">{{j.id}}</div>
         <div class="juz-heading-ar ar-text2">{{j.name}}</div>
@@ -119,12 +101,7 @@
     </ng-container>
   </div>
   <!-- Popover content for filters -->
-  <ion-popover
-    [isOpen]="isPopoverOpen"
-    trigger="popover-trigger"
-    side="bottom"
-    (didDismiss)="isPopoverOpen = false"
-  >
+  <ion-popover [isOpen]="isPopoverOpen" trigger="popover-trigger" side="bottom" (didDismiss)="isPopoverOpen = false">
     <ng-template>
       <ion-content>
         <ion-list>

@@ -877,14 +877,14 @@ export class ReadPage implements OnInit, AfterViewInit {
         msg += `${w.text_indopak} — ${w.translation.text} <br>`;
       });
       // this.presentAlert(msg, verse.verse_key);
-      this.presentModal(verse, verse.verse_key);
+      this.presentModal(verseKey);
     });
   }
-  async presentModal(verse, key) {
+  async presentModal(verseKey) {
     const modal = await this.modalController.create({
       component: TafseerModalComponent,
       componentProps: {
-        verse,
+        verseKey,
       },
     });
     modal.present();

@@ -419,7 +419,7 @@ export class SurahService {
   }
 
   fetchTrans(verseKey, lang = "en") {
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak,text&words=true&word_fields=text_indopak,text&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
     return this.httpClient.get(url);
   }
   async presentToastWithOptions(

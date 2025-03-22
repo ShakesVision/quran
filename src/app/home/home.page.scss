@@ -65,34 +65,34 @@ ion-grid {
     opacity: 0.8;
     background-image: linear-gradient(
         30deg,
-        #a9ded2 12%,
+        var(--ion-color-tertiary) 12%,
         transparent 12.5%,
         transparent 87%,
-        #a9ded2 87.5%,
+        var(--ion-color-tertiary) 87.5%,
         #a9ded2
       ),
       linear-gradient(
         150deg,
-        #a9ded2 12%,
+        var(--ion-color-tertiary) 12%,
         transparent 12.5%,
         transparent 87%,
-        #a9ded2 87.5%,
+        var(--ion-color-tertiary) 87.5%,
         #a9ded2
       ),
       linear-gradient(
         30deg,
-        #a9ded2 12%,
+        var(--ion-color-tertiary) 12%,
         transparent 12.5%,
         transparent 87%,
-        #a9ded2 87.5%,
+        var(--ion-color-tertiary) 87.5%,
         #a9ded2
       ),
       linear-gradient(
         150deg,
-        #a9ded2 12%,
+        var(--ion-color-tertiary) 12%,
         transparent 12.5%,
         transparent 87%,
-        #a9ded2 87.5%,
+        var(--ion-color-tertiary) 87.5%,
         #a9ded2
       ),
       linear-gradient(
@@ -113,7 +113,7 @@ ion-grid {
       );
     background-size: 26px 46px;
     background-position: 0 0, 0 0, 13px 23px, 13px 23px, 0 0, 13px 23px;
-    color: #0f2306;
+    color: var(--ion-color-dark);
     border-radius: 15px;
   }
 
@@ -139,8 +139,22 @@ ion-grid {
     margin-top: 5px;
   }
   .secondary-card {
-    background: var(--ion-color-light);
     color: var(--ion-color-dark);
+    background: radial-gradient(var(--ion-color-light) 15%, transparent 16%),
+      linear-gradient(
+        45deg,
+        transparent 49%,
+        var(--ion-color-light) 49% 51%,
+        transparent 51%
+      ),
+      linear-gradient(
+        -45deg,
+        transparent 49%,
+        var(--ion-color-light) 49% 51%,
+        transparent 51%
+      );
+    background-size: 3em 3em;
+    opacity: 0.6;
     padding-bottom: 1rem;
     .icon {
       font-size: 30px;

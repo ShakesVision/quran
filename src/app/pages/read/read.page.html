@@ -57,7 +57,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content #swipeContainer>
   <div class="scan-view" [hidden]="!scanView">
     <pinch-zoom [properties]="zoomProperties">
       <div class="scan-image-wrapper">
@@ -96,8 +96,8 @@
         'juz-start-line': ![2,3].includes(currentPageCalculated) && surahService.juzPageNumbers.includes(currentPageCalculated) && (lines[1].trim()==='﷽' ? i===2 : i===0),
         'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPageCalculated==188 && i==0), 
         'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))|| (currentPage===pages.length && i===lines.length-1 && !juzmode)}"
-        (click)="openTrans($event,i)" (mousedown)="onPressStart(line,i)" (mouseup)="onPressEnd()"
-        (mouseleave)="onPressEnd()" (touchstart)="onPressStart(line,i)" (touchend)="onPressEnd()"
+        (click)="openTrans($event,i)" (mousedown)="onPressStart($event,line,i)" (mouseup)="onPressEnd()"
+        (mouseleave)="onPressEnd()" (touchstart)="onPressStart($event,line,i)" (touchend)="onPressEnd()"
         (touchcancel)="onPressEnd()">
         <div *ngIf="line.includes(surahService.diacritics.RUKU_MARK)" class="ruku-wrapper"
           [innerHTML]="addIndicators(line,i)"></div>

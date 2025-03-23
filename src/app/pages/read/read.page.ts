@@ -2,11 +2,13 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnInit,
   ViewChild,
 } from "@angular/core";
 import { SurahService } from "./../../services/surah.service";
 import {
+  GestureController,
   ModalController,
   PopoverController,
   ToastController,
@@ -34,6 +36,8 @@ import { TafseerModalComponent } from "src/app/components/tafseer-modal";
   styleUrls: ["./read.page.scss"],
 })
 export class ReadPage implements OnInit, AfterViewInit {
+  @ViewChild("swipeContainer", { read: ElementRef })
+  swipeContainer!: ElementRef;
   @ViewChild(VirtualScrollerComponent, { static: false })
   surah;
   lines: string[];
@@ -123,7 +127,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     public changeDetectorRef: ChangeDetectorRef,
     private storage: Storage,
     private popoverController: PopoverController,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private gestureCtrl: GestureController
   ) {}
 
   ngOnInit() {
@@ -202,6 +207,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.pageFontSize = window
       .getComputedStyle(el, null)
       .getPropertyValue("font-size");
+    this.setupSwipeGesture();
   }
 
   async getBookmark() {
@@ -1224,10 +1230,13 @@ export class ReadPage implements OnInit, AfterViewInit {
   }
 
   // Start long-press timer
-  onPressStart(line, i) {
+  onPressStart(ev, line, i) {
     this.longPressTimer = setTimeout(() => {
+      console.log(ev);
+      ev.preventDefault();
+      ev.stopPropagation();
       this.presenttAlert(line, i + 1); // Show alert after long press
-    }, 1000);
+    }, 1500);
   }
 
   // Cancel long press if user releases before timer completes
@@ -1292,5 +1301,35 @@ export class ReadPage implements OnInit, AfterViewInit {
     });
 
     await alert.present();
+  }
+
+  setupSwipeGesture() {
+    const gesture = this.gestureCtrl.create(
+      {
+        el: this.swipeContainer.nativeElement, // Target element
+        threshold: 10, // Minimum movement to trigger
+        gestureName: "swipe",
+        onEnd: (detail) => {
+          const SWIPE_THRESHOLD = 50; // Only register swipe if it moves more than 50px
+
+          if (detail.deltaX > SWIPE_THRESHOLD) {
+            this.onSwipeRight();
+          } else if (detail.deltaX < -SWIPE_THRESHOLD) {
+            this.onSwipeLeft();
+          }
+        },
+      },
+      true
+    );
+
+    gesture.enable();
+  }
+
+  onSwipeLeft() {
+    this.goToPage(-1);
+  }
+
+  onSwipeRight() {
+    this.goToPage(1);
   }
 }

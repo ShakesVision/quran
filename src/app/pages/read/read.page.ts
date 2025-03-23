@@ -115,7 +115,11 @@ export class ReadPage implements OnInit, AfterViewInit {
     disableZoomControl: "disable", // stops showing zoom + and zoom - images.
     backgroundColor: "rgba(0,0,0,0)", // Makes the pinch zoom container color to transparent. So that ionic themes can be applied without issues.
   };
-  longPressTimer: any; // Holds timeout reference
+  selectionMap = {
+    somethingSelected: false,
+    selectedElementId: "",
+    message: "",
+  };
 
   constructor(
     public surahService: SurahService,
@@ -208,6 +212,9 @@ export class ReadPage implements OnInit, AfterViewInit {
       .getComputedStyle(el, null)
       .getPropertyValue("font-size");
     this.setupSwipeGesture();
+    document.addEventListener("selectionchange", () => {
+      this.selectionChangeReportHandler();
+    });
   }
 
   async getBookmark() {
@@ -360,25 +367,29 @@ export class ReadPage implements OnInit, AfterViewInit {
           "top"
         );
       else {
-        const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
-        let lineCounter = n;
-        let txt = "";
-        do {
-          txt = this.lines[lineCounter];
-          lineCounter++;
-        } while (!re.test(txt));
-        console.log(txt);
-        let verseNum = txt
-          .split(" ")
-          .find((word) => re.test(word))
-          .split(this.surahService.diacritics.AYAH_MARK)[1];
-        verseNum = this.getEnNumber(verseNum);
-        console.log(txt);
         this.readTrans(
-          `${this.getCorrectedSurahNumberWithRespectTo(n)}:${verseNum}`
+          `${this.getCorrectedSurahNumberWithRespectTo(
+            n
+          )}:${this.getNextAyahNumberFromCurrentLine(n)}`
         );
       }
     }
+  }
+  getNextAyahNumberFromCurrentLine(lineNumber: number) {
+    const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
+    let lineCounter = lineNumber;
+    let txt = "";
+    do {
+      txt = this.lines[lineCounter];
+      lineCounter++;
+    } while (!re.test(txt));
+    console.log(txt);
+    let verseNum = txt
+      .split(" ")
+      .find((word) => re.test(word))
+      .split(this.surahService.diacritics.AYAH_MARK)[1];
+    verseNum = this.getEnNumber(verseNum);
+    return verseNum;
   }
   getCorrectedSurahNumberWithRespectTo(lineNo) {
     let lineNumbers = this.lines
@@ -956,16 +967,29 @@ export class ReadPage implements OnInit, AfterViewInit {
       return;
     }
     console.log(this.audio?.src);
+    let key = "";
+    if (this.selectionMap.somethingSelected) {
+      console.log(
+        "Something selected, we should play selected verse: ",
+        this.selectionMap.selectedElementId
+      );
+      const n = parseInt(this.selectionMap.selectedElementId.split("_")[1]);
+      key = `${this.getCorrectedSurahNumberWithRespectTo(
+        n
+      )}:${this.getNextAyahNumberFromCurrentLine(n)}`;
+    } else {
+      key = verseIdList[0];
+    }
     // Audio not playing and not paused
     if (!this.audio) {
       console.log("// Audio not playing and not paused");
-      let url = `https://api.quran.com/api/v4/verses/by_key/${verseIdList[0]}?language=${lang}&audio=${this.qariId}`;
+      let url = `https://api.quran.com/api/v4/verses/by_key/${key}?language=${lang}&audio=${this.qariId}`;
       this.httpClient.get(url).subscribe((res: any) => {
         console.log(res);
         this.audioSrc = "https://verses.quran.com/" + res.verse.audio?.url;
         if (!res.verse.audio) {
           this.surahService.presentToastWithOptions(
-            `The selected Qari might not have the audio for the verse ${verseIdList[0]}. Try another Qaris from the list.`,
+            `The selected Qari might not have the audio for the verse ${key}. Try another Qaris from the list.`,
             "warning",
             "middle"
           );
@@ -973,7 +997,7 @@ export class ReadPage implements OnInit, AfterViewInit {
         }
         // https://verses.quran.com/Shatri/mp3/059010.mp3 or https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/001005.mp3
         this.audio = new Audio(this.audioSrc);
-        this.audioPlayRoutine(verseIdListForAudio, verseIdList);
+        this.audioPlayRoutine(verseIdListForAudio, verseIdList, key);
       });
     }
 
@@ -981,14 +1005,15 @@ export class ReadPage implements OnInit, AfterViewInit {
     else if (this.audio.paused) {
       console.log("Audio not playing but paused");
 
-      this.audioPlayRoutine(verseIdListForAudio, verseIdList);
+      this.audioPlayRoutine(verseIdListForAudio, verseIdList, key);
     }
   }
-  audioPlayRoutine(verseIdListForAudio, verseIdList) {
+  audioPlayRoutine(verseIdListForAudio, verseIdList, key) {
     console.log(verseIdListForAudio);
     this.setAudioSpeed(this.audioSpeed);
     this.audioPlaying = true;
     this.audio.play();
+    // this.audioPlayIndex = verseIdList.indexOf(parseInt(key.split(":")));
     this.playingVerseNum = verseIdList[this.audioPlayIndex - 1];
 
     let pageFlipping = true;
@@ -1177,18 +1202,6 @@ export class ReadPage implements OnInit, AfterViewInit {
       p
     )}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
     this.fullImageUrl = fullUrl;
-    // const alertmsg = await this.alertController.create({
-    //   message: `<img src='${fullUrl}' />`,
-    //   header: `Page #${this.currentPageCalculated}`,
-    //   cssClass: "scanImgAlertBox",
-    //   buttons: [
-    //     {
-    //       text: "Ok",
-    //       role: "cancel",
-    //     },
-    //   ],
-    // });
-    // alertmsg.present();
   }
 
   textWidth(text, fontProp) {
@@ -1229,78 +1242,30 @@ export class ReadPage implements OnInit, AfterViewInit {
     if (this.audio) this.stopAudio();
   }
 
-  // Start long-press timer
-  onPressStart(ev, line, i) {
-    this.longPressTimer = setTimeout(() => {
-      console.log(ev);
-      ev.preventDefault();
-      ev.stopPropagation();
-      this.presenttAlert(line, i + 1); // Show alert after long press
-    }, 1500);
-  }
-
-  // Cancel long press if user releases before timer completes
-  onPressEnd() {
-    clearTimeout(this.longPressTimer);
-  }
-
   // Show Ionic alert
-  async presenttAlert(line, i) {
-    console.log("line to report: " + i, line);
-    let msg = `${line}<br>Selected: ${window.getSelection().toString()}`;
-    const alert = await this.alertController.create({
-      header: `Report Pg${this.currentPage}:L${i}`,
-      message: msg,
-      inputs: [
-        {
-          name: "note",
-          type: "text",
-          placeholder: "Enter note (Optional)",
-        },
-      ],
-      buttons: [
-        {
-          text: "Copy",
-          /**
-           * Handler for the "Copy" button in the alert. Copies the selected text and the note (if any) entered by the user to the clipboard.
-           * @param {object} data - The input data from the alert.
-           * @param {string} data.note - The note entered by the user.
-           */
-          handler: (data) => {
-            const textToCopy = `${msg.replace("<br>", "\n")}\n\nNote: ${
-              data.note
-            }`;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-              this.surahService.presentToastWithOptions(
-                "Copied to clipboard",
-                "dark",
-                "top"
-              );
-            });
-          },
-        },
-
-        {
-          text: "OK",
-          /**
-           * Handler for the "OK" button in the alert. Opens a telegram link to report the issue with the selected text and the note (if any) entered by the user.
-           * @param {object} data - The input data from the alert.
-           * @param {string} data.note - The note entered by the user.
-           */
-          handler: (data) => {
-            window.open(
-              `https://t.me/ShakesVision?text=${msg}
-              
-              Note: ${data.note}`,
-              "_system",
-              "location=yes"
-            );
-          },
-        },
-      ],
-    });
-
-    await alert.present();
+  async selectionChangeReportHandler() {
+    var selection = window.getSelection();
+    if (selection.toString() != "") {
+      var selectedElement = selection.anchorNode?.parentElement?.parentElement;
+      if (selectedElement) {
+        this.selectionMap.selectedElementId = selectedElement.id;
+      }
+      this.selectionMap.somethingSelected = true;
+      const i = this.selectionMap.selectedElementId.split("_")[1];
+      const el = document.getElementById(this.selectionMap.selectedElementId);
+      const line = el ? el.textContent.trim() : "";
+      let msg = `Report Pg${this.currentPage}:L${i}
+      
+      ${line}
+      Selected: ${window.getSelection().toString()}`;
+      this.selectionMap.message = msg;
+    } else {
+      this.selectionMap = {
+        somethingSelected: false,
+        selectedElementId: "",
+        message: "",
+      };
+    }
   }
 
   setupSwipeGesture() {
@@ -1310,7 +1275,7 @@ export class ReadPage implements OnInit, AfterViewInit {
         threshold: 10, // Minimum movement to trigger
         gestureName: "swipe",
         onEnd: (detail) => {
-          const SWIPE_THRESHOLD = 50; // Only register swipe if it moves more than 50px
+          const SWIPE_THRESHOLD = 50; // Only register swipe if it moves more than this many pixels.
 
           if (detail.deltaX > SWIPE_THRESHOLD) {
             this.onSwipeRight();

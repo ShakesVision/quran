@@ -1498,7 +1498,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const deficit = containerWidth - currentWidth;
-      const tatweelCount = Math.min(12, Math.floor(deficit / tatweelWidth));
+      const tatweelCount = Math.floor(deficit / tatweelWidth);
       if (tatweelCount <= 0) {
         spanEl.innerText = rawText;
         return;
@@ -1515,29 +1515,98 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     return true;
   }
 
+  /**
+   * Properly insert tatweel (kashida) characters between connected Arabic letters.
+   *
+   * Rules:
+   * - Tatweel goes AFTER a base letter + its tashkeel marks, BEFORE the next base letter
+   * - Only after letters that connect to the left (dual-joining letters)
+   * - Never across word boundaries (spaces)
+   * - Distributed as evenly as possible across all eligible slots
+   * - Max 3 tatweels per slot to prevent ugly over-stretching
+   */
   private insertTatweel(text: string, count: number): string {
-    const chars = text.split("");
-    const slots: number[] = [];
-    const kashidaLetters = /[بتثجحخسشصضطظعغفقكلمنهي]/;
+    const TATWEEL = "\u0640";
 
-    for (let i = 0; i < chars.length - 1; i++) {
-      const current = chars[i];
-      const next = chars[i + 1];
-      if (current === " " || next === " ") continue;
-      if (kashidaLetters.test(current)) {
-        slots.push(i);
+    // Arabic combining marks (tashkeel / diacritics) that sit above/below a base letter
+    const isTashkeel = (c: string) =>
+      /[\u064B-\u065F\u0670\u06D6-\u06ED\u08D4-\u08E1\u08E3-\u08FF]/.test(c);
+
+    // Arabic base letter (not marks, not special symbols)
+    const isArabicBase = (c: string) =>
+      /[\u0621-\u063A\u0641-\u064A\u066E\u066F\u0671-\u06D3\u06FA-\u06FC]/.test(c);
+
+    // Right-joining-only letters — they do NOT connect to the left,
+    // so tatweel CANNOT follow them (it would float disconnected).
+    // ا أ إ آ ٱ ى د ذ ر ز و ؤ
+    const isNonLeftJoining = (c: string) =>
+      /[\u0627\u0623\u0625\u0622\u0671\u0649\u062F\u0630\u0631\u0632\u0648\u0624]/.test(c);
+
+    const chars = [...text]; // spread handles multi-byte correctly
+
+    // --- Find eligible insertion positions ---
+    // For each Arabic base letter at index i, look backward (past tashkeel)
+    // to find the previous base letter. If that previous letter connects
+    // left and there is no space between them, index i is a valid slot
+    // (tatweel inserted just before chars[i]).
+    const slots: number[] = [];
+
+    for (let i = 0; i < chars.length; i++) {
+      if (!isArabicBase(chars[i])) continue;
+
+      // Walk backward past tashkeel and existing tatweels
+      let j = i - 1;
+      while (j >= 0 && (isTashkeel(chars[j]) || chars[j] === TATWEEL)) j--;
+
+      if (j < 0) continue;
+
+      const prev = chars[j];
+      if (!isArabicBase(prev)) continue; // previous is space, symbol, etc.
+      if (isNonLeftJoining(prev)) continue; // previous letter doesn't connect left
+
+      // Make sure there is no space between j and i
+      let hasGap = false;
+      for (let k = j + 1; k < i; k++) {
+        if (chars[k] === " " || chars[k] === "\u00A0") {
+          hasGap = true;
+          break;
+        }
+      }
+      if (hasGap) continue;
+
+      slots.push(i);
+    }
+
+    if (slots.length === 0) return text;
+
+    // --- Distribute tatweels evenly, max 3 per slot ---
+    const MAX_PER_SLOT = 3;
+    const effectiveMax = slots.length * MAX_PER_SLOT;
+    const total = Math.min(count, effectiveMax);
+
+    const perSlot = Math.floor(total / slots.length);
+    const remainder = total % slots.length;
+    const allocation: number[] = new Array(slots.length).fill(perSlot);
+
+    // Spread the remainder across evenly-spaced slots
+    if (remainder > 0) {
+      const step = slots.length / remainder;
+      for (let k = 0; k < remainder; k++) {
+        const idx = Math.min(Math.round(k * step), allocation.length - 1);
+        allocation[idx]++;
       }
     }
 
-    if (!slots.length) return text;
-
-    const segments = chars.map((ch) => ch);
-    for (let i = 0; i < count; i++) {
-      const slot = slots[i % slots.length];
-      segments[slot] = segments[slot] + "ـ";
+    // --- Build result string, inserting from end to preserve indices ---
+    const result = [...chars];
+    for (let k = slots.length - 1; k >= 0; k--) {
+      if (allocation[k] > 0) {
+        const stretch = TATWEEL.repeat(allocation[k]);
+        result.splice(slots[k], 0, ...stretch.split(""));
+      }
     }
 
-    return segments.join("");
+    return result.join("");
   }
 
   async ionViewWillLeave() {

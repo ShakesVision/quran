@@ -238,7 +238,7 @@ export class DiscoverPage implements OnInit, OnDestroy {
     const card = this.currentCard;
     if (!card) return;
 
-    const shareText = `${card.arabicText}\n\n${card.englishTranslation}\n\n— Surah ${card.surahNameEn} (${card.verseKey})`;
+    const shareText = `${card.arabicText}\n\n${card.englishTranslation}\n\n— Surah ${card.surahNameEn} (${card.verseKey})\n\nvia Quran Hifz Helper by Shakeeb Ahmad\nhttps://ur.shakeeb.in`;
 
     if (navigator.share) {
       try {

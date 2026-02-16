@@ -13,6 +13,32 @@ body.dark ion-content {
   --background: url("./../../../assets/paper-texture-dark.svg") repeat center center;
 }
 
+// Quran.com loading progress overlay
+.qurancom-progress {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  padding: 0 12px;
+  display: flex;
+  justify-content: center;
+
+  .progress-card {
+    width: min(520px, 100%);
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--ion-color-medium);
+  }
+}
+
 // ===========================================
 // IMMERSIVE MODE - Hide header/footer
 // ===========================================
@@ -36,7 +62,7 @@ body.dark ion-content {
   .content-wrapper {
     height: calc(100vh - 40px) !important;
     max-height: calc(100vh - 40px) !important;
-    border: none !important;
+    border: 1px solid var(--ion-color-medium) !important;
   }
 }
 
@@ -104,11 +130,13 @@ body.dark ion-content {
     display: flex;
     flex-direction: column;
     padding: 8px 12px;
-    border: 1px solid var(--ion-color-light-shade);
+    padding-inline-start: 28px;
+    border: 2px solid var(--ion-color-medium);
     border-radius: 4px;
     background: var(--ion-background-color);
     user-select: text;
-    overflow: hidden;
+    overflow: visible;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     
     // Each line takes equal space (for 15 lines)
     .line {
@@ -118,10 +146,11 @@ body.dark ion-content {
       justify-content: stretch;
       border-bottom: 0.5px solid var(--ion-color-light-shade);
       position: relative;
+      overflow: visible;
       min-height: 0; // Allow flex shrinking
       
       // Dynamic font sizing based on container
-      font-size: clamp(12px, calc(100vw / 22), 20px);
+      font-size: var(--reader-font-size, clamp(12px, calc(100vw / 22), 20px));
       
       span {
         flex: 1;
@@ -151,27 +180,27 @@ body.dark ion-content {
 }
 
 .ar {
-  font-size: clamp(14px, 4vw, 18px);
+  font-size: var(--reader-font-size, clamp(14px, 4vw, 18px));
   font-family: Indopak, "Traditional Arabic", serif;
   direction: rtl;
 }
 
 .ar2 {
   font-family: Muhammadi, Indopak, serif;
-  font-size: clamp(14px, 4.2vw, 19px);
+  font-size: var(--reader-font-size, clamp(14px, 4.2vw, 19px));
   direction: rtl;
 }
 
 // New font classes for quran.com sources
 .ar-waqflazim {
   font-family: "IndoPak Waqf Lazim", Indopak, serif;
-  font-size: clamp(14px, 4vw, 18px);
+  font-size: var(--reader-font-size, clamp(14px, 4vw, 18px));
   direction: rtl;
 }
 
 .ar-uthmani {
   font-family: "Uthmanic Hafs", "Traditional Arabic", serif;
-  font-size: clamp(14px, 4vw, 18px);
+  font-size: var(--reader-font-size, clamp(14px, 4vw, 18px));
   direction: rtl;
 }
 
@@ -182,7 +211,7 @@ body.dark ion-content {
 .ur {
   font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
-  font-size: clamp(11px, 3vw, 14px);
+  font-size: var(--reader-font-size, clamp(11px, 3vw, 14px));
 }
 
 // ===========================================
@@ -283,7 +312,7 @@ ion-footer {
   row-gap: 2px;
   font-size: clamp(10px, 2.5vw, 14px);
   position: absolute;
-  left: -20px;
+  left: -24px;
   line-height: 1;
   top: 50%;
   transform: translateY(-50%);
@@ -392,14 +421,43 @@ virtual-scroller {
 // POPOVER / SETTINGS
 // ===========================================
 .popover-wrapper {
+  padding: 8px 4px 4px;
+
   ion-item {
     font-size: small;
+    --inner-padding-end: 8px;
+    --padding-start: 12px;
+    --min-height: 44px;
   }
   
   .font-size-field {
     max-width: 60px;
     margin-left: 15px;
     border-bottom: 1px dashed var(--ion-color-medium);
+  }
+
+  .settings-section {
+    margin: 6px 0 2px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--ion-color-medium);
+    text-transform: uppercase;
+  }
+
+  .settings-card {
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    background: var(--ion-color-light);
+    overflow: hidden;
+    margin: 6px 0 10px;
+  }
+
+  ion-item-divider {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+    --background: transparent;
   }
   
   .selected-result {

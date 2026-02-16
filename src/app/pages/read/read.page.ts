@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from "@angular/core";
@@ -19,6 +20,8 @@ import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { VirtualScrollerComponent } from "ngx-virtual-scroller";
 import { Storage } from "@ionic/storage-angular";
+import { Subject } from "rxjs";
+import { take, takeUntil } from "rxjs/operators";
 import { FirstLastAyah } from "src/app/models/firstLastModels";
 import {
   RukuLocationItem,
@@ -29,13 +32,15 @@ import { MushafLines } from "src/app/models/mushaf-versions";
 import { ImageQuality } from "../scanned/scanned.page";
 import { Bookmarks } from "src/app/models/bookmarks";
 import { TafseerModalComponent } from "src/app/components/tafseer-modal";
+import { QuranDataService } from "src/app/services/quran-data.service";
+import { AppDataService } from "src/app/services/app-data.service";
 
 @Component({
   selector: "app-read",
   templateUrl: "./read.page.html",
   styleUrls: ["./read.page.scss"],
 })
-export class ReadPage implements OnInit, AfterViewInit {
+export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("swipeContainer", { read: ElementRef })
   swipeContainer!: ElementRef;
   @ViewChild(VirtualScrollerComponent, { static: false })
@@ -63,6 +68,9 @@ export class ReadPage implements OnInit, AfterViewInit {
   reciters = [];
   qariId: number = 7;
   selectedQari;
+  enableTatweel = true;
+  quranComProgress = { loaded: 0, total: 0, done: true };
+  showQuranComProgress = false;
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
 
@@ -116,6 +124,31 @@ export class ReadPage implements OnInit, AfterViewInit {
     disableZoomControl: "disable", // stops showing zoom + and zoom - images.
     backgroundColor: "rgba(0,0,0,0)", // Makes the pinch zoom container color to transparent. So that ionic themes can be applied without issues.
   };
+  private destroy$ = new Subject<void>();
+  private swipeGesture: any;
+  private arElement?: HTMLElement;
+  private arMouseupHandler = () => {
+    const selection = window.getSelection();
+    const start = selection?.anchorOffset ?? 0;
+    const end = selection?.focusOffset ?? 0;
+    if (start >= 0 && end >= 0) {
+      console.log("start: " + start);
+      console.log("end: " + end);
+    }
+  };
+  private arSelectStartHandler = () => {
+    const selection = window.getSelection();
+    const txt = selection?.toString();
+    if (txt && txt !== "") {
+      const selectedElement = selection?.anchorNode?.parentElement;
+      if (selectedElement) {
+        console.log("Element where selection happened:", selectedElement);
+      }
+    }
+  };
+  private selectionChangeHandler = () => {
+    this.selectionChangeReportHandler();
+  };
   selectionMap = {
     somethingSelected: false,
     selectedElementId: "",
@@ -138,10 +171,21 @@ export class ReadPage implements OnInit, AfterViewInit {
     private storage: Storage,
     private popoverController: PopoverController,
     private modalController: ModalController,
-    private gestureCtrl: GestureController
+    private gestureCtrl: GestureController,
+    private quranDataService: QuranDataService,
+    private appDataService: AppDataService
   ) {}
 
   ngOnInit() {
+    this.quranDataService
+      .getQuranComProgress()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((progress) => {
+        this.quranComProgress = progress;
+        this.showQuranComProgress =
+          progress.total > 0 && progress.loaded < progress.total;
+      });
+
     // Check for route params first (new URL-based navigation)
     const routeParams = this.activatedRoute.snapshot.params;
     const routeData = this.activatedRoute.snapshot.data;
@@ -202,7 +246,10 @@ export class ReadPage implements OnInit, AfterViewInit {
     }
     
     // get surah info file
-    this.surahService.getSurahInfo().subscribe((res: any) => {
+    this.surahService
+      .getSurahInfo()
+      .pipe(take(1))
+      .subscribe((res: any) => {
       this.surahInfo = res;
       this.surahService.surahInfo = res;
     });
@@ -210,27 +257,6 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.adjustFontsize();
     // Get scan info
     this.setupLinks();
-    // highlight helper listener
-    document.querySelector(".ar").addEventListener("mouseup", function (e) {
-      var txt = this.innerText;
-      var selection = window.getSelection();
-      var start = selection.anchorOffset;
-      var end = selection.focusOffset;
-      if (start >= 0 && end >= 0) {
-        console.log("start: " + start);
-        console.log("end: " + end);
-      }
-    });
-    document.querySelector(".ar").addEventListener("selectstart", function (e) {
-      let selection = window.getSelection();
-      var txt = selection.toString();
-      if (txt && txt != "") {
-        var selectedElement = selection.anchorNode?.parentElement;
-        if (selectedElement) {
-          console.log("Element where selection happened:", selectedElement);
-        }
-      }
-    });
   }
 
   ngAfterViewInit(): void {
@@ -240,9 +266,7 @@ export class ReadPage implements OnInit, AfterViewInit {
       .getComputedStyle(el, null)
       .getPropertyValue("font-size");
     this.setupSwipeGesture();
-    document.addEventListener("selectionchange", () => {
-      this.selectionChangeReportHandler();
-    });
+    this.attachSelectionListeners();
   }
 
   async getBookmark() {
@@ -483,7 +507,8 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   changeFontSize(val, inputValue: boolean = false) {
     var el: HTMLElement = document.querySelector(".content-wrapper");
-    var currentSize = parseFloat(this.pageFontSize);
+    const stored = el?.style?.getPropertyValue("--reader-font-size");
+    var currentSize = parseFloat(stored || this.pageFontSize);
     // Reset all line fontsizes - remove all inline styles for font-size
     document.querySelectorAll(".line").forEach((e: any) => {
       if (e.style.removeProperty) {
@@ -492,11 +517,12 @@ export class ReadPage implements OnInit, AfterViewInit {
         e.style.removeAttribute("font-size");
       }
     });
-    if (inputValue) el.style.fontSize = parseFloat(val) + "px";
-    else {
-      el.style.fontSize = currentSize + val + "px";
+    const nextSize = inputValue ? parseFloat(val) : currentSize + val;
+    if (!isNaN(nextSize)) {
+      el.style.setProperty("--reader-font-size", `${nextSize}px`);
+      this.pageFontSize = `${nextSize}px`;
+      this.applyTatweelToLines();
     }
-    this.pageFontSize = el.style.fontSize;
   }
 
   changeColors(val, field = "bg") {
@@ -548,7 +574,10 @@ export class ReadPage implements OnInit, AfterViewInit {
   }
 
   showSurahInfo() {
-    this.surahService.getSurahInfo().subscribe((res: any) => {
+    this.surahService
+      .getSurahInfo()
+      .pipe(take(1))
+      .subscribe((res: any) => {
       this.surahInfo = res;
       this.surahService.surahInfo = [...res];
       this.currentSurahInfo = this.surahService.surahInfo.find((s) => {
@@ -1160,7 +1189,10 @@ export class ReadPage implements OnInit, AfterViewInit {
     return val.toString().padStart(3, "0");
   }
   fetchQariList() {
-    this.surahService.fetchQariList().subscribe((res: any) => {
+    this.surahService
+      .fetchQariList()
+      .pipe(take(1))
+      .subscribe((res: any) => {
       console.log(res);
       this.reciters = res.reciters?.sort((a, b) => a.id - b.id);
       this.qariId = this.qariId ?? 7;
@@ -1271,13 +1303,241 @@ export class ReadPage implements OnInit, AfterViewInit {
         el.clientWidth <
         this.textWidth(
           el.innerText,
-          window.getComputedStyle(el).fontSize + " Muhammadi"
+          this.getFontProp(el)
         )
       )
         el.style.fontSize =
           (parseFloat(window.getComputedStyle(el).fontSize) - 1).toString() +
           "px";
     });
+    requestAnimationFrame(() => this.applyTatweelToLines());
+  }
+
+  private getFontProp(el: HTMLElement): string {
+    const computed = window.getComputedStyle(el);
+    return computed.font || `${computed.fontSize} ${computed.fontFamily}`;
+  }
+
+  toggleTatweel(enabled: boolean) {
+    this.enableTatweel = enabled;
+    this.applyTatweelToLines();
+  }
+
+  async addManualBookmark() {
+    const alert = await this.alertController.create({
+      header: "Add Bookmark",
+      inputs: [
+        {
+          name: "name",
+          type: "text",
+          placeholder: "Bookmark name",
+          value: `Page ${this.currentPageCalculated || this.currentPage}`,
+        },
+        {
+          name: "folder",
+          type: "text",
+          placeholder: "Folder (optional)",
+          value: "Default",
+        },
+      ],
+      buttons: [
+        { text: "Cancel", role: "cancel" },
+        {
+          text: "Save",
+          handler: async (data) => {
+            const page =
+              this.currentPageCalculated || this.currentPage || 1;
+            const name = (data?.name || "").trim();
+            const folder = (data?.folder || "Default").trim();
+            if (!name) return;
+            await this.appDataService.addManualBookmark(name, page, folder);
+            this.surahService.presentToastWithOptions(
+              "Bookmark saved",
+              "success",
+              "middle"
+            );
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  async addNoteEntry() {
+    const alert = await this.alertController.create({
+      header: "Add Note",
+      inputs: [
+        {
+          name: "title",
+          type: "text",
+          placeholder: "Note title",
+        },
+        {
+          name: "content",
+          type: "textarea",
+          placeholder: "Write your note...",
+        },
+      ],
+      buttons: [
+        { text: "Cancel", role: "cancel" },
+        {
+          text: "Save",
+          handler: async (data) => {
+            const title = (data?.title || "").trim();
+            const content = (data?.content || "").trim();
+            if (!title || !content) return;
+            await this.appDataService.addOrAppendNote(title, content, {
+              page: this.currentPageCalculated || this.currentPage,
+              surah: this.surahCalculatedForJuz || this.surahCalculated,
+              juz: this.juzCalculated,
+            });
+            this.surahService.presentToastWithOptions(
+              "Note saved",
+              "success",
+              "middle"
+            );
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  async exportAppData() {
+    const json = await this.appDataService.exportAppData();
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(json);
+      this.surahService.presentToastWithOptions(
+        "App data copied to clipboard",
+        "success",
+        "middle"
+      );
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: "Export Data",
+      message: "<small>Copy the JSON below</small>",
+      inputs: [
+        {
+          name: "json",
+          type: "textarea",
+          value: json,
+        },
+      ],
+      buttons: [{ text: "Close", role: "cancel" }],
+    });
+    await alert.present();
+  }
+
+  async importAppData() {
+    const alert = await this.alertController.create({
+      header: "Import Data",
+      inputs: [
+        {
+          name: "json",
+          type: "textarea",
+          placeholder: "Paste JSON here",
+        },
+      ],
+      buttons: [
+        { text: "Cancel", role: "cancel" },
+        {
+          text: "Import",
+          handler: async (data) => {
+            const json = (data?.json || "").trim();
+            if (!json) return;
+            await this.appDataService.importAppData(json, true);
+            this.surahService.presentToastWithOptions(
+              "App data imported",
+              "success",
+              "middle"
+            );
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private applyTatweelToLines() {
+    const lines = document.querySelectorAll(".line span");
+    lines.forEach((spanEl: HTMLElement) => {
+      const rawText =
+        spanEl.getAttribute("data-raw-text") ?? spanEl.innerText ?? "";
+
+      if (!spanEl.getAttribute("data-raw-text")) {
+        spanEl.setAttribute("data-raw-text", rawText);
+      }
+
+      if (!this.enableTatweel) {
+        spanEl.innerText = rawText;
+        return;
+      }
+
+      if (!this.shouldApplyTatweel(rawText)) {
+        spanEl.innerText = rawText;
+        return;
+      }
+
+      const parent = spanEl.parentElement as HTMLElement;
+      if (!parent) return;
+      const computed = window.getComputedStyle(spanEl);
+      const fontProp = computed.font || `${computed.fontSize} ${computed.fontFamily}`;
+      const containerWidth = parent.clientWidth;
+      const currentWidth = this.textWidth(rawText, fontProp);
+      if (currentWidth >= containerWidth) {
+        spanEl.innerText = rawText;
+        return;
+      }
+
+      const tatweelWidth = this.textWidth("ـ", fontProp);
+      if (!tatweelWidth || tatweelWidth <= 0) {
+        spanEl.innerText = rawText;
+        return;
+      }
+
+      const deficit = containerWidth - currentWidth;
+      const tatweelCount = Math.min(12, Math.floor(deficit / tatweelWidth));
+      if (tatweelCount <= 0) {
+        spanEl.innerText = rawText;
+        return;
+      }
+
+      spanEl.innerText = this.insertTatweel(rawText, tatweelCount);
+    });
+  }
+
+  private shouldApplyTatweel(text: string): boolean {
+    if (!text) return false;
+    if (text.includes("﷽")) return false;
+    if (!/[\u0600-\u06FF]/.test(text)) return false;
+    return true;
+  }
+
+  private insertTatweel(text: string, count: number): string {
+    const chars = text.split("");
+    const slots: number[] = [];
+    const kashidaLetters = /[بتثجحخسشصضطظعغفقكلمنهي]/;
+
+    for (let i = 0; i < chars.length - 1; i++) {
+      const current = chars[i];
+      const next = chars[i + 1];
+      if (current === " " || next === " ") continue;
+      if (kashidaLetters.test(current)) {
+        slots.push(i);
+      }
+    }
+
+    if (!slots.length) return text;
+
+    const segments = chars.map((ch) => ch);
+    for (let i = 0; i < count; i++) {
+      const slot = slots[i % slots.length];
+      segments[slot] = segments[slot] + "ـ";
+    }
+
+    return segments.join("");
   }
 
   async ionViewWillLeave() {
@@ -1286,6 +1546,17 @@ export class ReadPage implements OnInit, AfterViewInit {
     const alert = await this.alertController.getTop();
     if (alert) this.alertController.dismiss();
     if (this.audio) this.stopAudio();
+  }
+
+  private attachSelectionListeners() {
+    if (!this.arElement) {
+      this.arElement = document.querySelector(".ar") as HTMLElement;
+    }
+    if (this.arElement) {
+      this.arElement.addEventListener("mouseup", this.arMouseupHandler);
+      this.arElement.addEventListener("selectstart", this.arSelectStartHandler);
+    }
+    document.addEventListener("selectionchange", this.selectionChangeHandler);
   }
 
   // Show Ionic alert
@@ -1333,6 +1604,7 @@ export class ReadPage implements OnInit, AfterViewInit {
       true
     );
 
+    this.swipeGesture = gesture;
     gesture.enable();
   }
 
@@ -1366,6 +1638,8 @@ export class ReadPage implements OnInit, AfterViewInit {
     const page = params.page ? parseInt(params.page) : null;
     const ruku = params.ruku ? parseInt(params.ruku) : null;
     const ayah = params.ayah ? parseInt(params.ayah) : null;
+    const queryParams = this.activatedRoute.snapshot.queryParams || {};
+    const sourceId = this.resolveSourceId(queryParams.source, queryParams.lines);
 
     console.log('Initializing from route params:', { mode, id, page, ruku, ayah });
 
@@ -1374,7 +1648,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.juzsurahmode = mode === 'surah';
 
     // Load data from storage/network
-    this.loadQuranDataFromRoute(mode, id, page, ruku, ayah);
+    this.loadQuranDataFromRoute(mode, id, page, ruku, ayah, sourceId);
   }
 
   /**
@@ -1385,128 +1659,125 @@ export class ReadPage implements OnInit, AfterViewInit {
     id: number | null,
     page: number | null,
     ruku: number | null,
-    ayah: number | null
+    ayah: number | null,
+    sourceId: string
   ) {
-    // Load full Quran first
-    this.httpClient
-      .get(
-        `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/Quran.txt`,
-        { responseType: 'text' }
-      )
-      .subscribe(
-        (res) => {
-          const allPages = res.split('\n\n');
-          
-          if (mode === 'full') {
-            // Full Quran mode
-            this.surah = res;
-            this.pages = allPages;
-            this.title = 'Quran';
-            this.isCompleteMushaf = true;
-            
-            // Jump to specific page if provided
-            if (page) {
-              this.currentPage = Math.min(Math.max(1, page), this.pages.length);
-            }
-          } else if (mode === 'juz' && id) {
-            // Juz mode
-            const startPage = this.surahService.juzPageNumbers[id - 1];
-            const endPage = this.surahService.juzPageNumbers[id] || allPages.length + 1;
-            const juzPages = allPages.slice(startPage - 1, endPage - 1);
-            
-            this.surah = juzPages.join('\n\n');
-            this.pages = juzPages;
-            this.title = id.toString();
-            this.juzNumber = id;
-            this.isCompleteMushaf = false;
-            
-            // Calculate ruku array for this juz
-            this.calculateRukuArrayForJuz(id, juzPages);
-            
-            // Jump to ruku if provided
-            if (ruku && this.rukuArray[id - 1] && this.rukuArray[id - 1][ruku - 1]) {
-              const rukuInfo = this.rukuArray[id - 1][ruku - 1];
-              this.currentPage = rukuInfo.juzPageIndex + 1;
-            }
-          } else if (mode === 'surah' && id) {
-            // Surah mode
-            const startPage = this.surahService.surahPageNumbers[id - 1];
-            const endPage = this.surahService.surahPageNumbers[id] || allPages.length + 1;
-            
-            // Handle surahs that share pages
-            let surahPages: string[] = [];
-            for (let i = startPage - 1; i < endPage - 1 && i < allPages.length; i++) {
-              surahPages.push(allPages[i]);
-            }
-            
-            this.surah = surahPages.join('\n\n');
-            this.pages = surahPages;
-            this.title = id.toString();
-            this.isCompleteMushaf = false;
-            
-            // TODO: Jump to ayah if provided (needs word-level tracking)
-          }
-          
-          // Initialize lines for current page
-          if (this.pages && this.pages.length > 0) {
-            this.lines = this.pages[this.currentPage - 1]?.split('\n') || [];
-          }
-          
-          // Set MUSHAF_MODE
-          this.MUSHAF_MODE = {
-            COMPLETE_MUSHAF: this.juzmode && this.isCompleteMushaf,
-            JUZ_VERSION: this.juzmode && !this.isCompleteMushaf && !this.juzsurahmode,
-            SURAH_VERSION: this.juzmode && !this.isCompleteMushaf && this.juzsurahmode,
-          };
-          
-          // Mark data as loaded
-          this.isDataLoaded = true;
-          
-          // Update calculated numbers
-          this.updateCalculatedNumbers();
-          this.getFirstAndLastAyahNumberOnPage();
-          this.getBookmark();
-          this.adjustFontsize();
-          
-          // Get surah info
-          this.surahService.getSurahInfo().subscribe((res: any) => {
-            this.surahInfo = res;
-            this.surahService.surahInfo = res;
-          });
-          
-          // Save to storage for offline use
-          this.storage.set('Quran', {
-            title: 'Quran',
-            data: res,
-            rukuArray: this.rukuArray,
-            mode: mode,
-          }).catch(err => console.warn('Storage error:', err));
-        },
-        (err) => {
-          console.error('Failed to load Quran data:', err);
-          // Try loading from storage
-          this.storage.get('Quran').then((cached) => {
-            if (cached) {
-              this.surah = cached.data;
-              this.pages = cached.data.split('\n\n');
-              this.title = cached.title;
-              this.rukuArray = cached.rukuArray || [];
-              this.lines = this.pages[this.currentPage - 1]?.split('\n') || [];
-              this.isCompleteMushaf = this.pages.length === 611;
-              this.isDataLoaded = true;
-            } else {
-              this.surahService.presentToastWithOptions(
-                'Failed to load Quran data. Please check your connection.',
-                'danger',
-                'middle'
-              );
-              this.router.navigate(['/browse']);
-            }
-          }).catch(() => {
-            this.router.navigate(['/browse']);
-          });
+    this.quranDataService
+      .setSource(sourceId)
+      .then(() => {
+        if (mode === 'full') {
+          this.quranDataService.loadFullQuran().subscribe(
+            (res) => {
+              const allPages = res.split('\n\n');
+              this.surah = res;
+              this.pages = allPages;
+              this.title = 'Quran';
+              this.isCompleteMushaf = true;
+
+              if (page) {
+                this.currentPage = Math.min(Math.max(1, page), this.pages.length);
+              }
+
+              this.finalizeRouteLoad(mode);
+            },
+            (err) => this.handleLoadError(err)
+          );
+          return;
         }
-      );
+
+        if (mode === 'juz' && id) {
+          this.quranDataService.getJuz(id).subscribe(
+            (res: any) => {
+              this.surah = res.pages;
+              this.pages = res.pages.split('\n\n');
+              this.title = res.title;
+              this.juzNumber = id;
+              this.isCompleteMushaf = false;
+              this.calculateRukuArrayForJuz(id || 1, this.pages);
+
+              if (ruku && this.rukuArray[id - 1] && this.rukuArray[id - 1][ruku - 1]) {
+                const rukuInfo = this.rukuArray[id - 1][ruku - 1];
+                this.currentPage = rukuInfo.juzPageIndex + 1;
+              }
+
+              this.finalizeRouteLoad(mode);
+            },
+            (err) => this.handleLoadError(err)
+          );
+          return;
+        }
+
+        if (mode === 'surah' && id) {
+          this.quranDataService.getSurah(id).subscribe(
+            (res: any) => {
+              this.surah = res.pages;
+              this.pages = res.pages.split('\n\n');
+              this.title = res.title;
+              this.isCompleteMushaf = false;
+              this.finalizeRouteLoad(mode);
+            },
+            (err) => this.handleLoadError(err)
+          );
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to initialize text source:', err);
+        this.router.navigate(['/browse']);
+      });
+  }
+
+  private finalizeRouteLoad(mode: string) {
+    if (this.pages && this.pages.length > 0) {
+      this.lines = this.pages[this.currentPage - 1]?.split('\n') || [];
+    }
+
+    this.MUSHAF_MODE = {
+      COMPLETE_MUSHAF: mode === 'full',
+      JUZ_VERSION: mode === 'juz',
+      SURAH_VERSION: mode === 'surah',
+    };
+
+    // TODO: Jump to ayah if provided (needs word-level tracking)
+
+    this.isDataLoaded = true;
+    this.updateCalculatedNumbers();
+    this.getFirstAndLastAyahNumberOnPage();
+    this.getBookmark();
+    this.adjustFontsize();
+
+    this.surahService
+      .getSurahInfo()
+      .pipe(take(1))
+      .subscribe((res: any) => {
+      this.surahInfo = res;
+      this.surahService.surahInfo = res;
+    });
+  }
+
+  private handleLoadError(err: any) {
+    console.error('Failed to load Quran data:', err);
+    this.surahService.presentToastWithOptions(
+      'Failed to load Quran data. Please check your connection.',
+      'danger',
+      'middle'
+    );
+    this.router.navigate(['/browse']);
+  }
+
+  private resolveSourceId(sourceParam?: string, linesParam?: string): string {
+    const sources = this.quranDataService.getAllSources();
+    const direct = sourceParam
+      ? sources.find((s) => s.id.toLowerCase() === sourceParam.toLowerCase())
+      : null;
+    if (direct) return direct.id;
+
+    const lines = linesParam ? parseInt(linesParam, 10) : 15;
+    const sourceKey = (sourceParam || '').toLowerCase();
+    if (sourceKey === 'archive') return lines === 16 ? 'archive-16' : 'archive-15';
+    if (sourceKey === 'qurancom' || sourceKey === 'quran.com')
+      return lines === 16 ? 'qurancom-indopak-16' : 'qurancom-indopak-15';
+
+    return sources.find((s) => s.isDefault)?.id || 'qurancom-indopak-15';
   }
 
   /**
@@ -1535,5 +1806,20 @@ export class ReadPage implements OnInit, AfterViewInit {
       this.rukuArray.push([]);
     }
     this.rukuArray[juzNumber - 1] = juzRukuArray;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    if (this.arElement) {
+      this.arElement.removeEventListener("mouseup", this.arMouseupHandler);
+      this.arElement.removeEventListener("selectstart", this.arSelectStartHandler);
+    }
+    document.removeEventListener("selectionchange", this.selectionChangeHandler);
+
+    if (this.swipeGesture?.destroy) {
+      this.swipeGesture.destroy();
+    }
   }
 }

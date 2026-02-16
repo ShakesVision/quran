@@ -65,6 +65,15 @@
 </ion-header>
 
 <ion-content #swipeContainer>
+  <div class="qurancom-progress" *ngIf="showQuranComProgress">
+    <div class="progress-card">
+      <ion-progress-bar [value]="quranComProgress.loaded / quranComProgress.total"></ion-progress-bar>
+      <div class="progress-text">
+        Loading Quran.com data
+        <span>{{quranComProgress.loaded}} / {{quranComProgress.total}}</span>
+      </div>
+    </div>
+  </div>
   <div class="scan-view" [hidden]="!scanView">
     <pinch-zoom [properties]="zoomProperties">
       <div class="scan-image-wrapper">
@@ -140,7 +149,8 @@
     <ng-template>
       <ion-content>
         <div class="popover-wrapper" #scrollingBlock>
-          <ion-list lines="none">
+          <ion-list lines="none" class="settings-list">
+            <ion-item-divider class="settings-section">Reading</ion-item-divider>
             <ion-item>
               <ion-label>Font Size</ion-label>
               <ion-input placeholder="px" [value]="pageFontSize" (ionChange)="changeFontSize($event.target.value,true)"
@@ -156,6 +166,12 @@
                 </ion-button>
               </ion-buttons>
             </ion-item>
+            <ion-item>
+              <ion-label>Tatweel (Justify)</ion-label>
+              <ion-toggle slot="end" [checked]="enableTatweel"
+                (ionChange)="toggleTatweel($event.detail.checked)"></ion-toggle>
+            </ion-item>
+            <ion-item-divider class="settings-section">Navigation</ion-item-divider>
             <ion-item *ngIf="isCompleteMushaf">
               <ion-label>Go to</ion-label>
               <ng-container slot="end">
@@ -167,6 +183,7 @@
                   class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
               </ng-container>
             </ion-item>
+            <ion-item-divider class="settings-section">Appearance</ion-item-divider>
             <ion-item>
               <ion-label>Colors</ion-label>
               <ion-input placeholder="css color" (ionChange)="changeColors($event.target.value,'color')"
@@ -174,6 +191,7 @@
               <ion-input placeholder="bg" (ionChange)="changeColors($event.target.value,'bg')" [debounce]="1000"
                 class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
             </ion-item>
+            <ion-item-divider class="settings-section">Tools</ion-item-divider>
             <ion-item>
               <ion-label>Translation</ion-label>
               <ion-input #verseIdInput placeholder="2:125" (ionChange)="readTrans($event.target.value)"
@@ -203,6 +221,23 @@
               <ion-icon slot="start" name="refresh"></ion-icon>
               <ion-label>Change Font</ion-label>
             </ion-item>
+            <ion-item button (click)="addManualBookmark()">
+              <ion-icon slot="start" name="bookmark-outline"></ion-icon>
+              <ion-label>Add Bookmark</ion-label>
+            </ion-item>
+            <ion-item button (click)="addNoteEntry()">
+              <ion-icon slot="start" name="create-outline"></ion-icon>
+              <ion-label>Add Note</ion-label>
+            </ion-item>
+            <ion-item button (click)="exportAppData()">
+              <ion-icon slot="start" name="download-outline"></ion-icon>
+              <ion-label>Export Data</ion-label>
+            </ion-item>
+            <ion-item button (click)="importAppData()">
+              <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+              <ion-label>Import Data</ion-label>
+            </ion-item>
+            <ion-item-divider class="settings-section">Search</ion-item-divider>
             <ion-card>
               <ion-item color="light">
                 <ion-input #searchInput placeholder="بحث / SEARCH / تلاش" [value]="queryString"

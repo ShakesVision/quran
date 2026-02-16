@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage-angular';
 import { BehaviorSubject, Observable, of, from } from 'rxjs';
-import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, concatMap, toArray } from 'rxjs/operators';
 import {
   TextSource,
   TEXT_SOURCES,
@@ -38,6 +38,12 @@ export interface NavigationTarget {
   ruku?: number;
 }
 
+export interface QuranComProgress {
+  loaded: number;
+  total: number;
+  done: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -46,12 +52,21 @@ export class QuranDataService {
   private readonly STORAGE_KEY_QURAN = 'QuranData';
   private readonly STORAGE_KEY_CUSTOM_SOURCES = 'customSources';
 
+  private quranComPageNumbers: number[] = [];
+  private quranComPageIndexByNumber: Map<number, number> = new Map();
+  private quranComPageMeta: Map<number, { juzs: Set<number>; surahs: Set<number> }> = new Map();
+
   private currentSource$ = new BehaviorSubject<TextSource>(
     TEXT_SOURCES.find((s) => s.isDefault) || TEXT_SOURCES[0]
   );
 
   private quranData$ = new BehaviorSubject<string | null>(null);
   private isLoading$ = new BehaviorSubject<boolean>(false);
+  private quranComProgress$ = new BehaviorSubject<QuranComProgress>({
+    loaded: 0,
+    total: 0,
+    done: true,
+  });
 
   constructor(
     private http: HttpClient,
@@ -124,6 +139,8 @@ export class QuranDataService {
       return this.loadArchiveQuran(source);
     } else if (source.type === 'qurancom') {
       return this.loadQuranComQuran(source);
+    } else if (source.type === 'custom') {
+      return this.loadCustomQuran(source);
     }
 
     return of('');
@@ -166,29 +183,214 @@ export class QuranDataService {
   }
 
   /**
+   * Load Quran from a custom source (expects plain text like Archive)
+   */
+  private loadCustomQuran(source: TextSource): Observable<string> {
+    this.isLoading$.next(true);
+    const cacheKey = `${this.STORAGE_KEY_QURAN}_${source.id}`;
+
+    return from(this.storage.get(cacheKey)).pipe(
+      switchMap((cached) => {
+        if (cached && !navigator.onLine) {
+          console.log('Using cached custom source data');
+          return of(cached);
+        }
+
+        const url = source.baseUrl.endsWith('.txt')
+          ? source.baseUrl
+          : `${source.baseUrl}/Quran.txt`;
+
+        return this.http.get(url, { responseType: 'text' }).pipe(
+          tap((data) => {
+            this.storage.set(cacheKey, data);
+          }),
+          catchError((error) => {
+            console.error('Failed to fetch custom Quran:', error);
+            if (cached) return of(cached);
+            throw error;
+          })
+        );
+      }),
+      tap((data) => {
+        this.quranData$.next(data);
+        this.isLoading$.next(false);
+      })
+    );
+  }
+
+  /**
    * Load Quran from Quran.com API (JSON with word tracking)
    * This downloads all 114 chapters and combines them
    */
   private loadQuranComQuran(source: TextSource): Observable<string> {
     this.isLoading$.next(true);
+    const totalChapters = 114;
 
     // Check cache first
     return from(this.storage.get(`${this.STORAGE_KEY_QURAN}_${source.id}`)).pipe(
       switchMap((cached) => {
-        if (cached && !navigator.onLine) {
+        if (cached) {
           console.log('Using cached quran.com data');
+          this.quranComProgress$.next({
+            loaded: totalChapters,
+            total: totalChapters,
+            done: true,
+          });
           return of(cached);
         }
 
-        // For now, return placeholder - full implementation would download all chapters
-        // This is a simplified version that works with the existing text format
-        console.log('Quran.com source selected - using archive fallback for now');
-        return this.loadArchiveQuran(TEXT_SOURCES.find((s) => s.id === 'archive-15')!);
+        this.quranComProgress$.next({
+          loaded: 0,
+          total: totalChapters,
+          done: false,
+        });
+
+        return this.fetchQuranComChapters(source).pipe(
+          map((chapters) => this.buildQuranComText(chapters, source)),
+          tap((data) => {
+            this.storage.set(`${this.STORAGE_KEY_QURAN}_${source.id}`, data);
+          }),
+          catchError((error) => {
+            console.error('Failed to fetch Quran.com archive data:', error);
+            if (cached) return of(cached);
+            throw error;
+          })
+        );
       }),
-      tap(() => {
+      tap((data) => {
+        this.quranData$.next(data);
         this.isLoading$.next(false);
+        this.quranComProgress$.next({
+          loaded: totalChapters,
+          total: totalChapters,
+          done: true,
+        });
       })
     );
+  }
+
+  private fetchQuranComChapters(source: TextSource): Observable<QuranComChapterResponse[]> {
+    const chapters = Array.from({ length: 114 }, (_, i) => i + 1);
+    const total = chapters.length;
+    let loaded = 0;
+    return from(chapters).pipe(
+      concatMap((chapterId) =>
+        this.http.get<QuranComChapterResponse>(`${source.baseUrl}/${chapterId}.json`).pipe(
+          tap(() => {
+            loaded += 1;
+            this.quranComProgress$.next({
+              loaded,
+              total,
+              done: loaded >= total,
+            });
+          }),
+          catchError((error) => {
+            console.warn(`Failed to fetch chapter ${chapterId}:`, error);
+            loaded += 1;
+            this.quranComProgress$.next({
+              loaded,
+              total,
+              done: loaded >= total,
+            });
+            return of({ verses: [] } as QuranComChapterResponse);
+          })
+        )
+      ),
+      toArray()
+    );
+  }
+
+  private buildQuranComText(chapters: QuranComChapterResponse[], source: TextSource): string {
+    const pages: Map<number, Map<number, string[]>> = new Map();
+    const pageMeta: Map<number, { juzs: Set<number>; surahs: Set<number> }> = new Map();
+    let lastRukuNumber: number | null = null;
+
+    chapters.forEach((chapter) => {
+      (chapter?.verses || []).forEach((verse: any) => {
+        const juzNumber = verse.juz_number || 0;
+        const surahNumber = verse.chapter_id || 0;
+        const verseRuku = verse.ruku_number || null;
+
+        if (verseRuku && verseRuku !== lastRukuNumber) {
+          const firstWord = (verse.words || []).find(
+            (word: any) => word.page_number && word.line_number
+          );
+          if (firstWord) {
+            if (!pages.has(firstWord.page_number)) {
+              pages.set(firstWord.page_number, new Map());
+            }
+            const pageLines = pages.get(firstWord.page_number)!;
+            if (!pageLines.has(firstWord.line_number)) {
+              pageLines.set(firstWord.line_number, []);
+            }
+            pageLines
+              .get(firstWord.line_number)!
+              .push(this.surahService?.diacritics?.RUKU_MARK || "۝");
+          }
+          lastRukuNumber = verseRuku;
+        }
+
+        (verse.words || []).forEach((word: any) => {
+          const pageNumber = word.page_number;
+          const lineNumber = word.line_number;
+          if (!pageNumber || !lineNumber) return;
+
+          if (!pages.has(pageNumber)) {
+            pages.set(pageNumber, new Map());
+          }
+          const pageLines = pages.get(pageNumber)!;
+          if (!pageLines.has(lineNumber)) {
+            pageLines.set(lineNumber, []);
+          }
+
+          const wordText = this.pickQuranComWordText(word, source);
+          if (wordText) {
+            pageLines.get(lineNumber)!.push(wordText);
+          }
+
+          if (!pageMeta.has(pageNumber)) {
+            pageMeta.set(pageNumber, { juzs: new Set(), surahs: new Set() });
+          }
+          const meta = pageMeta.get(pageNumber)!;
+          if (juzNumber) meta.juzs.add(juzNumber);
+          if (surahNumber) meta.surahs.add(surahNumber);
+        });
+      });
+    });
+
+    const pageNumbers = Array.from(pages.keys()).sort((a, b) => a - b);
+    this.quranComPageNumbers = pageNumbers;
+    this.quranComPageIndexByNumber = new Map(
+      pageNumbers.map((pageNumber, index) => [pageNumber, index])
+    );
+    this.quranComPageMeta = pageMeta;
+
+    const pageTexts = pageNumbers.map((pageNumber) => {
+      const linesMap = pages.get(pageNumber)!;
+      const lineNumbers = Array.from(linesMap.keys()).sort((a, b) => a - b);
+      const lines = lineNumbers.map((lineNumber) =>
+        (linesMap.get(lineNumber) || []).join(" ")
+      );
+      return lines.join("\n");
+    });
+
+    return pageTexts.join("\n\n");
+  }
+
+  private pickQuranComWordText(word: any, source: TextSource): string {
+    if (word?.char_type_name === "end") {
+      return word.text || word.text_uthmani || word.text_indopak || "";
+    }
+
+    if (source.id.includes("uthmani")) {
+      return word.text_uthmani || word.text || word.text_indopak || "";
+    }
+
+    if (source.id.includes("indopak")) {
+      return word.text || word.text_indopak || word.text || word.text_uthmani || "";
+    }
+
+    return word.text || word.text_indopak || word.text_uthmani || "";
   }
 
   /**
@@ -198,10 +400,25 @@ export class QuranDataService {
     return this.loadFullQuran().pipe(
       map((quranText) => {
         const pages = quranText.split('\n\n');
-        const startPage = this.surahService.juzPageNumbers[juzNumber - 1];
-        const endPage = this.surahService.juzPageNumbers[juzNumber] || pages.length + 1;
+        const source = this.currentSource$.getValue();
+        let juzPages: string[] = [];
 
-        const juzPages = pages.slice(startPage - 1, endPage - 1);
+        if (source.type === 'qurancom' && this.quranComPageNumbers.length > 0) {
+          const pageNumbers = this.quranComPageNumbers.filter((pageNumber) => {
+            const meta = this.quranComPageMeta.get(pageNumber);
+            return meta?.juzs.has(juzNumber);
+          });
+          juzPages = pageNumbers
+            .map((pageNumber) => {
+              const idx = this.quranComPageIndexByNumber.get(pageNumber);
+              return idx !== undefined ? pages[idx] : '';
+            })
+            .filter((p) => p);
+        } else {
+          const startPage = this.surahService.juzPageNumbers[juzNumber - 1];
+          const endPage = this.surahService.juzPageNumbers[juzNumber] || pages.length + 1;
+          juzPages = pages.slice(startPage - 1, endPage - 1);
+        }
 
         return {
           juzNumber,
@@ -221,17 +438,48 @@ export class QuranDataService {
     return this.loadFullQuran().pipe(
       map((quranText) => {
         const pages = quranText.split('\n\n');
-        const startPage = this.surahService.surahPageNumbers[surahNumber - 1];
-        const endPage = this.surahService.surahPageNumbers[surahNumber] || pages.length + 1;
+        const source = this.currentSource$.getValue();
+        let surahPages: string[] = [];
+        let juzNumberForSurah = 0;
 
-        // Handle surahs that share a page
-        let surahPages = pages.filter((_, i) => {
-          const pageNum = i + 1;
-          return pageNum >= startPage && pageNum < endPage;
-        });
+        if (source.type === 'qurancom' && this.quranComPageNumbers.length > 0) {
+          const pageNumbers = this.quranComPageNumbers.filter((pageNumber) => {
+            const meta = this.quranComPageMeta.get(pageNumber);
+            return meta?.surahs.has(surahNumber);
+          });
+
+          if (pageNumbers.length) {
+            const minPage = Math.min(...pageNumbers);
+            const maxPage = Math.max(...pageNumbers);
+            const pageRange = this.quranComPageNumbers.filter(
+              (p) => p >= minPage && p <= maxPage
+            );
+            surahPages = pageRange
+              .map((pageNumber) => {
+                const idx = this.quranComPageIndexByNumber.get(pageNumber);
+                return idx !== undefined ? pages[idx] : '';
+              })
+              .filter((p) => p);
+
+            const meta = this.quranComPageMeta.get(minPage);
+            const juzList = meta?.juzs ? Array.from(meta.juzs) : [];
+            const firstJuz = juzList.length ? Math.min(...juzList) : 0;
+            juzNumberForSurah = firstJuz || 0;
+          }
+        } else {
+          const startPage = this.surahService.surahPageNumbers[surahNumber - 1];
+          const endPage = this.surahService.surahPageNumbers[surahNumber] || pages.length + 1;
+
+          // Handle surahs that share a page
+          surahPages = pages.filter((_, i) => {
+            const pageNum = i + 1;
+            return pageNum >= startPage && pageNum < endPage;
+          });
+          juzNumberForSurah = this.surahService.juzCalculated(startPage);
+        }
 
         return {
-          juzNumber: this.surahService.juzCalculated(startPage),
+          juzNumber: juzNumberForSurah,
           pages: surahPages.join('\n\n'),
           rukuArray: [],
           title: surahNumber.toString(),
@@ -281,6 +529,10 @@ export class QuranDataService {
    */
   getLoadingState(): Observable<boolean> {
     return this.isLoading$.asObservable();
+  }
+
+  getQuranComProgress(): Observable<QuranComProgress> {
+    return this.quranComProgress$.asObservable();
   }
 
   /**

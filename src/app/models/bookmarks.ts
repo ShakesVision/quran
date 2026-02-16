@@ -6,13 +6,25 @@ export interface AutoBookmarks {
 }
 
 export interface ManualBookmark {
+  id?: string;
   name: string;
   page: number;
+  folderId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ManualBookmarkFolder {
+  id: string;
+  name: string;
+  color?: string;
+  bookmarks: ManualBookmark[];
 }
 
 export interface Bookmarks {
   auto?: AutoBookmarks;
   manual?: ManualBookmark[];
+  manualFolders?: ManualBookmarkFolder[];
 }
 
 /**

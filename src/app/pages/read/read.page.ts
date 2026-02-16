@@ -1777,7 +1777,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (sourceKey === 'qurancom' || sourceKey === 'quran.com')
       return lines === 16 ? 'qurancom-indopak-16' : 'qurancom-indopak-15';
 
-    return sources.find((s) => s.isDefault)?.id || 'qurancom-indopak-15';
+    // Default to archive for fast loading (single file vs 114 JSON files)
+    return 'archive-15';
   }
 
   /**

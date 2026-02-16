@@ -83,6 +83,27 @@
     </div>
   </div>
 
+  <!-- Discover CTA - Prominent Reel-style card -->
+  <div class="discover-section">
+    <div class="discover-card" routerLink="/discover">
+      <div class="discover-bg"></div>
+      <div class="discover-content">
+        <div class="discover-icon-ring">
+          <ion-icon name="sparkles"></ion-icon>
+        </div>
+        <div class="discover-text">
+          <h3>Discover</h3>
+          <p>Random ayahs, beautiful designs. Swipe to explore.</p>
+        </div>
+        <ion-icon name="chevron-forward" class="discover-arrow"></ion-icon>
+      </div>
+      <div class="discover-status" *ngIf="preCacheProgress">
+        <ion-spinner name="dots" color="light"></ion-spinner>
+        <span>{{ preCacheProgress }}</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Tools Section -->
   <div class="tools-section">
     <h2 class="section-title">Tools</h2>

@@ -21,6 +21,7 @@ body.dark ion-content {
   padding: 0 12px;
   display: flex;
   justify-content: center;
+  pointer-events: none;
 
   .progress-card {
     width: min(520px, 100%);

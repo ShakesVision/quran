@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage-angular';
 import { BehaviorSubject, Observable, of, from } from 'rxjs';
-import { map, catchError, switchMap, tap, concatMap, toArray } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, mergeMap, toArray } from 'rxjs/operators';
 import {
   TextSource,
   TEXT_SOURCES,
@@ -12,6 +12,7 @@ import {
   MUSHAF_CODES,
 } from '../models/text-sources';
 import { SurahService } from './surah.service';
+import { AyahCard, CardDesign, CARD_PALETTES, CARD_PATTERNS, SURAH_NAMES_EN } from '../models/ayah-card';
 
 export interface PageData {
   pageNumber: number;
@@ -51,6 +52,8 @@ export class QuranDataService {
   private readonly STORAGE_KEY_SOURCE = 'selectedTextSource';
   private readonly STORAGE_KEY_QURAN = 'QuranData';
   private readonly STORAGE_KEY_CUSTOM_SOURCES = 'customSources';
+  private readonly STORAGE_KEY_AYAH_DATA = 'QuranAyahData';
+  private readonly STORAGE_KEY_PRECACHE_DONE = 'QuranPreCacheDone';
 
   private quranComPageNumbers: number[] = [];
   private quranComPageIndexByNumber: Map<number, number> = new Map();
@@ -274,8 +277,9 @@ export class QuranDataService {
     const total = chapters.length;
     let loaded = 0;
     return from(chapters).pipe(
-      concatMap((chapterId) =>
-        this.http.get<QuranComChapterResponse>(`${source.baseUrl}/${chapterId}.json`).pipe(
+      mergeMap(
+        (chapterId) =>
+          this.http.get<QuranComChapterResponse>(`${source.baseUrl}/${chapterId}.json`).pipe(
           tap(() => {
             loaded += 1;
             this.quranComProgress$.next({
@@ -294,7 +298,8 @@ export class QuranDataService {
             });
             return of({ verses: [] } as QuranComChapterResponse);
           })
-        )
+          ),
+        6
       ),
       toArray()
     );
@@ -596,6 +601,205 @@ export class QuranDataService {
       default:
         return 'ar2';
     }
+  }
+
+  // =============================================
+  // AYAH-LEVEL DATA (for Discover / Ayah Flow)
+  // =============================================
+
+  private ayahDataCache: any[] | null = null;
+  private preCacheInProgress = false;
+
+  /**
+   * Pre-cache quran.com data on first app open (called from home page).
+   * Downloads comprehensive JSON data in background and stores ayah-level data.
+   * Returns immediately if already cached.
+   */
+  async preCacheQuranData(): Promise<void> {
+    if (this.preCacheInProgress) return;
+
+    const alreadyCached = await this.storage.get(this.STORAGE_KEY_AYAH_DATA);
+    if (alreadyCached && alreadyCached.length > 0) {
+      this.ayahDataCache = alreadyCached;
+      return;
+    }
+
+    this.preCacheInProgress = true;
+    const sourceUrl = 'https://raw.githubusercontent.com/ShakesVision/quran-archive/master/qurancom/comprehensive-15Lines';
+
+    try {
+      const allAyahs: any[] = [];
+      const chapters = Array.from({ length: 114 }, (_, i) => i + 1);
+
+      // Download in batches of 10
+      for (let batch = 0; batch < chapters.length; batch += 10) {
+        const batchChapters = chapters.slice(batch, batch + 10);
+        const promises = batchChapters.map(async (chapterId) => {
+          try {
+            const data = await this.http
+              .get<any>(`${sourceUrl}/${chapterId}.json`)
+              .toPromise();
+            return { chapterId, data };
+          } catch (err) {
+            console.warn(`Pre-cache: Failed to download chapter ${chapterId}`);
+            return { chapterId, data: null };
+          }
+        });
+        const results = await Promise.all(promises);
+
+        for (const { chapterId, data } of results) {
+          if (!data?.verses) continue;
+          for (const verse of data.verses) {
+            allAyahs.push({
+              vk: verse.verse_key,
+              sn: verse.chapter_id || chapterId,
+              an: verse.verse_number,
+              ar: verse.text_indopak || verse.text_uthmani || '',
+              aru: verse.text_uthmani || '',
+              tr: this.extractTranslations(verse.translations || []),
+            });
+          }
+        }
+      }
+
+      if (allAyahs.length > 0) {
+        await this.storage.set(this.STORAGE_KEY_AYAH_DATA, allAyahs);
+        this.ayahDataCache = allAyahs;
+        console.log(`Pre-cached ${allAyahs.length} ayahs for Discover feature`);
+      }
+    } catch (err) {
+      console.error('Pre-cache failed:', err);
+    } finally {
+      this.preCacheInProgress = false;
+    }
+  }
+
+  /**
+   * Extract translations from comprehensive verse data
+   */
+  private extractTranslations(translations: any[]): { en: string; ur: string } {
+    let en = '';
+    let ur = '';
+
+    for (const t of translations) {
+      const text = (t.text || '')
+        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
+        .replace(/<[^>]+>/g, '')
+        .trim();
+
+      // English: resource_id 20 (Sahih), 85 (Haleem), 84 (Usmani)
+      if (!en && [20, 85, 84].includes(t.resource_id)) {
+        en = text;
+      }
+      // Urdu: resource_id 97 (Maududi), 54 (Junagarhi)
+      if (!ur && [97, 54].includes(t.resource_id)) {
+        ur = text;
+      }
+    }
+
+    return { en, ur };
+  }
+
+  /**
+   * Get a random ayah card for the Discover feature
+   */
+  async getRandomAyahCard(): Promise<AyahCard | null> {
+    if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
+      this.ayahDataCache = await this.storage.get(this.STORAGE_KEY_AYAH_DATA);
+    }
+
+    if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
+      return null;
+    }
+
+    const randomIndex = Math.floor(Math.random() * this.ayahDataCache.length);
+    const ayah = this.ayahDataCache[randomIndex];
+    return this.buildAyahCard(ayah);
+  }
+
+  /**
+   * Get multiple random ayah cards (batch) for the Discover feature
+   */
+  async getRandomAyahCards(count: number): Promise<AyahCard[]> {
+    if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
+      this.ayahDataCache = await this.storage.get(this.STORAGE_KEY_AYAH_DATA);
+    }
+
+    if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
+      return [];
+    }
+
+    const cards: AyahCard[] = [];
+    const usedIndices = new Set<number>();
+
+    for (let i = 0; i < count && usedIndices.size < this.ayahDataCache.length; i++) {
+      let idx: number;
+      do {
+        idx = Math.floor(Math.random() * this.ayahDataCache.length);
+      } while (usedIndices.has(idx));
+      usedIndices.add(idx);
+      cards.push(this.buildAyahCard(this.ayahDataCache[idx]));
+    }
+
+    return cards;
+  }
+
+  /**
+   * Check if ayah data is available (pre-cached)
+   */
+  async isAyahDataReady(): Promise<boolean> {
+    if (this.ayahDataCache && this.ayahDataCache.length > 0) return true;
+    const cached = await this.storage.get(this.STORAGE_KEY_AYAH_DATA);
+    return cached && cached.length > 0;
+  }
+
+  /**
+   * Build an AyahCard from raw cached data
+   */
+  private buildAyahCard(ayah: any): AyahCard {
+    const surahIdx = (ayah.sn || 1) - 1;
+    const arabicText = ayah.ar || '';
+    const design = this.generateCardDesign(arabicText);
+
+    return {
+      verseKey: ayah.vk || `${ayah.sn}:${ayah.an}`,
+      surahNumber: ayah.sn || 1,
+      ayahNumber: ayah.an || 1,
+      arabicText,
+      urduTranslation: ayah.tr?.ur || '',
+      englishTranslation: ayah.tr?.en || '',
+      surahNameAr: this.surahService.surahNames?.[surahIdx] || '',
+      surahNameEn: SURAH_NAMES_EN[surahIdx] || '',
+      design,
+    };
+  }
+
+  /**
+   * Generate a random beautiful card design
+   */
+  private generateCardDesign(arabicText: string): CardDesign {
+    const paletteIndex = Math.floor(Math.random() * CARD_PALETTES.length);
+    const patternIndex = Math.floor(Math.random() * CARD_PATTERNS.length);
+    const palette = CARD_PALETTES[paletteIndex];
+
+    // Determine font size based on text length
+    const textLen = arabicText.length;
+    let fontSizeClass: 'large' | 'medium' | 'small';
+    if (textLen < 80) {
+      fontSizeClass = 'large';
+    } else if (textLen < 250) {
+      fontSizeClass = 'medium';
+    } else {
+      fontSizeClass = 'small';
+    }
+
+    return {
+      gradient: palette.gradient,
+      pattern: CARD_PATTERNS[patternIndex] || undefined,
+      textColor: palette.textColor,
+      accentColor: palette.accent,
+      fontSizeClass,
+    };
   }
 }
 

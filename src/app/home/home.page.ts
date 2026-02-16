@@ -6,6 +6,7 @@ import { ActionSheetButton, ActionSheetController, AlertController, ModalControl
 import { Storage } from "@ionic/storage-angular";
 import { HomePageBanner } from "../models/common";
 import { ProgressPage } from "../pages/progress/progress.page";
+import { QuranDataService } from "../services/quran-data.service";
 
 interface MushafOption {
   id: string;
@@ -26,10 +27,10 @@ export class HomePage {
   currentMushaf: MushafOption | null = null;
   
   mushafOptions: MushafOption[] = [
-    { id: '15lines', name: '15-Line Indopak', description: 'Saudi Mushaf Style', pages: 611, source: 'archive', linesPerPage: 15 },
-    { id: '16lines', name: '16-Line Indopak', description: 'Pakistan/India Style', pages: 548, source: 'archive', linesPerPage: 16 },
-    { id: 'qurancom15', name: 'Quran.com 15-Line', description: 'Madani Mushaf', pages: 604, source: 'qurancom', linesPerPage: 15 },
-    { id: 'qurancom16', name: 'Quran.com 16-Line', description: 'Indopak Mushaf', pages: 548, source: 'qurancom', linesPerPage: 16 },
+    { id: 'archive-15', name: '15-Line Indopak', description: 'Saudi Mushaf Style', pages: 611, source: 'archive', linesPerPage: 15 },
+    { id: 'archive-16', name: '16-Line Indopak', description: 'Pakistan/India Style', pages: 548, source: 'archive', linesPerPage: 16 },
+    { id: 'qurancom-indopak-15', name: 'Quran.com 15-Line', description: 'Madani Mushaf', pages: 604, source: 'qurancom', linesPerPage: 15 },
+    { id: 'qurancom-indopak-16', name: 'Quran.com 16-Line', description: 'Indopak Mushaf', pages: 548, source: 'qurancom', linesPerPage: 16 },
   ];
   
   banner: HomePageBanner = {
@@ -53,6 +54,9 @@ export class HomePage {
       common: "",
     },
   };
+  discoverReady = false;
+  preCacheProgress = '';
+
   constructor(
     private alertController: AlertController,
     private modalController: ModalController,
@@ -60,7 +64,8 @@ export class HomePage {
     private httpClient: HttpClient,
     private domSanatizer: DomSanitizer,
     private router: Router,
-    private storage: Storage
+    private storage: Storage,
+    private quranDataService: QuranDataService
   ) {
     this.initStorage();
   }
@@ -79,11 +84,10 @@ export class HomePage {
   async selectMushaf(mushaf: MushafOption) {
     this.currentMushaf = mushaf;
     await this.storage.set('preferredMushaf', mushaf.id);
-    // Navigate to quran reader with selected mushaf
+    // Navigate to quran reader with the exact source ID
     this.router.navigate(['/quran'], { 
       queryParams: { 
-        source: mushaf.source, 
-        lines: mushaf.linesPerPage 
+        source: mushaf.id
       } 
     });
   }
@@ -121,6 +125,27 @@ export class HomePage {
         );
         this.loading = false;
       });
+
+    // Pre-cache Quran data in background for Discover and offline use
+    this.startPreCache();
+  }
+
+  private async startPreCache() {
+    const ready = await this.quranDataService.isAyahDataReady();
+    if (ready) {
+      this.discoverReady = true;
+      return;
+    }
+
+    this.preCacheProgress = 'Preparing Quran data...';
+    try {
+      await this.quranDataService.preCacheQuranData();
+      this.discoverReady = true;
+      this.preCacheProgress = '';
+    } catch (err) {
+      console.error('Pre-cache error:', err);
+      this.preCacheProgress = '';
+    }
   }
   async open(name) {
     const modal = await this.modalController.create({

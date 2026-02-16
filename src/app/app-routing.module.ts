@@ -82,6 +82,10 @@ const routes: Routes = [
   // =============================================
   
   {
+    path: 'discover',
+    loadChildren: () => import('./pages/discover/discover.module').then(m => m.DiscoverPageModule)
+  },
+  {
     path: 'memorize',
     loadChildren: () => import('./pages/memorize/memorize.module').then(m => m.MemorizePageModule)
   },

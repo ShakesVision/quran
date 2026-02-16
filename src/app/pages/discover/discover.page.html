@@ -1,0 +1,115 @@
+<!-- Full-screen immersive Discover / Ayah Flow page -->
+<div class="discover-container" #cardContainer tabindex="0" (keydown)="onKeyDown($event)">
+
+  <!-- Loading State -->
+  <div class="loading-screen" *ngIf="isLoading">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <ion-spinner name="crescent" color="light"></ion-spinner>
+      </div>
+      <p class="loading-text">Preparing your journey...</p>
+      <p class="loading-subtext">Loading ayah data for the first time</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-screen" *ngIf="!isLoading && cards.length === 0">
+    <div class="empty-content">
+      <ion-icon name="cloud-download-outline" class="empty-icon"></ion-icon>
+      <h2>Data Not Available</h2>
+      <p>Quran data needs to be downloaded first. Go back to the home page and wait for the download to complete.</p>
+      <ion-button fill="outline" color="light" (click)="goBack()">
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Go Home
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Card Stack -->
+  <ng-container *ngIf="!isLoading && cards.length > 0">
+    <div *ngFor="let card of cards; let i = index"
+         class="card-slide"
+         [class.active]="i === currentIndex"
+         [class.above]="i < currentIndex"
+         [class.below]="i > currentIndex"
+         [style.background]="card.design.gradient">
+
+      <!-- Pattern overlay -->
+      <div class="pattern-overlay"
+           *ngIf="card.design.pattern"
+           [style.backgroundImage]="card.design.pattern"></div>
+
+      <!-- Decorative geometric elements -->
+      <div class="decorative-top" [style.borderColor]="card.design.accentColor + '30'"></div>
+      <div class="decorative-bottom" [style.borderColor]="card.design.accentColor + '30'"></div>
+
+      <!-- Card Content -->
+      <div class="card-content" [class.text-light]="card.design.textColor === 'light'" [class.text-dark]="card.design.textColor === 'dark'">
+
+        <!-- Surah Badge -->
+        <div class="surah-badge" [style.background]="card.design.accentColor + '20'"
+             [style.borderColor]="card.design.accentColor + '40'">
+          <span class="surah-name-ar">{{ card.surahNameAr }}</span>
+          <span class="surah-divider">•</span>
+          <span class="surah-name-en">{{ card.surahNameEn }}</span>
+          <span class="verse-key">({{ card.verseKey }})</span>
+        </div>
+
+        <!-- Arabic Text -->
+        <div class="arabic-section" [class.font-large]="card.design.fontSizeClass === 'large'"
+             [class.font-medium]="card.design.fontSizeClass === 'medium'"
+             [class.font-small]="card.design.fontSizeClass === 'small'">
+          <div class="bismillah-ornament" [style.color]="card.design.accentColor + '60'">﴾</div>
+          <p class="arabic-text ar2">{{ card.arabicText }}</p>
+          <div class="bismillah-ornament end" [style.color]="card.design.accentColor + '60'">﴿</div>
+        </div>
+
+        <!-- Divider -->
+        <div class="translation-divider" [style.background]="card.design.accentColor + '30'"></div>
+
+        <!-- Urdu Translation -->
+        <div class="translation-section urdu-section" *ngIf="card.urduTranslation">
+          <p class="translation-text urdu-text">{{ card.urduTranslation }}</p>
+        </div>
+
+        <!-- English Translation -->
+        <div class="translation-section english-section" *ngIf="card.englishTranslation">
+          <p class="translation-text english-text">{{ card.englishTranslation }}</p>
+        </div>
+      </div>
+
+      <!-- Side Action Bar -->
+      <div class="action-bar" [class.text-light]="card.design.textColor === 'light'" [class.text-dark]="card.design.textColor === 'dark'">
+        <button class="action-btn" (click)="shareAyah()" title="Share">
+          <ion-icon name="share-social-outline"></ion-icon>
+        </button>
+        <button class="action-btn" (click)="openInReader()" title="Read in context">
+          <ion-icon name="book-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Scroll Hint (only on first card) -->
+      <div class="scroll-hint" *ngIf="i === 0 && currentIndex === 0">
+        <ion-icon name="chevron-up"></ion-icon>
+        <span>Swipe up</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Floating Navigation -->
+  <div class="floating-nav" *ngIf="!isLoading && cards.length > 0">
+    <button class="nav-btn back-btn" (click)="goBack()">
+      <ion-icon name="close"></ion-icon>
+    </button>
+    <div class="counter">
+      {{ currentIndex + 1 }}
+    </div>
+  </div>
+
+  <!-- Share Toast -->
+  <div class="share-toast" [class.visible]="showShareToast">
+    <ion-icon name="checkmark-circle"></ion-icon>
+    <span>Copied to clipboard</span>
+  </div>
+</div>
+

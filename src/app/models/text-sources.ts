@@ -128,6 +128,41 @@ export const MUSHAF_CODES = {
 };
 
 /**
+ * Translation resource IDs for Quran.com API
+ */
+export const TRANSLATION_IDS = {
+  // English
+  ENGLISH_HALEEM: 85,          // M.A.S. Abdel Haleem
+  ENGLISH_SAHIH: 20,           // Saheeh International
+  ENGLISH_USMANI: 84,          // Mufti Taqi Usmani
+  ENGLISH_PICKTHALL: 19,       // M. Pickthall
+  ENGLISH_YUSUFALI: 22,        // A. Yusuf Ali
+  ENGLISH_MAUDUDI: 95,         // A. Maududi (Tafhim commentary)
+  ENGLISH_BRIDGES: 149,        // Fadel Soliman, Bridges' translation
+  
+  // Urdu
+  URDU_MAUDUDI: 97,            // Tafheem e Qur'an - Syed Abu Ali Maududi
+  URDU_JUNAGARHI: 54,          // Maulana Muhammad Junagarhi
+  URDU_JALANDHARI: 234,        // Fatah Muhammad Jalandhari
+  URDU_MAHMUD_HASAN: 151,      // Shaykh al-Hind Mahmud al-Hasan (with Tafsir E Usmani)
+  URDU_ISRAR_AHMAD: 158,       // Bayan-ul-Quran (Dr. Israr Ahmad)
+  URDU_QUTB: 156,              // Fe Zilal al-Qur'an (Sayyid Ibrahim Qutb)
+  URDU_WAHIDUDDIN: 819,        // Maulana Wahiduddin Khan
+  URDU_MAUDUDI_ROMAN: 831,     // Abul Ala Maududi (Roman Urdu)
+};
+
+/**
+ * Default translations to include when downloading data
+ */
+export const DEFAULT_TRANSLATIONS = [
+  TRANSLATION_IDS.URDU_MAUDUDI,
+  TRANSLATION_IDS.URDU_JUNAGARHI,
+  TRANSLATION_IDS.ENGLISH_HALEEM,
+  TRANSLATION_IDS.ENGLISH_SAHIH,
+  TRANSLATION_IDS.ENGLISH_USMANI,
+];
+
+/**
  * User's text source preference
  */
 export interface UserSourcePreference {

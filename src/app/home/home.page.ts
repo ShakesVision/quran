@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Component } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
-import { ActionSheetController, AlertController, ModalController } from "@ionic/angular";
+import { ActionSheetButton, ActionSheetController, AlertController, ModalController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { HomePageBanner } from "../models/common";
 import { ProgressPage } from "../pages/progress/progress.page";
@@ -89,7 +89,7 @@ export class HomePage {
   }
 
   async openMushafSelector() {
-    const buttons = this.mushafOptions.map(mushaf => ({
+    const buttons: ActionSheetButton[] = this.mushafOptions.map((mushaf): ActionSheetButton => ({
       text: `${mushaf.name} (${mushaf.pages} pages)`,
       cssClass: this.currentMushaf?.id === mushaf.id ? 'selected-mushaf' : '',
       handler: () => {

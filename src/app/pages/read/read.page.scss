@@ -131,7 +131,8 @@ body.dark ion-content {
     display: flex;
     flex-direction: column;
     padding: 8px 12px;
-    padding-inline-start: 28px;
+    padding-inline-start: 16px; // Right side in RTL (text start)
+    padding-inline-end: 28px;   // Left side in RTL — space for ruku/waqf marks
     border: 2px solid var(--ion-color-medium);
     border-radius: 4px;
     background: var(--ion-background-color);
@@ -160,6 +161,15 @@ body.dark ion-content {
         text-overflow: clip;
         white-space: nowrap;
       }
+    }
+
+    // Hide lines until tatweel/font-sizing is applied, then reveal
+    &.text-preparing .line span {
+      opacity: 0;
+    }
+
+    &.text-ready .line span {
+      animation: revealText 0.3s ease-out forwards;
     }
     
     .line:last-child {
@@ -301,8 +311,13 @@ ion-footer {
   100% { background-color: rgba(66, 165, 245, 0.1); }
 }
 
+@keyframes revealText {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 // ===========================================
-// RUKU INDICATOR
+// RUKU INDICATOR (IndoPak style)
 // ===========================================
 .ruku-wrapper {
   user-select: none;
@@ -310,14 +325,44 @@ ion-footer {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  row-gap: 2px;
-  font-size: clamp(10px, 2.5vw, 14px);
   position: absolute;
-  left: -24px;
-  line-height: 1;
+  left: -26px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--ion-color-primary);
+  line-height: 1;
+  width: 24px;
+
+  // The ain (ع) with ayah count overlaid inside its "belly"
+  .ruku-ain-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .ruku-ain {
+      font-size: clamp(16px, 4vw, 22px);
+      font-family: "Traditional Arabic", serif;
+      line-height: 1;
+    }
+
+    .ruku-ayah-count {
+      position: absolute;
+      font-size: clamp(6px, 1.5vw, 8px);
+      font-family: sans-serif;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.85;
+    }
+  }
+
+  // Ruku sequential number below the ain
+  .ruku-number {
+    font-size: clamp(8px, 2vw, 11px);
+    margin-top: 1px;
+    opacity: 0.8;
+  }
 }
 
 // ===========================================

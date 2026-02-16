@@ -45,21 +45,22 @@
         "https://cdn.jsdelivr.net/npm/ionicons@*/**/*.svg"
       ],
       "cacheConfig": {
-        "maxSize": 200,
-        "maxAge": "30d",
+        "maxSize": 300,
+        "maxAge": "90d",
         "strategy": "performance"
       }
     },
     {
       "name": "quran-archive",
       "urls": [
-        "https://raw.githubusercontent.com/ShakesVision/Quran_archive/**"
+        "https://raw.githubusercontent.com/ShakesVision/Quran_archive/**",
+        "https://raw.githubusercontent.com/ShakesVision/quran-archive/**"
       ],
       "cacheConfig": {
-        "maxSize": 50,
+        "maxSize": 200,
         "maxAge": "30d",
-        "strategy": "freshness",
-        "timeout": "5s"
+        "strategy": "performance",
+        "timeout": "8s"
       }
     },
     {
@@ -69,8 +70,8 @@
         "https://api.qurancdn.com/api/qdc/**"
       ],
       "cacheConfig": {
-        "maxSize": 200,
-        "maxAge": "7d",
+        "maxSize": 300,
+        "maxAge": "30d",
         "strategy": "freshness",
         "timeout": "10s"
       }
@@ -82,8 +83,8 @@
         "https://audio.qurancdn.com/**"
       ],
       "cacheConfig": {
-        "maxSize": 100,
-        "maxAge": "30d",
+        "maxSize": 200,
+        "maxAge": "90d",
         "strategy": "performance"
       }
     },

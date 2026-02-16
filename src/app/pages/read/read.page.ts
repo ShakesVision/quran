@@ -686,12 +686,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
   addIndicators(line: string, i: number): string {
     if (line.includes(this.surahService.diacritics.RUKU_MARK)) {
-      // const ayahNumber = this.surahService.e2a(
-      //   this.surahService
-      //     .a2e(this.surahService.p2e(line))
-      //     ?.replace(/[^0-9]/g, "")
-      // );
-      let rukuNumber = 0;
+      let rukuIndex = -1;
       const juzrukuarr = this.rukuArray[this.juzCalculated - 1];
       juzrukuarr?.forEach((el, index) => {
         const mushafPageNumber =
@@ -702,12 +697,62 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           this.currentPageCalculated === mushafPageNumber &&
           el.lineIndex === i
         )
-          rukuNumber = index;
+          rukuIndex = index;
       });
-      return `<div>۰</div><div> ع </div><div style="font-size: 16px; margin-top: 3px;">${this.surahService.e2a(
-        (rukuNumber + 1).toString()
-      )}</div>`;
+
+      const rukuNumber = rukuIndex + 1;
+      const ayahCount = this.getAyahCountForRuku(rukuIndex);
+      const ayahCountAr = ayahCount > 0 ? this.surahService.e2a(ayahCount.toString()) : '';
+      const rukuNumberAr = this.surahService.e2a(rukuNumber.toString());
+
+      return `<div class="ruku-ain-group">` +
+        `<span class="ruku-ain">ع</span>` +
+        `<span class="ruku-ayah-count">${ayahCountAr}</span>` +
+        `</div>` +
+        `<div class="ruku-number">${rukuNumberAr}</div>`;
     } else return "";
+  }
+
+  /**
+   * Count ayah marks (۝) between this ruku and the previous one in the current juz.
+   * This gives the number of ayahs in this ruku section.
+   */
+  private getAyahCountForRuku(rukuIndex: number): number {
+    if (!this.pages || rukuIndex < 0) return 0;
+    const juzrukuarr = this.rukuArray[this.juzCalculated - 1];
+    if (!juzrukuarr || !juzrukuarr[rukuIndex]) return 0;
+
+    const AYAH_MARK = this.surahService.diacritics.AYAH_MARK;
+    const currentRuku = juzrukuarr[rukuIndex];
+    const prevRuku = rukuIndex > 0 ? juzrukuarr[rukuIndex - 1] : null;
+
+    // Determine the range of pages and lines to scan
+    const juzStartPage = this.surahService.juzPageNumbers[this.juzCalculated - 1] - 1; // 0-indexed
+
+    // Get text between previous ruku (exclusive) and current ruku (inclusive)
+    let ayahCount = 0;
+    const startPage = prevRuku ? (prevRuku.pageNumber || (juzStartPage + prevRuku.juzPageIndex + 1)) - 1 : juzStartPage;
+    const endPage = (currentRuku.pageNumber || (juzStartPage + currentRuku.juzPageIndex + 1)) - 1;
+
+    for (let p = startPage; p <= endPage && p < this.pages.length; p++) {
+      const pageLines = this.pages[p]?.split('\n') || [];
+      for (let l = 0; l < pageLines.length; l++) {
+        // Skip lines at or before the previous ruku mark
+        if (p === startPage && prevRuku) {
+          const prevLineIdx = prevRuku.lineIndex;
+          if (p === endPage && l <= prevLineIdx) continue;
+          if (p !== endPage && l <= prevLineIdx) continue;
+        }
+        // Stop after the current ruku line
+        if (p === endPage && l > currentRuku.lineIndex) break;
+
+        // Count ayah marks in this line
+        const matches = pageLines[l].match(new RegExp(AYAH_MARK, 'g'));
+        if (matches) ayahCount += matches.length;
+      }
+    }
+
+    return ayahCount;
   }
   toggleMuhammadiFont() {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
@@ -1297,7 +1342,13 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   adjustFontsize() {
-    console.log("adjusting fontsize size");
+    const wrapper = document.querySelector(".content-wrapper") as HTMLElement;
+    if (!wrapper) return;
+
+    // Mark preparing — hides text instantly (opacity: 0)
+    wrapper.classList.remove("text-ready");
+    wrapper.classList.add("text-preparing");
+
     document.querySelectorAll(".line").forEach((el: HTMLElement) => {
       while (
         el.clientWidth <
@@ -1310,7 +1361,13 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           (parseFloat(window.getComputedStyle(el).fontSize) - 1).toString() +
           "px";
     });
-    requestAnimationFrame(() => this.applyTatweelToLines());
+
+    requestAnimationFrame(() => {
+      this.applyTatweelToLines();
+      // Reveal with animation after tatweel is done
+      wrapper.classList.remove("text-preparing");
+      wrapper.classList.add("text-ready");
+    });
   }
 
   private getFontProp(el: HTMLElement): string {

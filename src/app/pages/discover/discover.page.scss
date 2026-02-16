@@ -315,6 +315,11 @@
     direction: rtl;
     text-align: center;
     word-spacing: 4px;
+
+    // quran.com indopak text uses this font
+    &.ar-qurancom {
+      font-family: "IndoPak Waqf Lazim", "Indopak", "Traditional Arabic", serif;
+    }
   }
 
   // Font size variants based on text length

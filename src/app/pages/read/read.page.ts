@@ -61,7 +61,7 @@ export class ReadPage implements OnInit, AfterViewInit {
   audioSpeed = "1";
   playingVerseNum: string;
   reciters = [];
-  qariId: number;
+  qariId: number = 7;
   selectedQari;
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
@@ -235,7 +235,6 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.fetchQariList();
-    this.qariId = 7;
     var el: HTMLElement = document.querySelector(".content-wrapper");
     this.pageFontSize = window
       .getComputedStyle(el, null)
@@ -1164,7 +1163,7 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.surahService.fetchQariList().subscribe((res: any) => {
       console.log(res);
       this.reciters = res.reciters?.sort((a, b) => a.id - b.id);
-      this.qariId = 7;
+      this.qariId = this.qariId ?? 7;
       this.selectedQari = this.reciters.find((r) => r.id == this.qariId);
       console.log(this.selectedQari);
     });

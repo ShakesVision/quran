@@ -73,18 +73,28 @@
     </pinch-zoom>
   </div>
   <div class="page-wrapper ar ar2 ion-margin-top unicode-view" [hidden]="scanView">
-    <div class="page-top-info">
+    <div class="page-top-info" *ngIf="isDataLoaded">
       <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
         <span class="juz-number"> {{ getJuzNumber() }} </span>
         <span class="page-number">
-          {{ isCompleteMushaf? surahService.e2a(currentPage.toString()):
-          surahService.e2a(currentPageCalculated.toString()) }}
+          {{
+            isCompleteMushaf
+              ? surahService.e2a((currentPage ?? 0).toString())
+              : (currentPageCalculated ? surahService.e2a(currentPageCalculated.toString()) : '')
+          }}
         </span>
         <span class="surah-number">
-          {{ isCompleteMushaf? surahService.surahNames[surahCalculated-1] + ' '
-          + surahService.e2a(surahCalculated.toString()) :
-          surahService.surahNames[surahCalculatedForJuz-1] + ' ' +
-          surahService.e2a(surahCalculatedForJuz.toString())}}
+          {{
+            isCompleteMushaf
+              ? (surahCalculated
+                  ? (surahService.surahNames[surahCalculated - 1] + ' ' +
+                    surahService.e2a(surahCalculated.toString()))
+                  : '')
+              : (surahCalculatedForJuz
+                  ? (surahService.surahNames[surahCalculatedForJuz - 1] + ' ' +
+                    surahService.e2a(surahCalculatedForJuz.toString()))
+                  : '')
+          }}
         </span>
       </ng-container>
     </div>

@@ -15,6 +15,7 @@ export class ListenPage implements OnInit {
   media: HTMLAudioElement;
   spin: boolean = false;
   qariId: number = 3;
+  selectedQariName: string = '';
   surahInfo = [];
   surahInfoCopy = [];
   reciters = [];
@@ -91,5 +92,7 @@ export class ListenPage implements OnInit {
   qariChanged(e) {
     console.log(e);
     this.qariId = parseInt(e);
+    const qari = this.reciters.find(r => r.id === this.qariId);
+    this.selectedQariName = qari?.name?.split(' ')[0] || 'Qaari';
   }
 }

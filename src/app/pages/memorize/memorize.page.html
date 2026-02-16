@@ -1,7 +1,7 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-back-button slot="start" defaultHref="/"></ion-back-button>
-    <ion-title>Memorize</ion-title>
+    <ion-title>Memorization</ion-title>
     <ion-buttons slot="end">
       <ion-button id="popover-trigger-button" slot="end">
         <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
@@ -10,148 +10,146 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-card class="ion-no-padding ion-no-margin ion-margin-bottom">
-    <ion-card-header>
-      <ion-card-title> Recommended for memorization </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      The prophet ﷺ has mentioned fazaail for a lot of surahs and ayahs. The
-      following should be memorized on priority.
-      <br />
-      <span class="ar-text" *ngFor="let chapter of recommendedChapters">
-        {{chapter}} .
-      </span>
-      <ion-button (click)="open('recommended')" size="small" fill="outline"
-        >See supporting ahadith</ion-button
-      >
-    </ion-card-content>
-  </ion-card>
-  <!-- <h2>Completion Stats</h2>
-  <table>
-    <tr>
-      <td>36. Yaseen یس</td>
-      <td>(12%)</td>
-      <td>5/30 Ayahs</td>
-    </tr>
-  </table> -->
-  <ion-item lines="none" class="ion-no-padding ion-no-margin">
-    <ion-label slot="start">Memorization Stats</ion-label>
-    <ion-button [routerLink]="['/juz']" fill="clear" slot="end">
-      <ion-icon slot="end" name="book-outline"></ion-icon>
-      Open Quran
+<ion-content>
+  <!-- Recommended Card -->
+  <div class="recommended-card">
+    <div class="recommended-header">
+      <ion-icon name="star"></ion-icon>
+      <span>Recommended for Memorization</span>
+    </div>
+    <p class="recommended-text">
+      The Prophet ﷺ has mentioned fazaail for many surahs and ayahs.
+    </p>
+    <div class="recommended-surahs">
+      <span class="ar-tag" *ngFor="let chapter of recommendedChapters">{{chapter}}</span>
+    </div>
+    <ion-button (click)="open('recommended')" size="small" fill="clear" class="see-more-btn">
+      See supporting ahadith
+      <ion-icon name="arrow-forward" slot="end"></ion-icon>
     </ion-button>
-  </ion-item>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th style="min-width: 70px">Juz</th>
-          <th>Memorized</th>
-          <th>Total</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          class="row"
-          *ngFor="let item of items"
-          (click)="add(item)"
-          [ngStyle]="{'background': 'linear-gradient(to right, rgb(222 243 255 / 75%) '+(item.completed/item.total)*100+'%, transparent 0)'}"
-        >
-          <td>
-            <span style="font-size: large" class="juz-col-num"
-              >{{item.juz }}</span
-            >
-            <br />
-            <span class="ar-text2 juz-name"
-              >{{getJuzInfo(item.juz,'name')}}</span
-            >
-          </td>
-          <!-- <td class="ar-text">{{item.surah}}</td> -->
-          <td>
-            {{item.completed}} <br />
-            <small>({{((item.completed/item.total)*100).toFixed(1)}}%)</small>
-          </td>
-          <td>{{item.total}}</td>
-          <td style="font-size: xx-small">
-            <ion-icon slot="start" name="time-outline"></ion-icon>
-            {{item.started.toLocaleString()}}
-            <br />
-            <ion-icon slot="start" name="sync"></ion-icon>
-            {{item.updated.toLocaleString()}}
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
+
+  <!-- Segment Toggle -->
+  <ion-segment [(ngModel)]="trackingMode" (ionChange)="onModeChange($event)" class="mode-segment">
+    <ion-segment-button value="juz">
+      <ion-label>By Juz</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="surah">
+      <ion-label>By Surah</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Stats Summary -->
+  <div class="stats-summary">
+    <div class="stat-item">
+      <span class="stat-value">{{getTotalProgress()}}%</span>
+      <span class="stat-label">Total Progress</span>
+    </div>
+    <div class="stat-item" *ngIf="trackingMode === 'juz'">
+      <span class="stat-value">{{items.length}}/30</span>
+      <span class="stat-label">Juz Started</span>
+    </div>
+    <div class="stat-item" *ngIf="trackingMode === 'surah'">
+      <span class="stat-value">{{surahItems.length}}/114</span>
+      <span class="stat-label">Surahs Started</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{getTotalMemorized()}}</span>
+      <span class="stat-label">{{trackingMode === 'juz' ? 'Pages' : 'Ayahs'}}</span>
+    </div>
+  </div>
+
+  <!-- Juz Tracking -->
+  <div class="tracking-section" *ngIf="trackingMode === 'juz'">
+    <div class="section-header">
+      <h2>Juz Progress</h2>
+      <ion-button routerLink="/quran" fill="clear" size="small">
+        <ion-icon name="book-outline" slot="start"></ion-icon>
+        Open Quran
+      </ion-button>
+    </div>
+
+    <div class="progress-list">
+      <div class="progress-item" *ngFor="let item of items" (click)="add(item)"
+        [class.completed]="item.completed === item.total">
+        <div class="item-progress-bar" 
+          [style.width.%]="(item.completed/item.total)*100">
+        </div>
+        <div class="item-content">
+          <div class="item-left">
+            <span class="item-number">{{item.juz}}</span>
+            <div class="item-details">
+              <span class="item-name ar-text">{{getJuzInfo(item.juz,'name')}}</span>
+              <span class="item-meta">{{item.completed}}/{{item.total}} pages</span>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-percent">{{((item.completed/item.total)*100).toFixed(0)}}%</span>
+            <ion-icon name="checkmark-circle" *ngIf="item.completed === item.total" color="success"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length === 0">
+        <ion-icon name="book-outline"></ion-icon>
+        <p>No juz tracking started yet</p>
+        <ion-button (click)="add()" fill="outline" size="small">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Add first juz
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Surah Tracking -->
+  <div class="tracking-section" *ngIf="trackingMode === 'surah'">
+    <div class="section-header">
+      <h2>Surah Progress</h2>
+      <ion-button routerLink="/browse" fill="clear" size="small">
+        <ion-icon name="grid-outline" slot="start"></ion-icon>
+        Browse Surahs
+      </ion-button>
+    </div>
+
+    <div class="progress-list">
+      <div class="progress-item" *ngFor="let item of surahItems" (click)="addSurah(item)"
+        [class.completed]="item.completed === item.total">
+        <div class="item-progress-bar" 
+          [style.width.%]="(item.completed/item.total)*100">
+        </div>
+        <div class="item-content">
+          <div class="item-left">
+            <span class="item-number">{{item.surahNumber}}</span>
+            <div class="item-details">
+              <span class="item-name ar-text">{{item.surahName}}</span>
+              <span class="item-meta">{{item.completed}}/{{item.total}} ayahs</span>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-percent">{{((item.completed/item.total)*100).toFixed(0)}}%</span>
+            <ion-icon name="checkmark-circle" *ngIf="item.completed === item.total" color="success"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="surahItems.length === 0">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <p>No surah tracking started yet</p>
+        <ion-button (click)="addSurah()" fill="outline" size="small">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Add first surah
+        </ion-button>
+      </div>
+    </div>
+  </div>
+  <!-- FAB Button -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="add()">
-      <ion-icon name="add"></ion-icon> </ion-fab-button
-  ></ion-fab>
+    <ion-fab-button (click)="trackingMode === 'juz' ? add() : addSurah()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
-  <!-- Use a trigger -->
-  <!-- <ion-button id="trigger-button">Click to open modal</ion-button> -->
-  <ion-modal
-    trigger="trigger-button"
-    (didDismiss)="getValueFromModal($event)"
-    [isOpen]="isModalOpen"
-  >
-    <ng-template>
-      <ion-toolbar>
-        <ion-title>Add Surah for Hifz</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="closeModal()">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-      <ion-content class="ion-padding">
-        <form [formGroup]="memorizeEntryForm">
-          <ion-item>
-            <ion-label>Date</ion-label>
-            <!-- <ion-input type="date" formControlName="date"></ion-input> -->
-            <ion-datetime
-              type="date"
-              formControlName="date"
-              (ionChange)="dateChanged($event)"
-            ></ion-datetime>
-          </ion-item>
-          <ion-item>
-            <ion-label position="floating">Surah Number</ion-label>
-            <ion-input type="number" formControlName="number"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="floating">Surah</ion-label>
-            <ion-input type="text" formControlName="surah"></ion-input>
-          </ion-item>
-
-          <ion-item>
-            <ion-label position="floating">From Ayah</ion-label>
-            <ion-input type="number" formControlName="from"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="floating">To Ayah</ion-label>
-            <ion-input type="number" formControlName="to"></ion-input>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label>Finished</ion-label>
-            <ion-toggle
-              (ionChange)="toggle($event)"
-              formControlName="finished"
-            ></ion-toggle>
-          </ion-item>
-        </form>
-        <ion-button
-          type="submit"
-          (click)="onSubmit()"
-          [disabled]="!memorizeEntryForm.valid"
-          expand="block"
-          >Add</ion-button
-        >
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+  <!-- Popover Menu -->
   <ion-popover
     [isOpen]="isPopoverOpen"
     trigger="popover-trigger-button"
@@ -165,7 +163,7 @@
         </ion-item>
         <ion-item button (click)="export()">
           <ion-icon slot="start" name="copy-outline"></ion-icon>
-          <ion-label>Copy data (Export)</ion-label>
+          <ion-label>Export data</ion-label>
         </ion-item>
         <ion-item button [routerLink]="['/']">
           <ion-icon slot="start" name="home-outline"></ion-icon>

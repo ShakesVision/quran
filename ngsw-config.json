@@ -17,13 +17,86 @@
     },
     {
       "name": "assets",
-      "installMode": "lazy",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
           "/assets/**",
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ]
+      }
+    },
+    {
+      "name": "fonts",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/fonts/**"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "ionicons",
+      "urls": [
+        "https://unpkg.com/ionicons@*/**/*.svg",
+        "https://cdn.jsdelivr.net/npm/ionicons@*/**/*.svg"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "30d",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "quran-archive",
+      "urls": [
+        "https://raw.githubusercontent.com/ShakesVision/Quran_archive/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "30d",
+        "strategy": "freshness",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "quran-api",
+      "urls": [
+        "https://api.quran.com/api/v4/**",
+        "https://api.qurancdn.com/api/qdc/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "7d",
+        "strategy": "freshness",
+        "timeout": "10s"
+      }
+    },
+    {
+      "name": "audio-cdn",
+      "urls": [
+        "https://verses.quran.com/**",
+        "https://audio.qurancdn.com/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "30d",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "archive-org",
+      "urls": [
+        "https://archive.org/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "7d",
+        "strategy": "freshness",
+        "timeout": "10s"
       }
     }
   ]

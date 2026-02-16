@@ -17,18 +17,38 @@ import { Observable, Subject } from "rxjs";
 import { SurahService } from "src/app/services/surah.service";
 import { ProgressPage } from "../progress/progress.page";
 
+interface JuzItem {
+  juz: number;
+  completed: number;
+  total: number;
+  started: Date;
+  updated: Date;
+}
+
+interface SurahItem {
+  surahNumber: number;
+  surahName: string;
+  completed: number;
+  total: number;
+  started: Date;
+  updated: Date;
+}
+
 @Component({
   selector: "app-memorize",
   templateUrl: "./memorize.page.html",
   styleUrls: ["./memorize.page.scss"],
 })
+
 export class MemorizePage implements OnInit {
   @ViewChild(IonModal) modal: IonModal;
-  items: Array<Object> = [];
-  recommendedChapters = ["الفاتحہ", "یس", "رحمن", "واقعہ", "ملک", "کہف "];
+  items: JuzItem[] = [];
+  surahItems: SurahItem[] = [];
+  trackingMode: 'juz' | 'surah' = 'juz';
+  recommendedChapters = ["الفاتحہ", "یس", "رحمن", "واقعہ", "ملک", "کہف"];
   isOpen: boolean = true;
   memorizeEntryForm: FormGroup;
-  surahInfo = [];
+  surahInfo: any[] = [];
   isPopoverOpen: boolean = false;
   isModalOpen: boolean = false;
 
@@ -44,23 +64,46 @@ export class MemorizePage implements OnInit {
 
   ngOnInit() {
     this.setupStorage();
+    // Load juz memorization data
     this.storage.get("memorize").then((items) => {
       if (items) this.items = items.sort((a: any, b: any) => a.juz - b.juz);
     });
-    // this.surahService
-    //   .getSurahInfo()
-    //   .subscribe((res: any) => (this.surahInfo = res));
-    // this.memorizeEntryForm = this.formBuilder.group({
-    //   date: new FormControl(new Date().toISOString()),
-    //   number: new FormControl(""),
-    //   surah: new FormControl("", Validators.required),
-    //   from: new FormControl("", Validators.required),
-    //   to: new FormControl("", Validators.required),
-    //   finished: new FormControl(false),
-    // });
+    // Load surah memorization data
+    this.storage.get("memorize_surah").then((items) => {
+      if (items) this.surahItems = items.sort((a: any, b: any) => a.surahNumber - b.surahNumber);
+    });
+    // Load surah info for names and ayah counts
+    this.surahService.getSurahInfo().subscribe((res: any) => {
+      this.surahInfo = res;
+    });
   }
+
   async setupStorage() {
     await this.storage.create();
+  }
+
+  onModeChange(event: any) {
+    this.trackingMode = event.detail.value;
+  }
+
+  getTotalProgress(): number {
+    if (this.trackingMode === 'juz') {
+      const totalPages = 611;
+      const memorizedPages = this.items.reduce((sum, item) => sum + item.completed, 0);
+      return Math.round((memorizedPages / totalPages) * 100);
+    } else {
+      const totalAyahs = 6236; // Total ayahs in Quran
+      const memorizedAyahs = this.surahItems.reduce((sum, item) => sum + item.completed, 0);
+      return Math.round((memorizedAyahs / totalAyahs) * 100);
+    }
+  }
+
+  getTotalMemorized(): number {
+    if (this.trackingMode === 'juz') {
+      return this.items.reduce((sum, item) => sum + item.completed, 0);
+    } else {
+      return this.surahItems.reduce((sum, item) => sum + item.completed, 0);
+    }
   }
 
   async add(item?) {
@@ -171,6 +214,110 @@ export class MemorizePage implements OnInit {
   saveItems() {
     this.storage.set("memorize", this.items);
   }
+
+  saveSurahItems() {
+    this.storage.set("memorize_surah", this.surahItems);
+  }
+
+  async addSurah(item?: SurahItem) {
+    // Get surah list for picker
+    const surahOptions = this.surahInfo.map((s: any, i: number) => ({
+      text: `${i + 1}. ${s.name}`,
+      value: i + 1
+    }));
+
+    const alert = await this.alertController.create({
+      header: item ? "Update Surah" : "Add Surah",
+      cssClass: "custom-alert",
+      inputs: [
+        {
+          name: "surahNumber",
+          type: "number",
+          placeholder: "Surah number (1-114)",
+          value: item ? item.surahNumber : null,
+          min: 1,
+          max: 114
+        },
+        {
+          name: "completed",
+          type: "number",
+          placeholder: "Ayahs memorized...",
+          value: item ? item.completed : null,
+          min: 0
+        }
+      ],
+      buttons: [
+        {
+          text: "Cancel",
+          role: "cancel"
+        },
+        ...(item ? [{
+          text: "Delete",
+          handler: () => {
+            this.surahItems = this.surahItems.filter(
+              (i) => i.surahNumber !== item.surahNumber
+            );
+            this.saveSurahItems();
+          },
+          cssClass: "delete-btn"
+        }] : []),
+        {
+          text: item ? "Update" : "Add",
+          cssClass: "add-btn",
+          handler: (data) => {
+            const surahNum = parseInt(data.surahNumber);
+            const completed = parseInt(data.completed);
+
+            if (surahNum < 1 || surahNum > 114) {
+              this.toast("Invalid surah number (1-114)", "danger");
+              return false;
+            }
+
+            if (!data.surahNumber || completed === undefined || completed < 0) {
+              this.toast("Both fields are required!", "danger");
+              return false;
+            }
+
+            // Get total ayahs for this surah
+            const surahData = this.surahInfo[surahNum - 1];
+            const totalAyahs = surahData?.totalAyah || this.surahService.surahAyahCounts?.[surahNum - 1] || 0;
+            const surahName = surahData?.name || `Surah ${surahNum}`;
+
+            if (completed > totalAyahs) {
+              this.toast(`Surah ${surahNum} only has ${totalAyahs} ayahs.`, "danger");
+              return false;
+            }
+
+            if (!item && this.surahItems.some((i) => i.surahNumber === surahNum)) {
+              this.toast(`Surah ${surahNum} already exists. Edit the existing one.`, "danger");
+              return false;
+            }
+
+            const newItem: SurahItem = {
+              surahNumber: surahNum,
+              surahName: surahName,
+              completed: completed,
+              total: totalAyahs,
+              started: item?.started || new Date(),
+              updated: new Date()
+            };
+
+            if (item) {
+              const index = this.surahItems.findIndex((i) => i.surahNumber === item.surahNumber);
+              this.surahItems[index] = newItem;
+            } else {
+              this.surahItems.push(newItem);
+            }
+
+            this.surahItems.sort((a, b) => a.surahNumber - b.surahNumber);
+            this.saveSurahItems();
+            return true;
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
   getFormattedDate = (date) => new Date(date).toLocaleDateString();
   openModelWithItem(item) {
     this.modal.present().then();
@@ -222,13 +369,19 @@ export class MemorizePage implements OnInit {
     }
   }
   export() {
-    window.navigator.clipboard.writeText(JSON.stringify(this.items));
-    this.toast("Copied!", "success");
+    const exportData = {
+      juz: this.items,
+      surah: this.surahItems
+    };
+    window.navigator.clipboard.writeText(JSON.stringify(exportData));
+    this.toast("Copied all memorization data!", "success");
     this.popoverDismiss();
   }
+
   async import() {
     const importAlert = await this.alertController.create({
       header: "Import",
+      message: "Paste the exported JSON data. This will replace existing data.",
       inputs: [
         {
           type: "textarea",
@@ -238,17 +391,36 @@ export class MemorizePage implements OnInit {
       ],
       buttons: [
         {
+          text: "Cancel",
+          role: "cancel",
+        },
+        {
           text: "Import",
           cssClass: "import-btn-alert",
           handler: (data) => {
-            console.log(data);
-            this.items = JSON.parse(data.textarea);
-            this.saveItems();
+            try {
+              const parsed = JSON.parse(data.textarea);
+              // Support both old format (array) and new format (object with juz/surah)
+              if (Array.isArray(parsed)) {
+                // Old format - just juz data
+                this.items = parsed;
+                this.saveItems();
+              } else {
+                // New format
+                if (parsed.juz) {
+                  this.items = parsed.juz;
+                  this.saveItems();
+                }
+                if (parsed.surah) {
+                  this.surahItems = parsed.surah;
+                  this.saveSurahItems();
+                }
+              }
+              this.toast("Data imported successfully!", "success");
+            } catch (e) {
+              this.toast("Invalid JSON data", "danger");
+            }
           },
-        },
-        {
-          text: "Cancel",
-          role: "cancel",
         },
       ],
     });

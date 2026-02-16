@@ -40,11 +40,12 @@ export class ReadPage implements OnInit, AfterViewInit {
   swipeContainer!: ElementRef;
   @ViewChild(VirtualScrollerComponent, { static: false })
   surah;
-  lines: string[];
-  pages: string[];
-  tPages: string[];
-  arabicLines: string[];
-  translationLines: string[];
+  lines: string[] = [];
+  pages: string[] = [];
+  tPages: string[] = [];
+  arabicLines: string[] = [];
+  translationLines: string[] = [];
+  isDataLoaded: boolean = false;
   currentPage: number = 1;
   translation: string;
   tMode: boolean = false;
@@ -121,6 +122,11 @@ export class ReadPage implements OnInit, AfterViewInit {
     message: "",
   };
 
+  /**
+   * Immersive mode - hides header and footer for full-screen reading
+   */
+  isImmersive: boolean = false;
+
   constructor(
     public surahService: SurahService,
     public toastController: ToastController,
@@ -136,42 +142,65 @@ export class ReadPage implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    const juzData = this.router.getCurrentNavigation().extras.state?.juzData;
-    const id = this.activatedRoute.snapshot.params.id;
-    if (juzData) {
+    // Check for route params first (new URL-based navigation)
+    const routeParams = this.activatedRoute.snapshot.params;
+    const routeData = this.activatedRoute.snapshot.data;
+    const juzData = this.router.getCurrentNavigation()?.extras?.state?.juzData;
+    
+    // Handle URL-based navigation (refresh-safe)
+    if (routeParams.id || routeData.mode === 'full') {
+      this.initFromRouteParams(routeParams, routeData);
+      // initFromRouteParams handles async data loading, so return early
+      // The rest of initialization will be done after data loads
+      return;
+    }
+    // Handle legacy state-based navigation
+    else if (juzData) {
       this.juzmode = true;
       this.juzsurahmode = juzData.mode === "surah";
       this.surah = juzData.data;
       this.title = juzData.title;
-      this.pages = this.surah.split("\n\n");
-      this.lines = this.pages[this.currentPage - 1].split("\n");
+      this.pages = this.surah?.split("\n\n") || [];
+      this.lines = this.pages[this.currentPage - 1]?.split("\n") || [];
       console.log(this.lines);
-      this.rukuArray = [...juzData.rukuArray];
-    } else if (!juzData) {
+      this.rukuArray = [...(juzData.rukuArray || [])];
+      this.isDataLoaded = true;
+    } else if (!juzData && !routeParams.id) {
       console.log("not jz mode", this.surah);
       this.juzmode = false;
       this.surah = this.surahService.currentSurah;
+      if (!this.surah) {
+        // No data available, redirect to browse
+        this.router.navigate(['/browse']);
+        return;
+      }
       this.title = this.surah.name;
-      this.pages = this.surah.arabic.split("\n\n");
-      this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+      this.pages = this.surah.arabic?.split("\n\n") || [];
+      this.arabicLines = this.pages[this.currentPage - 1]?.split("\n") || [];
       this.lines = this.arabicLines;
       if (this.surah.urdu && this.surah.urdu != "") {
         this.translationExists = true;
         this.tPages = this.surah.urdu.split("\n\n");
-        this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+        this.translationLines = this.tPages[this.currentPage - 1]?.split("\n") || [];
       }
+      this.isDataLoaded = true;
     }
-    this.isCompleteMushaf = this.pages.length === 611;
-    this.MUSHAF_MODE = {
-      COMPLETE_MUSHAF: this.juzmode && this.isCompleteMushaf,
-      JUZ_VERSION: this.juzmode && !this.isCompleteMushaf && !this.juzsurahmode,
-      SURAH_VERSION:
-        this.juzmode && !this.isCompleteMushaf && this.juzsurahmode,
-    };
+    
+    // Only run these if we have data loaded (not async route loading)
+    if (this.pages.length > 0) {
+      this.isCompleteMushaf = this.pages.length === 611;
+      this.MUSHAF_MODE = {
+        COMPLETE_MUSHAF: this.juzmode && this.isCompleteMushaf,
+        JUZ_VERSION: this.juzmode && !this.isCompleteMushaf && !this.juzsurahmode,
+        SURAH_VERSION:
+          this.juzmode && !this.isCompleteMushaf && this.juzsurahmode,
+      };
 
-    // get bookmark
-    this.getBookmark();
-    this.updateCalculatedNumbers();
+      // get bookmark
+      this.getBookmark();
+      this.updateCalculatedNumbers();
+    }
+    
     // get surah info file
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = res;
@@ -1146,28 +1175,46 @@ export class ReadPage implements OnInit, AfterViewInit {
     this.qariId = parseInt(r);
   }
   getJuzNumber() {
+    if (!this.isDataLoaded) return '';
+    
     let result = "";
-    // Complete Mushaf mode
-    if (this.isCompleteMushaf) {
-      if (this.surahCalculated === 1) result = "سورۃ";
-      else
-        result =
-          this.surahService.juzNames[this.juzCalculated - 1] +
-          " " +
-          this.surahService.e2a(this.juzCalculated.toString());
-    } else if (this.surahCalculatedForJuz === 1) result = "سورۃ";
-    // Surah mode
-    else if (this.juzsurahmode)
-      result =
-        this.surahService.juzNames[this.juzCalculated - 1] +
-        " " +
-        this.surahService.e2a(this.juzCalculated.toString());
-    // Juz mode
-    else
-      result =
-        this.surahService.juzNames[+this.title - 1] +
-        " " +
-        this.surahService.e2a(this.title.toString());
+    try {
+      // Complete Mushaf mode
+      if (this.isCompleteMushaf) {
+        if (this.surahCalculated === 1) result = "سورۃ";
+        else if (this.juzCalculated && this.juzCalculated > 0) {
+          const juzIndex = this.juzCalculated - 1;
+          if (juzIndex >= 0 && juzIndex < this.surahService.juzNames?.length) {
+            result =
+              this.surahService.juzNames[juzIndex] +
+              " " +
+              this.surahService.e2a(this.juzCalculated.toString());
+          }
+        }
+      } else if (this.surahCalculatedForJuz === 1) result = "سورۃ";
+      // Surah mode
+      else if (this.juzsurahmode && this.juzCalculated && this.juzCalculated > 0) {
+        const juzIndex = this.juzCalculated - 1;
+        if (juzIndex >= 0 && juzIndex < this.surahService.juzNames?.length) {
+          result =
+            this.surahService.juzNames[juzIndex] +
+            " " +
+            this.surahService.e2a(this.juzCalculated.toString());
+        }
+      }
+      // Juz mode
+      else if (this.title) {
+        const titleNum = +this.title;
+        if (titleNum > 0 && titleNum <= this.surahService.juzNames?.length) {
+          result =
+            this.surahService.juzNames[titleNum - 1] +
+            " " +
+            this.surahService.e2a(this.title.toString());
+        }
+      }
+    } catch (e) {
+      console.warn('Error getting juz number:', e);
+    }
     return result;
   }
   setupLinks() {
@@ -1296,5 +1343,198 @@ export class ReadPage implements OnInit, AfterViewInit {
 
   onSwipeRight() {
     this.goToPage(1);
+  }
+
+  /**
+   * Toggle immersive mode for full-screen reading
+   */
+  toggleImmersiveMode() {
+    this.isImmersive = !this.isImmersive;
+    if (this.isImmersive) {
+      document.body.classList.add('immersive-mode');
+    } else {
+      document.body.classList.remove('immersive-mode');
+    }
+  }
+
+  /**
+   * Initialize page from route params (URL-based navigation)
+   * This enables refresh-safe navigation
+   */
+  private initFromRouteParams(params: any, data: any) {
+    const mode = data.mode || 'full';
+    const id = params.id ? parseInt(params.id) : null;
+    const page = params.page ? parseInt(params.page) : null;
+    const ruku = params.ruku ? parseInt(params.ruku) : null;
+    const ayah = params.ayah ? parseInt(params.ayah) : null;
+
+    console.log('Initializing from route params:', { mode, id, page, ruku, ayah });
+
+    // Set mode flags
+    this.juzmode = true;
+    this.juzsurahmode = mode === 'surah';
+
+    // Load data from storage/network
+    this.loadQuranDataFromRoute(mode, id, page, ruku, ayah);
+  }
+
+  /**
+   * Load Quran data based on route parameters
+   */
+  private loadQuranDataFromRoute(
+    mode: string,
+    id: number | null,
+    page: number | null,
+    ruku: number | null,
+    ayah: number | null
+  ) {
+    // Load full Quran first
+    this.httpClient
+      .get(
+        `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/Quran.txt`,
+        { responseType: 'text' }
+      )
+      .subscribe(
+        (res) => {
+          const allPages = res.split('\n\n');
+          
+          if (mode === 'full') {
+            // Full Quran mode
+            this.surah = res;
+            this.pages = allPages;
+            this.title = 'Quran';
+            this.isCompleteMushaf = true;
+            
+            // Jump to specific page if provided
+            if (page) {
+              this.currentPage = Math.min(Math.max(1, page), this.pages.length);
+            }
+          } else if (mode === 'juz' && id) {
+            // Juz mode
+            const startPage = this.surahService.juzPageNumbers[id - 1];
+            const endPage = this.surahService.juzPageNumbers[id] || allPages.length + 1;
+            const juzPages = allPages.slice(startPage - 1, endPage - 1);
+            
+            this.surah = juzPages.join('\n\n');
+            this.pages = juzPages;
+            this.title = id.toString();
+            this.juzNumber = id;
+            this.isCompleteMushaf = false;
+            
+            // Calculate ruku array for this juz
+            this.calculateRukuArrayForJuz(id, juzPages);
+            
+            // Jump to ruku if provided
+            if (ruku && this.rukuArray[id - 1] && this.rukuArray[id - 1][ruku - 1]) {
+              const rukuInfo = this.rukuArray[id - 1][ruku - 1];
+              this.currentPage = rukuInfo.juzPageIndex + 1;
+            }
+          } else if (mode === 'surah' && id) {
+            // Surah mode
+            const startPage = this.surahService.surahPageNumbers[id - 1];
+            const endPage = this.surahService.surahPageNumbers[id] || allPages.length + 1;
+            
+            // Handle surahs that share pages
+            let surahPages: string[] = [];
+            for (let i = startPage - 1; i < endPage - 1 && i < allPages.length; i++) {
+              surahPages.push(allPages[i]);
+            }
+            
+            this.surah = surahPages.join('\n\n');
+            this.pages = surahPages;
+            this.title = id.toString();
+            this.isCompleteMushaf = false;
+            
+            // TODO: Jump to ayah if provided (needs word-level tracking)
+          }
+          
+          // Initialize lines for current page
+          if (this.pages && this.pages.length > 0) {
+            this.lines = this.pages[this.currentPage - 1]?.split('\n') || [];
+          }
+          
+          // Set MUSHAF_MODE
+          this.MUSHAF_MODE = {
+            COMPLETE_MUSHAF: this.juzmode && this.isCompleteMushaf,
+            JUZ_VERSION: this.juzmode && !this.isCompleteMushaf && !this.juzsurahmode,
+            SURAH_VERSION: this.juzmode && !this.isCompleteMushaf && this.juzsurahmode,
+          };
+          
+          // Mark data as loaded
+          this.isDataLoaded = true;
+          
+          // Update calculated numbers
+          this.updateCalculatedNumbers();
+          this.getFirstAndLastAyahNumberOnPage();
+          this.getBookmark();
+          this.adjustFontsize();
+          
+          // Get surah info
+          this.surahService.getSurahInfo().subscribe((res: any) => {
+            this.surahInfo = res;
+            this.surahService.surahInfo = res;
+          });
+          
+          // Save to storage for offline use
+          this.storage.set('Quran', {
+            title: 'Quran',
+            data: res,
+            rukuArray: this.rukuArray,
+            mode: mode,
+          }).catch(err => console.warn('Storage error:', err));
+        },
+        (err) => {
+          console.error('Failed to load Quran data:', err);
+          // Try loading from storage
+          this.storage.get('Quran').then((cached) => {
+            if (cached) {
+              this.surah = cached.data;
+              this.pages = cached.data.split('\n\n');
+              this.title = cached.title;
+              this.rukuArray = cached.rukuArray || [];
+              this.lines = this.pages[this.currentPage - 1]?.split('\n') || [];
+              this.isCompleteMushaf = this.pages.length === 611;
+              this.isDataLoaded = true;
+            } else {
+              this.surahService.presentToastWithOptions(
+                'Failed to load Quran data. Please check your connection.',
+                'danger',
+                'middle'
+              );
+              this.router.navigate(['/browse']);
+            }
+          }).catch(() => {
+            this.router.navigate(['/browse']);
+          });
+        }
+      );
+  }
+
+  /**
+   * Calculate ruku array for a specific juz
+   */
+  private calculateRukuArrayForJuz(juzNumber: number, juzPages: string[]) {
+    const juzRukuArray: any[] = [];
+    
+    juzPages.forEach((page, juzPageIndex) => {
+      if (page.includes(this.surahService.diacritics.RUKU_MARK)) {
+        page.split('\n').forEach((line, lineIndex) => {
+          if (line.includes(this.surahService.diacritics.RUKU_MARK)) {
+            juzRukuArray.push({
+              juzPageIndex,
+              lineIndex,
+              line,
+              pageNumber: juzPageIndex + this.surahService.juzPageNumbers[juzNumber - 1],
+            });
+          }
+        });
+      }
+    });
+    
+    // Ensure rukuArray has entries for all juz
+    while (this.rukuArray.length < juzNumber) {
+      this.rukuArray.push([]);
+    }
+    this.rukuArray[juzNumber - 1] = juzRukuArray;
   }
 }

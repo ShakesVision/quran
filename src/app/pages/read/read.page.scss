@@ -1,10 +1,48 @@
+// ===========================================
+// READER PAGE STYLES - Full-screen 16:9 Design
+// ===========================================
+
+// Paper texture backgrounds
 ion-content {
-  --background: url("./../../../assets/border.svg") no-repeat center center
-    fixed;
-  --background-size: cover;
+  --background: url("./../../../assets/paper-texture-light.svg") repeat center center;
+  --background-size: 200px 200px;
   overflow: hidden;
 }
 
+body.dark ion-content {
+  --background: url("./../../../assets/paper-texture-dark.svg") repeat center center;
+}
+
+// ===========================================
+// IMMERSIVE MODE - Hide header/footer
+// ===========================================
+:host-context(.immersive-mode) {
+  ion-header, ion-footer {
+    display: none !important;
+  }
+  
+  ion-content {
+    --padding-top: 0;
+    --padding-bottom: 0;
+  }
+  
+  .page-wrapper {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .content-wrapper {
+    height: calc(100vh - 40px) !important;
+    max-height: calc(100vh - 40px) !important;
+    border: none !important;
+  }
+}
+
+// ===========================================
+// TEXT ALIGNMENT (Arabic/Urdu)
+// ===========================================
 .ar,
 .ur {
   text-align: justify;
@@ -13,97 +51,194 @@ ion-content {
   -webkit-text-align-last: justify;
   -ms-text-align-last: justify;
   -o-text-align-last: justify;
-  line-height: 2em;
+  line-height: 2.2em;
 }
+
 .ar table,
 .ur table {
   margin: 0 auto;
 }
+
+// ===========================================
+// PAGE WRAPPER - Full-screen 16:9 responsive
+// ===========================================
 .page-wrapper {
-  max-width: 324px; //360px;
+  // Use viewport units with aspect ratio for 9:16 (portrait)
+  width: 100%;
+  max-width: min(100vw, 56.25vh); // 9/16 = 0.5625
+  height: calc(100vh - 120px); // Account for header + footer
+  max-height: 177.78vw; // 16/9 = 1.7778
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  
   .page-top-info {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    // justify-content: space-between;
-    margin-bottom: -5px;
-    min-height: 34px;
+    padding: 4px 8px;
+    min-height: 28px;
+    flex-shrink: 0;
+    
     span.juz-number {
-      font-size: small;
+      font-size: clamp(10px, 2.5vw, 14px);
       text-align-last: start;
+      color: var(--ion-color-medium);
     }
+    
     span.page-number {
-      font-size: x-large;
+      font-size: clamp(16px, 4vw, 24px);
       text-align-last: center;
+      font-weight: 600;
+      color: var(--ion-color-primary);
     }
+    
     span.surah-number {
-      font-size: small;
+      font-size: clamp(10px, 2.5vw, 14px);
       text-align-last: end;
+      color: var(--ion-color-medium);
     }
   }
+  
   .content-wrapper {
-    height: 576px; //height: 75vh; aspect-ratio: 9/16;
-    padding: 5px;
-    border: 2px solid;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    border: 1px solid var(--ion-color-light-shade);
+    border-radius: 4px;
+    background: var(--ion-background-color);
     user-select: text;
-    // background-image: url("../../../assets/quran-pg466-aspect.PNG");
+    overflow: hidden;
+    
+    // Each line takes equal space (for 15 lines)
     .line {
-      border-bottom: 0.5px solid #cecece;
-      height: 38px; //screen:height in px=> 345:32,300:28,250:22. With aspect-ratio, height: calc(78vh*0.066);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: stretch;
+      border-bottom: 0.5px solid var(--ion-color-light-shade);
+      position: relative;
+      min-height: 0; // Allow flex shrinking
+      
+      // Dynamic font sizing based on container
+      font-size: clamp(12px, calc(100vw / 22), 20px);
+      
+      span {
+        flex: 1;
+        display: block;
+        overflow: hidden;
+        text-overflow: clip;
+        white-space: nowrap;
+      }
     }
+    
+    .line:last-child {
+      border-bottom: none;
+    }
+    
     .line:hover {
-      background-color: var(--success-light); //#ebfef6; // #ebf2fe;
+      background-color: var(--success-light);
+      cursor: pointer;
     }
   }
 }
+
+// ===========================================
+// FONT FAMILIES
+// ===========================================
 .rtl {
   direction: rtl;
 }
+
 .ar {
-  font-size: 16px; // 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
-  font-family: Indopak;
+  font-size: clamp(14px, 4vw, 18px);
+  font-family: Indopak, "Traditional Arabic", serif;
   direction: rtl;
 }
+
 .ar2 {
-  font-family: Muhammadi;
-  font-size: 17px;
+  font-family: Muhammadi, Indopak, serif;
+  font-size: clamp(14px, 4.2vw, 19px);
   direction: rtl;
 }
+
+// New font classes for quran.com sources
+.ar-waqflazim {
+  font-family: "IndoPak Waqf Lazim", Indopak, serif;
+  font-size: clamp(14px, 4vw, 18px);
+  direction: rtl;
+}
+
+.ar-uthmani {
+  font-family: "Uthmanic Hafs", "Traditional Arabic", serif;
+  font-size: clamp(14px, 4vw, 18px);
+  direction: rtl;
+}
+
 .small-text {
   font-size: small;
 }
+
 .ur {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
-    sans-serif;
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
-  font-size: 13px;
+  font-size: clamp(11px, 3vw, 14px);
 }
+
+// ===========================================
+// FOOTER NAVIGATION
+// ===========================================
 ion-footer {
   text-align: center;
+  background: var(--ion-toolbar-background);
+  
+  &.immersive-hidden {
+    display: none;
+  }
 }
+
 .btmNav {
   display: flex;
   align-items: center;
   width: 100%;
   justify-content: center;
+  gap: 4px;
+  padding: 4px 0;
+  
+  .nav-btns {
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
 }
+
+// ===========================================
+// POPUP / TRANSLATION MODAL
+// ===========================================
 .popup,
 .trans {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
-    sans-serif;
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
 }
+
 .popup {
   opacity: 0;
   height: 0;
   position: absolute;
   left: 0;
   background: var(--ion-color-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.2s ease;
 }
+
 .popup-header {
   font-size: small;
   color: var(--ion-color-medium);
 }
+
+// ===========================================
+// SPECIAL LINE STYLES
+// ===========================================
 .centered-table-text {
   text-align-last: center;
 }
@@ -112,47 +247,62 @@ ion-footer {
 .bism {
   text-align-last: center;
 }
+
 .surah-name {
-  font-size: x-large;
+  font-size: clamp(18px, 5vw, 28px);
 }
+
 .bism {
-  font-size: larger;
+  font-size: clamp(14px, 4vw, 20px);
   color: var(--ion-color-medium);
 }
 
 .emphasize-btn {
   color: var(--ion-color-primary);
-  // border-radius: 50%;
-  // background: var(--success-light);
 }
+
 .highlight-line {
-  background-color: #e2edff;
+  background-color: rgba(66, 165, 245, 0.2) !important;
+  animation: highlight-fade 1s ease-out;
 }
+
+@keyframes highlight-fade {
+  0% { background-color: rgba(66, 165, 245, 0.4); }
+  100% { background-color: rgba(66, 165, 245, 0.1); }
+}
+
+// ===========================================
+// RUKU INDICATOR
+// ===========================================
 .ruku-wrapper {
   user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  row-gap: 4px;
-  font-size: 14px;
+  row-gap: 2px;
+  font-size: clamp(10px, 2.5vw, 14px);
   position: absolute;
-  left: -18px;
-  line-height: 8px;
-  top: 2px;
-  &.span:nth-child(3) {
-    margin-top: 3px;
-    font-size: 14px;
-  }
+  left: -20px;
+  line-height: 1;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ion-color-primary);
 }
+
+// ===========================================
+// VIRTUAL SCROLLER (Search results)
+// ===========================================
 virtual-scroller {
   width: 100%;
   height: 400px;
+  
   ion-item {
     width: 100%;
     height: 48px;
   }
 }
+
 .indices {
   span.index {
     font-size: xx-small;
@@ -164,11 +314,13 @@ virtual-scroller {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 4px;
   }
+  
   span.frequency {
     font-size: 6px;
     background: var(--ion-color-danger);
-    color: var(--ion-color-light);
+    color: white;
     width: 10px;
     height: 10px;
     display: inline-flex;
@@ -179,6 +331,7 @@ virtual-scroller {
     right: 15px;
     top: 8px;
   }
+  
   span.location {
     position: absolute;
     left: 5px;
@@ -188,53 +341,71 @@ virtual-scroller {
     font-size: xx-small;
   }
 }
+
+// ===========================================
+// SPECIAL PAGE STYLES
+// ===========================================
 .quran-kareem-text {
-  font-size: 40px;
+  font-size: clamp(28px, 8vw, 44px) !important;
   border: none !important;
-  top: 50%;
-  transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  -moz-transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
-  -o-transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .juz-start-line {
   font-size: 110%;
   font-weight: bold;
 }
+
 .surah-start-line {
   text-align-last: center;
   font-size: small;
   color: var(--ion-color-medium-tint);
 }
+
 .surah-end-line {
   text-align-last: center;
 }
+
 .bism-line {
   text-align-last: center;
-  font-size: larger;
+  font-size: clamp(14px, 4vw, 20px);
   color: var(--ion-color-medium);
   font-family: Indopak;
 }
+
+// ===========================================
+// PAGE NUMBER INPUT
+// ===========================================
 .page-num-input {
   width: 50px;
   display: inline-flex;
   background: var(--ion-color-light);
-  border-bottom: 1px solid;
+  border-bottom: 1px solid var(--ion-color-medium);
+  border-radius: 4px;
+  text-align: center;
 }
+
+// ===========================================
+// POPOVER / SETTINGS
+// ===========================================
 .popover-wrapper {
   ion-item {
     font-size: small;
   }
+  
   .font-size-field {
     max-width: 60px;
     margin-left: 15px;
     border-bottom: 1px dashed var(--ion-color-medium);
   }
+  
   .selected-result {
-    background-color: #a3c0ff;
+    background-color: rgba(66, 165, 245, 0.3);
   }
+  
   .result-heading {
     .small-results-text {
       font-size: 7px;
@@ -246,38 +417,98 @@ virtual-scroller {
     }
   }
 }
+
+// ===========================================
+// AUDIO CONTROLS
+// ===========================================
 .btn-controls-top {
-  // ion-button {
-  //   width: 42px !important;
-  //   height: 42px !important;
-  // }
+  display: flex;
+  align-items: center;
 }
+
 .aud-controls-wrapper {
   display: flex;
+  align-items: center;
+  
   .qari-wrapper {
     margin-top: 5px;
     width: 80px;
     font-size: xx-small;
   }
+  
   .aud-controls {
     display: inline-flex;
     align-items: center;
     font-size: small;
+    gap: 4px;
+    
     .verse-num {
       font-size: 10px;
       padding-left: 2px;
+      color: var(--ion-color-primary);
     }
+    
     .gif-text {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
     }
+    
     .gif {
       width: 24px;
     }
+    
     .stop-btn {
       width: 38px;
     }
   }
+}
+
+// ===========================================
+// IMMERSIVE MODE TOGGLE BUTTON
+// ===========================================
+.immersive-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// When in immersive mode, show the toggle more prominently
+:host-context(.immersive-mode) .immersive-toggle {
+  bottom: env(safe-area-inset-bottom, 20px);
+  opacity: 0.5;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+// ===========================================
+// SCAN VIEW
+// ===========================================
+.scan-view {
+  width: 100%;
+  height: 100%;
+  
+  .scan-image-wrapper {
+    width: 100%;
+    height: auto;
+  }
+}
+
+// ===========================================
+// IMMERSIVE MODE HIDING
+// ===========================================
+.immersive-hidden {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }

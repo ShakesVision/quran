@@ -206,10 +206,23 @@ export class JuzPage implements OnInit {
       );
   }
   navigate(data?, id = 0, mode = "juz") {
-    if (id != 0)
-      data = { title: id, data: data, rukuArray: this.rukuArray, mode };
-    if (!data) data = this.quranData;
-    this.router.navigate(["/read"], { state: { juzData: data } });
+    // Use new URL-based routes for refresh-safe navigation
+    if (id === 0 && !data) {
+      // Full Quran
+      this.router.navigate(["/quran"]);
+    } else if (mode === "juz") {
+      // Juz mode - use URL route
+      this.router.navigate(["/juz", id]);
+    } else if (mode === "surah") {
+      // Surah mode - use URL route
+      this.router.navigate(["/surah", id]);
+    } else {
+      // Fallback to legacy state-based navigation
+      if (id != 0)
+        data = { title: id, data: data, rukuArray: this.rukuArray, mode };
+      if (!data) data = this.quranData;
+      this.router.navigate(["/quran"], { state: { juzData: data } });
+    }
   }
   calculateJuzData(juzData) {
     this.pages = juzData.split("\n\n");

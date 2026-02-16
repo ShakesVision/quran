@@ -25,25 +25,50 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+// ===========================================
+// FONT DEFINITIONS
+// ===========================================
+
+// Current archive text font
 @font-face {
   font-family: "Indopak";
-  // src: url("assets/fonts/Naskh-IndoPak.woff2");
-  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.woff2");
-}
-@font-face {
-  font-family: "Muhammadi";
-  src: url("assets/fonts/muhammadi.ttf");
-}
-@font-face {
-  font-family: "Mehr";
-  src: url("assets/fonts/Mehr.ttf");
+  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.woff2") format("woff2");
+  font-display: swap;
 }
 
 @font-face {
+  font-family: "Muhammadi";
+  src: url("assets/fonts/muhammadi.ttf") format("truetype");
+  font-display: swap;
+}
+
+// Quran.com IndoPak source font (waqf-lazim marks)
+@font-face {
+  font-family: "IndoPak Waqf Lazim";
+  src: url("assets/fonts/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2") format("woff2");
+  font-display: swap;
+}
+
+// Quran.com Uthmani source font
+@font-face {
+  font-family: "Uthmanic Hafs";
+  src: url("assets/fonts/UthmanicHafs1Ver18.woff2") format("woff2");
+  font-display: swap;
+}
+
+// Urdu/Translation font
+@font-face {
+  font-family: "Mehr";
+  src: url("assets/fonts/Mehr.ttf") format("truetype");
+  font-display: swap;
+}
+
+// Unicode range for Arabic chars fallback
+@font-face {
   font-family: "UrduChar";
-  // font-family: "MuhammadiChar";
-  src: url("assets/fonts/muhammadi.ttf");
+  src: url("assets/fonts/muhammadi.ttf") format("truetype");
   unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+  font-display: swap;
 }
 
 ion-title.title-large {

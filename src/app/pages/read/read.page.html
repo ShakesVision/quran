@@ -1,7 +1,7 @@
-<ion-header>
+<ion-header [class.immersive-hidden]="isImmersive">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="juz"></ion-back-button>
+      <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title [ngStyle]="{'visibility': audioPlaying?'hidden':'visible', 'max-width':audioPlaying?'0':'100%'}">
       {{title}}
@@ -54,6 +54,9 @@
           [name]="tMode?toggleIconOutline('language-outline'):toggleIconOutline('language')"></ion-icon>
       </ion-button>
 
+      <ion-button (click)="toggleImmersiveMode()" slot="end" [ngClass]="isImmersive?'emphasize-btn':''">
+        <ion-icon slot="icon-only" [name]="isImmersive?'contract-outline':'expand-outline'"></ion-icon>
+      </ion-button>
       <ion-button id="popover-trigger-btn" slot="end">
         <ion-icon slot="icon-only" name="options-outline"></ion-icon>
       </ion-button>
@@ -235,8 +238,15 @@
       </ion-content>
     </ng-template>
   </ion-popover>
+  
+  <!-- Floating immersive mode toggle (visible in immersive mode) -->
+  <ion-fab *ngIf="isImmersive" vertical="bottom" horizontal="end" slot="fixed" class="immersive-toggle">
+    <ion-fab-button size="small" color="medium" (click)="toggleImmersiveMode()">
+      <ion-icon name="contract-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
-<ion-footer>
+<ion-footer [class.immersive-hidden]="isImmersive">
   <div class="btmNav">
     <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==pages?.length"
       (click)="gotoPageNum(pages?.length)">

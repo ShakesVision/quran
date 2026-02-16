@@ -52,6 +52,18 @@ export class SurahService {
     2, 23, 43, 63, 83, 103, 123, 143, 163, 183, 203, 223, 243, 263, 283, 303,
     323, 343, 363, 383, 403, 423, 443, 463, 483, 503, 523, 543, 563, 587,
   ];
+  
+  // Number of ayahs in each surah (1-114)
+  surahAyahCounts = [
+    7, 286, 200, 176, 120, 165, 206, 75, 129, 109, 123, 111, 43, 52, 99, 128,
+    111, 110, 98, 135, 112, 78, 118, 64, 77, 227, 93, 88, 69, 60, 34, 30,
+    73, 54, 45, 83, 182, 88, 75, 85, 54, 53, 89, 59, 37, 35, 38, 29,
+    18, 45, 60, 49, 62, 55, 78, 96, 29, 22, 24, 13, 14, 11, 11, 18,
+    12, 12, 30, 52, 52, 44, 28, 28, 20, 56, 40, 31, 50, 40, 46, 42,
+    29, 19, 36, 25, 22, 17, 19, 26, 30, 20, 15, 21, 11, 8, 8, 19,
+    5, 8, 8, 11, 11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
+  ];
+
   sectionPageNumbers = [
     [8, 13, 18],
     [27, 32, 38],
@@ -463,4 +475,136 @@ export class SurahService {
     this.surahPageNumbers.findIndex((e) => e > p) == -1
       ? 114
       : this.surahPageNumbers.findIndex((e) => e > p);
+
+  // ===========================================
+  // TATWEEL (KASHIDA) JUSTIFICATION
+  // ===========================================
+  
+  /**
+   * Letters that can naturally have tatweel added AFTER them
+   * These are letters that connect to the next letter in Arabic script
+   */
+  private readonly TATWEEL_CANDIDATES = [
+    'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ',
+    'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'ي', 'ئ', 'ـ',
+    // With diacritics - common forms
+    'بَ', 'بِ', 'بُ', 'تَ', 'تِ', 'تُ', 'سَ', 'سِ', 'سُ',
+    'لَ', 'لِ', 'لُ', 'مَ', 'مِ', 'مُ', 'نَ', 'نِ', 'نُ',
+  ];
+
+  /**
+   * Letters that should NOT have tatweel before them
+   * (non-connecting letters at start of words)
+   */
+  private readonly NON_CONNECTING_LETTERS = [
+    'ا', 'أ', 'إ', 'آ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ة'
+  ];
+
+  /**
+   * Apply tatweel justification to a line of Arabic text
+   * This inserts tatweel characters (ـ) to help justify text
+   * 
+   * @param line The line of Arabic text
+   * @param targetLength Target character length for justification (optional)
+   * @returns The line with tatweel characters inserted
+   */
+  applyTatweelJustification(line: string, targetLength?: number): string {
+    if (!line || line.trim().length === 0) return line;
+    
+    // Don't process special lines (bismillah, etc.)
+    if (line.includes(this.diacritics.BISM)) return line;
+    
+    const words = line.split(' ');
+    const currentLength = line.replace(/\s/g, '').length;
+    const target = targetLength || Math.ceil(currentLength * 1.1); // 10% increase if no target
+    
+    let tatweelCount = target - currentLength;
+    if (tatweelCount <= 0) return line;
+    
+    // Find all possible insertion points
+    const insertionPoints: { wordIndex: number; charIndex: number }[] = [];
+    
+    words.forEach((word, wordIndex) => {
+      // Skip short words and special characters
+      if (word.length < 3) return;
+      
+      const chars = [...word];
+      chars.forEach((char, charIndex) => {
+        // Check if this is a good insertion point
+        if (charIndex < chars.length - 1) {
+          const baseChar = this.getBaseChar(char);
+          const nextBaseChar = this.getBaseChar(chars[charIndex + 1]);
+          
+          // Can insert tatweel if current char can connect and next char is not non-connecting
+          if (this.canHaveTatweelAfter(baseChar) && 
+              !this.NON_CONNECTING_LETTERS.includes(nextBaseChar)) {
+            insertionPoints.push({ wordIndex, charIndex: charIndex + 1 });
+          }
+        }
+      });
+    });
+    
+    if (insertionPoints.length === 0) return line;
+    
+    // Distribute tatweels evenly across insertion points
+    const tatweelsPerPoint = Math.ceil(tatweelCount / insertionPoints.length);
+    const tatweel = this.diacritics.TATWEEL;
+    
+    // Apply tatweels (limit to avoid over-stretching)
+    const maxTatweelsPerWord = 2;
+    let applied = 0;
+    
+    const processedWords = words.map((word, wordIndex) => {
+      const points = insertionPoints.filter(p => p.wordIndex === wordIndex);
+      if (points.length === 0 || applied >= tatweelCount) return word;
+      
+      let result = word;
+      let offset = 0;
+      
+      points.slice(0, maxTatweelsPerWord).forEach(point => {
+        if (applied >= tatweelCount) return;
+        
+        const insertPos = point.charIndex + offset;
+        const tatweelsToAdd = Math.min(tatweelsPerPoint, tatweelCount - applied, 1);
+        result = result.slice(0, insertPos) + tatweel.repeat(tatweelsToAdd) + result.slice(insertPos);
+        offset += tatweelsToAdd;
+        applied += tatweelsToAdd;
+      });
+      
+      return result;
+    });
+    
+    return processedWords.join(' ');
+  }
+
+  /**
+   * Get base character without diacritics
+   */
+  private getBaseChar(char: string): string {
+    return this.tashkeelRemover(char).charAt(0);
+  }
+
+  /**
+   * Check if a character can have tatweel after it
+   */
+  private canHaveTatweelAfter(char: string): boolean {
+    const base = this.getBaseChar(char);
+    return !this.NON_CONNECTING_LETTERS.includes(base) && 
+           /[\u0600-\u06FF]/.test(base);
+  }
+
+  /**
+   * Apply tatweel to all lines on a page
+   */
+  applyTatweelToPage(lines: string[]): string[] {
+    // Calculate average line length for consistent justification
+    const avgLength = Math.round(
+      lines
+        .filter(l => l.trim().length > 10)
+        .reduce((sum, l) => sum + l.replace(/\s/g, '').length, 0) / 
+      lines.filter(l => l.trim().length > 10).length
+    );
+    
+    return lines.map(line => this.applyTatweelJustification(line, avgLength));
+  }
 }

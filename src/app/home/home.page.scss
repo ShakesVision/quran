@@ -1,179 +1,341 @@
-#container {
-  text-align: center;
+// ===========================================
+// HOMEPAGE STYLES - Modern Material Design
+// ===========================================
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  strong {
-    font-size: 20px;
-    line-height: 26px;
+// Header
+ion-header {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    padding: 8px 0;
   }
+  
+  .app-logo {
+    font-size: 28px;
+  }
+  
+  .app-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--ion-color-primary);
+  }
+  
+  .app-subtitle {
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+    margin-left: 4px;
+  }
+  
+  .theme-toggle {
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+}
 
-  p {
-    font-size: 16px;
-    line-height: 22px;
+// Content background
+ion-content {
+  --background: var(--ion-background-color);
+}
 
-    color: #8c8c8c;
+// ===========================================
+// HERO SECTION
+// ===========================================
+.hero-section {
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  padding: 20px;
+  margin: 12px;
+  border-radius: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  
+  // Decorative pattern
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .hero-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    opacity: 0.95;
+  }
+  
+  .hero-btn {
+    --background: white;
+    --color: var(--ion-color-primary-shade);
+    --border-radius: 20px;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    
+    &:hover {
+      --background: rgba(255, 255, 255, 0.95);
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+  }
+}
 
+// ===========================================
+// SECTION TITLES
+// ===========================================
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ion-color-medium);
+  margin: 24px 16px 12px;
+}
+
+// ===========================================
+// FEATURE GRID
+// ===========================================
+.features-section {
+  .feature-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 12px;
+  }
+  
+  .feature-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    .card-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-tint) 100%);
+      color: white;
+      flex-shrink: 0;
+      
+      ion-icon {
+        font-size: 24px;
+      }
+      
+      &.secondary {
+        background: linear-gradient(135deg, var(--ion-color-secondary) 0%, var(--ion-color-secondary-tint) 100%);
+        color: var(--ion-color-secondary-contrast);
+      }
+      
+      &.tertiary {
+        background: linear-gradient(135deg, var(--ion-color-tertiary) 0%, var(--ion-color-tertiary-tint) 100%);
+        color: var(--ion-color-tertiary-contrast);
+      }
+    }
+    
+    .card-content {
+      flex: 1;
+      margin-left: 16px;
+      
+      h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: var(--ion-text-color);
+      }
+      
+      p {
+        font-size: 0.8rem;
+        color: var(--ion-color-medium);
+        margin: 0;
+      }
+    }
+    
+    .card-arrow {
+      color: var(--ion-color-medium);
+      font-size: 20px;
+    }
+    
+    // Primary card - larger, more prominent
+    &.primary-card {
+      background: linear-gradient(135deg, var(--ion-color-light) 0%, var(--ion-color-light-tint) 100%);
+      border: 1px solid var(--ion-color-primary);
+      
+      .card-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        
+        ion-icon {
+          font-size: 28px;
+        }
+      }
+      
+      .card-content h3 {
+        color: var(--ion-color-primary);
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+// ===========================================
+// TOOLS GRID
+// ===========================================
+.tools-section {
+  margin-top: 8px;
+  
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 0 12px;
+  }
+  
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    position: relative;
+    
+    &:hover {
+      background: var(--ion-color-light-tint);
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    ion-icon {
+      font-size: 24px;
+      color: var(--ion-color-primary);
+      margin-bottom: 8px;
+    }
+    
+    span {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--ion-text-color);
+      text-align: center;
+    }
+    
+    ion-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 6px;
+      padding: 2px 4px;
+    }
+  }
+}
+
+// ===========================================
+// FOOTER
+// ===========================================
+.footer-section {
+  margin-top: 32px;
+  padding: 20px 16px 32px;
+  text-align: center;
+  
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 16px;
+    
+    ion-button {
+      --color: var(--ion-color-medium);
+      font-size: 0.75rem;
+      
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+  
+  .footer-text {
+    font-size: 0.7rem;
+    color: var(--ion-color-medium);
     margin: 0;
   }
-
-  a {
-    text-decoration: none;
-  }
 }
 
-hr {
-  display: block;
-  height: 1px;
-  border: 0;
-  border-top: 1px solid #ccc;
-  margin: 0 20px;
-  padding: 0;
-}
-
-ion-content ion-toolbar {
-  --background: translucent;
-}
-.links {
-  margin: 20px;
-  h6 {
-    color: var(--ion-color-medium);
-    letter-spacing: 3px;
-    font-size: smaller;
+// ===========================================
+// DARK MODE ADJUSTMENTS
+// ===========================================
+body.dark {
+  .hero-section {
+    background: linear-gradient(135deg, var(--ion-color-primary-shade) 0%, var(--ion-color-primary) 100%);
   }
-  ion-grid span {
-    text-transform: uppercase;
-    font-size: x-small;
-    letter-spacing: 2px;
-  }
-  ion-grid {
-    text-align: center;
-  }
-}
-
-ion-grid {
-  .card {
-    position: relative;
-    text-align: center;
-    padding: 20px;
-    transition: transform 0.2s ease-in-out;
-    // background: linear-gradient(135deg, #42a5f5, #478ed1);
-    background-color: var(--ion-color-light);
-    opacity: 0.8;
-    background-image: linear-gradient(
-        30deg,
-        var(--ion-color-tertiary) 12%,
-        transparent 12.5%,
-        transparent 87%,
-        var(--ion-color-tertiary) 87.5%,
-        #a9ded2
-      ),
-      linear-gradient(
-        150deg,
-        var(--ion-color-tertiary) 12%,
-        transparent 12.5%,
-        transparent 87%,
-        var(--ion-color-tertiary) 87.5%,
-        #a9ded2
-      ),
-      linear-gradient(
-        30deg,
-        var(--ion-color-tertiary) 12%,
-        transparent 12.5%,
-        transparent 87%,
-        var(--ion-color-tertiary) 87.5%,
-        #a9ded2
-      ),
-      linear-gradient(
-        150deg,
-        var(--ion-color-tertiary) 12%,
-        transparent 12.5%,
-        transparent 87%,
-        var(--ion-color-tertiary) 87.5%,
-        #a9ded2
-      ),
-      linear-gradient(
-        60deg,
-        #a9ded277 25%,
-        transparent 25.5%,
-        transparent 75%,
-        #a9ded277 75%,
-        #a9ded277
-      ),
-      linear-gradient(
-        60deg,
-        #a9ded277 25%,
-        transparent 25.5%,
-        transparent 75%,
-        #a9ded277 75%,
-        #a9ded277
-      );
-    background-size: 26px 46px;
-    background-position: 0 0, 0 0, 13px 23px, 13px 23px, 0 0, 13px 23px;
-    color: var(--ion-color-dark);
-    border-radius: 15px;
-  }
-
-  .card:hover {
-    transform: scale(1.05);
-  }
-  .icon {
-    font-size: 40px;
-    margin-bottom: 10px;
-  }
-  .label {
-    display: block;
-  }
-  .badge {
-    position: absolute;
-    top: 0;
-    right: 2px;
-    font-size: 8px;
-    background: var(--ion-color-warning);
-    color: black;
-    padding: 5px 10px;
-    border-radius: 10px;
-    margin-top: 5px;
-  }
-  .secondary-card {
-    color: var(--ion-color-dark);
-    background: radial-gradient(var(--ion-color-light) 15%, transparent 16%),
-      linear-gradient(
-        45deg,
-        transparent 49%,
-        var(--ion-color-light) 49% 51%,
-        transparent 51%
-      ),
-      linear-gradient(
-        -45deg,
-        transparent 49%,
-        var(--ion-color-light) 49% 51%,
-        transparent 51%
-      );
-    background-size: 3em 3em;
-    opacity: 0.6;
-    padding-bottom: 1rem;
-    .icon {
-      font-size: 30px;
-      padding-top: 1rem;
+  
+  .feature-card {
+    background: var(--ion-color-light);
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-    .label {
-      font-size: x-small;
+    
+    &.primary-card {
+      border-color: var(--ion-color-primary-tint);
     }
   }
+  
+  .tool-card {
+    background: var(--ion-color-light);
+  }
 }
-/*
-* Using one image for all - just change  background-position: 0 0;
-div.feature-icon {
-    width: 50px;
-    height: 50px;
-    background-image: url(/assets/icon/app-icons-grid.png);
-    background-repeat: no-repeat;
-    overflow: hidden;
-    background-position: -119px -3px;
-    background-size: 170px;
+
+// ===========================================
+// RESPONSIVE - Tablet/Desktop
+// ===========================================
+@media (min-width: 768px) {
+  .features-section .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tools-section .tools-grid {
+    max-width: 500px;
     margin: 0 auto;
-*/
+  }
+}

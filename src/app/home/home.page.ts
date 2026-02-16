@@ -1,9 +1,20 @@
 import { HttpClient } from "@angular/common/http";
 import { Component } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
-import { AlertController, ModalController } from "@ionic/angular";
+import { Router } from "@angular/router";
+import { ActionSheetController, AlertController, ModalController } from "@ionic/angular";
+import { Storage } from "@ionic/storage-angular";
 import { HomePageBanner } from "../models/common";
 import { ProgressPage } from "../pages/progress/progress.page";
+
+interface MushafOption {
+  id: string;
+  name: string;
+  description: string;
+  pages: number;
+  source: string;
+  linesPerPage: number;
+}
 
 @Component({
   selector: "app-home",
@@ -12,6 +23,15 @@ import { ProgressPage } from "../pages/progress/progress.page";
 })
 export class HomePage {
   loading = false;
+  currentMushaf: MushafOption | null = null;
+  
+  mushafOptions: MushafOption[] = [
+    { id: '15lines', name: '15-Line Indopak', description: 'Saudi Mushaf Style', pages: 611, source: 'archive', linesPerPage: 15 },
+    { id: '16lines', name: '16-Line Indopak', description: 'Pakistan/India Style', pages: 548, source: 'archive', linesPerPage: 16 },
+    { id: 'qurancom15', name: 'Quran.com 15-Line', description: 'Madani Mushaf', pages: 604, source: 'qurancom', linesPerPage: 15 },
+    { id: 'qurancom16', name: 'Quran.com 16-Line', description: 'Indopak Mushaf', pages: 548, source: 'qurancom', linesPerPage: 16 },
+  ];
+  
   banner: HomePageBanner = {
     text: "We are digitizing the 15 Lines Quran & translation in Unicode, which is a work in progress. You can also help us complete this project.",
     button: {
@@ -36,9 +56,59 @@ export class HomePage {
   constructor(
     private alertController: AlertController,
     private modalController: ModalController,
+    private actionSheetController: ActionSheetController,
     private httpClient: HttpClient,
-    private domSanatizer: DomSanitizer
-  ) {}
+    private domSanatizer: DomSanitizer,
+    private router: Router,
+    private storage: Storage
+  ) {
+    this.initStorage();
+  }
+
+  async initStorage() {
+    await this.storage.create();
+    // Load saved mushaf preference
+    const savedMushaf = await this.storage.get('preferredMushaf');
+    if (savedMushaf) {
+      this.currentMushaf = this.mushafOptions.find(m => m.id === savedMushaf) || this.mushafOptions[0];
+    } else {
+      this.currentMushaf = this.mushafOptions[0]; // Default to 15-line
+    }
+  }
+
+  async selectMushaf(mushaf: MushafOption) {
+    this.currentMushaf = mushaf;
+    await this.storage.set('preferredMushaf', mushaf.id);
+    // Navigate to quran reader with selected mushaf
+    this.router.navigate(['/quran'], { 
+      queryParams: { 
+        source: mushaf.source, 
+        lines: mushaf.linesPerPage 
+      } 
+    });
+  }
+
+  async openMushafSelector() {
+    const buttons = this.mushafOptions.map(mushaf => ({
+      text: `${mushaf.name} (${mushaf.pages} pages)`,
+      cssClass: this.currentMushaf?.id === mushaf.id ? 'selected-mushaf' : '',
+      handler: () => {
+        this.selectMushaf(mushaf);
+      }
+    }));
+    buttons.push({
+      text: 'Cancel',
+      role: 'cancel',
+      cssClass: ''
+    });
+
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Choose Mushaf',
+      buttons: buttons
+    });
+    await actionSheet.present();
+  }
+
   ngOnInit() {
     this.loading = true;
     const url = `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/App/HomePageBanner.json`;

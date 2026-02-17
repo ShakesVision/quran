@@ -1,124 +1,129 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Full Quran</ion-title>
+    <ion-title>Browse</ion-title>
     <ion-buttons slot="end">
-      <div class="last-synced-time ion-margin-end">
-        <span class="date">{{lastSyncedAt | date: 'd/M/yy'}}</span>
-        <span class="time">{{lastSyncedAt | date: 'h:mm:ss a'}}</span>
-      </div>
-      <div class="sync-btn-wrapper">
-        <ion-button (click)="fetchAndSaveInDeviceStorage('Quran')" fill="clear" color="medium" size="small">
-          <ion-icon *ngIf="!syncing && !hasSaved" slot="start" name="sync"></ion-icon>
-          <ion-icon *ngIf="hasSaved" slot="start" color="primary" name="save"></ion-icon>
-          <ion-spinner *ngIf="syncing" name="crescent"></ion-spinner>
-          {{ hasSaved ? 'Saved!' : 'Sync' }}
-        </ion-button>
-      </div>
+      <ion-button (click)="fetchAndSaveInDeviceStorage('Quran')" fill="clear" color="medium" size="small">
+        <ion-icon *ngIf="!syncing && !hasSaved" slot="icon-only" name="cloud-download-outline"></ion-icon>
+        <ion-icon *ngIf="hasSaved" slot="icon-only" color="success" name="checkmark-circle"></ion-icon>
+        <ion-spinner *ngIf="syncing" name="crescent"></ion-spinner>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="ion-text-center ion-margin-bottom" style="font-style: italic">
-    <ion-label>Read full Quran or jump to any juz. Your memorization under
-      <a [routerLink]="['/memorize']"> Memorize</a> page is also hightlighted
-      here in green.
-    </ion-label>
+<ion-content>
+  <!-- Full Quran Card -->
+  <div class="full-quran-card" (click)="navigate()"
+    [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'">
+    <div class="card-background"></div>
+    <div class="card-content">
+      <div class="card-icon">
+        <ion-icon name="book"></ion-icon>
+      </div>
+      <div class="card-text">
+        <h2>Complete Quran</h2>
+        <p class="ar-text">مکمل قرآن پڑھیے</p>
+        <div class="card-meta">
+          <span><ion-icon name="layers-outline"></ion-icon> 30 Juz</span>
+          <span><ion-icon name="document-outline"></ion-icon> {{pages?.length || 611}} Pages</span>
+        </div>
+        <div class="source-badge" *ngIf="currentSourceName">
+          <ion-icon name="library-outline"></ion-icon> {{currentSourceName}}
+        </div>
+      </div>
+      <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
+    </div>
+    <div class="bookmark-indicator" *ngIf="unicodeBookmarkPageNum > 0">
+      <ion-icon name="bookmark"></ion-icon>
+      Page {{unicodeBookmarkPageNum}} ({{((unicodeBookmarkPageNum/ 611) * 100).toFixed(0)}}%)
+    </div>
   </div>
 
-  <div class="juz-grid-wrapper" [ngSwitch]="segment">
-    <div class="juz-btn juz-btn-full" (click)="navigate()"
-      [ngStyle]="{'background': totalMemorizeStyle(),'background-position': 'left'}"
-      [style]="'--bookmarkPercentage:'+(unicodeBookmarkPageNum/ 611) * 100+'%'"
-      attr.data-bookmarkPercentage="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'}}"
-      attr.data-bookmarkPercentageContent="{{((unicodeBookmarkPageNum/ 611) * 100).toFixed(1) + '%'+ ' ('+unicodeBookmarkPageNum+')'}}">
-      <div class="juz-heading-en">Read Complete Quran</div>
-      <div class="juz-number">1-30</div>
-      <div class="juz-heading-ur ur">مکمل قرآن پڑھیے</div>
-    </div>
-    <div class="list-controls ion-text-center">
-      <ion-segment color="primary" [(ngModel)]="segment" mode="ios">
-        <ion-segment-button value="juz" checked>
-          <ion-label>Juz</ion-label>
-          <ion-icon name="apps"></ion-icon>
-        </ion-segment-button>
-        <ion-segment-button value="surah">
-          <ion-label>Surah</ion-label>
-          <ion-icon name="list"></ion-icon>
-        </ion-segment-button>
-      </ion-segment>
-      <div class="search-controls">
-        <ion-searchbar type="text" class="ion-text-center ion-no-padding ar-text2"
-          [placeholder]="segment==='juz'?'عم / 30 / ۳۰':'فلق / 113 / ۱۱۳ / falaq'"
-          (ionChange)="queryChanged($event.target.value)" mode="ios"></ion-searchbar>
-        <ion-button id="popover-trigger" slot="end" fill="clear" size="small">
-          <ion-icon slot="icon-only" name="options-outline"></ion-icon>
-        </ion-button>
-      </div>
-      <ion-label *ngIf="segment==='juz'" color="secondary">
-        <small><i>{{juzPages.length}} of {{juzPagesCopy.length}}</i></small>
-      </ion-label>
-      <ion-label *ngIf="segment==='surah'" color="secondary">
-        <small><i>{{surahPages.length}} of {{surahPagesCopy.length}}</i></small>
-      </ion-label>
-    </div>
-    <ng-container *ngSwitchCase="'juz'">
-      <div *ngFor="let j of juzPages" [class]="'juz-btn juz'+j.id+'-btn'"
-        [ngClass]="{'hifz-complete': findMemorizeItem(j.id)=='100.0'}"
-        [ngStyle]="{'background': returnStyle(j.id-1), 'transition':'all 1s ease'}"
-        [style]="'--bookmarkPercentage:'+returnBookmarkCalc(j)?.perc"
-        attr.data-bookmarkPercentageContent="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
-        (click)="navigate(j.pages,j.id)">
-        <div class="juz-heading-en">JUZ</div>
-        <div class="juz-number">{{j.id}}</div>
-        <div class="juz-heading-ar ar-text2">{{j.name}}</div>
-        <div class="pages-count-wrapper">
-          <div class="pages-count">
-            <div>{{j.length}}</div>
-            <ion-icon name="document-outline" color="secondary"></ion-icon>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-    <ng-container *ngSwitchCase="'surah'">
-      <div *ngFor="let j of surahPages" [class]="'juz-btn surah'+j.id+'-btn'"
-        [style]="'--bookmarkPercentage:'+returnBookmarkCalc(j)?.perc"
-        attr.data-bookmarkPercentageContent="{{!returnBookmarkCalc(j)? '':returnBookmarkCalc(j).perc + ' ('+returnBookmarkCalc(j).page+')'}}"
-        (click)="navigate(j.pages,j.id,'surah')">
-        <div class="juz-heading-en">SURAH</div>
-        <div class="juz-number">{{j.id}}</div>
-        <div class="juz-heading-ar ar-text2">{{j.name}}</div>
-        <div class="pages-count-wrapper">
-          <div class="pages-count">
-            <div>{{j.length}}</div>
-            <ion-icon name="document-outline" color="secondary"></ion-icon>
-          </div>
-        </div>
-      </div>
-    </ng-container>
+  <!-- Segment Toggle -->
+  <div class="segment-wrapper">
+    <ion-segment [(ngModel)]="segment" mode="ios" class="browse-segment">
+      <ion-segment-button value="juz">
+        <ion-label>Juz</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="surah">
+        <ion-label>Surah</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </div>
-  <!-- Popover content for filters -->
+
+  <!-- Search & Filter Bar -->
+  <div class="search-bar">
+    <ion-searchbar
+      type="text"
+      class="custom-searchbar"
+      [placeholder]="segment==='juz' ? 'Search juz...' : 'Search surah...'"
+      (ionChange)="queryChanged($event.target.value)"
+      mode="ios">
+    </ion-searchbar>
+    <ion-button id="popover-trigger" fill="clear" class="filter-btn">
+      <ion-icon slot="icon-only" name="options-outline"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-count">
+    <span *ngIf="segment==='juz'">{{juzPages.length}} of {{juzPagesCopy.length}} Juz</span>
+    <span *ngIf="segment==='surah'">{{surahPages.length}} of {{surahPagesCopy.length}} Surahs</span>
+  </div>
+
+  <!-- Juz Grid -->
+  <div class="browse-grid" *ngIf="segment === 'juz'">
+    <div class="grid-item" *ngFor="let j of juzPages" (click)="navigate(j.pages, j.id)"
+      [class.complete]="findMemorizeItem(j.id)==='100.0'"
+      [class.has-bookmark]="returnBookmarkCalc(j)">
+      <div class="item-progress" [style.width.%]="findMemorizeItem(j.id) || 0"></div>
+      <div class="item-content">
+        <span class="item-number">{{j.id}}</span>
+        <span class="item-name ar-text">{{j.name}}</span>
+        <span class="item-pages">{{j.length}} pages</span>
+      </div>
+      <ion-icon name="bookmark" class="bookmark-icon" *ngIf="returnBookmarkCalc(j)"></ion-icon>
+    </div>
+  </div>
+
+  <!-- Surah Grid -->
+  <div class="browse-grid surah-grid" *ngIf="segment === 'surah'">
+    <div class="grid-item" *ngFor="let j of surahPages" (click)="navigate(j.pages, j.id, 'surah')"
+      [class.has-bookmark]="returnBookmarkCalc(j)">
+      <div class="item-content">
+        <span class="item-number">{{j.id}}</span>
+        <span class="item-name ar-text">{{j.name}}</span>
+        <span class="item-pages">{{j.length}} pages</span>
+      </div>
+      <ion-icon name="bookmark" class="bookmark-icon" *ngIf="returnBookmarkCalc(j)"></ion-icon>
+    </div>
+  </div>
+
+  <!-- Popover for Filters -->
   <ion-popover [isOpen]="isPopoverOpen" trigger="popover-trigger" side="bottom" (didDismiss)="isPopoverOpen = false">
     <ng-template>
       <ion-content>
-        <ion-list>
+        <ion-list lines="none">
+          <ion-list-header>
+            <ion-label>Sort & Filter</ion-label>
+          </ion-list-header>
           <ion-item button (click)="sortBy('direction')">
-            <ion-icon name="swap-vertical" slot="start"></ion-icon>
-            <ion-label>Reverse</ion-label>
+            <ion-icon name="swap-vertical" slot="start" color="medium"></ion-icon>
+            <ion-label>Reverse Order</ion-label>
           </ion-item>
           <ion-item button (click)="sortBy('pageCount')">
-            <ion-icon name="document-outline" slot="start"></ion-icon>
-            <ion-label>Sort by no. of pages</ion-label>
+            <ion-icon name="document-outline" slot="start" color="medium"></ion-icon>
+            <ion-label>By Page Count</ion-label>
           </ion-item>
           <ion-item button (click)="sortBy('name')">
-            <ion-icon name="text-outline" slot="start"></ion-icon>
-            <ion-label>Sort by name (alphabetically)</ion-label>
+            <ion-icon name="text-outline" slot="start" color="medium"></ion-icon>
+            <ion-label>By Name (A-Z)</ion-label>
           </ion-item>
           <ion-item button (click)="resetLists()">
-            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            <ion-icon name="refresh-outline" slot="start" color="medium"></ion-icon>
             <ion-label>Reset</ion-label>
           </ion-item>
         </ion-list>

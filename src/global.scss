@@ -25,25 +25,50 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+// ===========================================
+// FONT DEFINITIONS
+// ===========================================
+
+// Current archive text font
 @font-face {
   font-family: "Indopak";
-  // src: url("assets/fonts/Naskh-IndoPak.woff2");
-  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.woff2");
-}
-@font-face {
-  font-family: "Muhammadi";
-  src: url("assets/fonts/muhammadi.ttf");
-}
-@font-face {
-  font-family: "Mehr";
-  src: url("assets/fonts/Mehr.ttf");
+  src: url("assets/fonts/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.woff2") format("woff2");
+  font-display: swap;
 }
 
 @font-face {
+  font-family: "Muhammadi";
+  src: url("assets/fonts/muhammadi.ttf") format("truetype");
+  font-display: swap;
+}
+
+// Quran.com IndoPak source font (waqf-lazim marks)
+@font-face {
+  font-family: "IndoPak Waqf Lazim";
+  src: url("assets/fonts/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2") format("woff2");
+  font-display: swap;
+}
+
+// Quran.com Uthmani source font
+@font-face {
+  font-family: "Uthmanic Hafs";
+  src: url("assets/fonts/UthmanicHafs1Ver18.woff2") format("woff2");
+  font-display: swap;
+}
+
+// Urdu/Translation font
+@font-face {
+  font-family: "Mehr";
+  src: url("assets/fonts/Mehr.ttf") format("truetype");
+  font-display: swap;
+}
+
+// Unicode range for Arabic chars fallback
+@font-face {
   font-family: "UrduChar";
-  // font-family: "MuhammadiChar";
-  src: url("assets/fonts/muhammadi.ttf");
+  src: url("assets/fonts/muhammadi.ttf") format("truetype");
   unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+  font-display: swap;
 }
 
 ion-title.title-large {
@@ -139,5 +164,268 @@ span.ayah_mark {
   .alert-message {
     max-height: fit-content;
     padding: 0;
+  }
+}
+
+// ===========================================
+// GLOBAL ANIMATION UTILITIES
+// ===========================================
+
+// Staggered entrance for child elements
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(var(--ion-color-primary-rgb), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(var(--ion-color-primary-rgb), 0.45);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+  }
+  50% {
+    border-color: rgba(var(--ion-color-primary-rgb), 0.7);
+  }
+}
+
+@keyframes floatY {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes spin360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes checkBounce {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes progressShimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+// Utility class for press feedback — use on any interactive element
+.press-feedback {
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1), 
+              box-shadow 0.15s ease;
+  will-change: transform;
+
+  &:active {
+    transform: scale(0.96) !important;
+  }
+}
+
+// Utility: animate children with stagger
+.stagger-children {
+  > * {
+    opacity: 0;
+    animation: fadeSlideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  @for $i from 1 through 12 {
+    > *:nth-child(#{$i}) {
+      animation-delay: #{$i * 60}ms;
+    }
+  }
+}
+
+// Smooth page enter transition
+.ion-page {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Enhance all ion-buttons with subtle scale
+ion-button {
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0.2, 1);
+  
+  &:active {
+    transform: scale(0.94);
+  }
+}
+
+// Enhance ion-fab-buttons
+ion-fab-button {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s ease !important;
+
+  &:active {
+    transform: scale(0.88) !important;
+  }
+}
+
+// Toast-style notifications - slide up
+ion-toast {
+  animation: fadeSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Popover & action-sheet entrance
+ion-popover {
+  --backdrop-opacity: 0.2;
+}
+
+// ===========================================
+// SEARCH SHEET MODAL (global because ion-modal
+// renders outside the component)
+// ===========================================
+ion-modal.word-detail-modal {
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  .word-detail-content {
+    --background: var(--ion-background-color);
+  }
+}
+
+ion-modal.bookmarks-sheet-modal {
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-width: 0;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+
+  ion-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .bookmarks-modal-content {
+    --background: var(--ion-background-color);
+  }
+}
+
+ion-modal.search-sheet-modal {
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-width: 0;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+
+  ion-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .search-modal-content {
+    --background: var(--ion-background-color);
   }
 }

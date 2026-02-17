@@ -1,10 +1,84 @@
+// ===========================================
+// READER PAGE STYLES - Full-screen 16:9 Design + Micro-animations
+// ===========================================
+
+// Paper texture backgrounds
 ion-content {
-  --background: url("./../../../assets/border.svg") no-repeat center center
-    fixed;
-  --background-size: cover;
+  --background: url("./../../../assets/paper-texture-light.svg") repeat center center;
+  --background-size: 200px 200px;
   overflow: hidden;
 }
 
+body.dark ion-content {
+  --background: url("./../../../assets/paper-texture-dark.svg") repeat center center;
+}
+
+// Quran.com loading progress overlay
+.qurancom-progress {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  padding: 0 12px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  animation: fadeSlideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .progress-card {
+    width: min(520px, 100%);
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--ion-color-medium);
+  }
+
+  ion-progress-bar {
+    --progress-background: var(--ion-color-primary);
+    border-radius: 4px;
+    height: 4px;
+  }
+}
+
+// ===========================================
+// IMMERSIVE MODE - Hide header/footer
+// ===========================================
+:host-context(.immersive-mode) {
+  ion-header, ion-footer {
+    display: none !important;
+  }
+  
+  ion-content {
+    --padding-top: 0;
+    --padding-bottom: 0;
+  }
+  
+  .page-wrapper {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .content-wrapper {
+    height: calc(100vh - 40px) !important;
+    max-height: calc(100vh - 40px) !important;
+    border: 2px solid var(--mushaf-border-outer, #8B7355) !important;
+    outline: none !important;
+  }
+}
+
+// ===========================================
+// TEXT ALIGNMENT (Arabic/Urdu)
+// ===========================================
 .ar,
 .ur {
   text-align: justify;
@@ -13,97 +87,367 @@ ion-content {
   -webkit-text-align-last: justify;
   -ms-text-align-last: justify;
   -o-text-align-last: justify;
-  line-height: 2em;
+  line-height: 2.2em;
 }
+
 .ar table,
 .ur table {
   margin: 0 auto;
 }
+
+// ===========================================
+// PAGE WRAPPER - Full-screen 16:9 responsive
+// ===========================================
 .page-wrapper {
-  max-width: 324px; //360px;
+  width: 100%;
+  max-width: min(100vw, 56.25vh);
+  height: calc(100vh - 120px);
+  max-height: 177.78vw;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  
   .page-top-info {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    // justify-content: space-between;
-    margin-bottom: -5px;
-    min-height: 34px;
+    padding: 4px 8px;
+    min-height: 28px;
+    flex-shrink: 0;
+    animation: fadeSlideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    
     span.juz-number {
-      font-size: small;
+      font-size: clamp(10px, 2.5vw, 14px);
       text-align-last: start;
+      color: var(--mushaf-gold-dark, #A07C18);
+      font-weight: 500;
     }
+    
     span.page-number {
-      font-size: x-large;
+      font-size: clamp(16px, 4vw, 24px);
       text-align-last: center;
+      font-weight: 700;
+      color: var(--mushaf-gold-dark, #A07C18);
+      transition: transform 0.2s ease;
     }
+    
     span.surah-number {
-      font-size: small;
+      font-size: clamp(10px, 2.5vw, 14px);
       text-align-last: end;
+      color: var(--mushaf-gold-dark, #A07C18);
+      font-weight: 500;
     }
   }
+  
   .content-wrapper {
-    height: 576px; //height: 75vh; aspect-ratio: 9/16;
-    padding: 5px;
-    border: 2px solid;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    padding-inline-start: 16px;
+    padding-inline-end: 28px;
+    background: var(--ion-background-color);
     user-select: text;
-    // background-image: url("../../../assets/quran-pg466-aspect.PNG");
-    .line {
-      border-bottom: 0.5px solid #cecece;
-      height: 38px; //screen:height in px=> 345:32,300:28,250:22. With aspect-ratio, height: calc(78vh*0.066);
+    overflow: visible;
+    position: relative;
+
+    // ── Ornamental double-border frame (like printed mushafs) ──
+    border: 2.5px solid var(--mushaf-border-outer, #8B7355);
+    outline: 1px solid var(--mushaf-border-inner, #C9A227);
+    outline-offset: 3px;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      inset 0 0 0 1px rgba(var(--ion-color-medium-rgb, 146, 148, 156), 0.15);
+    border-radius: 2px;
+
+    // ── Corner decorations (top-left, top-right, bottom-left, bottom-right) ──
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: var(--mushaf-corner, #C9A227);
+      border-style: solid;
+      z-index: 2;
+      pointer-events: none;
     }
+
+    &::before {
+      top: -5px;
+      left: -5px;
+      border-width: 2px 0 0 2px;
+    }
+
+    &::after {
+      top: -5px;
+      right: -5px;
+      border-width: 2px 2px 0 0;
+    }
+    
+    // Each line takes equal space (for 15 lines)
+    .line {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: stretch;
+      flex-wrap: wrap;
+      border-bottom: 0.5px solid rgba(var(--ion-color-medium-rgb, 146, 148, 156), 0.2);
+      position: relative;
+      overflow: visible;
+      min-height: 0;
+      font-size: var(--reader-font-size, clamp(12px, calc(100vw / 22), 20px));
+      
+      // Smooth hover glow
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+
+      .arabic-line-text {
+        flex: 1;
+        display: block;
+        overflow: hidden;
+        text-overflow: clip;
+        white-space: nowrap;
+        min-width: 100%;
+      }
+
+      // Inline translation below each Arabic line
+      .inline-translation {
+        display: block;
+        width: 100%;
+        font-size: clamp(7px, 1.8vw, 10px);
+        line-height: 1.3;
+        color: var(--ion-color-medium);
+        font-family: "Segoe UI", "Roboto", sans-serif;
+        direction: ltr;
+        text-align: left;
+        text-align-last: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 2px;
+        margin-top: -2px;
+        // Slide in from below
+        animation: fadeSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        &.ur {
+          direction: rtl;
+          text-align: right;
+          text-align-last: right;
+          font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
+          font-size: clamp(7px, 2vw, 11px);
+          line-height: 1.5;
+        }
+      }
+
+      span:not(.inline-translation) {
+        flex: 1;
+        display: block;
+        overflow: hidden;
+        text-overflow: clip;
+        white-space: nowrap;
+      }
+    }
+    
+    // When inline translation is active
+    &.inline-trans-active .line {
+      min-height: 0;
+      .arabic-line-text {
+        line-height: 1.8;
+      }
+    }
+
+    // Word-by-word row
+    .wbw-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      direction: rtl;
+      padding: 2px 0;
+      animation: fadeIn 0.3s ease-out forwards;
+
+      .wbw-word {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2px 4px;
+        border-radius: 6px;
+        background: rgba(var(--ion-color-primary-rgb), 0.05);
+        border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+        min-width: 36px;
+        transition: background 0.15s ease;
+
+        &:hover {
+          background: rgba(var(--ion-color-primary-rgb), 0.12);
+        }
+
+        .wbw-arabic {
+          font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif;
+          font-size: clamp(0.75rem, 2.5vw, 1rem);
+          line-height: 1.4;
+          color: var(--ion-text-color);
+        }
+
+        .wbw-transliteration {
+          font-family: "Segoe UI", "Roboto", sans-serif;
+          font-size: clamp(0.4rem, 1.2vw, 0.55rem);
+          line-height: 1.1;
+          color: var(--ion-color-primary);
+          font-style: italic;
+          direction: ltr;
+          text-align: center;
+        }
+
+        .wbw-meaning {
+          font-family: "Segoe UI", "Roboto", sans-serif;
+          font-size: clamp(0.5rem, 1.5vw, 0.65rem);
+          line-height: 1.2;
+          color: var(--ion-color-medium);
+          text-align: center;
+          direction: ltr;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 60px;
+        }
+      }
+    }
+
+    // Hide lines until tatweel/font-sizing is applied, then reveal
+    &.text-preparing .line span {
+      opacity: 0;
+    }
+
+    &.text-ready .line span {
+      animation: revealText 0.3s ease-out forwards;
+    }
+    
+    .line:last-child {
+      border-bottom: none;
+    }
+    
+    // Enhanced hover with soft glow
     .line:hover {
-      background-color: var(--success-light); //#ebfef6; // #ebf2fe;
+      background-color: var(--success-light);
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.08);
+    }
+
+    // Active line press
+    .line:active {
+      background-color: rgba(var(--ion-color-primary-rgb), 0.12);
+      transition-duration: 0.05s;
     }
   }
 }
+
+// ===========================================
+// FONT FAMILIES
+// ===========================================
 .rtl {
   direction: rtl;
 }
+
 .ar {
-  font-size: 16px; // 4.6vw; //screen:fontsize in px=> 345:16,300:14,250:11 ** 18Font:42DivHeight:390Width
-  font-family: Indopak;
+  font-size: var(--reader-font-size, clamp(14px, 4vw, 18px));
+  font-family: Indopak, "Traditional Arabic", serif;
   direction: rtl;
 }
+
 .ar2 {
-  font-family: Muhammadi;
-  font-size: 17px;
+  font-family: Muhammadi, Indopak, serif;
+  font-size: var(--reader-font-size, clamp(14px, 4.2vw, 19px));
   direction: rtl;
 }
+
+.ar-waqflazim {
+  font-family: "IndoPak Waqf Lazim", Indopak, serif;
+  font-size: var(--reader-font-size, clamp(14px, 4vw, 18px));
+  direction: rtl;
+}
+
+.ar-uthmani {
+  font-family: "Uthmanic Hafs", "Traditional Arabic", serif;
+  font-size: var(--reader-font-size, clamp(14px, 4vw, 18px));
+  direction: rtl;
+}
+
 .small-text {
   font-size: small;
 }
+
 .ur {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
-    sans-serif;
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
-  font-size: 13px;
+  font-size: var(--reader-font-size, clamp(11px, 3vw, 14px));
 }
+
+// ===========================================
+// FOOTER NAVIGATION
+// ===========================================
 ion-footer {
   text-align: center;
+  background: var(--ion-toolbar-background);
+  
+  &.immersive-hidden {
+    display: none;
+  }
 }
+
 .btmNav {
   display: flex;
   align-items: center;
   width: 100%;
   justify-content: center;
+  gap: 4px;
+  padding: 4px 0;
+  
+  .nav-btns {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:active {
+      transform: scale(0.85);
+    }
+  }
 }
+
+// ===========================================
+// POPUP / TRANSLATION MODAL
+// ===========================================
 .popup,
 .trans {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
-    sans-serif;
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
 }
+
 .popup {
   opacity: 0;
   height: 0;
   position: absolute;
   left: 0;
   background: var(--ion-color-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.visible {
+    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
+
 .popup-header {
   font-size: small;
   color: var(--ion-color-medium);
 }
+
+// ===========================================
+// SPECIAL LINE STYLES
+// ===========================================
 .centered-table-text {
   text-align-last: center;
 }
@@ -112,47 +456,196 @@ ion-footer {
 .bism {
   text-align-last: center;
 }
+
 .surah-name {
-  font-size: x-large;
+  font-size: clamp(18px, 5vw, 28px);
 }
+
 .bism {
-  font-size: larger;
+  font-size: clamp(14px, 4vw, 20px);
   color: var(--ion-color-medium);
+}
+
+// ── Ornamental surah header (mimics printed mushaf banners) ──
+.surah-start-line {
+  text-align-last: center;
+  font-size: clamp(10px, 2.8vw, 14px);
+  color: var(--mushaf-gold-dark, #A07C18);
+  position: relative;
+  padding: 2px 0;
+  border-top: none !important;
+  border-bottom: none !important;
+  background: var(--mushaf-header-bg, linear-gradient(180deg, #FDF8F0 0%, #F5E6C8 50%, #FDF8F0 100%));
+  border-radius: 2px;
+  margin: 0 -4px;
+  padding: 3px 12px;
+
+  // Decorative horizontal lines flanking the header text
+  &::before,
+  &::after {
+    content: '✦';
+    font-size: 8px;
+    color: var(--mushaf-gold, #C9A227);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  &::before { left: 8px; }
+  &::after { right: 8px; }
+}
+
+// ── Ornamental bismillah line ──
+.bism-line {
+  text-align-last: center;
+  font-size: clamp(14px, 4vw, 20px);
+  color: var(--mushaf-gold-dark, #A07C18);
+  font-family: Indopak;
+  position: relative;
+  border-bottom-color: transparent !important;
+
+  // Subtle decorative under-rule
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--mushaf-gold-light, #E8D48B) 30%, var(--mushaf-gold, #C9A227) 50%, var(--mushaf-gold-light, #E8D48B) 70%, transparent 100%);
+  }
 }
 
 .emphasize-btn {
   color: var(--ion-color-primary);
-  // border-radius: 50%;
-  // background: var(--success-light);
+  // Active state glow
+  animation: subtlePulse 2s ease-in-out infinite;
 }
+
 .highlight-line {
-  background-color: #e2edff;
+  background-color: rgba(66, 165, 245, 0.2) !important;
+  animation: highlightFade 1.5s ease-out forwards;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(66, 165, 245, 0.3);
+    animation: highlightGlow 1.5s ease-out forwards;
+  }
 }
+
+@keyframes highlightFade {
+  0% { background-color: rgba(66, 165, 245, 0.4); }
+  100% { background-color: rgba(66, 165, 245, 0.05); }
+}
+
+@keyframes highlightGlow {
+  0% { box-shadow: 0 0 16px rgba(66, 165, 245, 0.4); }
+  100% { box-shadow: 0 0 0 rgba(66, 165, 245, 0); }
+}
+
+@keyframes revealText {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+// ===========================================
+// RUKU INDICATOR (IndoPak style)
+// ===========================================
 .ruku-wrapper {
   user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  row-gap: 4px;
-  font-size: 14px;
   position: absolute;
-  left: -18px;
-  line-height: 8px;
-  top: 2px;
-  &.span:nth-child(3) {
-    margin-top: 3px;
-    font-size: 14px;
+  left: -26px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--mushaf-gold-dark, #A07C18);
+  line-height: 1;
+  width: 24px;
+
+  .ruku-ain-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .ruku-ain {
+      font-size: clamp(16px, 4vw, 22px);
+      font-family: "Traditional Arabic", serif;
+      line-height: 1;
+      color: var(--mushaf-gold, #C9A227);
+    }
+
+    .ruku-ayah-count {
+      position: absolute;
+      font-size: small;
+      font-family: sans-serif;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.85;
+      color: var(--mushaf-gold-dark, #A07C18);
+    }
+  }
+
+  .ruku-number {
+    font-size: clamp(8px, 2vw, 11px);
+    margin-top: 1px;
+    opacity: 0.8;
+    color: var(--mushaf-gold-dark, #A07C18);
   }
 }
+
+// ===========================================
+// MARGIN INDICATORS (Sajdah, Waqf-Lazim etc.)
+// ===========================================
+.margin-indicator {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: clamp(7px, 1.8vw, 10px);
+  font-family: "Traditional Arabic", "Mehr", serif;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-top: 2px;
+  padding: 1px 0;
+  white-space: nowrap;
+
+  span {
+    display: inline-block;
+  }
+}
+
+.sajdah-indicator {
+  color: var(--ion-color-danger, #c62828);
+  font-weight: 600;
+  border-top: 1px solid var(--ion-color-danger, #c62828);
+  border-bottom: 1px solid var(--ion-color-danger, #c62828);
+  padding: 2px 0;
+}
+
+.waqf-lazim-indicator {
+  color: var(--mushaf-gold-dark, #A07C18);
+  font-weight: 600;
+}
+
+// ===========================================
+// VIRTUAL SCROLLER (Search results - now in modal)
+// ===========================================
 virtual-scroller {
   width: 100%;
   height: 400px;
+  
   ion-item {
     width: 100%;
     height: 48px;
   }
 }
+
 .indices {
   span.index {
     font-size: xx-small;
@@ -164,11 +657,13 @@ virtual-scroller {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 4px;
   }
+  
   span.frequency {
     font-size: 6px;
     background: var(--ion-color-danger);
-    color: var(--ion-color-light);
+    color: white;
     width: 10px;
     height: 10px;
     display: inline-flex;
@@ -179,6 +674,7 @@ virtual-scroller {
     right: 15px;
     top: 8px;
   }
+  
   span.location {
     position: absolute;
     left: 5px;
@@ -188,53 +684,147 @@ virtual-scroller {
     font-size: xx-small;
   }
 }
+
+// ===========================================
+// SPECIAL PAGE STYLES
+// ===========================================
 .quran-kareem-text {
-  font-size: 40px;
+  font-size: clamp(28px, 8vw, 44px) !important;
   border: none !important;
-  top: 50%;
-  transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  -moz-transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
-  -o-transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--mushaf-gold-dark, #A07C18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .juz-start-line {
   font-size: 110%;
   font-weight: bold;
 }
-.surah-start-line {
-  text-align-last: center;
-  font-size: small;
-  color: var(--ion-color-medium-tint);
-}
+
 .surah-end-line {
   text-align-last: center;
 }
-.bism-line {
-  text-align-last: center;
-  font-size: larger;
-  color: var(--ion-color-medium);
-  font-family: Indopak;
-}
+
+// ===========================================
+// PAGE NUMBER INPUT
+// ===========================================
 .page-num-input {
   width: 50px;
   display: inline-flex;
   background: var(--ion-color-light);
-  border-bottom: 1px solid;
+  border-bottom: 1px solid var(--ion-color-medium);
+  border-radius: 4px;
+  text-align: center;
 }
+
+// ===========================================
+// POPOVER / SETTINGS
+// ===========================================
 .popover-wrapper {
+  padding: 8px 4px 4px;
+
   ion-item {
     font-size: small;
+    --inner-padding-end: 8px;
+    --padding-start: 12px;
+    --min-height: 44px;
+    transition: background 0.15s ease;
+
+    &:active {
+      --background: rgba(var(--ion-color-primary-rgb), 0.08);
+    }
   }
+  
   .font-size-field {
     max-width: 60px;
     margin-left: 15px;
     border-bottom: 1px dashed var(--ion-color-medium);
   }
-  .selected-result {
-    background-color: #a3c0ff;
+
+  .settings-section {
+    margin: 6px 0 2px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--ion-color-medium);
+    text-transform: uppercase;
   }
+
+  .settings-card {
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    background: var(--ion-color-light);
+    overflow: hidden;
+    margin: 6px 0 10px;
+  }
+
+  ion-item-divider {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+    --background: transparent;
+  }
+
+  // ── Theme selector grid ──
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px 12px 12px;
+
+    .theme-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 8px 4px 6px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      outline: none;
+      min-height: 54px;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      &.active {
+        border-color: currentColor;
+        box-shadow: 0 0 0 1px currentColor, 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .theme-sample {
+        font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+
+      .theme-name {
+        font-family: "Segoe UI", "Roboto", sans-serif;
+        font-size: 8px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .selected-result {
+    background-color: rgba(66, 165, 245, 0.3);
+  }
+  
   .result-heading {
     .small-results-text {
       font-size: 7px;
@@ -246,38 +836,616 @@ virtual-scroller {
     }
   }
 }
+
+// ===========================================
+// AUDIO CONTROLS
+// ===========================================
 .btn-controls-top {
-  // ion-button {
-  //   width: 42px !important;
-  //   height: 42px !important;
-  // }
+  display: flex;
+  align-items: center;
 }
+
 .aud-controls-wrapper {
   display: flex;
+  align-items: center;
+  
   .qari-wrapper {
     margin-top: 5px;
     width: 80px;
     font-size: xx-small;
   }
+  
   .aud-controls {
     display: inline-flex;
     align-items: center;
     font-size: small;
+    gap: 4px;
+    
     .verse-num {
       font-size: 10px;
       padding-left: 2px;
+      color: var(--ion-color-primary);
     }
+    
     .gif-text {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
     }
+    
     .gif {
       width: 24px;
     }
+    
     .stop-btn {
       width: 38px;
+      // Pulsing stop button while playing
+      animation: subtlePulse 1.5s ease-in-out infinite;
     }
+  }
+}
+
+// ===========================================
+// IMMERSIVE MODE TOGGLE BUTTON
+// ===========================================
+.immersive-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  opacity: 0.7;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  ion-fab-button {
+    &:active {
+      transform: scale(0.85) !important;
+    }
+  }
+}
+
+:host-context(.immersive-mode) .immersive-toggle {
+  bottom: env(safe-area-inset-bottom, 20px);
+  opacity: 0.5;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+// ===========================================
+// SCAN VIEW
+// ===========================================
+.scan-view {
+  width: 100%;
+  height: 100%;
+  
+  .scan-image-wrapper {
+    width: 100%;
+    height: auto;
+  }
+}
+
+// ===========================================
+// IMMERSIVE MODE HIDING
+// ===========================================
+.immersive-hidden {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+// ===========================================
+// SEARCH MODAL (Sheet style)
+// ===========================================
+.search-wrapper {
+  padding: 8px;
+  height: 100%;
+  overflow-y: auto;
+
+  .search-card {
+    margin: 0 0 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    animation: fadeSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    ion-item {
+      --min-height: 44px;
+      font-size: small;
+    }
+  }
+
+  .result-heading {
+    animation: fadeSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    .small-results-text {
+      font-size: 7px;
+      letter-spacing: 2px;
+      position: absolute;
+      top: 6px;
+      text-transform: uppercase;
+      font-style: italic;
+    }
+  }
+
+  virtual-scroller {
+    width: 100%;
+    height: calc(100% - 160px);
+    min-height: 200px;
+
+    ion-item {
+      width: 100%;
+      height: 48px;
+      transition: background 0.15s ease;
+
+      &:active {
+        --background: rgba(var(--ion-color-primary-rgb), 0.1);
+      }
+    }
+  }
+
+  .indices {
+    span.index {
+      font-size: xx-small;
+      font-family: sans-serif;
+      background: var(--ion-color-light);
+      padding: 2px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    span.frequency {
+      font-size: 6px;
+      background: var(--ion-color-danger);
+      color: white;
+      width: 10px;
+      height: 10px;
+      display: inline-flex;
+      border-radius: 50%;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      right: 15px;
+      top: 8px;
+    }
+
+    span.location {
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      color: var(--ion-color-medium);
+      rotate: -45deg;
+      font-size: xx-small;
+    }
+  }
+}
+
+// ===========================================
+// WORD DETAIL MODAL
+// ===========================================
+.word-detail-wrapper {
+  padding: 20px;
+  text-align: center;
+  animation: fadeSlideUp 0.3s ease-out forwards;
+
+  .word-detail-arabic {
+    font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif;
+    font-size: 2.5rem;
+    line-height: 1.5;
+    color: var(--ion-text-color);
+    margin-bottom: 8px;
+  }
+
+  .word-detail-transliteration {
+    font-size: 1rem;
+    color: var(--ion-color-primary);
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+
+  .word-detail-translation {
+    font-size: 1.1rem;
+    color: var(--ion-color-medium-shade);
+    margin-bottom: 12px;
+  }
+
+  .word-detail-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    .word-location {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  // ── Morphology Section ──
+  .word-morphology {
+    text-align: left;
+    margin: 12px 0 16px;
+    padding: 12px;
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    animation: fadeSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+
+    .morphology-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      ion-icon {
+        font-size: 1.1rem;
+      }
+    }
+
+    .morphology-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+
+      .morph-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .morph-label {
+          font-size: 0.65rem;
+          color: var(--ion-color-medium);
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .morph-value {
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: var(--ion-text-color);
+
+          &.ar {
+            font-family: "IndoPak Waqf Lazim", "Muhammadi", serif;
+            font-size: 1.2rem;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+  }
+
+  .word-detail-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+
+    ion-button {
+      --border-radius: 20px;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// ===========================================
+// BOOKMARKS VIEWER
+// ===========================================
+.bookmarks-wrapper {
+  padding: 12px;
+
+  .bookmark-folder {
+    margin-bottom: 16px;
+    animation: fadeSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .folder-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--ion-color-light-shade);
+    margin-bottom: 4px;
+
+    .folder-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex: 1;
+    }
+
+    .folder-count {
+      font-size: 0.7rem;
+      color: var(--ion-color-medium);
+      background: var(--ion-color-light);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+  }
+
+  .bookmark-list {
+    ion-item {
+      --min-height: 52px;
+      --padding-start: 8px;
+      transition: background 0.15s ease;
+
+      &:active {
+        --background: rgba(var(--ion-color-primary-rgb), 0.08);
+      }
+
+      h3 {
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      p {
+        font-size: 0.7rem;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  .empty-folder-text {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    text-align: center;
+    padding: 8px;
+    font-style: italic;
+  }
+
+  .empty-bookmarks {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--ion-color-medium);
+    animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+
+    p {
+      margin: 8px 0;
+    }
+  }
+}
+
+// ===========================================
+// LINE CONTEXT MENU (Long Press)
+// ===========================================
+:root {
+  .line-context-menu {
+    .action-sheet-group-cancel {
+      padding-bottom: env(safe-area-inset-bottom, 8px);
+    }
+  }
+}
+
+// ===========================================
+// TAJWEED COLORS (offline library classes)
+// ===========================================
+// Ported from https://github.com/quran/tajweed
+// Classes: tj-ghunna, tj-ikhfa, tj-idgham_with_ghunna, etc.
+// Colors use CSS custom properties so users can override them.
+
+:root {
+  // Madani mushaf default palette
+  --tj-ghunna:            #43A047;
+  --tj-ikhfa:             #D4A017;
+  --tj-idgham:            #43A047;
+  --tj-idgham-gray:       #9E9E9E;
+  --tj-iqlab:             #43A047;
+  --tj-qalqalah:          #0091EA;
+  --tj-meem-ikhfa:        #D4A017;
+  --tj-meem-idgham:       #43A047;
+  --tj-maad-long:         #B71C1C;
+  --tj-maad-connected:    #F44336;
+  --tj-maad-sukoon:       #FB8C00;
+  --tj-maad-sila:         #E68A00;
+}
+
+:host ::ng-deep .tajweed-text {
+  // Ghunnah – green
+  .tj-ghunna                { color: var(--tj-ghunna); }
+
+  // Ikhfa – yellow/gold
+  .tj-ikhfa                 { color: var(--tj-ikhfa); }
+
+  // Idgham with ghunnah – green
+  .tj-idgham_with_ghunna    { color: var(--tj-idgham); }
+  // Idgham without ghunnah – gray (not pronounced)
+  .tj-idgham_without_ghunna { color: var(--tj-idgham-gray); }
+  .tj-idgham_not_pronounced { color: var(--tj-idgham-gray); }
+
+  // Iqlab – green
+  .tj-iqlab                 { color: var(--tj-iqlab); }
+  .tj-iqlab_not_pronounced  { color: var(--tj-idgham-gray); }
+
+  // Qalqalah – blue
+  .tj-qalqalah              { color: var(--tj-qalqalah); }
+
+  // Meem rules
+  .tj-meem_ikhfa            { color: var(--tj-meem-ikhfa); }
+  .tj-meem_idgham           { color: var(--tj-meem-idgham); }
+
+  // Madd rules
+  .tj-maad_long             { color: var(--tj-maad-long); }
+  .tj-maad_munfassil        { color: var(--tj-maad-connected); }
+  .tj-maad_sukoon           { color: var(--tj-maad-sukoon); }
+  .tj-maad_sila             { color: var(--tj-maad-sila); }
+}
+
+// Dark mode adjustments
+body.dark {
+  --tj-ghunna:            #66FF66;
+  --tj-ikhfa:             #FFD54F;
+  --tj-idgham:            #66FF66;
+  --tj-idgham-gray:       #BDBDBD;
+  --tj-iqlab:             #66FF66;
+  --tj-qalqalah:          #64B5F6;
+  --tj-meem-ikhfa:        #FFD54F;
+  --tj-meem-idgham:       #66FF66;
+  --tj-maad-long:         #EF5350;
+  --tj-maad-connected:    #FF7043;
+  --tj-maad-sukoon:       #FFB74D;
+  --tj-maad-sila:         #FFA726;
+}
+
+// Tajweed legend tooltip
+.tajweed-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  justify-content: center;
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+  }
+}
+
+// ===========================================
+// COMPACT POPOVER / SETTINGS
+// ===========================================
+.compact-settings {
+  padding: 0;
+
+  ion-item {
+    --min-height: 36px;
+    font-size: 0.85rem;
+  }
+  ion-item-divider {
+    --padding-top: 4px;
+    --padding-bottom: 2px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Quick toggles row (top of popover)
+.quick-toggles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 8px;
+  background: var(--ion-color-light-tint, #f4f5f8);
+  border-radius: 0 0 12px 12px;
+
+  .qt-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--ion-color-medium);
+
+    ion-icon {
+      font-size: 20px;
+    }
+    span {
+      font-size: 0.6rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    &.active {
+      background: var(--ion-color-primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.35);
+    }
+    &:active {
+      transform: scale(0.92);
+    }
+  }
+}
+
+// Font size display
+.font-size-display {
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 28px;
+  text-align: center;
+  color: var(--ion-color-primary);
+}
+
+// Navigation inputs
+.nav-input {
+  max-width: 65px;
+  font-size: 0.8rem;
+}
+
+// Action grid (bookmarks, notes, export etc.)
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px 8px;
+
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 2px;
+    border: 1px solid var(--ion-color-light-shade, #ddd);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--ion-text-color);
+
+    ion-icon {
+      font-size: 18px;
+      color: var(--ion-color-primary);
+    }
+    span {
+      font-size: 0.6rem;
+      font-weight: 500;
+    }
+
+    &:active {
+      transform: scale(0.92);
+      background: var(--ion-color-light);
+    }
+  }
+}
+
+// ===========================================
+// REDUCED MOTION
+// ===========================================
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

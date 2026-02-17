@@ -17,13 +17,98 @@
     },
     {
       "name": "assets",
-      "installMode": "lazy",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
           "/assets/**",
+          "!/assets/data/morphology/**",
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ]
+      }
+    },
+    {
+      "name": "morphology-data",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/assets/data/morphology/**"
+        ]
+      }
+    },
+    {
+      "name": "fonts",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/fonts/**"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "ionicons",
+      "urls": [
+        "https://unpkg.com/ionicons@*/**/*.svg",
+        "https://cdn.jsdelivr.net/npm/ionicons@*/**/*.svg"
+      ],
+      "cacheConfig": {
+        "maxSize": 300,
+        "maxAge": "90d",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "quran-archive",
+      "urls": [
+        "https://raw.githubusercontent.com/ShakesVision/Quran_archive/**",
+        "https://raw.githubusercontent.com/ShakesVision/quran-archive/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "30d",
+        "strategy": "performance",
+        "timeout": "8s"
+      }
+    },
+    {
+      "name": "quran-api",
+      "urls": [
+        "https://api.quran.com/api/v4/**",
+        "https://api.qurancdn.com/api/qdc/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 300,
+        "maxAge": "30d",
+        "strategy": "freshness",
+        "timeout": "10s"
+      }
+    },
+    {
+      "name": "audio-cdn",
+      "urls": [
+        "https://verses.quran.com/**",
+        "https://audio.qurancdn.com/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "90d",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "archive-org",
+      "urls": [
+        "https://archive.org/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "7d",
+        "strategy": "freshness",
+        "timeout": "10s"
       }
     }
   ]

@@ -1,11 +1,16 @@
 {
   "name": "Quran: Hifz Helper",
-  "short_name": "Quran: Hifz Helper",
+  "short_name": "Quran Hifz",
+  "description": "Read, memorize and explore the Holy Quran with multi-source text, audio, translation and beautiful Discover reels.",
   "theme_color": "#055533",
   "background_color": "#055533",
   "display": "standalone",
+  "orientation": "portrait",
   "scope": "./",
   "start_url": "./",
+  "categories": ["education", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "assets/icons/icon-72x72.png",
@@ -59,10 +64,55 @@
   "shortcuts": [
     {
       "name": "Full Quran",
-      "short_name": "Quran",
-      "url": "/juz",
-      "description": "Open the page of full Quran with Juz & Surah list",
-      "icons": ["src/assets/quran.png"]
+      "short_name": "Read",
+      "url": "/quran",
+      "description": "Open and read the complete Quran",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Browse Juz & Surah",
+      "short_name": "Browse",
+      "url": "/browse",
+      "description": "Browse Juz & Surah list",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Discover Ayahs",
+      "short_name": "Discover",
+      "url": "/discover",
+      "description": "Swipe through random beautiful Ayah cards",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Memorize",
+      "short_name": "Memorize",
+      "url": "/memorize",
+      "description": "Track your Quran memorization progress",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

@@ -1,40 +1,266 @@
-ion-searchbar {
-  padding-bottom: 0;
+// ===========================================
+// LISTEN PAGE - Modern Material Design 3
+// ===========================================
+
+ion-header {
+  ion-toolbar {
+    --background: transparent;
+  }
+
+  .qari-btn {
+    --color: var(--ion-color-primary);
+    font-size: 0.8rem;
+    text-transform: none;
+
+    ion-icon {
+      font-size: 20px;
+      margin-right: 4px;
+    }
+  }
 }
-.top-wrapper {
-  // padding: 10px;
+
+ion-content {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 8px;
+  --padding-bottom: 120px;
 }
-.active {
-  background: var(--success-light);
-}
-.player-wrapper {
+
+// ===========================================
+// PLAYER CARD (Now Playing)
+// ===========================================
+.player-card {
   position: fixed;
   bottom: 0;
-  z-index: 5;
-  text-align: center;
-  padding-top: 3px;
-  width: 100%;
-  background: var(--ion-color-primary); //var(--success-light); // #ffe2bd;
-  color: var(--ion-color-light);
-  // audio {
-  //   border: 1px solid;
-  //   border-radius: 50px;
-  // }
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--ion-color-primary);
+  padding: 12px 16px 16px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+
+  .player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: white;
+
+    .player-number {
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .player-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .player-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .player-title-ar {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .custom-audio {
+    width: 100%;
+    height: 36px;
+    border-radius: 18px;
+    outline: none;
+
+    &::-webkit-media-controls-panel {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
 }
-.labelled-btn-wrapper {
+
+// ===========================================
+// QARI SELECTOR CARD
+// ===========================================
+.qari-selector-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+
+  .selector-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+  }
+
+  .qari-select {
+    flex: 1;
+    --placeholder-color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+
+  .qari-count {
+    font-size: 0.7rem;
+    color: var(--ion-color-medium);
+    white-space: nowrap;
+  }
+}
+
+// ===========================================
+// SEARCH CONTAINER
+// ===========================================
+.search-container {
+  margin-bottom: 8px;
+}
+
+.custom-searchbar {
+  --background: var(--ion-color-light);
+  --border-radius: 12px;
+  --box-shadow: none;
+  --placeholder-color: var(--ion-color-medium);
+  padding: 0;
+}
+
+// ===========================================
+// SURAH COUNT
+// ===========================================
+.surah-count {
+  font-size: 0.7rem;
+  color: var(--ion-color-medium);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+// ===========================================
+// LOADING
+// ===========================================
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+// ===========================================
+// SURAH LIST
+// ===========================================
+.surah-list {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.surah-item {
+  display: flex;
   align-items: center;
-  ion-button {
-    --padding-bottom: 0;
+  gap: 12px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    background: var(--ion-color-light-tint);
+    transform: translateY(-1px);
   }
-  ion-label {
-    font-size: x-small;
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &.playing {
+    background: var(--ion-color-primary-tint);
+    border: 1px solid var(--ion-color-primary);
+
+    .surah-number {
+      background: var(--ion-color-primary);
+      color: white;
+    }
+  }
+
+  .surah-number {
+    width: 36px;
+    height: 36px;
+    background: var(--ion-color-primary-tint);
+    color: var(--ion-color-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .surah-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    .surah-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--ion-text-color);
+    }
+
+    .surah-meta {
+      font-size: 0.7rem;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .surah-title-ar {
+    font-size: 1rem;
+    color: var(--ion-text-color);
+    flex-shrink: 0;
+  }
+
+  .play-icon {
+    font-size: 28px;
+    color: var(--ion-color-medium);
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+
+    &.playing {
+      color: var(--ion-color-primary);
+    }
   }
 }
-.qari-selector {
-  // --background: var(--success-light);
+
+// ===========================================
+// ARABIC TEXT
+// ===========================================
+.ar-text {
+  font-family: "Muhammadi", serif;
+  direction: rtl;
 }
-.aud-wrapper {
-  margin-bottom: 100px;
+
+// ===========================================
+// DARK MODE
+// ===========================================
+body.dark {
+  .player-card {
+    background: var(--ion-color-primary-shade);
+  }
+
+  .surah-item {
+    &:hover {
+      background: var(--ion-color-light-shade);
+    }
+  }
 }

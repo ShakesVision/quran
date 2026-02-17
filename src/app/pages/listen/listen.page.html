@@ -1,73 +1,82 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-searchbar
-      type="text"
-      class="ion-text-center ion-no-padding ar-text"
-      placeholder="falaq / فلق / 113 / ۱۱۳"
-      (ionChange)="queryChanged($event.target.value)"
-      mode="ios"
-    ></ion-searchbar>
+    <ion-title>Listen</ion-title>
     <ion-buttons slot="end">
-      <div class="labelled-btn-wrapper">
-        <ion-button (click)="qariSelect()">
-          <ion-icon slot="icon-only" name="people-outline"></ion-icon>
-        </ion-button>
-        <ion-label> {{reciters.length}} </ion-label>
-      </div>
+      <ion-button (click)="qariSelect()" class="qari-btn">
+        <ion-icon slot="start" name="person-circle-outline"></ion-icon>
+        <span>{{selectedQariName || 'Qaari'}}</span>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <div class="top-wrapper">
-    <!-- <ion-input type="number" placeholder="Ayah number" #numValue></ion-input>
-    <ion-button (click)="listen(numValue.value)">
-      <ion-icon slot="start" name="play-outline"></ion-icon>
-      Play
-    </ion-button> -->
-    <div class="spinner">
-      <ion-spinner *ngIf="spin" name="bubbles"></ion-spinner>
+  <!-- Now Playing Card -->
+  <div class="player-card" *ngIf="nowPlaying">
+    <div class="player-info">
+      <span class="player-number">{{nowPlaying.index}}</span>
+      <div class="player-text">
+        <span class="player-title">{{nowPlaying.title}}</span>
+        <span class="player-title-ar ar-text">{{nowPlaying.titleAr}}</span>
+      </div>
     </div>
+    <audio controls [src]="audioSrc" #audioEl id="audio" class="custom-audio"></audio>
   </div>
 
-  <ion-item class="qari-selector">
-    <ion-label>Qaari</ion-label>
+  <!-- Qari Selector -->
+  <div class="qari-selector-card">
+    <ion-icon name="mic-outline" class="selector-icon"></ion-icon>
     <ion-select
       *ngIf="reciters"
       #mySelect
       value="3"
       (ionChange)="qariChanged(mySelect.value)"
       placeholder="Select Qaari"
-      mode="ios"
-    >
-      <ion-select-option *ngFor="let r of reciters" [value]="r.id"
-        >{{r.name}}</ion-select-option
-      >
+      interface="action-sheet"
+      class="qari-select">
+      <ion-select-option *ngFor="let r of reciters" [value]="r.id">
+        {{r.name}}
+      </ion-select-option>
     </ion-select>
-  </ion-item>
-  <div class="total">{{surahInfo.length}}</div>
-  <div class="aud-wrapper">
-    <div class="aud" *ngFor="let s of surahInfo">
-      <ion-item button (click)="listen(s,$event.target)">
-        <ion-label> <span>{{s.index}}. {{s.title}}</span></ion-label>
-        <ion-label slot="end">
-          <span class="ar-text">{{s.titleAr}}</span></ion-label
-        >
-      </ion-item>
-    </div>
+    <span class="qari-count">{{reciters.length}} reciters</span>
   </div>
-  <div class="player-wrapper">
-    <div *ngIf="nowPlaying" class="now-playing">
-      <ion-label>
-        <span>{{nowPlaying.index}}. {{nowPlaying.title}}</span></ion-label
-      >
-      <ion-label slot="end">
-        <span class="ar-text">{{nowPlaying.titleAr}}</span></ion-label
-      >
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <ion-searchbar
+      type="text"
+      class="custom-searchbar"
+      placeholder="Search surah..."
+      (ionChange)="queryChanged($event.target.value)"
+      mode="ios">
+    </ion-searchbar>
+  </div>
+
+  <!-- Surah Count -->
+  <div class="surah-count" *ngIf="surahInfo">
+    {{surahInfo.length}} Surahs
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrapper" *ngIf="spin">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+
+  <!-- Surah List -->
+  <div class="surah-list">
+    <div class="surah-item" *ngFor="let s of surahInfo" (click)="listen(s, $event.target)"
+      [class.playing]="nowPlaying?.index === s.index">
+      <div class="surah-number">{{s.index}}</div>
+      <div class="surah-info">
+        <span class="surah-title">{{s.title}}</span>
+        <span class="surah-meta">{{s.count}} Ayahs • {{s.type}}</span>
+      </div>
+      <span class="surah-title-ar ar-text">{{s.titleAr}}</span>
+      <ion-icon name="play-circle" class="play-icon" *ngIf="nowPlaying?.index !== s.index"></ion-icon>
+      <ion-icon name="pause-circle" class="play-icon playing" *ngIf="nowPlaying?.index === s.index" color="primary"></ion-icon>
     </div>
-    <audio controls [src]="audioSrc" #audioEl id="audio"></audio>
   </div>
 </ion-content>

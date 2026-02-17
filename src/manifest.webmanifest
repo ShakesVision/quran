@@ -63,16 +63,56 @@
   ],
   "shortcuts": [
     {
-      "name": "Browse Quran",
+      "name": "Full Quran",
+      "short_name": "Read",
+      "url": "/quran",
+      "description": "Open and read the complete Quran",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Browse Juz & Surah",
       "short_name": "Browse",
       "url": "/browse",
-      "description": "Browse Juz & Surah list"
+      "description": "Browse Juz & Surah list",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Discover Ayahs",
       "short_name": "Discover",
       "url": "/discover",
-      "description": "Swipe through random beautiful Ayah cards"
+      "description": "Swipe through random beautiful Ayah cards",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Memorize",
+      "short_name": "Memorize",
+      "url": "/memorize",
+      "description": "Track your Quran memorization progress",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

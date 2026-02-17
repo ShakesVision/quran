@@ -261,24 +261,37 @@ ion-content {
       
       .card-caret {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 0 12px;
-        border-left: 1px solid rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.2);
+        padding: 4px 14px;
+        border-left: 1.5px solid rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.25);
         cursor: pointer;
         transition: background 0.2s;
+        background: rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.04);
+        gap: 2px;
 
         ion-icon {
-          font-size: 18px;
+          font-size: 22px;
           color: var(--ion-color-primary);
+          animation: caretBounce 2s ease-in-out infinite 2s;
+        }
+
+        .caret-label {
+          font-size: 0.55rem;
+          color: var(--ion-color-primary);
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          text-transform: uppercase;
+          opacity: 0.8;
         }
 
         &:hover {
-          background: rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.08);
+          background: rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.1);
         }
 
         &:active {
-          background: rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.15);
+          background: rgba(var(--ion-color-primary-rgb, 27, 94, 32), 0.18);
         }
       }
       
@@ -373,6 +386,223 @@ ion-content {
       animation: subtlePulse 2s ease-in-out infinite;
     }
   }
+}
+
+// ===========================================
+// DAILY TARGETS
+// ===========================================
+.targets-section {
+  padding: 0 12px;
+  margin-top: 16px;
+  opacity: 0;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+
+  .targets-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    .targets-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .streak-flame {
+      font-size: 20px;
+      color: #999;
+      transition: all 0.3s ease;
+
+      &.active {
+        color: #FF6B35;
+        animation: flamePulse 1.5s ease-in-out infinite;
+      }
+    }
+
+    .streak-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #FF6B35;
+      background: rgba(255, 107, 53, 0.12);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .section-title {
+      margin: 0;
+    }
+  }
+
+  .target-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--ion-color-light);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    .target-progress-ring {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      position: relative;
+
+      svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+      }
+
+      .ring-bg {
+        fill: none;
+        stroke: var(--ion-color-medium-tint);
+        stroke-width: 3;
+        opacity: 0.2;
+      }
+
+      .ring-fill {
+        fill: none;
+        stroke: var(--ion-color-success);
+        stroke-width: 3;
+        stroke-linecap: round;
+        transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &.hifz {
+          stroke: #7C4DFF;
+        }
+      }
+
+      .ring-text {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .ring-value {
+          font-size: 0.85rem;
+          font-weight: 700;
+          line-height: 1;
+          color: var(--ion-text-color);
+        }
+
+        .ring-label {
+          font-size: 0.5rem;
+          opacity: 0.6;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+
+    .target-info {
+      flex: 1;
+
+      .target-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--ion-text-color);
+      }
+
+      .target-detail {
+        font-size: 0.72rem;
+        opacity: 0.7;
+        margin-top: 2px;
+      }
+
+      .target-sub {
+        font-size: 0.65rem;
+        opacity: 0.5;
+        margin-top: 2px;
+
+        .target-done {
+          color: var(--ion-color-success);
+          font-weight: 600;
+          opacity: 1;
+        }
+      }
+    }
+
+    .log-btn {
+      font-size: 28px;
+      color: var(--ion-color-primary);
+      opacity: 0.7;
+      transition: all 0.2s ease;
+    }
+
+    &:hover .log-btn {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+
+  .khatm-projection {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    padding: 6px 10px;
+    background: rgba(var(--ion-color-warning-rgb), 0.08);
+    border-radius: 8px;
+    margin-bottom: 8px;
+
+    ion-icon {
+      font-size: 14px;
+      color: var(--ion-color-warning);
+    }
+  }
+
+  .weekly-heatmap {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 4px;
+    gap: 4px;
+
+    .heatmap-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+
+      .day-label {
+        font-size: 0.55rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.5;
+        font-weight: 500;
+      }
+
+      .day-dot {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        background: var(--ion-color-success);
+        transition: opacity 0.3s ease;
+      }
+
+      &.done .day-dot {
+        opacity: 1 !important;
+        box-shadow: 0 0 6px rgba(var(--ion-color-success-rgb), 0.4);
+      }
+    }
+  }
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); filter: brightness(1.2); }
 }
 
 // ===========================================
@@ -623,6 +853,14 @@ body.dark {
     max-width: 500px;
     margin: 0 auto;
   }
+}
+
+// ===========================================
+// CARET BOUNCE ANIMATION
+// ===========================================
+@keyframes caretBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
 }
 
 // ===========================================

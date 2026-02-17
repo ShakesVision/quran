@@ -430,8 +430,11 @@ export class SurahService {
     return this.http.get(url);
   }
 
-  fetchTrans(verseKey, lang = "en") {
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak,text&words=true&word_fields=text_indopak,text&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
+  fetchTrans(verseKey, lang = "en", translationIds?: number[]) {
+    // Default: comprehensive set of English + Urdu translations
+    const defaultIds = [20, 85, 84, 95, 22, 203, 97, 54, 234, 151, 158, 156, 819];
+    const ids = translationIds || defaultIds;
+    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak,text&words=true&word_fields=text_indopak,text&translations=${ids.join(',')}&translation_fields=resource_name,language_name&audio=2`;
     return this.httpClient.get(url);
   }
   async presentToastWithOptions(

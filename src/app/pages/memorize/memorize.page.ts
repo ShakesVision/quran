@@ -42,6 +42,22 @@ interface Badge {
   condition: () => boolean;
 }
 
+interface ReviewItem {
+  type: 'juz' | 'surah';
+  id: number;
+  label: string;
+  lastReviewed: Date;
+  intervalDays: number; // spaced repetition interval
+  intervalLabel: string;
+  nextReview: Date;
+}
+
+interface ReviewHeatmapDay {
+  short: string;
+  label: string;
+  count: number;
+}
+
 @Component({
   selector: "app-memorize",
   templateUrl: "./memorize.page.html",
@@ -66,6 +82,11 @@ export class MemorizePage implements OnInit {
   showConfetti = false;
   confettiPieces: { x: number; delay: number; color: string }[] = [];
   streakCount = 0;
+
+  // Spaced Repetition & Review
+  dueForReview: ReviewItem[] = [];
+  reviewHeatmap: ReviewHeatmapDay[] = [];
+  Math = Math; // Expose for template
 
   // Progress ring
   ringCircumference = 2 * Math.PI * 52; // 52 is the radius
@@ -119,6 +140,12 @@ export class MemorizePage implements OnInit {
     this.surahService.getSurahInfo().subscribe((res: any) => {
       this.surahInfo = res;
     });
+    // Load spaced repetition review data and heatmap
+    setTimeout(() => {
+      this.loadDueForReview();
+      this.buildReviewHeatmap();
+    }, 500);
+
     // Load streak
     this.storage.get("memorize_streak").then((streak) => {
       if (streak) {
@@ -415,7 +442,7 @@ export class MemorizePage implements OnInit {
   getSurahNameByNumber(num: number): string {
     if (num < 1 || num > 114) return '';
     const info = this.surahInfo[num - 1];
-    return info?.name || this.surahService.surahNamesEnglish?.[num - 1] || `Surah ${num}`;
+    return info?.name || this.surahService.surahNames?.[num - 1] || `Surah ${num}`;
   }
 
   getJuzNameByNumber(num: number): string {
@@ -661,5 +688,174 @@ export class MemorizePage implements OnInit {
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();
     if (popover) this.popoverDismiss();
+  }
+
+  // ═══════════════════════════════════════════
+  // SPACED REPETITION / REVIEW SYSTEM
+  // ═══════════════════════════════════════════
+
+  /**
+   * Spaced repetition intervals based on Ebbinghaus forgetting curve:
+   * 1 day → 3 days → 7 days → 14 days → 30 days → 60 days (mastered)
+   */
+  private REVIEW_INTERVALS = [1, 3, 7, 14, 30, 60];
+
+  /**
+   * Get mastery level based on how many review cycles completed.
+   * Stored as reviewCount in the item's updated metadata.
+   */
+  getMasteryLevel(item: JuzItem | SurahItem): string {
+    const progress = 'total' in item ? item.completed / item.total : 0;
+    if (progress === 0) return 'new';
+    if (progress < 1) return 'learning';
+
+    // For completed items, check review history
+    const daysSinceUpdate = this.daysSince(new Date(item.updated));
+    if (daysSinceUpdate > 30) return 'reviewing'; // needs review
+    return 'mastered';
+  }
+
+  getMasteryLabel(item: JuzItem | SurahItem): string {
+    const level = this.getMasteryLevel(item);
+    switch (level) {
+      case 'new': return 'New';
+      case 'learning': return 'Learning';
+      case 'reviewing': return 'Review needed';
+      case 'mastered': return 'Strong';
+      default: return '';
+    }
+  }
+
+  private daysSince(date: Date): number {
+    const now = new Date();
+    return Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  /**
+   * Calculate which items are due for review using spaced repetition intervals.
+   */
+  async loadDueForReview() {
+    this.dueForReview = [];
+    const now = new Date();
+
+    // Check completed juz items
+    for (const item of this.items) {
+      if (item.completed < item.total) continue; // not yet completed
+      const review = await this.getReviewData('juz', item.juz);
+      const interval = this.REVIEW_INTERVALS[Math.min(review.cycle, this.REVIEW_INTERVALS.length - 1)];
+      const nextReview = new Date(review.lastReviewed);
+      nextReview.setDate(nextReview.getDate() + interval);
+
+      if (now >= nextReview) {
+        this.dueForReview.push({
+          type: 'juz',
+          id: item.juz,
+          label: `Juz ${item.juz}`,
+          lastReviewed: review.lastReviewed,
+          intervalDays: interval,
+          intervalLabel: this.formatInterval(interval),
+          nextReview,
+        });
+      }
+    }
+
+    // Check completed surah items
+    for (const item of this.surahItems) {
+      if (item.completed < item.total) continue;
+      const review = await this.getReviewData('surah', item.surahNumber);
+      const interval = this.REVIEW_INTERVALS[Math.min(review.cycle, this.REVIEW_INTERVALS.length - 1)];
+      const nextReview = new Date(review.lastReviewed);
+      nextReview.setDate(nextReview.getDate() + interval);
+
+      if (now >= nextReview) {
+        this.dueForReview.push({
+          type: 'surah',
+          id: item.surahNumber,
+          label: item.surahName || `Surah ${item.surahNumber}`,
+          lastReviewed: review.lastReviewed,
+          intervalDays: interval,
+          intervalLabel: this.formatInterval(interval),
+          nextReview,
+        });
+      }
+    }
+
+    // Sort by most overdue first
+    this.dueForReview.sort((a, b) => a.nextReview.getTime() - b.nextReview.getTime());
+  }
+
+  private async getReviewData(type: string, id: number): Promise<{ lastReviewed: Date; cycle: number }> {
+    const key = `review_${type}_${id}`;
+    const data = await this.storage.get(key);
+    if (data) {
+      return { lastReviewed: new Date(data.lastReviewed), cycle: data.cycle || 0 };
+    }
+    // Default: treat completion date as last review, cycle 0
+    return { lastReviewed: new Date(), cycle: 0 };
+  }
+
+  async markReviewed(item: ReviewItem) {
+    const key = `review_${item.type}_${item.id}`;
+    const data = await this.storage.get(key) || { cycle: 0 };
+    data.cycle = (data.cycle || 0) + 1;
+    data.lastReviewed = new Date().toISOString();
+    await this.storage.set(key, data);
+
+    // Remove from due list
+    this.dueForReview = this.dueForReview.filter(
+      (r) => !(r.type === item.type && r.id === item.id)
+    );
+
+    // Update streak
+    this.updateStreak();
+
+    // Log to heatmap
+    await this.logReviewActivity();
+
+    this.toast(`${item.label} reviewed! Next in ${this.formatInterval(
+      this.REVIEW_INTERVALS[Math.min(data.cycle, this.REVIEW_INTERVALS.length - 1)]
+    )}`, 'success');
+  }
+
+  private formatInterval(days: number): string {
+    if (days === 1) return '1 day';
+    if (days < 7) return `${days} days`;
+    if (days === 7) return '1 week';
+    if (days === 14) return '2 weeks';
+    if (days === 30) return '1 month';
+    if (days === 60) return '2 months';
+    return `${days} days`;
+  }
+
+  // ═══════════════════════════════════════════
+  // WEEKLY REVIEW HEATMAP
+  // ═══════════════════════════════════════════
+
+  async buildReviewHeatmap() {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    this.reviewHeatmap = [];
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - dayOfWeek + i);
+      const key = `review_activity_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const count = (await this.storage.get(key)) || 0;
+      this.reviewHeatmap.push({
+        short: days[i],
+        label: fullDays[i],
+        count,
+      });
+    }
+  }
+
+  private async logReviewActivity() {
+    const d = new Date();
+    const key = `review_activity_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const current = (await this.storage.get(key)) || 0;
+    await this.storage.set(key, current + 1);
+    await this.buildReviewHeatmap();
   }
 }

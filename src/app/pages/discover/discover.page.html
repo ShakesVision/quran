@@ -49,9 +49,9 @@
         <!-- Surah Badge -->
         <div class="surah-badge" [style.background]="card.design.accentColor + '20'"
              [style.borderColor]="card.design.accentColor + '40'">
-          <span class="surah-name-ar">{{ card.surahNameAr }}</span>
-          <span class="surah-divider">•</span>
           <span class="surah-name-en">{{ card.surahNameEn }}</span>
+          <span class="surah-divider">•</span>
+          <span class="surah-name-ar">{{ card.surahNameAr }}</span>
           <span class="verse-key">({{ card.verseKey }})</span>
         </div>
 
@@ -59,9 +59,8 @@
         <div class="arabic-section" [class.font-large]="card.design.fontSizeClass === 'large'"
              [class.font-medium]="card.design.fontSizeClass === 'medium'"
              [class.font-small]="card.design.fontSizeClass === 'small'">
-          <div class="bismillah-ornament" [style.color]="card.design.accentColor + '60'">﴾</div>
-          <p class="arabic-text ar-qurancom">{{ card.arabicText }}</p>
-          <div class="bismillah-ornament end" [style.color]="card.design.accentColor + '60'">﴿</div>
+          <p class="arabic-text ar-qurancom"
+             [style.--accent]="card.design.accentColor + '35'">{{ card.arabicText }}</p>
         </div>
 
         <!-- Divider -->
@@ -86,6 +85,9 @@
         <button class="action-btn" (click)="openInReader()" title="Read in context">
           <ion-icon name="book-outline"></ion-icon>
         </button>
+        <button class="action-btn" (click)="toggleSettings()" title="Translation settings">
+          <ion-icon name="language-outline"></ion-icon>
+        </button>
       </div>
 
       <!-- Scroll Hint (only on first card) -->
@@ -103,6 +105,43 @@
     </button>
     <div class="counter">
       {{ currentIndex + 1 }}
+    </div>
+  </div>
+
+  <!-- Translation Settings Panel -->
+  <div class="settings-panel" [class.visible]="showSettings">
+    <div class="settings-backdrop" (click)="toggleSettings()"></div>
+    <div class="settings-sheet">
+      <div class="settings-handle"></div>
+      <h3 class="settings-title">Translation Settings</h3>
+      <p class="settings-subtitle">Choose your preferred translations for Discover</p>
+
+      <div class="settings-option" (click)="pickEnglishTranslation()">
+        <div class="option-label">
+          <ion-icon name="language-outline"></ion-icon>
+          <div>
+            <span class="option-title">English Translation</span>
+            <span class="option-value">{{ currentEnName }}</span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="option-arrow"></ion-icon>
+      </div>
+
+      <div class="settings-option" (click)="pickUrduTranslation()">
+        <div class="option-label">
+          <ion-icon name="language-outline"></ion-icon>
+          <div>
+            <span class="option-title">Urdu Translation</span>
+            <span class="option-value urdu-label">{{ currentUrName }}</span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="option-arrow"></ion-icon>
+      </div>
+
+      <p class="settings-note">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        Changes apply to new cards. Swipe to see updated translations.
+      </p>
     </div>
   </div>
 

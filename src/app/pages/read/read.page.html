@@ -76,7 +76,7 @@
       </div>
     </pinch-zoom>
   </div>
-  <div class="page-wrapper ar ar2 ion-margin-top unicode-view" [hidden]="scanView">
+  <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass" [hidden]="scanView">
     <div class="page-top-info" *ngIf="isDataLoaded">
       <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
         <span class="juz-number"> {{ getJuzNumber() }} </span>
@@ -123,7 +123,7 @@
         (touchend)="onLineTouchEnd($event,i)"
         (touchmove)="onLineTouchCancel()"
         (contextmenu)="onLineContextMenu($event,i)">
-        <div *ngIf="line.includes(surahService.diacritics.RUKU_MARK)" class="ruku-wrapper"
+        <div *ngIf="hasIndicator(line, i)" class="ruku-wrapper"
           [innerHTML]="addIndicators(line,i)"></div>
         <span class="arabic-line-text" *ngIf="!tajweedMode"> {{line}} </span>
         <span class="arabic-line-text tajweed-text" *ngIf="tajweedMode" [innerHTML]="tajweedLines[i] || line"></span>
@@ -268,13 +268,18 @@
                 <ion-select-option value="ur">UR</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-item>
-              <ion-label>Colors</ion-label>
-              <ion-input placeholder="text" (ionChange)="changeColors($event.target.value,'color')"
-                [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-              <ion-input placeholder="bg" (ionChange)="changeColors($event.target.value,'bg')" [debounce]="1000"
-                class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-            </ion-item>
+            <ion-item-divider class="settings-section">Themes</ion-item-divider>
+            <div class="theme-grid">
+              <button *ngFor="let t of readerThemes" class="theme-btn"
+                      [class.active]="activeTheme === t.id"
+                      [style.background]="t.bg"
+                      [style.color]="t.text"
+                      [style.borderColor]="activeTheme === t.id ? t.accent : 'transparent'"
+                      (click)="applyTheme(t)">
+                <span class="theme-sample">بسم</span>
+                <span class="theme-name">{{ t.name }}</span>
+              </button>
+            </div>
             <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information-circle-outline"></ion-icon>
               <ion-label>About Surah</ion-label>

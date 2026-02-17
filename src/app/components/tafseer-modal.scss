@@ -1,24 +1,497 @@
-.verse {
-  font-size: large;
-}
-.ayah-word {
-  margin-inline-end: 0.1rem;
-}
-p.verse-words span {
-  display: inline-flex;
-  padding: 0.5rem;
-  background: var(--ion-color-secondary);
-  margin: 0.25rem;
-  color: var(--ion-color-primary);
-}
-.verse-words-table {
-  width: 100%;
-  .translation,
-  .transliteration,
-  .word {
-    text-align: start;
+// =============================================
+// TAFSEER MODAL – Modern, compact, colorful
+// =============================================
+
+// ── Footer Toolbar (thumb-friendly controls at bottom) ──
+.tafseer-footer {
+  ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-color: rgba(var(--ion-color-medium-rgb), 0.15);
+    --min-height: 44px;
+    --padding-start: 4px;
+    --padding-end: 4px;
+  }
+
+  ion-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .verse-key {
+    text-decoration: underline dashed var(--ion-color-medium);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+    }
   }
 }
-.verse-key {
-  text-decoration: underline dashed var(--ion-color-medium);
+
+// ── Content wrapper ──
+.tafseer-content {
+  --background: var(--ion-background-color);
+}
+
+.tafsir-content-wrapper {
+  padding: 12px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+// ── Loading ──
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+// ── Arabic Text Card ──
+.arabic-card {
+  background: rgba(var(--ion-color-primary-rgb), 0.04);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.12);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  .verse {
+    font-size: 1.3rem;
+    line-height: 2.2;
+    text-align: center;
+    margin: 0;
+  }
+
+  .ayah-word {
+    margin-inline-end: 0.12rem;
+    cursor: pointer;
+    padding: 2px 1px;
+    border-radius: 4px;
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(var(--ion-color-primary-rgb), 0.12);
+    }
+    &:active {
+      background: rgba(var(--ion-color-primary-rgb), 0.2);
+    }
+  }
+
+  .arabic-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .sajdah-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 152, 0, 0.12);
+    color: #e65100;
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+
+    ion-icon { font-size: 14px; }
+  }
+
+  .verse-audio {
+    width: 100%;
+    max-width: 280px;
+    height: 32px;
+    border-radius: 16px;
+    margin-top: 4px;
+  }
+}
+
+// ── Config Banner ──
+.config-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: #e65100;
+  font-size: 0.72rem;
+  line-height: 1.4;
+
+  ion-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+// ── Translation Blocks ──
+.translations-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.translation-block {
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ion-card-background, var(--ion-background-color));
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.hidden-trans {
+    display: none;
+  }
+
+  &.collapsed {
+    .trans-body {
+      display: none;
+    }
+  }
+}
+
+.trans-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+  min-height: 40px;
+
+  &:hover {
+    background: rgba(var(--ion-color-medium-rgb), 0.06);
+  }
+  &:active {
+    background: rgba(var(--ion-color-medium-rgb), 0.1);
+  }
+}
+
+.trans-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.trans-color-bar {
+  width: 3px;
+  height: 24px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.trans-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.trans-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.trans-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ion-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trans-lang {
+  font-size: 0.62rem;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+
+  &.lang-urdu {
+    font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.68rem;
+    direction: rtl;
+  }
+}
+
+.trans-header-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.expand-icon {
+  font-size: 16px;
+  color: var(--ion-color-medium);
+  transition: transform 0.2s;
+}
+
+// Priority number input
+.priority-input {
+  width: 32px;
+  height: 26px;
+  text-align: center;
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.25);
+  border-radius: 6px;
+  background: rgba(var(--ion-color-medium-rgb), 0.06);
+  color: var(--ion-text-color);
+  font-size: 0.72rem;
+  font-weight: 600;
+  outline: none;
+  -moz-appearance: textfield;
+  
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &:focus {
+    border-color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+  }
+}
+
+// Config mode buttons
+.config-btn {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--ion-color-medium);
+  }
+
+  &:hover {
+    background: rgba(var(--ion-color-medium-rgb), 0.12);
+  }
+  &:active {
+    background: rgba(var(--ion-color-medium-rgb), 0.2);
+  }
+  &:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+// Translation body text
+.trans-body {
+  padding: 0 10px 10px 10px;
+  animation: fadeSlideIn 0.2s ease;
+
+  &.hidden-text {
+    opacity: 0.3;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: var(--ion-text-color);
+
+    &.rtl {
+      direction: rtl;
+      text-align: right;
+    }
+
+    &.ur {
+      font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
+      font-size: 0.92rem;
+      line-height: 2;
+    }
+
+    &.en-text {
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Word by Word Section ──
+.wbw-section {
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ion-text-color);
+  background: rgba(var(--ion-color-medium-rgb), 0.04);
+
+  &:hover {
+    background: rgba(var(--ion-color-medium-rgb), 0.08);
+  }
+
+  ion-icon:first-child {
+    font-size: 18px;
+    color: var(--ion-color-primary);
+  }
+
+  span { flex: 1; }
+
+  .expand-icon {
+    font-size: 16px;
+    color: var(--ion-color-medium);
+  }
+}
+
+.wbw-table-wrapper {
+  padding: 4px 12px 12px;
+  animation: fadeSlideIn 0.2s ease;
+}
+
+.wbw-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  color: var(--ion-color-medium);
+  margin: 0 0 8px;
+
+  ion-icon { font-size: 14px; }
+}
+
+.verse-words-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 2px;
+
+  .wbw-row {
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+
+    &:hover {
+      background: rgba(var(--ion-color-primary-rgb), 0.06);
+    }
+  }
+
+  td {
+    padding: 6px 8px;
+    vertical-align: middle;
+  }
+
+  .translation-col {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    text-align: start;
+    max-width: 120px;
+  }
+
+  .transliteration-col {
+    font-size: 0.72rem;
+    color: var(--ion-color-medium-shade);
+    font-style: italic;
+    text-align: center;
+  }
+
+  .arabic-col {
+    text-align: end;
+    font-size: 1.05rem;
+  }
+}
+
+// ── Tafsir Section ──
+.tafsir-section {
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 24px;
+
+  .section-header {
+    cursor: default;
+  }
+}
+
+.tafsir-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px 12px;
+
+  ion-button {
+    --border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    height: 32px;
+  }
+}
+
+.tafsir-block {
+  padding: 12px;
+  margin: 0 12px 12px;
+  background: rgba(var(--ion-color-medium-rgb), 0.04);
+  border-radius: 8px;
+
+  h4 {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    text-align: justify;
+    color: var(--ion-text-color);
+  }
+
+  &.rtl p {
+    direction: rtl;
+    text-align: right;
+  }
+
+  &.ur p {
+    font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
+    font-size: 0.9rem;
+    line-height: 2;
+  }
+
+  &.en-text p {
+    line-height: 1.6;
+  }
 }

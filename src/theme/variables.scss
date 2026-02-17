@@ -85,6 +85,15 @@
 
   --success-light: #ebfef6;
   --green-highlight: #cce0ce;
+
+  // Mushaf decoration colors (gold accents like printed mushafs)
+  --mushaf-gold: #C9A227;
+  --mushaf-gold-light: #E8D48B;
+  --mushaf-gold-dark: #A07C18;
+  --mushaf-border-outer: #8B7355;
+  --mushaf-border-inner: #C9A227;
+  --mushaf-header-bg: linear-gradient(180deg, #FDF8F0 0%, #F5E6C8 50%, #FDF8F0 100%);
+  --mushaf-corner: #C9A227;
 }
 .ion-color-success-light {
   --ion-color-base: var(--ion-color-success-light);
@@ -178,6 +187,15 @@ body.dark {
 
   --green-highlight: #1B3D28;
   --success-light: var(--green-highlight);
+
+  // Mushaf decoration colors (dark mode)
+  --mushaf-gold: #D4A843;
+  --mushaf-gold-light: #C9A03A;
+  --mushaf-gold-dark: #A07C18;
+  --mushaf-border-outer: #6B5840;
+  --mushaf-border-inner: #9B8350;
+  --mushaf-header-bg: linear-gradient(180deg, rgba(40, 35, 28, 0.8) 0%, rgba(60, 50, 35, 0.6) 50%, rgba(40, 35, 28, 0.8) 100%);
+  --mushaf-corner: #9B8350;
 }
 
 /*

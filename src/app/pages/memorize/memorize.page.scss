@@ -167,6 +167,177 @@ ion-content {
 }
 
 // ===========================================
+// DUE FOR REVIEW (SPACED REPETITION)
+// ===========================================
+.review-section {
+  background: var(--ion-color-light);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-left: 3px solid var(--ion-color-warning);
+
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    .review-icon {
+      font-size: 22px;
+      color: var(--ion-color-warning);
+    }
+
+    .review-title {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .review-subtitle {
+      margin: 0;
+      font-size: 0.65rem;
+      opacity: 0.6;
+    }
+  }
+
+  .review-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .review-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(var(--ion-color-warning-rgb), 0.1);
+    border: 1px solid rgba(var(--ion-color-warning-rgb), 0.2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+      transform: scale(0.92);
+      background: rgba(var(--ion-color-success-rgb), 0.15);
+    }
+
+    .review-chip-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .review-chip-interval {
+      font-size: 0.6rem;
+      opacity: 0.6;
+    }
+
+    .review-check {
+      font-size: 14px;
+      color: var(--ion-color-success);
+      opacity: 0.6;
+    }
+  }
+}
+
+// ===========================================
+// WEEKLY REVIEW HEATMAP
+// ===========================================
+.heatmap-section {
+  margin-bottom: 12px;
+  padding: 0 4px;
+
+  .heatmap-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.6;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .heatmap-grid {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+
+    .heatmap-cell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+
+      .heatmap-day {
+        font-size: 0.55rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        opacity: 0.5;
+      }
+
+      .heatmap-bar {
+        width: 100%;
+        min-height: 4px;
+        max-height: 40px;
+        background: var(--ion-color-success);
+        border-radius: 3px;
+        opacity: var(--intensity, 0.08);
+        transition: height 0.4s ease, opacity 0.4s ease;
+      }
+
+      .heatmap-count {
+        font-size: 0.6rem;
+        font-weight: 600;
+        color: var(--ion-color-success);
+      }
+
+      &.active .heatmap-day {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+// ===========================================
+// MASTERY LEGEND
+// ===========================================
+.mastery-legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px;
+
+  .mastery-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.6rem;
+    opacity: 0.7;
+  }
+
+  .mastery-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+
+    &.new { background: var(--ion-color-medium); }
+    &.learning { background: #FFA726; }
+    &.reviewing { background: #42A5F5; }
+    &.mastered { background: var(--ion-color-success); }
+  }
+}
+
+// Mastery indicators on progress items
+.progress-item {
+  &.mastery-new { border-left: 3px solid var(--ion-color-medium); }
+  &.mastery-learning { border-left: 3px solid #FFA726; }
+  &.mastery-reviewing { border-left: 3px solid #42A5F5; }
+  &.mastery-mastered { border-left: 3px solid var(--ion-color-success); }
+}
+
+// ===========================================
 // MODE SEGMENT
 // ===========================================
 .mode-segment {

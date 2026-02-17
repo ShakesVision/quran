@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Platform, GestureController, Gesture } from '@ionic/angular';
+import { Platform, GestureController, Gesture, ActionSheetController } from '@ionic/angular';
 import { AyahCard } from '../../models/ayah-card';
-import { QuranDataService } from '../../services/quran-data.service';
+import { QuranDataService, TranslationResource, AVAILABLE_TRANSLATIONS } from '../../services/quran-data.service';
 
 @Component({
   selector: 'app-discover',
@@ -18,6 +18,15 @@ export class DiscoverPage implements OnInit, OnDestroy {
   isTransitioning = false;
   swipeDirection: 'up' | 'down' | null = null;
   showShareToast = false;
+  showSettings = false;
+
+  /** Translation config */
+  englishTranslations: TranslationResource[] = [];
+  urduTranslations: TranslationResource[] = [];
+  selectedEnId: number = 20;
+  selectedUrId: number = 97;
+  currentEnName: string = '';
+  currentUrName: string = '';
 
   /** For touch/swipe tracking */
   private swipeGesture: Gesture | null = null;
@@ -34,11 +43,20 @@ export class DiscoverPage implements OnInit, OnDestroy {
     private router: Router,
     private platform: Platform,
     private gestureCtrl: GestureController,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private actionSheetCtrl: ActionSheetController
   ) {}
 
   async ngOnInit() {
     this.isLoading = true;
+
+    // Load translation options and current preferences (only cached ones for Discover)
+    this.englishTranslations = this.quranDataService.getAvailableTranslations('english', true);
+    this.urduTranslations = this.quranDataService.getAvailableTranslations('urdu', true);
+    this.selectedEnId = this.quranDataService.getSelectedEnTranslationId();
+    this.selectedUrId = this.quranDataService.getSelectedUrTranslationId();
+    this.currentEnName = this.quranDataService.getTranslationName(this.selectedEnId);
+    this.currentUrName = this.quranDataService.getTranslationName(this.selectedUrId);
 
     const ready = await this.quranDataService.isAyahDataReady();
     if (!ready) {
@@ -293,7 +311,99 @@ export class DiscoverPage implements OnInit, OnDestroy {
     } else if (event.key === 'ArrowDown' || event.key === 'j') {
       this.goNext();
     } else if (event.key === 'Escape') {
-      this.goBack();
+      if (this.showSettings) {
+        this.showSettings = false;
+      } else {
+        this.goBack();
+      }
+    }
+  }
+
+  /**
+   * Toggle settings panel
+   */
+  toggleSettings() {
+    this.showSettings = !this.showSettings;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Open English translation picker
+   */
+  async pickEnglishTranslation() {
+    const buttons = this.englishTranslations.map(t => ({
+      text: `${t.name}${t.id === this.selectedEnId ? ' ✓' : ''}`,
+      cssClass: t.id === this.selectedEnId ? 'selected-translation' : '',
+      handler: () => {
+        this.selectEnTranslation(t.id);
+      }
+    }));
+    buttons.push({ text: 'Cancel', cssClass: 'action-sheet-cancel', handler: () => {} });
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'English Translation',
+      subHeader: 'Select your preferred English translation',
+      cssClass: 'translation-picker',
+      buttons,
+    });
+    await actionSheet.present();
+  }
+
+  /**
+   * Open Urdu translation picker
+   */
+  async pickUrduTranslation() {
+    const buttons = this.urduTranslations.map(t => ({
+      text: `${t.name}${t.id === this.selectedUrId ? ' ✓' : ''}`,
+      cssClass: t.id === this.selectedUrId ? 'selected-translation' : '',
+      handler: () => {
+        this.selectUrTranslation(t.id);
+      }
+    }));
+    buttons.push({ text: 'Cancel', cssClass: 'action-sheet-cancel', handler: () => {} });
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Urdu Translation',
+      subHeader: 'اردو ترجمہ منتخب کریں',
+      cssClass: 'translation-picker',
+      buttons,
+    });
+    await actionSheet.present();
+  }
+
+  /**
+   * Apply selected English translation
+   */
+  async selectEnTranslation(resourceId: number) {
+    this.selectedEnId = resourceId;
+    this.currentEnName = this.quranDataService.getTranslationName(resourceId);
+    await this.quranDataService.setEnTranslation(resourceId);
+    // Rebuild visible cards with new translation
+    await this.rebuildCardsWithNewTranslation();
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Apply selected Urdu translation
+   */
+  async selectUrTranslation(resourceId: number) {
+    this.selectedUrId = resourceId;
+    this.currentUrName = this.quranDataService.getTranslationName(resourceId);
+    await this.quranDataService.setUrTranslation(resourceId);
+    // Rebuild visible cards with new translation
+    await this.rebuildCardsWithNewTranslation();
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Reload cards with the new translation preferences
+   */
+  private async rebuildCardsWithNewTranslation() {
+    const newCards = await this.quranDataService.getRandomAyahCards(this.INITIAL_LOAD);
+    if (newCards.length > 0) {
+      this.cards = newCards;
+      this.currentIndex = 0;
+      this.cdr.detectChanges();
     }
   }
 }

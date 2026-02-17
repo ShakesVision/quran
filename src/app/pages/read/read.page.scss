@@ -71,7 +71,8 @@ body.dark ion-content {
   .content-wrapper {
     height: calc(100vh - 40px) !important;
     max-height: calc(100vh - 40px) !important;
-    border: 1px solid var(--ion-color-medium) !important;
+    border: 2px solid var(--mushaf-border-outer, #8B7355) !important;
+    outline: none !important;
   }
 }
 
@@ -106,6 +107,7 @@ body.dark ion-content {
   display: flex;
   flex-direction: column;
   animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
   
   .page-top-info {
     display: grid;
@@ -118,21 +120,23 @@ body.dark ion-content {
     span.juz-number {
       font-size: clamp(10px, 2.5vw, 14px);
       text-align-last: start;
-      color: var(--ion-color-medium);
+      color: var(--mushaf-gold-dark, #A07C18);
+      font-weight: 500;
     }
     
     span.page-number {
       font-size: clamp(16px, 4vw, 24px);
       text-align-last: center;
-      font-weight: 600;
-      color: var(--ion-color-primary);
+      font-weight: 700;
+      color: var(--mushaf-gold-dark, #A07C18);
       transition: transform 0.2s ease;
     }
     
     span.surah-number {
       font-size: clamp(10px, 2.5vw, 14px);
       text-align-last: end;
-      color: var(--ion-color-medium);
+      color: var(--mushaf-gold-dark, #A07C18);
+      font-weight: 500;
     }
   }
   
@@ -143,12 +147,44 @@ body.dark ion-content {
     padding: 8px 12px;
     padding-inline-start: 16px;
     padding-inline-end: 28px;
-    border: 2px solid var(--ion-color-medium);
-    border-radius: 4px;
     background: var(--ion-background-color);
     user-select: text;
     overflow: visible;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: relative;
+
+    // ── Ornamental double-border frame (like printed mushafs) ──
+    border: 2.5px solid var(--mushaf-border-outer, #8B7355);
+    outline: 1px solid var(--mushaf-border-inner, #C9A227);
+    outline-offset: 3px;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      inset 0 0 0 1px rgba(var(--ion-color-medium-rgb, 146, 148, 156), 0.15);
+    border-radius: 2px;
+
+    // ── Corner decorations (top-left, top-right, bottom-left, bottom-right) ──
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: var(--mushaf-corner, #C9A227);
+      border-style: solid;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    &::before {
+      top: -5px;
+      left: -5px;
+      border-width: 2px 0 0 2px;
+    }
+
+    &::after {
+      top: -5px;
+      right: -5px;
+      border-width: 2px 2px 0 0;
+    }
     
     // Each line takes equal space (for 15 lines)
     .line {
@@ -157,7 +193,7 @@ body.dark ion-content {
       align-items: center;
       justify-content: stretch;
       flex-wrap: wrap;
-      border-bottom: 0.5px solid var(--ion-color-light-shade);
+      border-bottom: 0.5px solid rgba(var(--ion-color-medium-rgb, 146, 148, 156), 0.2);
       position: relative;
       overflow: visible;
       min-height: 0;
@@ -430,6 +466,55 @@ ion-footer {
   color: var(--ion-color-medium);
 }
 
+// ── Ornamental surah header (mimics printed mushaf banners) ──
+.surah-start-line {
+  text-align-last: center;
+  font-size: clamp(10px, 2.8vw, 14px);
+  color: var(--mushaf-gold-dark, #A07C18);
+  position: relative;
+  padding: 2px 0;
+  border-top: none !important;
+  border-bottom: none !important;
+  background: var(--mushaf-header-bg, linear-gradient(180deg, #FDF8F0 0%, #F5E6C8 50%, #FDF8F0 100%));
+  border-radius: 2px;
+  margin: 0 -4px;
+  padding: 3px 12px;
+
+  // Decorative horizontal lines flanking the header text
+  &::before,
+  &::after {
+    content: '✦';
+    font-size: 8px;
+    color: var(--mushaf-gold, #C9A227);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  &::before { left: 8px; }
+  &::after { right: 8px; }
+}
+
+// ── Ornamental bismillah line ──
+.bism-line {
+  text-align-last: center;
+  font-size: clamp(14px, 4vw, 20px);
+  color: var(--mushaf-gold-dark, #A07C18);
+  font-family: Indopak;
+  position: relative;
+  border-bottom-color: transparent !important;
+
+  // Subtle decorative under-rule
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--mushaf-gold-light, #E8D48B) 30%, var(--mushaf-gold, #C9A227) 50%, var(--mushaf-gold-light, #E8D48B) 70%, transparent 100%);
+  }
+}
+
 .emphasize-btn {
   color: var(--ion-color-primary);
   // Active state glow
@@ -479,7 +564,7 @@ ion-footer {
   left: -26px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--ion-color-primary);
+  color: var(--mushaf-gold-dark, #A07C18);
   line-height: 1;
   width: 24px;
 
@@ -493,16 +578,18 @@ ion-footer {
       font-size: clamp(16px, 4vw, 22px);
       font-family: "Traditional Arabic", serif;
       line-height: 1;
+      color: var(--mushaf-gold, #C9A227);
     }
 
     .ruku-ayah-count {
       position: absolute;
-      font-size: clamp(6px, 1.5vw, 8px);
+      font-size: small;
       font-family: sans-serif;
-      top: 55%;
+      top: 5px;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       opacity: 0.85;
+      color: var(--mushaf-gold-dark, #A07C18);
     }
   }
 
@@ -510,7 +597,40 @@ ion-footer {
     font-size: clamp(8px, 2vw, 11px);
     margin-top: 1px;
     opacity: 0.8;
+    color: var(--mushaf-gold-dark, #A07C18);
   }
+}
+
+// ===========================================
+// MARGIN INDICATORS (Sajdah, Waqf-Lazim etc.)
+// ===========================================
+.margin-indicator {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: clamp(7px, 1.8vw, 10px);
+  font-family: "Traditional Arabic", "Mehr", serif;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-top: 2px;
+  padding: 1px 0;
+  white-space: nowrap;
+
+  span {
+    display: inline-block;
+  }
+}
+
+.sajdah-indicator {
+  color: var(--ion-color-danger, #c62828);
+  font-weight: 600;
+  border-top: 1px solid var(--ion-color-danger, #c62828);
+  border-bottom: 1px solid var(--ion-color-danger, #c62828);
+  padding: 2px 0;
+}
+
+.waqf-lazim-indicator {
+  color: var(--mushaf-gold-dark, #A07C18);
+  font-weight: 600;
 }
 
 // ===========================================
@@ -575,6 +695,8 @@ virtual-scroller {
   align-items: center;
   justify-content: center;
   text-align: center;
+  color: var(--mushaf-gold-dark, #A07C18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .juz-start-line {
@@ -582,21 +704,8 @@ virtual-scroller {
   font-weight: bold;
 }
 
-.surah-start-line {
-  text-align-last: center;
-  font-size: small;
-  color: var(--ion-color-medium-tint);
-}
-
 .surah-end-line {
   text-align-last: center;
-}
-
-.bism-line {
-  text-align-last: center;
-  font-size: clamp(14px, 4vw, 20px);
-  color: var(--ion-color-medium);
-  font-family: Indopak;
 }
 
 // ===========================================
@@ -658,7 +767,60 @@ virtual-scroller {
     color: var(--ion-color-medium);
     --background: transparent;
   }
-  
+
+  // ── Theme selector grid ──
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px 12px 12px;
+
+    .theme-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 8px 4px 6px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      outline: none;
+      min-height: 54px;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      &.active {
+        border-color: currentColor;
+        box-shadow: 0 0 0 1px currentColor, 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .theme-sample {
+        font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+
+      .theme-name {
+        font-family: "Segoe UI", "Roboto", sans-serif;
+        font-size: 8px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+    }
+  }
+
   .selected-result {
     background-color: rgba(66, 165, 245, 0.3);
   }

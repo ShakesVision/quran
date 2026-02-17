@@ -326,25 +326,33 @@
   width: 100%;
   margin-bottom: 20px;
 
-  .bismillah-ornament {
-    font-size: 2rem;
-    line-height: 1;
-    margin-bottom: 8px;
-    opacity: 0.6;
-    font-family: serif;
-
-    &.end {
-      margin-bottom: 0;
-      margin-top: 8px;
-    }
-  }
-
   .arabic-text {
     margin: 0;
     line-height: 2;
     direction: rtl;
     text-align: center;
     word-spacing: 4px;
+    position: relative;
+    padding: 0 8px;
+
+    // Ornamental brackets as inline pseudo-elements (not block)
+    &::before,
+    &::after {
+      font-family: serif;
+      font-size: 2.2rem;
+      opacity: 0.45;
+      color: var(--accent, rgba(255,255,255,0.35));
+      vertical-align: middle;
+      line-height: 1;
+    }
+    &::before {
+      content: "﴿";
+      margin-inline-end: 6px;
+    }
+    &::after {
+      content: "﴾";
+      margin-inline-start: 6px;
+    }
 
     // quran.com indopak text uses this font
     &.ar-qurancom {
@@ -642,6 +650,179 @@
 
   .action-bar {
     right: calc(50% - 300px);
+  }
+}
+
+// =============================================
+// TRANSLATION SETTINGS PANEL
+// =============================================
+.settings-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &.visible {
+    pointer-events: auto;
+    opacity: 1;
+
+    .settings-sheet {
+      transform: translateY(0);
+    }
+  }
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.settings-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1f2e;
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px max(24px, env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.settings-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 auto 16px;
+}
+
+.settings-title {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.settings-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  margin: 0 0 20px;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.14);
+    transform: scale(0.98);
+    transition-duration: 0.08s;
+  }
+
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    > ion-icon {
+      font-size: 22px;
+      color: rgba(255, 255, 255, 0.6);
+      flex-shrink: 0;
+    }
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+  }
+
+  .option-title {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  .option-value {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+
+    &.urdu-label {
+      font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
+      direction: rtl;
+    }
+  }
+
+  .option-arrow {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.7rem;
+  margin: 16px 0 0;
+  line-height: 1.4;
+
+  ion-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// =============================================
+// ACTION SHEET TRANSLATION PICKER (global)
+// =============================================
+::ng-deep .translation-picker {
+  .action-sheet-group {
+    background: #1a1f2e !important;
+  }
+
+  .action-sheet-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+  }
+
+  .action-sheet-sub-title {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .action-sheet-button {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.95rem !important;
+
+    &.selected-translation {
+      color: #4caf50 !important;
+      font-weight: 600;
+    }
+
+    &.action-sheet-cancel {
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
   }
 }
 

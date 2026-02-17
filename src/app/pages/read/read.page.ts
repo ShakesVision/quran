@@ -87,6 +87,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
 
+  // Dynamic font class based on current text source
+  currentFontClass: string = 'ar2'; // default: Muhammadi for archive
+
   // Inline translation mode
   inlineTransMode = false;
   inlineTransLang: 'en' | 'ur' = 'en';
@@ -274,7 +277,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     
     // Only run these if we have data loaded (not async route loading)
     if (this.pages.length > 0) {
-      this.isCompleteMushaf = this.pages.length === 611;
+      // Archive-15 has 611 pages, Quran.com 15-line has 605 (604+title), etc.
+      this.isCompleteMushaf = this.pages.length > 500;
       this.MUSHAF_MODE = {
         COMPLETE_MUSHAF: this.juzmode && this.isCompleteMushaf,
         JUZ_VERSION: this.juzmode && !this.isCompleteMushaf && !this.juzsurahmode,
@@ -309,6 +313,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .getPropertyValue("font-size");
     this.setupSwipeGesture();
     this.attachSelectionListeners();
+    this.loadSavedTheme();
   }
 
   async getBookmark() {
@@ -566,14 +571,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     const buttons: any[] = [
       {
-        text: '▶ Play from here',
+        text: 'Play from here',
         icon: 'play-outline',
         handler: () => {
           this.playAudioFromLine(lineIndex);
         },
       },
       {
-        text: '📖 Show Translation',
+        text: 'Show Translation',
         icon: 'language-outline',
         handler: () => {
           if (verseKey) {
@@ -584,7 +589,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         },
       },
       {
-        text: '📋 Copy Line',
+        text: 'Copy Line',
         icon: 'copy-outline',
         handler: () => {
           this.copyAnything(line);
@@ -592,7 +597,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         },
       },
       {
-        text: '📋 Copy Page',
+        text: 'Copy Page',
         icon: 'documents-outline',
         handler: () => {
           const pageText = this.lines.join('\n');
@@ -622,7 +627,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     buttons.push(
       {
-        text: '🔖 Bookmark this line',
+        text: 'Bookmark this line',
         icon: 'bookmark-outline',
         handler: () => {
           this.bookmarkLine(lineIndex);
@@ -1355,13 +1360,18 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   getNextAyahNumberFromCurrentLine(lineNumber: number) {
     if (!this.lines || this.lines.length === 0) return null;
 
-    // Match ayah marks: ۝ followed by Extended Arabic-Indic (۱-۹) OR Eastern Arabic (١-٩) numerals
+    // For qurancom: use ayah metadata instead of text scanning
+    const source = this.quranDataService.getCurrentSourceValue();
+    if (source.type === 'qurancom') {
+      return this.getNextAyahNumberFromMetadata(lineNumber);
+    }
+
+    // Archive text: scan for ayah marks
     const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹١-٩]`);
     let lineCounter = lineNumber;
     let txt = "";
     let found = false;
 
-    // Bounded loop — never go past the array
     while (lineCounter < this.lines.length) {
       txt = this.lines[lineCounter];
       lineCounter++;
@@ -1380,7 +1390,71 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     verseNum = this.getEnNumber(verseNum);
     return verseNum;
   }
+
+  /**
+   * Get the ayah number for a line using qurancom metadata.
+   * Looks at the current line and subsequent lines for the nearest ayah end.
+   */
+  private getNextAyahNumberFromMetadata(lineNumber: number): string | null {
+    const pageIdx = this.currentPage; // 1-indexed in this.pages
+    const ayahsOnPage = this.quranDataService.getQuranComAyahsForPage(pageIdx);
+    if (!ayahsOnPage || ayahsOnPage.length === 0) return null;
+
+    // Find the nearest ayah end at or after this line
+    let nearestAyah: { line: number; surah: number; ayah: number } | null = null;
+    let minDist = Infinity;
+
+    for (const a of ayahsOnPage) {
+      const dist = a.line - lineNumber;
+      if (dist >= 0 && dist < minDist) {
+        minDist = dist;
+        nearestAyah = a;
+      }
+    }
+
+    // If no ayah found after this line on current page, try to get the first one on current page
+    if (!nearestAyah && ayahsOnPage.length > 0) {
+      // Fallback: use the last ayah on the page (the line might be after all ayah ends)
+      nearestAyah = ayahsOnPage[ayahsOnPage.length - 1];
+    }
+
+    return nearestAyah ? nearestAyah.ayah.toString() : null;
+  }
+
+  /**
+   * Get surah number from metadata for qurancom.
+   */
+  private getSurahNumberFromMetadata(lineNumber: number): number | null {
+    const pageIdx = this.currentPage;
+    const ayahsOnPage = this.quranDataService.getQuranComAyahsForPage(pageIdx);
+    if (!ayahsOnPage || ayahsOnPage.length === 0) return null;
+
+    // Find nearest ayah end at or after this line
+    let nearestAyah: { line: number; surah: number; ayah: number } | null = null;
+    let minDist = Infinity;
+
+    for (const a of ayahsOnPage) {
+      const dist = a.line - lineNumber;
+      if (dist >= 0 && dist < minDist) {
+        minDist = dist;
+        nearestAyah = a;
+      }
+    }
+
+    if (!nearestAyah && ayahsOnPage.length > 0) {
+      nearestAyah = ayahsOnPage[ayahsOnPage.length - 1];
+    }
+
+    return nearestAyah ? nearestAyah.surah : null;
+  }
   getCorrectedSurahNumberWithRespectTo(lineNo) {
+    // For qurancom: use metadata for surah number
+    const source = this.quranDataService.getCurrentSourceValue();
+    if (source.type === 'qurancom') {
+      const fromMeta = this.getSurahNumberFromMetadata(lineNo);
+      if (fromMeta) return fromMeta;
+    }
+
     let lineNumbers = this.lines
       .map((l, i) => {
         if (l.includes(this.surahService.diacritics.BISM) && lineNo != i - 1)
@@ -1403,7 +1477,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       cssClass: "trans",
       buttons: [
         {
-          text: "⧉ Copy",
+          text: "Copy",
           handler: () => {
             this.copyAnything(
               this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`)
@@ -1459,6 +1533,44 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       el.style.setProperty("--reader-font-size", `${nextSize}px`);
       this.pageFontSize = `${nextSize}px`;
       this.applyTatweelToLines();
+    }
+  }
+
+  // Reader Themes
+  readerThemes = [
+    { id: 'golden',   name: 'Golden',     bg: '#FDF5E6', text: '#2C1810', accent: '#C9A227', border: '#D4B896' },
+    { id: 'paper',    name: 'Paper',      bg: '#FFF9F0', text: '#1A1A1A', accent: '#8B7355', border: '#E8DCC8' },
+    { id: 'ivory',    name: 'Ivory',      bg: '#FFFFF0', text: '#1C1C1C', accent: '#A0855B', border: '#E0D8C0' },
+    { id: 'sage',     name: 'Sage',       bg: '#F0F4E8', text: '#1B3A1B', accent: '#4A7C4A', border: '#B8C8A0' },
+    { id: 'ocean',    name: 'Ocean',      bg: '#EDF4F8', text: '#0D2137', accent: '#1565C0', border: '#B0C8D8' },
+    { id: 'lavender', name: 'Lavender',   bg: '#F3EFF8', text: '#2A1B3D', accent: '#7B1FA2', border: '#C8B8D8' },
+    { id: 'rose',     name: 'Rose',       bg: '#FFF0F3', text: '#3D1020', accent: '#C62828', border: '#E8C0C8' },
+    { id: 'midnight', name: 'Midnight',   bg: '#0D1117', text: '#E0E0E0', accent: '#58A6FF', border: '#30363D' },
+    { id: 'charcoal', name: 'Charcoal',   bg: '#1E1E1E', text: '#D4D4D4', accent: '#4CAF50', border: '#333333' },
+    { id: 'sepia',    name: 'Sepia',      bg: '#F4ECD8', text: '#5B4636', accent: '#8B6914', border: '#D2C4A4' },
+  ];
+  activeTheme = 'golden';
+
+  applyTheme(theme: any) {
+    this.activeTheme = theme.id;
+    const el: HTMLElement = document.querySelector('.content-wrapper');
+    if (!el) return;
+    el.style.background = theme.bg;
+    el.style.color = theme.text;
+    el.style.setProperty('--mushaf-gold-dark', theme.accent);
+    el.style.setProperty('--mushaf-gold', theme.accent);
+    el.style.setProperty('--mushaf-border-outer', theme.border);
+    el.style.setProperty('--mushaf-border-inner', theme.accent);
+    el.style.setProperty('--mushaf-corner', theme.accent);
+    // Save preference
+    this.storage.set('readerTheme', theme.id);
+  }
+
+  async loadSavedTheme() {
+    const saved = await this.storage.get('readerTheme');
+    if (saved) {
+      const theme = this.readerThemes.find(t => t.id === saved);
+      if (theme) this.applyTheme(theme);
     }
   }
 
@@ -1546,8 +1658,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           .size
       } <br />
       Ayahs: ${
-        // Need to add number in the equation too, const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
-        page.split(this.surahService.diacritics.AYAH_MARK).length - 1
+        // Count real ayah marks only (exclude ۝۰ continuation markers)
+        (page.match(new RegExp(this.surahService.diacritics.AYAH_MARK + '[\\u06F1-\\u06F9\\u0661-\\u0669]', 'g')) || []).length
       } <br />
       Surah Beginnings: ${
         page.split(this.surahService.diacritics.BISM).length - 1
@@ -1621,70 +1733,146 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     return line;
   }
+  /**
+   * Check if a line has any margin indicators (ruku, sajdah, waqf).
+   * Used by the template guard to decide whether to render the ruku-wrapper div.
+   * For qurancom: also checks metadata for ruku positions.
+   */
+  hasIndicator(line: string, lineIndex: number): boolean {
+    // Archive text checks
+    if (line.includes(this.surahService.diacritics.RUKU_MARK)) return true;
+    if (line.includes(this.surahService.diacritics.SAJDAH_MARK)) return true;
+    if (line.includes('\u06D8')) return true;
+    // Qurancom metadata check for ruku
+    if (this._quranComRukuLineSet) {
+      const pageNum = this.currentPageCalculated || this.currentPage;
+      if (this._quranComRukuLineSet.has(`${pageNum}:${lineIndex}`)) return true;
+    }
+    return false;
+  }
+
   addIndicators(line: string, i: number): string {
-    if (line.includes(this.surahService.diacritics.RUKU_MARK)) {
+    const indicators: string[] = [];
+
+    // ── 1) RUKU indicator ──
+    // For qurancom: ۧ is NOT in the text, check metadata set instead.
+    // For archive: ۧ IS in the text, check with includes().
+    const pageNum = this.currentPageCalculated || this.currentPage;
+    const hasRuku = this._quranComRukuLineSet
+      ? this._quranComRukuLineSet.has(`${pageNum}:${i}`)
+      : line.includes(this.surahService.diacritics.RUKU_MARK);
+    if (hasRuku) {
       let rukuIndex = -1;
-      const juzrukuarr = this.rukuArray[this.juzCalculated - 1];
+      let matchedJuzArr: any[] | null = null;
+
+      // 1a) Try the expected juz array first
+      const juzIdx = (this.juzCalculated || 1) - 1;
+      const juzrukuarr = this.rukuArray[juzIdx];
       juzrukuarr?.forEach((el, index) => {
-        const mushafPageNumber =
-          el.pageNumber ||
-          this.surahService.juzPageNumbers[this.juzCalculated - 1] +
-            el.juzPageIndex;
-        if (
-          this.currentPageCalculated === mushafPageNumber &&
-          el.lineIndex === i
-        )
+        if (el.pageNumber === pageNum && el.lineIndex === i) {
           rukuIndex = index;
+          matchedJuzArr = juzrukuarr;
+        }
       });
 
-      const rukuNumber = rukuIndex + 1;
-      const ayahCount = this.getAyahCountForRuku(rukuIndex);
-      const ayahCountAr = ayahCount > 0 ? this.surahService.e2a(ayahCount.toString()) : '';
-      const rukuNumberAr = this.surahService.e2a(rukuNumber.toString());
+      // 1b) Fallback: search ALL ruku arrays
+      if (rukuIndex === -1) {
+        for (let j = 0; j < this.rukuArray.length; j++) {
+          const arr = this.rukuArray[j];
+          if (!arr) continue;
+          for (let idx = 0; idx < arr.length; idx++) {
+            if (arr[idx].pageNumber === pageNum && arr[idx].lineIndex === i) {
+              rukuIndex = idx;
+              matchedJuzArr = arr;
+              break;
+            }
+          }
+          if (rukuIndex !== -1) break;
+        }
+      }
 
-      return `<div class="ruku-ain-group">` +
+      // 1c) Final fallback: try currentPage
+      if (rukuIndex === -1 && this.currentPage !== pageNum) {
+        for (let j = 0; j < this.rukuArray.length; j++) {
+          const arr = this.rukuArray[j];
+          if (!arr) continue;
+          for (let idx = 0; idx < arr.length; idx++) {
+            if (arr[idx].pageNumber === this.currentPage && arr[idx].lineIndex === i) {
+              rukuIndex = idx;
+              matchedJuzArr = arr;
+              break;
+            }
+          }
+          if (rukuIndex !== -1) break;
+        }
+      }
+
+      const rukuNumber = rukuIndex + 1;
+      const ayahCount = rukuIndex >= 0 ? this.getAyahCountForRuku(rukuIndex, matchedJuzArr) : 0;
+      const ayahCountAr = ayahCount > 0 ? this.surahService.e2a(ayahCount.toString()) : '';
+      const rukuNumberAr = rukuNumber > 0 ? this.surahService.e2a(rukuNumber.toString()) : '';
+
+      indicators.push(
+        `<div class="ruku-ain-group">` +
         `<span class="ruku-ain">ع</span>` +
-        `<span class="ruku-ayah-count">${ayahCountAr}</span>` +
+        (ayahCountAr ? `<span class="ruku-ayah-count">${ayahCountAr}</span>` : '') +
         `</div>` +
-        `<div class="ruku-number">${rukuNumberAr}</div>`;
-    } else return "";
+        (rukuNumberAr ? `<div class="ruku-number">${rukuNumberAr}</div>` : '')
+      );
+    }
+
+    // ── 2) SAJDAH indicator (U+06DE ۞) ──
+    if (line.includes(this.surahService.diacritics.SAJDAH_MARK)) {
+      indicators.push(`<div class="margin-indicator sajdah-indicator"><span>سجدة</span></div>`);
+    }
+
+    // ── 3) WAQF-LAZIM indicator (U+06D8 ۘ) ──
+    // Waqf Lazim = obligatory stop — show "م" (meem) rotated in margin
+    if (line.includes('\u06D8')) {
+      indicators.push(`<div class="margin-indicator waqf-lazim-indicator"><span>م</span></div>`);
+    }
+
+    return indicators.join('');
   }
 
   /**
-   * Count ayah marks (۝) between this ruku and the previous one in the current juz.
+   * Count ayah marks (۝) between this ruku and the previous one.
    * This gives the number of ayahs in this ruku section.
+   * @param rukuIndex - index within the juz ruku array
+   * @param juzArr - optional: the specific ruku array to use (avoids juz lookup mismatch)
    */
-  private getAyahCountForRuku(rukuIndex: number): number {
+  private getAyahCountForRuku(rukuIndex: number, juzArr?: any[]): number {
     if (!this.pages || rukuIndex < 0) return 0;
-    const juzrukuarr = this.rukuArray[this.juzCalculated - 1];
+    const juzrukuarr = juzArr || this.rukuArray[(this.juzCalculated || 1) - 1];
     if (!juzrukuarr || !juzrukuarr[rukuIndex]) return 0;
 
-    const AYAH_MARK = this.surahService.diacritics.AYAH_MARK;
     const currentRuku = juzrukuarr[rukuIndex];
     const prevRuku = rukuIndex > 0 ? juzrukuarr[rukuIndex - 1] : null;
 
-    // Determine the range of pages and lines to scan
-    const juzStartPage = this.surahService.juzPageNumbers[this.juzCalculated - 1] - 1; // 0-indexed
+    // ── Qurancom: use metadata to count ayahs ──
+    const source = this.quranDataService.getCurrentSourceValue();
+    if (source.type === 'qurancom') {
+      const startPage = prevRuku ? prevRuku.pageNumber : Math.max(1, currentRuku.pageNumber - 1);
+      const startLine = prevRuku ? prevRuku.lineIndex + 1 : 0;
+      const endPage = currentRuku.pageNumber;
+      const endLine = currentRuku.lineIndex;
+      return this.quranDataService.countQuranComAyahsBetween(startPage, startLine, endPage, endLine);
+    }
 
-    // Get text between previous ruku (exclusive) and current ruku (inclusive)
+    // ── Archive: scan text for ۝ + digits ──
+    const AYAH_MARK = this.surahService.diacritics.AYAH_MARK;
+
     let ayahCount = 0;
-    const startPage = prevRuku ? (prevRuku.pageNumber || (juzStartPage + prevRuku.juzPageIndex + 1)) - 1 : juzStartPage;
-    const endPage = (currentRuku.pageNumber || (juzStartPage + currentRuku.juzPageIndex + 1)) - 1;
+    const startPage = prevRuku ? (prevRuku.pageNumber - 1) : Math.max(0, currentRuku.pageNumber - 2);
+    const endPage = currentRuku.pageNumber - 1;
 
     for (let p = startPage; p <= endPage && p < this.pages.length; p++) {
       const pageLines = this.pages[p]?.split('\n') || [];
       for (let l = 0; l < pageLines.length; l++) {
-        // Skip lines at or before the previous ruku mark
-        if (p === startPage && prevRuku) {
-          const prevLineIdx = prevRuku.lineIndex;
-          if (p === endPage && l <= prevLineIdx) continue;
-          if (p !== endPage && l <= prevLineIdx) continue;
-        }
-        // Stop after the current ruku line
+        if (prevRuku && p === (prevRuku.pageNumber - 1) && l <= prevRuku.lineIndex) continue;
         if (p === endPage && l > currentRuku.lineIndex) break;
 
-        // Count ayah marks in this line
-        const matches = pageLines[l].match(new RegExp(AYAH_MARK, 'g'));
+        const matches = pageLines[l].match(new RegExp(AYAH_MARK + '[\\u06F1-\\u06F9\\u0661-\\u0669]', 'g'));
         if (matches) ayahCount += matches.length;
       }
     }
@@ -1695,15 +1883,33 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
   getFirstAndLastAyahNumberOnPage(): FirstLastAyah {
-    if (
-      (this.juzmode && this.isCompleteMushaf && this.currentPage === 1) ||
-      !this.juzmode
-    )
-      return;
+    // Skip the title page (page 1 of a complete mushaf has no ayahs)
+    if (this.isCompleteMushaf && this.currentPage === 1)
+      return null;
 
     if (!this.lines || this.lines.length === 0) return;
 
-    // Match ayah marks: ۝ followed by Extended Arabic-Indic (۱-۹) OR Eastern Arabic (١-٩) numerals
+    // ── Qurancom: use metadata (word.text has no ۝+digits) ──
+    const qcAyahs = this.quranDataService.getQuranComAyahsForPage(this.currentPage);
+    if (qcAyahs && qcAyahs.length > 0) {
+      const first = qcAyahs[0];
+      const last = qcAyahs[qcAyahs.length - 1];
+      const firstLastAyah = {
+        first: {
+          firstSurahNum: first.surah,
+          firstVerseNum: first.ayah,
+          verseId: `${first.surah}:${first.ayah}`,
+        },
+        last: {
+          lastSurahNum: last.surah,
+          lastVerseNum: last.ayah,
+          verseId: `${last.surah}:${last.ayah}`,
+        },
+      };
+      return firstLastAyah;
+    }
+
+    // ── Archive: scan text for ۝ + digits ──
     const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹١-٩]`);
 
     // --- First ayah: scan lines with a BOUNDED loop ---
@@ -1720,7 +1926,6 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (!foundFirst) {
-      // No ayah mark found on this page — return null safely
       return null;
     }
 
@@ -1743,9 +1948,6 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     let lastVerseNum = parseInt(this.getEnNumber(lastWordPart));
     if (isNaN(lastVerseNum)) lastVerseNum = firstVerseNum; // fallback
 
-    console.log(
-      `FIRST AND LAST AYAH ON PAGE: ${firstVerseNum} ${lastVerseNum}`
-    );
     let firstSurahNum = this.getCorrectedSurahNumberWithRespectTo(0);
     let lastSurahNum = this.getCorrectedSurahNumberWithRespectTo(
       this.lines?.length - 1
@@ -1762,7 +1964,6 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         verseId: `${lastSurahNum}:${lastVerseNum}`,
       },
     };
-    console.log(firstLastAyah);
     return firstLastAyah;
   }
   getEnNumber(num: string) {
@@ -1970,22 +2171,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       );
       return;
     }
-    let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
-    // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name,language_id&per_page=15&fields=text_uthmani,chapter_id,hizb_number,text_imlaei_simple&translations=131,151,234,158&reciter=7&word_translation_language=en&page=1&from=52:35&to=52:49&word_fields=verse_key,verse_id,page_number,location,text_uthmani,code_v1,qpc_uthmani_hafs&mushaf=2"
-    this.httpClient.get(url).subscribe((res: any) => {
-      console.log(res);
-      let verse = res.verse;
-      let msg = "";
-      msg += `${verse.text_indopak.replace(/ۡ/g, "ْ")}<br>`;
-      verse.translations.forEach((trans) => {
-        msg += `${trans.text} <br> <small>— <i>${trans.resource_name}</i> </small> <br><br>`;
-      });
-      verse.words.forEach((w) => {
-        msg += `${w.text_indopak} — ${w.translation.text} <br>`;
-      });
-      // this.presentAlert(msg, verse.verse_key);
-      this.presentModal(verseKey);
-    });
+    // Simply open the enhanced tafseer modal — it handles its own API calls
+    this.presentModal(verseKey);
   }
   async presentModal(verseKey) {
     const modal = await this.modalController.create({
@@ -2866,6 +3053,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.quranDataService
       .setSource(sourceId)
       .then(() => {
+        // Set font class based on the selected source
+        this.currentFontClass = this.quranDataService.getCurrentFontClass();
+        
         if (mode === 'full') {
           this.quranDataService.loadFullQuran().subscribe(
             (res) => {
@@ -2916,6 +3106,11 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               this.title = res.title;
               this.isCompleteMushaf = false;
               this.finalizeRouteLoad(mode);
+
+              // Jump to specific ayah if provided in route
+              if (ayah && ayah > 0 && id) {
+                setTimeout(() => this.jumpToAyahInSurahMode(id, ayah), 500);
+              }
             },
             (err) => this.handleLoadError(err)
           );
@@ -2939,15 +3134,23 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       SURAH_VERSION: mode === 'surah',
     };
 
-    // For full Quran mode, calculate ruku array for all 30 juz
+    // For full Quran mode, calculate ruku array for all 30 juz.
+    // For qurancom sources, use metadata (no ۧ in text). For archive, scan text.
     if (mode === 'full' && this.pages.length > 0) {
-      for (let juz = 1; juz <= 30; juz++) {
-        const juzStartPage = this.surahService.juzPageNumbers[juz - 1] - 1; // 0-indexed
-        const juzEndPage = juz < 30
-          ? this.surahService.juzPageNumbers[juz] - 1
-          : this.pages.length;
-        const juzPages = this.pages.slice(juzStartPage, juzEndPage);
-        this.calculateRukuArrayForJuz(juz, juzPages);
+      const source = this.quranDataService.getCurrentSourceValue();
+      if (source.type === 'qurancom') {
+        this.buildRukuArrayFromMetadata();
+      } else {
+        for (let juz = 1; juz <= 30; juz++) {
+          const juzStartPage = this.surahService.juzPageNumbers[juz - 1] - 1;
+          const juzEndPage = juz < 30
+            ? this.surahService.juzPageNumbers[juz] - 1
+            : this.pages.length;
+          const clampedStart = Math.min(juzStartPage, this.pages.length);
+          const clampedEnd = Math.min(juzEndPage, this.pages.length);
+          const juzPages = this.pages.slice(clampedStart, clampedEnd);
+          this.calculateRukuArrayForJuz(juz, juzPages, clampedStart);
+        }
       }
     }
 
@@ -3004,8 +3207,190 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Calculate ruku array for a specific juz
    */
-  private calculateRukuArrayForJuz(juzNumber: number, juzPages: string[]) {
+  /**
+   * Calculate ruku array for a specific juz.
+   * @param juzNumber 1-based juz number
+   * @param juzPages Array of page texts for this juz
+   * @param absolutePageOffset 0-based index of the first page in this.pages (used for absolute page numbering)
+   */
+  /**
+   * Build rukuArray from qurancom metadata (no ۧ character in text).
+   * Converts mushaf page numbers to this.pages array indices,
+   * then partitions by juz using surahService.juzPageNumbers.
+   */
+  private buildRukuArrayFromMetadata() {
+    const positions = this.quranDataService.getQuranComRukuPositions();
+    if (!positions || positions.length === 0) return;
+
+    // Convert each ruku position to a pages-array entry
+    const allRukuEntries: any[] = [];
+    for (const pos of positions) {
+      const pageIdx = this.quranDataService.getQuranComPageIndex(pos.page);
+      if (pageIdx === undefined) continue;
+      // pageIdx is 1-indexed in this.pages (0 = title page)
+      const pageText = this.pages[pageIdx];
+      if (!pageText) continue;
+      // line number from qurancom is 1-based; find which lineIndex (0-based) it maps to
+      // The lines in this.pages[pageIdx] are ordered, and line numbers may not be sequential
+      // (e.g., line 1, 2, ... 15). Use (pos.line - 1) as the 0-based index.
+      const lineIndex = pos.line - 1;
+      allRukuEntries.push({
+        juzPageIndex: 0, // not used for metadata-based
+        lineIndex,
+        line: pageText.split('\n')[lineIndex] || '',
+        pageNumber: pageIdx + 1, // 1-indexed absolute page in this.pages (matches how archive does it)
+      });
+    }
+
+    // Partition into juz-based arrays using surahService.juzPageNumbers
+    this.rukuArray = [];
+    for (let juz = 1; juz <= 30; juz++) {
+      const juzStartPage = this.surahService.juzPageNumbers[juz - 1]; // 1-indexed
+      const juzEndPage = juz < 30
+        ? this.surahService.juzPageNumbers[juz] - 1
+        : this.pages.length;
+
+      const juzRukuEntries = allRukuEntries.filter(
+        (e) => e.pageNumber >= juzStartPage && e.pageNumber <= juzEndPage
+      );
+
+      while (this.rukuArray.length < juz) {
+        this.rukuArray.push([]);
+      }
+      this.rukuArray[juz - 1] = juzRukuEntries;
+    }
+
+    // Also build a fast lookup set for addIndicators: "pageNumber:lineIndex"
+    this._quranComRukuLineSet = new Set(
+      allRukuEntries.map((e) => `${e.pageNumber}:${e.lineIndex}`)
+    );
+  }
+
+  /** Fast lookup for qurancom ruku lines: "pageNumber:lineIndex" */
+  private _quranComRukuLineSet: Set<string> | null = null;
+
+  /**
+   * Jump to a specific ayah within surah-only mode (non-complete mushaf).
+   * Scans pages for the ayah mark and navigates + highlights.
+   */
+  private jumpToAyahInSurahMode(surahNum: number, ayahNum: number) {
+    if (!this.pages || this.pages.length === 0) return;
+
+    // For qurancom: use metadata
+    const source = this.quranDataService.getCurrentSourceValue();
+    if (source.type === 'qurancom') {
+      // In surah mode, pages are indexed relative to the surah.
+      // quranComAyahMap uses absolute page indices.
+      // We need to search all pages for the matching surah:ayah.
+      for (let p = 0; p < this.pages.length; p++) {
+        const pageLines = this.pages[p].split('\n');
+        // Use the absolute page index: the surah reader maps surah pages to qurancom indices differently.
+        // For surah mode, pages are extracted from full text, so we check metadata for each page.
+        // Since we're in surah mode (not complete mushaf), ayah metadata may not be available.
+        // Fall back to text scanning below.
+      }
+    }
+
+    // Text scanning approach (works for both archive and qurancom since end markers are in text)
+    const AYAH_MARK = this.surahService.diacritics.AYAH_MARK;
+    const targetMark = AYAH_MARK + this.surahService.e2a(ayahNum.toString());
+
+    for (let p = 0; p < this.pages.length; p++) {
+      const pageText = this.pages[p];
+      const pageLines = pageText.split('\n');
+
+      // Check if this page contains the target ayah mark
+      // For qurancom, word.text won't have AYAH_MARK, so also check for verse number in text
+      let foundLine = -1;
+
+      for (let l = 0; l < pageLines.length; l++) {
+        // Archive text: check for AYAH_MARK + digits
+        if (pageLines[l].includes(targetMark)) {
+          foundLine = l;
+          break;
+        }
+      }
+
+      // For qurancom (no AYAH_MARK in text), use metadata
+      if (foundLine < 0 && source.type === 'qurancom') {
+        // Search qurancom ayah metadata across ALL pages (absolute index)
+        // This is a heuristic: in surah mode, page p maps to some absolute page.
+        // But we may not know the mapping. Instead, search ALL metadata for surah:ayah.
+        for (const [pageIdx, ayahs] of this.quranComAyahMapEntries()) {
+          for (const a of ayahs) {
+            if (a.surah === surahNum && a.ayah === ayahNum) {
+              // Found it. Now we need to find which SURAH page this corresponds to.
+              // In surah mode, pages are a subset. Map absolute pageIdx → surah page index.
+              const surahPageIdx = this.findSurahPageForAbsoluteIndex(pageIdx);
+              if (surahPageIdx >= 0) {
+                this.gotoPageNum(surahPageIdx + 1);
+                setTimeout(() => {
+                  this.highlightLine(a.line);
+                }, 300);
+                return;
+              }
+            }
+          }
+        }
+        break; // If metadata approach didn't find it, stop
+      }
+
+      if (foundLine >= 0) {
+        this.gotoPageNum(p + 1);
+        setTimeout(() => {
+          this.highlightLine(foundLine);
+        }, 300);
+        return;
+      }
+    }
+
+    // Fallback: if ayah 1, go to page 1
+    if (ayahNum === 1) {
+      this.gotoPageNum(1);
+    }
+  }
+
+  /**
+   * Highlight a specific line temporarily (2s).
+   */
+  private highlightLine(lineIndex: number) {
+    const el = document.querySelector(`#line_${lineIndex}`) as HTMLElement;
+    if (el) {
+      el.classList.add('highlight-line');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => el.classList.remove('highlight-line'), 3000);
+    }
+  }
+
+  /**
+   * Get qurancom ayah map entries (for iteration).
+   */
+  private quranComAyahMapEntries(): [number, { line: number; surah: number; ayah: number }[]][] {
+    const result: [number, { line: number; surah: number; ayah: number }[]][] = [];
+    // Use the service to check pages
+    for (let i = 1; i < 700; i++) {
+      const ayahs = this.quranDataService.getQuranComAyahsForPage(i);
+      if (ayahs === null) break; // No more data
+      if (ayahs.length > 0) result.push([i, ayahs]);
+    }
+    return result;
+  }
+
+  /**
+   * Find which surah-mode page index corresponds to an absolute page index.
+   * This is approximate: compare page text content.
+   */
+  private findSurahPageForAbsoluteIndex(absolutePageIdx: number): number {
+    // In surah mode, this.pages are a subset of the full Quran pages.
+    // We can't directly map, but we can compare the first line of each page.
+    // This is a best-effort approach.
+    return -1; // Not easily mappable in surah mode; let text scanning handle it
+  }
+
+  private calculateRukuArrayForJuz(juzNumber: number, juzPages: string[], absolutePageOffset?: number) {
     const juzRukuArray: any[] = [];
+    // If no explicit offset given, fall back to archive-based page numbers
+    const useAbsoluteOffset = absolutePageOffset !== undefined;
     
     juzPages.forEach((page, juzPageIndex) => {
       if (page.includes(this.surahService.diacritics.RUKU_MARK)) {
@@ -3015,7 +3400,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               juzPageIndex,
               lineIndex,
               line,
-              pageNumber: juzPageIndex + this.surahService.juzPageNumbers[juzNumber - 1],
+              // Absolute 1-indexed page number within this.pages
+              pageNumber: useAbsoluteOffset
+                ? absolutePageOffset + juzPageIndex + 1
+                : juzPageIndex + this.surahService.juzPageNumbers[juzNumber - 1],
             });
           }
         });

@@ -47,6 +47,7 @@
         </div>
         <div class="card-caret" (click)="openMushafSelector(); $event.stopPropagation()">
           <ion-icon name="caret-down-outline"></ion-icon>
+          <span class="caret-label">More</span>
         </div>
       </div>
 
@@ -84,6 +85,85 @@
           <p>Audio recitation</p>
         </div>
         <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Targets Section -->
+  <div class="targets-section" *ngIf="targetsEnabled">
+    <div class="targets-header">
+      <div class="targets-title-row">
+        <ion-icon name="flame" class="streak-flame" [class.active]="streakCount > 0"></ion-icon>
+        <h2 class="section-title">Daily Target</h2>
+        <span class="streak-badge" *ngIf="streakCount > 0">{{ streakCount }} day streak</span>
+      </div>
+      <ion-button fill="clear" size="small" (click)="editTargets()">
+        <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- Tilawat (Reading) Target -->
+    <div class="target-card tilawat-card" (click)="logReading()">
+      <div class="target-progress-ring">
+        <svg viewBox="0 0 36 36">
+          <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="ring-fill" [style.strokeDasharray]="tilawatProgress + ', 100'"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <div class="ring-text">
+          <span class="ring-value">{{ todayPages }}</span>
+          <span class="ring-label">pages</span>
+        </div>
+      </div>
+      <div class="target-info">
+        <div class="target-name">Tilawat</div>
+        <div class="target-detail">{{ todayPages }} / {{ dailyPageTarget }} pages today</div>
+        <div class="target-sub">
+          <span *ngIf="tilawatProgress < 100">{{ dailyPageTarget - todayPages }} more to go</span>
+          <span *ngIf="tilawatProgress >= 100" class="target-done">Target complete!</span>
+        </div>
+      </div>
+      <ion-icon name="add-circle" class="log-btn"></ion-icon>
+    </div>
+
+    <!-- Hifz (Memorization) Target -->
+    <div class="target-card hifz-card" (click)="logMemorization()">
+      <div class="target-progress-ring">
+        <svg viewBox="0 0 36 36">
+          <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="ring-fill hifz" [style.strokeDasharray]="hifzProgress + ', 100'"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <div class="ring-text">
+          <span class="ring-value">{{ todayAyahs }}</span>
+          <span class="ring-label">ayahs</span>
+        </div>
+      </div>
+      <div class="target-info">
+        <div class="target-name">Hifz</div>
+        <div class="target-detail">{{ todayAyahs }} / {{ dailyAyahTarget }} ayahs today</div>
+        <div class="target-sub">
+          <span *ngIf="hifzProgress < 100">{{ dailyAyahTarget - todayAyahs }} more to go</span>
+          <span *ngIf="hifzProgress >= 100" class="target-done">Target complete!</span>
+        </div>
+      </div>
+      <ion-icon name="add-circle" class="log-btn"></ion-icon>
+    </div>
+
+    <!-- Ramadan countdown / khatm projection -->
+    <div class="khatm-projection" *ngIf="ramadanDaysLeft > 0">
+      <ion-icon name="moon-outline"></ion-icon>
+      <span>{{ ramadanDaysLeft }} days of Ramadan left · {{ khatmProjection }}</span>
+    </div>
+
+    <!-- Weekly Heatmap -->
+    <div class="weekly-heatmap">
+      <div class="heatmap-day" *ngFor="let day of weeklyData"
+           [class.active]="day.pages > 0"
+           [class.done]="day.pages >= dailyPageTarget"
+           [title]="day.label + ': ' + day.pages + ' pages'">
+        <span class="day-label">{{ day.short }}</span>
+        <div class="day-dot" [style.opacity]="day.pages > 0 ? 0.4 + (day.pages / dailyPageTarget * 0.6) : 0.15"></div>
       </div>
     </div>
   </div>

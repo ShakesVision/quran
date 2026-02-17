@@ -38,10 +38,12 @@
   justify-content: center;
   background: linear-gradient(135deg, #0d1117 0%, #1a2332 100%);
   z-index: 10;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   .loading-content {
     text-align: center;
     color: white;
+    animation: subtlePulse 2s ease-in-out infinite;
   }
 
   .loading-spinner {
@@ -126,6 +128,34 @@
   &.active {
     z-index: 5;
     pointer-events: auto;
+
+    // Staggered content reveal when card enters
+    .surah-badge {
+      animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    }
+
+    .arabic-section {
+      animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+    }
+
+    .translation-divider {
+      animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+    }
+
+    .urdu-text {
+      animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+    }
+
+    .english-text {
+      animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.42s both;
+    }
+
+    .action-bar .action-btn {
+      animation: fadeSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+      &:nth-child(1) { animation-delay: 0.4s; }
+      &:nth-child(2) { animation-delay: 0.46s; }
+      &:nth-child(3) { animation-delay: 0.52s; }
+    }
   }
 
   &.above {
@@ -422,14 +452,26 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.85);
+    transition-duration: 0.08s;
   }
 
   ion-icon {
     font-size: 22px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover ion-icon {
+    transform: scale(1.05);
   }
 }
 
@@ -484,6 +526,7 @@
   z-index: 20;
   // Safe area for notch
   padding-top: max(12px, env(safe-area-inset-top));
+  animation: fadeSlideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
 }
 
 .nav-btn {
@@ -498,14 +541,16 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.08);
   }
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.88);
+    transition-duration: 0.08s;
   }
 
   ion-icon {
@@ -597,6 +642,17 @@
 
   .action-bar {
     right: calc(50% - 300px);
+  }
+}
+
+// =============================================
+// REDUCED MOTION
+// =============================================
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

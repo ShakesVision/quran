@@ -22,6 +22,7 @@ import { VirtualScrollerComponent } from "ngx-virtual-scroller";
 import { Storage } from "@ionic/storage-angular";
 import { Subject } from "rxjs";
 import { take, takeUntil } from "rxjs/operators";
+import { ActionSheetController } from "@ionic/angular";
 import { FirstLastAyah } from "src/app/models/firstLastModels";
 import {
   RukuLocationItem,
@@ -57,6 +58,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   hMode: boolean = false;
   translationExists: boolean = false;
   isPopoverOpen: boolean = false;
+  isSearchOpen: boolean = false;
   currentSurahInfo;
   pageFontSize: string;
   audioSrc: string;
@@ -73,6 +75,17 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   showQuranComProgress = false;
   mushafVersion = MushafLines.Fifteen;
   isFullscreen: boolean = false;
+
+  // Inline translation mode
+  inlineTransMode = false;
+  inlineTransLang: 'en' | 'ur' = 'en';
+  inlineTranslations: string[] = [];
+  private inlineTransCache: Map<string, string[]> = new Map();
+
+  // Long-press tracking
+  private longPressTimer: any;
+  private longPressTriggered = false;
+  private readonly LONG_PRESS_DURATION = 500; // ms
 
   searchResults: SearchResults;
 
@@ -173,7 +186,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     private modalController: ModalController,
     private gestureCtrl: GestureController,
     private quranDataService: QuranDataService,
-    private appDataService: AppDataService
+    private appDataService: AppDataService,
+    private actionSheetController: ActionSheetController
   ) {}
 
   ngOnInit() {
@@ -378,6 +392,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     }
     this.setBookmark();
     this.getFirstAndLastAyahNumberOnPage();
+    if (this.inlineTransMode) this.loadInlineTranslations();
     setTimeout(() => {
       this.adjustFontsize();
     }, 100);
@@ -427,6 +442,598 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       }
     }
   }
+  // ===========================================
+  // LINE INTERACTION HANDLERS
+  // Click = translate, DblClick = copy, LongPress = more options
+  // ===========================================
+
+  /**
+   * Single click on a line - show translation (existing behavior)
+   * Uses a timeout to distinguish from double-click
+   */
+  private singleClickTimer: any;
+  private preventSingleClick = false;
+
+  onLineClick(event: Event, lineIndex: number) {
+    if (this.longPressTriggered) {
+      this.longPressTriggered = false;
+      return;
+    }
+    this.preventSingleClick = false;
+    this.singleClickTimer = setTimeout(() => {
+      if (!this.preventSingleClick) {
+        this.openTrans(event, lineIndex);
+      }
+    }, 250);
+  }
+
+  /**
+   * Double-click on a line - copy the line text
+   */
+  onLineDblClick(event: Event, lineIndex: number) {
+    event.preventDefault();
+    this.preventSingleClick = true;
+    clearTimeout(this.singleClickTimer);
+
+    const lineText = this.lines[lineIndex]?.trim();
+    if (lineText) {
+      this.copyAnything(lineText);
+      this.surahService.presentToastWithOptions(
+        'Line copied!',
+        'success-light',
+        'bottom'
+      );
+    }
+  }
+
+  /**
+   * Long-press start (touch devices) - start timer for context menu
+   */
+  onLineTouchStart(event: TouchEvent, lineIndex: number) {
+    this.longPressTriggered = false;
+    this.longPressTimer = setTimeout(() => {
+      this.longPressTriggered = true;
+      event.preventDefault();
+      this.showLineContextMenu(lineIndex);
+    }, this.LONG_PRESS_DURATION);
+  }
+
+  onLineTouchEnd(event: TouchEvent, lineIndex: number) {
+    clearTimeout(this.longPressTimer);
+  }
+
+  onLineTouchCancel() {
+    clearTimeout(this.longPressTimer);
+    this.longPressTriggered = false;
+  }
+
+  /**
+   * Right-click context menu (desktop) - show options
+   */
+  onLineContextMenu(event: Event, lineIndex: number) {
+    event.preventDefault();
+    this.showLineContextMenu(lineIndex);
+  }
+
+  /**
+   * Show the context menu with all options for a line
+   */
+  async showLineContextMenu(lineIndex: number) {
+    const line = this.lines[lineIndex]?.trim() || '';
+    const verseKey = this.getVerseKeyForLine(lineIndex);
+    const surahNum = this.getCorrectedSurahNumberWithRespectTo(lineIndex);
+
+    const buttons: any[] = [
+      {
+        text: '▶ Play from here',
+        icon: 'play-outline',
+        handler: () => {
+          this.playAudioFromLine(lineIndex);
+        },
+      },
+      {
+        text: '📖 Show Translation',
+        icon: 'language-outline',
+        handler: () => {
+          if (verseKey) {
+            this.presentModal(verseKey);
+          } else {
+            this.openTrans({} as Event, lineIndex);
+          }
+        },
+      },
+      {
+        text: '📋 Copy Line',
+        icon: 'copy-outline',
+        handler: () => {
+          this.copyAnything(line);
+          this.surahService.presentToastWithOptions('Line copied!', 'success-light', 'bottom');
+        },
+      },
+      {
+        text: '📋 Copy Page',
+        icon: 'documents-outline',
+        handler: () => {
+          const pageText = this.lines.join('\n');
+          this.copyAnything(pageText);
+          this.surahService.presentToastWithOptions('Page copied!', 'success-light', 'bottom');
+        },
+      },
+    ];
+
+    // Add copy ayah option if we can identify the verse
+    if (verseKey) {
+      buttons.push({
+        text: `📜 Copy Ayah (${verseKey})`,
+        icon: 'document-text-outline',
+        handler: () => {
+          this.copyAyahText(verseKey);
+        },
+      });
+      buttons.push({
+        text: `📜 Copy Translation (${verseKey})`,
+        icon: 'language-outline',
+        handler: () => {
+          this.copyAyahTranslation(verseKey);
+        },
+      });
+    }
+
+    buttons.push(
+      {
+        text: '🔖 Bookmark this line',
+        icon: 'bookmark-outline',
+        handler: () => {
+          this.bookmarkLine(lineIndex);
+        },
+      },
+      {
+        text: 'Cancel',
+        icon: 'close',
+        role: 'cancel',
+      }
+    );
+
+    const header = verseKey
+      ? `Line ${lineIndex + 1} · Ayah ${verseKey}`
+      : `Line ${lineIndex + 1} · Page ${this.currentPageCalculated || this.currentPage}`;
+
+    const actionSheet = await this.actionSheetController.create({
+      header,
+      buttons,
+      cssClass: 'line-context-menu',
+    });
+    await actionSheet.present();
+  }
+
+  /**
+   * Get the verse key (surah:ayah) for a given line index.
+   * Scans current and subsequent lines for an ayah mark.
+   */
+  private getVerseKeyForLine(lineIndex: number): string | null {
+    try {
+      const surahNum = this.getCorrectedSurahNumberWithRespectTo(lineIndex);
+      const ayahNum = this.getNextAyahNumberFromCurrentLine(lineIndex);
+      if (surahNum && ayahNum) {
+        return `${surahNum}:${ayahNum}`;
+      }
+    } catch (e) {
+      // Line might not have an ayah mark nearby
+    }
+    return null;
+  }
+
+  /**
+   * Play audio starting from the ayah on a specific line
+   */
+  playAudioFromLine(lineIndex: number) {
+    // Stop any currently playing audio
+    if (this.audioPlaying && this.audio) {
+      this.stopAudio();
+    }
+
+    const verseKey = this.getVerseKeyForLine(lineIndex);
+    if (!verseKey) {
+      this.surahService.presentToastWithOptions(
+        'Could not determine ayah for this line',
+        'warning',
+        'middle'
+      );
+      return;
+    }
+
+    // Build ayah list from the line's ayah to end of page
+    const ayahList = this.getAyahsListOnPage();
+    if (!ayahList) return;
+
+    const { verseIdList, verseIdListForAudio } = ayahList;
+    const startIdx = verseIdList.indexOf(verseKey);
+    if (startIdx === -1) {
+      // Verse not in the page list — just play the single verse
+      this.playSingleVerse(verseKey);
+      return;
+    }
+
+    // Slice lists from the clicked line's ayah onwards
+    const remainingIds = verseIdList.slice(startIdx);
+    const remainingAudioIds = verseIdListForAudio.slice(startIdx);
+
+    const key = remainingIds[0];
+    const lang = 'en';
+    const url = `https://api.quran.com/api/v4/verses/by_key/${key}?language=${lang}&audio=${this.qariId}`;
+    this.httpClient.get(url).pipe(take(1)).subscribe((res: any) => {
+      if (!res.verse?.audio) {
+        this.surahService.presentToastWithOptions(
+          `Audio not available for verse ${key}`,
+          'warning',
+          'middle'
+        );
+        return;
+      }
+      this.audioSrc = 'https://verses.quran.com/' + res.verse.audio.url;
+      this.audio = new Audio(this.audioSrc);
+      this.audioPlayIndex = 1;
+      this.audioPlayRoutine(remainingAudioIds, remainingIds, key);
+    });
+  }
+
+  /**
+   * Play a single verse
+   */
+  private playSingleVerse(verseKey: string) {
+    const url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=en&audio=${this.qariId}`;
+    this.httpClient.get(url).pipe(take(1)).subscribe((res: any) => {
+      if (!res.verse?.audio) {
+        this.surahService.presentToastWithOptions(
+          `Audio not available for ${verseKey}`,
+          'warning',
+          'middle'
+        );
+        return;
+      }
+      this.audioSrc = 'https://verses.quran.com/' + res.verse.audio.url;
+      this.audio = new Audio(this.audioSrc);
+      this.audioPlaying = true;
+      this.playingVerseNum = verseKey;
+      this.setAudioSpeed(this.audioSpeed);
+      this.audio.play();
+      this.audio.onended = () => {
+        this.audioPlaying = false;
+        this.audio = undefined;
+      };
+    });
+  }
+
+  /**
+   * Copy the Arabic text of a specific ayah
+   */
+  private copyAyahText(verseKey: string) {
+    const url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?fields=text_indopak`;
+    this.httpClient.get(url).pipe(take(1)).subscribe(
+      (res: any) => {
+        const text = res.verse?.text_indopak || '';
+        this.copyAnything(text);
+        this.surahService.presentToastWithOptions(`Ayah ${verseKey} copied!`, 'success-light', 'bottom');
+      },
+      () => {
+        // Fallback: copy from line text
+        this.surahService.presentToastWithOptions('Failed to fetch ayah text', 'danger', 'bottom');
+      }
+    );
+  }
+
+  /**
+   * Copy translation of a specific ayah
+   */
+  private copyAyahTranslation(verseKey: string) {
+    const url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?translations=131,84`;
+    this.httpClient.get(url).pipe(take(1)).subscribe(
+      (res: any) => {
+        const translations = res.verse?.translations || [];
+        const text = translations.map((t: any) => `${this.convertToPlain(t.text)} — ${t.resource_name}`).join('\n\n');
+        this.copyAnything(`${verseKey}\n${text}`);
+        this.surahService.presentToastWithOptions(`Translation copied!`, 'success-light', 'bottom');
+      },
+      () => {
+        this.surahService.presentToastWithOptions('Failed to fetch translation', 'danger', 'bottom');
+      }
+    );
+  }
+
+  /**
+   * Bookmark a specific line
+   */
+  private async bookmarkLine(lineIndex: number) {
+    const page = this.currentPageCalculated || this.currentPage || 1;
+    const verseKey = this.getVerseKeyForLine(lineIndex);
+    const name = verseKey
+      ? `Ayah ${verseKey} (Page ${page}, Line ${lineIndex + 1})`
+      : `Page ${page}, Line ${lineIndex + 1}`;
+    await this.appDataService.addManualBookmark(name, page, 'Reading');
+    this.surahService.presentToastWithOptions('Bookmark saved!', 'success', 'bottom');
+  }
+
+  // ===========================================
+  // INLINE TRANSLATION
+  // ===========================================
+
+  /**
+   * Toggle inline translation mode
+   */
+  toggleInlineTranslation(enabled: boolean) {
+    this.inlineTransMode = enabled;
+    if (enabled) {
+      this.loadInlineTranslations();
+    } else {
+      this.inlineTranslations = [];
+    }
+  }
+
+  /**
+   * Reload inline translations (e.g., when language changes)
+   */
+  reloadInlineTranslations() {
+    if (this.inlineTransMode) {
+      this.loadInlineTranslations();
+    }
+  }
+
+  /**
+   * Load inline translations for all lines on the current page.
+   * Maps each line to the ayah(s) it contains, fetches translations.
+   */
+  private loadInlineTranslations() {
+    const cacheKey = `${this.currentPage}_${this.inlineTransLang}`;
+    if (this.inlineTransCache.has(cacheKey)) {
+      this.inlineTranslations = this.inlineTransCache.get(cacheKey)!;
+      return;
+    }
+
+    // For surah mode with existing translation data
+    if (this.translationExists && this.tPages?.length && this.inlineTransLang === 'ur') {
+      const tLines = this.tPages[this.currentPage - 1]?.split('\n') || [];
+      this.inlineTranslations = tLines;
+      this.inlineTransCache.set(cacheKey, tLines);
+      return;
+    }
+
+    // For juz mode (quran.com API) — build verse keys for all lines on this page
+    if (!this.juzmode || !this.surahInfo) {
+      this.inlineTranslations = [];
+      return;
+    }
+
+    try {
+      const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
+      if (!firstAndLast) {
+        this.inlineTranslations = [];
+        return;
+      }
+
+      const firstKey = firstAndLast.first.verseId;
+      const lastKey = firstAndLast.last.verseId;
+      const transId = this.inlineTransLang === 'ur' ? '151' : '131';
+      const [fSurah, fAyah] = firstKey.split(':').map(Number);
+      const [lSurah, lAyah] = lastKey.split(':').map(Number);
+
+      // Build a list of all verse keys on this page
+      const verseKeys: string[] = [];
+      for (let s = fSurah; s <= lSurah; s++) {
+        const startA = s === fSurah ? fAyah : 1;
+        const surahAyahCount = this.surahService.surahAyahCounts?.[s - 1] || 999;
+        const endA = s === lSurah ? lAyah : surahAyahCount;
+        for (let a = startA; a <= endA; a++) {
+          verseKeys.push(`${s}:${a}`);
+        }
+      }
+
+      // Fetch translations for all verses at once via chapter endpoint
+      const url = `https://api.quran.com/api/v4/verses/by_key/${firstKey}?translations=${transId}&fields=text_indopak`;
+      // Actually fetch all in batch by using the page-range approach
+      const batchUrl = `https://api.quran.com/api/v4/verses/by_chapter/${fSurah}?translations=${transId}&per_page=50&fields=text_indopak&from=${firstKey}&to=${lastKey}`;
+
+      this.httpClient.get(batchUrl).pipe(take(1)).subscribe(
+        (res: any) => {
+          const verseTrans: Map<string, string> = new Map();
+          (res.verses || []).forEach((v: any) => {
+            const transText = v.translations?.[0]?.text || '';
+            verseTrans.set(v.verse_key, this.convertToPlain(transText));
+          });
+
+          // Map each line to a translation based on which ayah it contains
+          const result: string[] = [];
+          for (let i = 0; i < this.lines.length; i++) {
+            const vk = this.getVerseKeyForLine(i);
+            result.push(vk ? (verseTrans.get(vk) || '') : '');
+          }
+          this.inlineTranslations = result;
+          this.inlineTransCache.set(cacheKey, result);
+        },
+        () => {
+          this.inlineTranslations = [];
+        }
+      );
+    } catch (e) {
+      console.warn('Inline translation failed:', e);
+      this.inlineTranslations = [];
+    }
+  }
+
+  // ===========================================
+  // JUMP TO AYAH
+  // ===========================================
+
+  /**
+   * Navigate to a specific ayah (format: "surah:ayah")
+   * Finds the page containing that ayah and navigates to it
+   */
+  gotoAyah(val: string) {
+    if (!val || !val.includes(':')) return;
+    const [surahStr, ayahStr] = val.split(':');
+    const surah = parseInt(surahStr);
+    const ayah = parseInt(ayahStr);
+    if (isNaN(surah) || isNaN(ayah) || surah < 1 || surah > 114 || ayah < 1) return;
+
+    // For complete mushaf, scan pages to find the ayah
+    if (this.isCompleteMushaf) {
+      const AYAH_MARK = this.surahService.diacritics.AYAH_MARK;
+      const BISM = this.surahService.diacritics.BISM;
+      let currentSurah = 1;
+
+      for (let p = 0; p < this.pages.length; p++) {
+        const pageText = this.pages[p];
+        const pageLines = pageText.split('\n');
+
+        // Track surah number changes on this page
+        for (const line of pageLines) {
+          if (line.includes(BISM) && p > 0) {
+            // Bismillah indicates start of a new surah
+            // (except for Surah Fatihah on page 1)
+            currentSurah++;
+          }
+        }
+
+        if (currentSurah >= surah) {
+          // Check if this page contains the target ayah
+          const ayahPattern = new RegExp(
+            `${AYAH_MARK}${this.surahService.e2a(ayah.toString())}(?:[^۰-۹]|$)`
+          );
+          if (ayahPattern.test(pageText) || (currentSurah === surah && ayah === 1)) {
+            this.gotoPageNum(p + 1);
+            // Try to highlight the line containing the ayah
+            setTimeout(() => {
+              for (let l = 0; l < pageLines.length; l++) {
+                if (ayahPattern.test(pageLines[l]) || (ayah === 1 && l === 0)) {
+                  const el = document.querySelector(`#line_${l}`) as HTMLElement;
+                  if (el) {
+                    el.classList.add('highlight-line');
+                    setTimeout(() => el.classList.remove('highlight-line'), 2000);
+                  }
+                  break;
+                }
+              }
+            }, 200);
+            return;
+          }
+        }
+      }
+      // Fallback: use surah page numbers
+      this.gotoPageNum(this.surahService.surahPageNumbers[surah - 1]);
+    }
+  }
+
+  // ===========================================
+  // EXPORT TEXT
+  // ===========================================
+
+  /**
+   * Show export text options - copy line, page, surah, juz, or range
+   */
+  async exportText() {
+    const buttons: any[] = [
+      {
+        text: 'Copy Current Page',
+        handler: () => {
+          const text = this.lines.join('\n');
+          this.copyAnything(text);
+          this.surahService.presentToastWithOptions('Page copied!', 'success-light', 'bottom');
+        },
+      },
+    ];
+
+    if (this.isCompleteMushaf) {
+      buttons.push({
+        text: `Copy Current Surah (${this.surahService.surahNames[this.surahCalculated - 1] || ''})`,
+        handler: () => {
+          this.copySurahText(this.surahCalculated);
+        },
+      });
+      buttons.push({
+        text: `Copy Current Juz (${this.juzCalculated})`,
+        handler: () => {
+          this.copyJuzText(this.juzCalculated);
+        },
+      });
+    }
+
+    buttons.push(
+      {
+        text: 'Copy Page Range...',
+        handler: () => {
+          this.promptCopyPageRange();
+        },
+      },
+      {
+        text: 'Cancel',
+        role: 'cancel',
+      }
+    );
+
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Export / Copy Text',
+      buttons,
+    });
+    await actionSheet.present();
+  }
+
+  private copySurahText(surahNum: number) {
+    if (!surahNum || surahNum < 1 || surahNum > 114) return;
+    const startPage = this.surahService.surahPageNumbers[surahNum - 1] - 1;
+    const endPage = surahNum < 114
+      ? this.surahService.surahPageNumbers[surahNum] - 1
+      : this.pages.length;
+    const text = this.pages.slice(startPage, endPage).join('\n\n--- Page Break ---\n\n');
+    this.copyAnything(text);
+    this.surahService.presentToastWithOptions(
+      `Surah ${this.surahService.surahNames[surahNum - 1]} copied!`,
+      'success-light',
+      'bottom'
+    );
+  }
+
+  private copyJuzText(juzNum: number) {
+    if (!juzNum || juzNum < 1 || juzNum > 30) return;
+    const startPage = this.surahService.juzPageNumbers[juzNum - 1] - 1;
+    const endPage = juzNum < 30
+      ? this.surahService.juzPageNumbers[juzNum] - 1
+      : this.pages.length;
+    const text = this.pages.slice(startPage, endPage).join('\n\n--- Page Break ---\n\n');
+    this.copyAnything(text);
+    this.surahService.presentToastWithOptions(
+      `Juz ${juzNum} copied!`,
+      'success-light',
+      'bottom'
+    );
+  }
+
+  private async promptCopyPageRange() {
+    const alert = await this.alertController.create({
+      header: 'Copy Page Range',
+      inputs: [
+        { name: 'from', type: 'number', placeholder: 'From page', min: 1, max: this.pages.length },
+        { name: 'to', type: 'number', placeholder: 'To page', min: 1, max: this.pages.length },
+      ],
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Copy',
+          handler: (data) => {
+            const from = Math.max(1, parseInt(data.from) || 1) - 1;
+            const to = Math.min(this.pages.length, parseInt(data.to) || this.pages.length);
+            const text = this.pages.slice(from, to).join('\n\n--- Page Break ---\n\n');
+            this.copyAnything(text);
+            this.surahService.presentToastWithOptions(
+              `Pages ${from + 1}–${to} copied!`,
+              'success-light',
+              'bottom'
+            );
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
   getNextAyahNumberFromCurrentLine(lineNumber: number) {
     const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
     let lineCounter = lineNumber;
@@ -885,13 +1492,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     return this.pages[pageIndex].split("\n")[lineIndex];
   }
   gotoPageNum(p) {
-    if (!p || p > 611 || p < 1) return;
+    if (!p || p > this.pages?.length || p < 1) return;
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
 
     this.setBookmark();
     this.updateCalculatedNumbers();
     this.getFirstAndLastAyahNumberOnPage();
+    if (this.inlineTransMode) this.loadInlineTranslations();
     setTimeout(() => {
       this.adjustFontsize();
     }, 1000);

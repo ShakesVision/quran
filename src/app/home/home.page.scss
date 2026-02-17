@@ -1,5 +1,5 @@
 // ===========================================
-// HOMEPAGE STYLES - Modern Material Design
+// HOMEPAGE STYLES - Modern Material Design + POP Animations
 // ===========================================
 
 // Header
@@ -12,12 +12,14 @@ ion-header {
   
   .app-logo {
     font-size: 28px;
+    animation: fadeSlideLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
   }
   
   .app-title {
     font-weight: 700;
     font-size: 1.2rem;
     color: var(--ion-color-primary);
+    animation: fadeSlideLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
   }
   
   .app-subtitle {
@@ -25,11 +27,17 @@ ion-header {
     font-size: 0.85rem;
     color: var(--ion-color-medium);
     margin-left: 4px;
+    animation: fadeSlideLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
   }
   
   .theme-toggle {
     --padding-start: 8px;
     --padding-end: 8px;
+    animation: fadeSlideLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+
+    &:active ion-icon {
+      animation: spin360 0.4s ease-out;
+    }
   }
 }
 
@@ -49,8 +57,9 @@ ion-content {
   color: white;
   position: relative;
   overflow: hidden;
-  
-  // Decorative pattern
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+
+  // Animated decorative circles
   &::before {
     content: '';
     position: absolute;
@@ -60,6 +69,7 @@ ion-content {
     height: 200px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
+    animation: floatY 6s ease-in-out infinite;
   }
   
   &::after {
@@ -71,6 +81,7 @@ ion-content {
     height: 150px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
+    animation: floatY 8s ease-in-out infinite reverse;
   }
   
   .hero-content {
@@ -92,10 +103,17 @@ ion-content {
     --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     font-size: 0.8rem;
     font-weight: 600;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.2s ease;
     
     &:hover {
       --background: rgba(255, 255, 255, 0.95);
-      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transform: translateY(-1px);
+      --box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      transform: scale(0.95) !important;
     }
   }
 }
@@ -110,6 +128,7 @@ ion-content {
   letter-spacing: 1.5px;
   color: var(--ion-color-medium);
   margin: 24px 16px 12px;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
 }
 
 // ===========================================
@@ -130,15 +149,28 @@ ion-content {
     background: var(--ion-color-light);
     border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.25s ease,
+                background 0.25s ease;
+    will-change: transform;
+
+    // Staggered entrance
+    opacity: 0;
+    animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    &:nth-child(1) { animation-delay: 0.15s; }
+    &:nth-child(2) { animation-delay: 0.22s; }
+    &:nth-child(3) { animation-delay: 0.29s; }
+    &:nth-child(4) { animation-delay: 0.36s; }
     
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
     
     &:active {
-      transform: scale(0.98);
+      transform: scale(0.97) !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition-duration: 0.08s;
     }
     
     .card-icon-wrapper {
@@ -151,9 +183,11 @@ ion-content {
       background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-tint) 100%);
       color: white;
       flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       
       ion-icon {
         font-size: 24px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       &.secondary {
@@ -164,6 +198,15 @@ ion-content {
       &.tertiary {
         background: linear-gradient(135deg, var(--ion-color-tertiary) 0%, var(--ion-color-tertiary-tint) 100%);
         color: var(--ion-color-tertiary-contrast);
+      }
+    }
+
+    // Icon breathes on hover
+    &:hover .card-icon-wrapper {
+      transform: scale(1.08);
+
+      ion-icon {
+        transform: scale(1.1);
       }
     }
     
@@ -188,12 +231,21 @@ ion-content {
     .card-arrow {
       color: var(--ion-color-medium);
       font-size: 20px;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // Arrow slides right on hover
+    &:hover .card-arrow {
+      transform: translateX(3px);
+      color: var(--ion-color-primary);
     }
     
-    // Primary card - larger, more prominent
+    // Primary card - larger, more prominent, animated border
     &.primary-card {
       background: linear-gradient(135deg, var(--ion-color-light) 0%, var(--ion-color-light-tint) 100%);
-      border: 1px solid var(--ion-color-primary);
+      border: 1.5px solid var(--ion-color-primary);
+      animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.12s both,
+                 borderGlow 3s ease-in-out infinite 1s;
       
       .card-icon-wrapper {
         width: 56px;
@@ -234,22 +286,40 @@ ion-content {
     background: var(--ion-color-light);
     border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                background 0.2s ease,
+                box-shadow 0.2s ease;
     position: relative;
+    will-change: transform;
+
+    // Staggered entrance
+    opacity: 0;
+    animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    &:nth-child(1) { animation-delay: 0.4s; }
+    &:nth-child(2) { animation-delay: 0.46s; }
+    &:nth-child(3) { animation-delay: 0.52s; }
+    &:nth-child(4) { animation-delay: 0.58s; }
     
     &:hover {
       background: var(--ion-color-light-tint);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     }
     
     &:active {
-      transform: scale(0.95);
+      transform: scale(0.90) !important;
+      transition-duration: 0.08s;
     }
     
     ion-icon {
       font-size: 24px;
       color: var(--ion-color-primary);
       margin-bottom: 8px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &:hover ion-icon {
+      transform: scale(1.2);
     }
     
     span {
@@ -265,6 +335,7 @@ ion-content {
       right: 4px;
       font-size: 6px;
       padding: 2px 4px;
+      animation: subtlePulse 2s ease-in-out infinite;
     }
   }
 }
@@ -275,21 +346,26 @@ ion-content {
 .discover-section {
   padding: 0 12px;
   margin-top: 20px;
+  // Entrance
+  opacity: 0;
+  animation: fadeSlideUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
   
   .discover-card {
     position: relative;
     border-radius: 16px;
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s ease;
     
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 12px 32px rgba(90, 45, 142, 0.35);
     }
     
     &:active {
-      transform: scale(0.98);
+      transform: scale(0.97) !important;
+      transition-duration: 0.08s;
     }
   }
   
@@ -298,6 +374,9 @@ ion-content {
     inset: 0;
     background: linear-gradient(135deg, #1a0a2e 0%, #3a1c6e 40%, #5b2d8e 70%, #7b3dae 100%);
     z-index: 0;
+    // Animated gradient shift
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease-in-out infinite;
     
     &::after {
       content: '';
@@ -305,6 +384,11 @@ ion-content {
       inset: 0;
       background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
   
   .discover-content {
@@ -326,10 +410,23 @@ ion-content {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    animation: glowRing 3s ease-in-out infinite;
     
     ion-icon {
       font-size: 26px;
       color: #ffe082;
+      animation: wiggle 3s ease-in-out infinite 1s;
+    }
+  }
+
+  @keyframes glowRing {
+    0%, 100% {
+      box-shadow: 0 0 8px rgba(255, 224, 130, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 224, 130, 0.4);
+      border-color: rgba(255, 224, 130, 0.5);
     }
   }
   
@@ -355,6 +452,12 @@ ion-content {
   .discover-arrow {
     font-size: 22px;
     opacity: 0.6;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .discover-card:hover .discover-arrow {
+    transform: translateX(4px);
+    opacity: 1;
   }
   
   .discover-status {
@@ -382,6 +485,8 @@ ion-content {
   margin-top: 32px;
   padding: 20px 16px 32px;
   text-align: center;
+  opacity: 0;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.65s both;
   
   .footer-links {
     display: flex;
@@ -392,9 +497,15 @@ ion-content {
     ion-button {
       --color: var(--ion-color-medium);
       font-size: 0.75rem;
+      transition: transform 0.2s ease;
       
       ion-icon {
         font-size: 16px;
+      }
+
+      &:hover {
+        --color: var(--ion-color-primary);
+        transform: translateY(-1px);
       }
     }
   }
@@ -414,9 +525,11 @@ ion-content {
     a {
       color: var(--ion-color-primary);
       text-decoration: none;
+      transition: color 0.2s ease;
 
       &:hover {
         text-decoration: underline;
+        color: var(--ion-color-primary-tint);
       }
     }
   }
@@ -434,7 +547,7 @@ body.dark {
     background: var(--ion-color-light);
     
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
     
     &.primary-card {
@@ -444,10 +557,21 @@ body.dark {
   
   .tool-card {
     background: var(--ion-color-light);
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
   }
   
-  .discover-card .discover-bg {
-    background: linear-gradient(135deg, #0d0520 0%, #2a1050 40%, #441a80 70%, #5b2d8e 100%);
+  .discover-card {
+    .discover-bg {
+      background: linear-gradient(135deg, #0d0520 0%, #2a1050 40%, #441a80 70%, #5b2d8e 100%);
+      background-size: 200% 200%;
+    }
+
+    &:hover {
+      box-shadow: 0 12px 32px rgba(90, 45, 142, 0.5);
+    }
   }
 }
 
@@ -463,5 +587,16 @@ body.dark {
   .tools-section .tools-grid {
     max-width: 500px;
     margin: 0 auto;
+  }
+}
+
+// ===========================================
+// REDUCED MOTION
+// ===========================================
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

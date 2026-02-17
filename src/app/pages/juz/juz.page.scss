@@ -1,10 +1,19 @@
 // ===========================================
-// BROWSE PAGE - Modern Material Design 3
+// BROWSE PAGE - Modern Material Design 3 + Animations
 // ===========================================
 
 ion-header {
   ion-toolbar {
     --background: transparent;
+  }
+
+  // Header title entrance
+  ion-title {
+    animation: fadeSlideLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.05s both;
+  }
+
+  ion-buttons {
+    animation: fadeSlideLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
   }
 }
 
@@ -26,15 +35,18 @@ ion-content {
   margin-bottom: 16px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s ease;
+  animation: fadeSlideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.3);
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.35);
   }
 
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.98) !important;
+    transition-duration: 0.08s;
   }
 
   .card-background {
@@ -45,6 +57,7 @@ ion-content {
     height: 200px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
+    animation: floatY 6s ease-in-out infinite;
   }
 
   .card-content {
@@ -63,11 +76,16 @@ ion-content {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     ion-icon {
       font-size: 28px;
       color: white;
     }
+  }
+
+  &:hover .card-icon {
+    transform: scale(1.1);
   }
 
   .card-text {
@@ -108,6 +126,12 @@ ion-content {
     color: white;
     font-size: 24px;
     opacity: 0.7;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:hover .card-arrow {
+    transform: translateX(3px);
+    opacity: 1;
   }
 
   .bookmark-indicator {
@@ -134,6 +158,7 @@ ion-content {
 // ===========================================
 .segment-wrapper {
   margin-bottom: 12px;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
 }
 
 .browse-segment {
@@ -147,6 +172,11 @@ ion-content {
     font-weight: 500;
     text-transform: none;
     min-height: 40px;
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.96);
+    }
   }
 }
 
@@ -157,6 +187,7 @@ ion-content {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
 }
 
 .custom-searchbar {
@@ -173,6 +204,11 @@ ion-content {
   --padding-end: 12px;
   height: 42px;
   margin: 0;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.88);
+  }
 
   ion-icon {
     font-size: 20px;
@@ -188,6 +224,7 @@ ion-content {
   color: var(--ion-color-medium);
   text-align: center;
   margin-bottom: 12px;
+  animation: fadeSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.25s both;
 }
 
 // ===========================================
@@ -210,16 +247,28 @@ ion-content {
   padding: 12px 8px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s ease;
+  will-change: transform;
+
+  // Staggered entrance for grid items
+  opacity: 0;
+  animation: fadeSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  @for $i from 1 through 30 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{0.2 + $i * 0.025}s;
+    }
+  }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   }
 
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.94) !important;
+    transition-duration: 0.08s;
   }
 
   &.complete {
@@ -231,6 +280,7 @@ ion-content {
       top: 4px;
       right: 4px;
       font-size: 10px;
+      animation: popIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
@@ -247,7 +297,22 @@ ion-content {
     height: 100%;
     background: linear-gradient(90deg, var(--ion-color-success-tint) 0%, rgba(var(--ion-color-success-rgb), 0.1) 100%);
     z-index: 0;
-    transition: width 0.3s ease;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Shimmer on progress
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: progressShimmer 2.5s ease-in-out infinite;
+    }
   }
 
   .item-content {
@@ -263,6 +328,11 @@ ion-content {
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--ion-color-primary);
+    transition: transform 0.2s ease;
+  }
+
+  &:hover .item-number {
+    transform: scale(1.15);
   }
 
   .item-name {
@@ -284,6 +354,7 @@ ion-content {
     right: 4px;
     font-size: 12px;
     color: var(--ion-color-primary);
+    animation: popIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -318,11 +389,15 @@ ion-content {
 body.dark {
   .full-quran-card {
     background: linear-gradient(135deg, var(--ion-color-primary-shade) 0%, var(--ion-color-primary) 100%);
+
+    &:hover {
+      box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.5);
+    }
   }
 
   .grid-item {
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     }
   }
 }
@@ -352,5 +427,16 @@ body.dark {
     &.surah-grid {
       grid-template-columns: repeat(8, 1fr);
     }
+  }
+}
+
+// ===========================================
+// REDUCED MOTION
+// ===========================================
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

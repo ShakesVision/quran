@@ -57,6 +57,9 @@
       <ion-button (click)="toggleImmersiveMode()" slot="end" [ngClass]="isImmersive?'emphasize-btn':''">
         <ion-icon slot="icon-only" [name]="isImmersive?'contract-outline':'expand-outline'"></ion-icon>
       </ion-button>
+      <ion-button (click)="isSearchOpen = true" slot="end">
+        <ion-icon slot="icon-only" name="search-outline"></ion-icon>
+      </ion-button>
       <ion-button id="popover-trigger-btn" slot="end">
         <ion-icon slot="icon-only" name="options-outline"></ion-icon>
       </ion-button>
@@ -107,7 +110,7 @@
         </span>
       </ng-container>
     </div>
-    <div class="content-wrapper">
+    <div class="content-wrapper" [class.inline-trans-active]="inlineTransMode">
       <ng-container class="ion-text-center" *ngIf="currentPage==1 && lines?.length<15 && !juzmode">
         <div class="filler-lines line" *ngFor="let line of [].constructor(15 - (lines?.length+2))"></div>
         <div class="surah-name line centered-table-text">
@@ -122,10 +125,19 @@
         'juz-start-line': ![2,3].includes(currentPageCalculated) && surahService.juzPageNumbers.includes(currentPageCalculated) && (lines[1].trim()==='﷽' ? i===2 : i===0),
         'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPageCalculated==188 && i==0), 
         'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))|| (currentPage===pages.length && i===lines.length-1 && !juzmode)}"
-        (click)="openTrans($event,i)">
+        (click)="onLineClick($event,i)"
+        (dblclick)="onLineDblClick($event,i)"
+        (touchstart)="onLineTouchStart($event,i)"
+        (touchend)="onLineTouchEnd($event,i)"
+        (touchmove)="onLineTouchCancel()"
+        (contextmenu)="onLineContextMenu($event,i)">
         <div *ngIf="line.includes(surahService.diacritics.RUKU_MARK)" class="ruku-wrapper"
           [innerHTML]="addIndicators(line,i)"></div>
-        <span> {{line}} </span>
+        <span class="arabic-line-text"> {{line}} </span>
+        <span *ngIf="inlineTransMode && inlineTranslations[i]" class="inline-translation"
+          [ngClass]="{'ur': inlineTransLang==='ur'}">
+          {{inlineTranslations[i]}}
+        </span>
       </div>
       <ng-container *ngIf="currentPage==pages?.length && pages?.length!=1 && lines.length<15">
         <div class="filler-lines line" *ngFor="let line of [].constructor(15 - lines.length)"></div>
@@ -171,6 +183,18 @@
               <ion-toggle slot="end" [checked]="enableTatweel"
                 (ionChange)="toggleTatweel($event.detail.checked)"></ion-toggle>
             </ion-item>
+            <ion-item>
+              <ion-label>Inline Translation</ion-label>
+              <ion-toggle slot="end" [checked]="inlineTransMode"
+                (ionChange)="toggleInlineTranslation($event.detail.checked)"></ion-toggle>
+            </ion-item>
+            <ion-item *ngIf="inlineTransMode">
+              <ion-label>Translation Language</ion-label>
+              <ion-select [(ngModel)]="inlineTransLang" (ionChange)="reloadInlineTranslations()" interface="popover">
+                <ion-select-option value="en">English</ion-select-option>
+                <ion-select-option value="ur">Urdu</ion-select-option>
+              </ion-select>
+            </ion-item>
             <ion-item-divider class="settings-section">Navigation</ion-item-divider>
             <ion-item *ngIf="isCompleteMushaf">
               <ion-label>Go to</ion-label>
@@ -180,6 +204,9 @@
                   class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
                 <ion-input slot="end" placeholder="surah" type="number" maxlength="3"
                   (ionChange)="gotoJuzSurah($event.target.value,'surah')" [debounce]="500"
+                  class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
+                <ion-input slot="end" placeholder="ayah (s:a)" type="text" maxlength="7"
+                  (ionChange)="gotoAyah($event.target.value)" [debounce]="800"
                   class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
               </ng-container>
             </ion-item>
@@ -229,6 +256,10 @@
               <ion-icon slot="start" name="create-outline"></ion-icon>
               <ion-label>Add Note</ion-label>
             </ion-item>
+            <ion-item button (click)="exportText()">
+              <ion-icon slot="start" name="copy-outline"></ion-icon>
+              <ion-label>Export/Copy Text</ion-label>
+            </ion-item>
             <ion-item button (click)="exportAppData()">
               <ion-icon slot="start" name="download-outline"></ion-icon>
               <ion-label>Export Data</ion-label>
@@ -237,53 +268,76 @@
               <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
               <ion-label>Import Data</ion-label>
             </ion-item>
-            <ion-item-divider class="settings-section">Search</ion-item-divider>
-            <ion-card>
-              <ion-item color="light">
-                <ion-input #searchInput placeholder="بحث / SEARCH / تلاش" [value]="queryString"
-                  (ionChange)="onSearchChange($event.target.value)" [debounce]="500" clearInput
-                  class="ion-no-padding ion-text-center ar2"></ion-input>
-              </ion-item>
-              <ion-item style="font-size: small">
-                <ion-label>Ignore Tashkeel</ion-label>
-                <ion-toggle slot="end" [checked]="ignoreTashkeel"
-                  (ionChange)="toggleIgnoreTashkeel(searchInput.value)"></ion-toggle>
-              </ion-item>
-            </ion-card>
-            <div *ngIf="searchResults" class="ion-text-center result-heading">
-              <ion-item button (click)="copyResults($event.target)" [color]="copyResultsBG">
-                <ion-label><span
-                    [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}">Results:</span>
-                  {{searchResults.results.length}}
-                  <span *ngIf="searchResults.total!==searchResults.results.length">({{searchResults.total}})</span>
-                  <small> ⏲ {{searchResults.searchTimeSecs}} sec</small>
-                </ion-label>
-                <ion-icon color="light" slot="end" name="copy-outline"></ion-icon>
-              </ion-item>
-              <ion-label *ngIf="!isCompleteMushaf" color="warning" style="font-style: italic">
-                <small>(searched only in {{juzsurahmode?'Surah':'Juz'}} {{title}})
-                </small>
-              </ion-label>
-            </div>
-            <virtual-scroller *ngIf="searchResults" #scroll [items]="searchResults.results"
-              [parentScroll]="scrollingBlock.nativeElement" [executeRefreshOutsideAngularZone]="true"
-              (vsUpdate)="changeDetectorRef.detectChanges()" (vsChange)="vsChange($event)">
-              <ion-item *ngFor="let r of scroll.viewPortItems;let i=index" button class="rtl" style="position: relative"
-                (click)="gotoPageAndHighlightLine(r)">
-                <div class="indices ion-margin-end">
-                  <span class="index">{{i+1+startIndex}}</span>
-                  <span class="frequency" *ngIf="r.charIndices.length>1">{{r.charIndices.length}}</span>
-                  <span class="location">{{r.pageIndex+1}}</span>
-                </div>
-                <ion-label class="ar2 small-text">{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label>
-              </ion-item>
-            </virtual-scroller>
           </ion-list>
         </div>
       </ion-content>
     </ng-template>
   </ion-popover>
   
+  <!-- Search Modal (sheet-style) -->
+  <ion-modal [isOpen]="isSearchOpen" (didDismiss)="isSearchOpen = false"
+    [breakpoints]="[0, 0.4, 0.75, 1]" [initialBreakpoint]="0.75"
+    [backdropDismiss]="true" [showBackdrop]="true"
+    cssClass="search-sheet-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title size="small">Search</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isSearchOpen = false">
+              <ion-icon slot="icon-only" name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="search-modal-content">
+        <div class="search-wrapper" #searchScrollingBlock>
+          <ion-card class="search-card">
+            <ion-item color="light">
+              <ion-icon slot="start" name="search-outline" color="medium"></ion-icon>
+              <ion-input #searchInput placeholder="بحث / SEARCH / تلاش" [value]="queryString"
+                (ionChange)="onSearchChange($event.target.value)" [debounce]="500" clearInput
+                class="ion-no-padding ion-text-center ar2"></ion-input>
+            </ion-item>
+            <ion-item style="font-size: small">
+              <ion-label>Ignore Tashkeel</ion-label>
+              <ion-toggle slot="end" [checked]="ignoreTashkeel"
+                (ionChange)="toggleIgnoreTashkeel(searchInput.value)"></ion-toggle>
+            </ion-item>
+          </ion-card>
+          <div *ngIf="searchResults" class="ion-text-center result-heading">
+            <ion-item button (click)="copyResults($event.target)" [color]="copyResultsBG">
+              <ion-label><span
+                  [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}">Results:</span>
+                {{searchResults.results.length}}
+                <span *ngIf="searchResults.total!==searchResults.results.length">({{searchResults.total}})</span>
+                <small> ⏲ {{searchResults.searchTimeSecs}} sec</small>
+              </ion-label>
+              <ion-icon color="light" slot="end" name="copy-outline"></ion-icon>
+            </ion-item>
+            <ion-label *ngIf="!isCompleteMushaf" color="warning" style="font-style: italic">
+              <small>(searched only in {{juzsurahmode?'Surah':'Juz'}} {{title}})
+              </small>
+            </ion-label>
+          </div>
+          <virtual-scroller *ngIf="searchResults" #scroll [items]="searchResults.results"
+            [parentScroll]="searchScrollingBlock" [executeRefreshOutsideAngularZone]="true"
+            (vsUpdate)="changeDetectorRef.detectChanges()" (vsChange)="vsChange($event)">
+            <ion-item *ngFor="let r of scroll.viewPortItems;let i=index" button class="rtl" style="position: relative"
+              (click)="gotoPageAndHighlightLine(r); isSearchOpen = false">
+              <div class="indices ion-margin-end">
+                <span class="index">{{i+1+startIndex}}</span>
+                <span class="frequency" *ngIf="r.charIndices.length>1">{{r.charIndices.length}}</span>
+                <span class="location">{{r.pageIndex+1}}</span>
+              </div>
+              <ion-label class="ar2 small-text">{{getLineTextFromIndices(+r.pageIndex,+r.lineIndex)}}</ion-label>
+            </ion-item>
+          </virtual-scroller>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
   <!-- Floating immersive mode toggle (visible in immersive mode) -->
   <ion-fab *ngIf="isImmersive" vertical="bottom" horizontal="end" slot="fixed" class="immersive-toggle">
     <ion-fab-button size="small" color="medium" (click)="toggleImmersiveMode()">

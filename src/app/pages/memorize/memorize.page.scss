@@ -1,5 +1,5 @@
 // ===========================================
-// MEMORIZE PAGE - Modern Material Design
+// MEMORIZE PAGE - Modern Material Design + Animations
 // ===========================================
 
 // Header
@@ -24,6 +24,13 @@ ion-content {
   padding: 16px;
   margin-bottom: 20px;
   color: var(--ion-color-warning-contrast);
+  animation: fadeSlideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
 
   .recommended-header {
     display: flex;
@@ -35,6 +42,7 @@ ion-content {
 
     ion-icon {
       font-size: 18px;
+      animation: wiggle 2s ease-in-out infinite 1s;
     }
   }
 
@@ -57,6 +65,12 @@ ion-content {
     border-radius: 16px;
     font-size: 0.9rem;
     font-family: "Muhammadi", serif;
+    transition: transform 0.2s ease, background 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.05);
+    }
   }
 
   .see-more-btn {
@@ -73,6 +87,7 @@ ion-content {
   --background: var(--ion-color-light);
   border-radius: 12px;
   margin-bottom: 16px;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
 
   ion-segment-button {
     --indicator-color: var(--ion-color-primary);
@@ -81,6 +96,11 @@ ion-content {
     font-weight: 500;
     font-size: 0.85rem;
     text-transform: none;
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.96);
+    }
   }
 }
 
@@ -101,6 +121,25 @@ ion-content {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.2s ease;
+    will-change: transform;
+    
+    // Staggered entrance
+    opacity: 0;
+    animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    &:nth-child(1) { animation-delay: 0.2s; }
+    &:nth-child(2) { animation-delay: 0.26s; }
+    &:nth-child(3) { animation-delay: 0.32s; }
+
+    &:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
 
     .stat-value {
       font-size: 1.2rem;
@@ -121,6 +160,8 @@ ion-content {
 // TRACKING SECTION
 // ===========================================
 .tracking-section {
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+
   .section-header {
     display: flex;
     justify-content: space-between;
@@ -151,7 +192,7 @@ ion-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-bottom: 80px; // Space for FAB
+  padding-bottom: 80px;
 }
 
 .progress-item {
@@ -160,15 +201,27 @@ ion-content {
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s ease;
+  will-change: transform;
+
+  // Staggered entrance
+  opacity: 0;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  @for $i from 1 through 30 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{0.3 + $i * 0.04}s;
+    }
+  }
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
   }
 
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.98) !important;
+    transition-duration: 0.08s;
   }
 
   &.completed {
@@ -176,6 +229,10 @@ ion-content {
 
     .item-progress-bar {
       background: var(--ion-color-success-tint);
+    }
+
+    .item-right ion-icon {
+      animation: checkBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
@@ -185,8 +242,23 @@ ion-content {
     left: 0;
     height: 100%;
     background: linear-gradient(90deg, var(--ion-color-primary-tint) 0%, rgba(var(--ion-color-primary-rgb), 0.2) 100%);
-    transition: width 0.3s ease;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 0;
+
+    // Shimmer effect on the progress bar
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: progressShimmer 2.5s ease-in-out infinite;
+    }
   }
 
   .item-content {
@@ -215,6 +287,11 @@ ion-content {
     justify-content: center;
     font-weight: 700;
     font-size: 0.85rem;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover .item-number {
+    transform: scale(1.1);
   }
 
   .item-details {
@@ -243,6 +320,8 @@ ion-content {
       font-size: 1rem;
       font-weight: 700;
       color: var(--ion-color-primary);
+      // Smooth number transitions
+      transition: color 0.3s ease;
     }
 
     ion-icon {
@@ -258,11 +337,13 @@ ion-content {
   text-align: center;
   padding: 48px 24px;
   color: var(--ion-color-medium);
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
 
   ion-icon {
     font-size: 48px;
     margin-bottom: 16px;
     opacity: 0.5;
+    animation: floatY 3s ease-in-out infinite;
   }
 
   p {
@@ -277,6 +358,17 @@ ion-content {
 ion-fab-button {
   --background: var(--ion-color-primary);
   --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s ease !important;
+
+  &:hover {
+    transform: scale(1.08);
+    --box-shadow: 0 6px 24px rgba(var(--ion-color-primary-rgb), 0.55);
+  }
+
+  &:active {
+    transform: scale(0.88) !important;
+  }
 }
 
 // ===========================================
@@ -298,12 +390,16 @@ body.dark {
 
   .progress-item {
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
     }
 
     .item-progress-bar {
       background: linear-gradient(90deg, var(--ion-color-primary-shade) 0%, rgba(var(--ion-color-primary-rgb), 0.15) 100%);
     }
+  }
+
+  .stat-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -317,5 +413,16 @@ body.dark {
 
   .alert-button.add-btn {
     font-weight: 600;
+  }
+}
+
+// ===========================================
+// REDUCED MOTION
+// ===========================================
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

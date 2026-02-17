@@ -9,6 +9,8 @@ export interface ManualBookmark {
   id?: string;
   name: string;
   page: number;
+  lineNumber?: number;
+  verseKey?: string; // e.g. "2:255"
   folderId?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -34,3 +36,4 @@ export interface BookmarkCalculation {
   perc: string;
   page: number;
 }
+

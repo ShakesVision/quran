@@ -11,25 +11,59 @@
 </ion-header>
 
 <ion-content>
-  <!-- Recommended Card -->
-  <div class="recommended-card">
-    <div class="recommended-header">
-      <ion-icon name="star"></ion-icon>
-      <span>Recommended for Memorization</span>
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Hero / Dashboard Card                       -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="hero-card">
+    <div class="hero-top">
+      <div class="ring-container">
+        <svg viewBox="0 0 120 120" class="progress-ring">
+          <circle cx="60" cy="60" r="52" class="ring-bg" />
+          <circle cx="60" cy="60" r="52"
+            class="ring-fill"
+            [style.strokeDasharray]="ringCircumference"
+            [style.strokeDashoffset]="ringOffset" />
+        </svg>
+        <div class="ring-label">
+          <span class="ring-percent">{{getTotalProgress()}}</span>
+          <span class="ring-percent-sign">%</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hs-value">{{getLevel()}}</span>
+          <span class="hs-label">{{getLevelTitle()}}</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hs-value">{{getStreak()}} 🔥</span>
+          <span class="hs-label">Day Streak</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hs-value">{{getTotalMemorized()}}</span>
+          <span class="hs-label">{{trackingMode === 'juz' ? 'Pages' : 'Ayahs'}}</span>
+        </div>
+      </div>
     </div>
-    <p class="recommended-text">
-      The Prophet ﷺ has mentioned fazaail for many surahs and ayahs.
-    </p>
-    <div class="recommended-surahs">
-      <span class="ar-tag" *ngFor="let chapter of recommendedChapters">{{chapter}}</span>
+    <div class="hero-motivation">
+      <ion-icon name="sparkles-outline"></ion-icon>
+      <span>{{motivationalQuote}}</span>
     </div>
-    <ion-button (click)="open('recommended')" size="small" fill="clear" class="see-more-btn">
-      See supporting ahadith
-      <ion-icon name="arrow-forward" slot="end"></ion-icon>
-    </ion-button>
   </div>
 
-  <!-- Segment Toggle -->
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Milestone Badges                            -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="badges-row" *ngIf="earnedBadges.length > 0">
+    <div class="badge-chip" *ngFor="let badge of earnedBadges"
+      [class.earned]="badge.earned">
+      <span class="badge-emoji">{{badge.emoji}}</span>
+      <span class="badge-name">{{badge.name}}</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Segment Toggle                              -->
+  <!-- ═══════════════════════════════════════════ -->
   <ion-segment [(ngModel)]="trackingMode" (ionChange)="onModeChange($event)" class="mode-segment">
     <ion-segment-button value="juz">
       <ion-label>By Juz</ion-label>
@@ -39,27 +73,56 @@
     </ion-segment-button>
   </ion-segment>
 
-  <!-- Stats Summary -->
-  <div class="stats-summary">
-    <div class="stat-item">
-      <span class="stat-value">{{getTotalProgress()}}%</span>
-      <span class="stat-label">Total Progress</span>
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Quick Stats Bar                             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="quick-stats">
+    <div class="qs-item" *ngIf="trackingMode === 'juz'">
+      <span class="qs-num">{{items.length}}</span><span class="qs-of">/30</span>
+      <span class="qs-label">Juz</span>
     </div>
-    <div class="stat-item" *ngIf="trackingMode === 'juz'">
-      <span class="stat-value">{{items.length}}/30</span>
-      <span class="stat-label">Juz Started</span>
+    <div class="qs-item" *ngIf="trackingMode === 'surah'">
+      <span class="qs-num">{{surahItems.length}}</span><span class="qs-of">/114</span>
+      <span class="qs-label">Surahs</span>
     </div>
-    <div class="stat-item" *ngIf="trackingMode === 'surah'">
-      <span class="stat-value">{{surahItems.length}}/114</span>
-      <span class="stat-label">Surahs Started</span>
+    <div class="qs-item">
+      <span class="qs-num">{{getCompletedCount()}}</span>
+      <span class="qs-label">Completed</span>
     </div>
-    <div class="stat-item">
-      <span class="stat-value">{{getTotalMemorized()}}</span>
-      <span class="stat-label">{{trackingMode === 'juz' ? 'Pages' : 'Ayahs'}}</span>
+    <div class="qs-item">
+      <span class="qs-num">{{getInProgressCount()}}</span>
+      <span class="qs-label">In Progress</span>
     </div>
   </div>
 
-  <!-- Juz Tracking -->
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Recommended Card (collapsed by default)     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="recommended-card" (click)="recommendedExpanded = !recommendedExpanded">
+    <div class="recommended-header">
+      <div class="rec-left">
+        <ion-icon name="star"></ion-icon>
+        <span>Recommended Surahs</span>
+      </div>
+      <ion-icon [name]="recommendedExpanded ? 'chevron-up' : 'chevron-down'" class="expand-chevron"></ion-icon>
+    </div>
+    <div class="recommended-body" *ngIf="recommendedExpanded">
+      <p class="recommended-text">
+        The Prophet ﷺ has mentioned fazaail for many surahs and ayahs.
+      </p>
+      <div class="recommended-surahs">
+        <span class="ar-tag" *ngFor="let chapter of recommendedChapters">{{chapter}}</span>
+      </div>
+      <ion-button (click)="open('recommended'); $event.stopPropagation()" size="small" fill="clear" class="see-more-btn">
+        See supporting ahadith
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Juz Tracking                                -->
+  <!-- ═══════════════════════════════════════════ -->
   <div class="tracking-section" *ngIf="trackingMode === 'juz'">
     <div class="section-header">
       <h2>Juz Progress</h2>
@@ -70,29 +133,42 @@
     </div>
 
     <div class="progress-list">
-      <div class="progress-item" *ngFor="let item of items" (click)="add(item)"
-        [class.completed]="item.completed === item.total">
+      <div class="progress-item" *ngFor="let item of items; trackBy: trackByJuz" (click)="add(item)"
+        [class.completed]="item.completed === item.total"
+        [class.celebrate]="justCompleted === item.juz">
         <div class="item-progress-bar" 
           [style.width.%]="(item.completed/item.total)*100">
         </div>
         <div class="item-content">
           <div class="item-left">
-            <span class="item-number">{{item.juz}}</span>
+            <div class="item-number" [class.gold]="item.completed === item.total">
+              {{item.juz}}
+            </div>
             <div class="item-details">
               <span class="item-name ar-text">{{getJuzInfo(item.juz,'name')}}</span>
               <span class="item-meta">{{item.completed}}/{{item.total}} pages</span>
             </div>
           </div>
           <div class="item-right">
-            <span class="item-percent">{{((item.completed/item.total)*100).toFixed(0)}}%</span>
-            <ion-icon name="checkmark-circle" *ngIf="item.completed === item.total" color="success"></ion-icon>
+            <div class="mini-ring-wrap">
+              <svg viewBox="0 0 36 36" class="mini-ring">
+                <circle cx="18" cy="18" r="15.9" class="mini-ring-bg" />
+                <circle cx="18" cy="18" r="15.9" class="mini-ring-fill"
+                  [style.strokeDasharray]="100"
+                  [style.strokeDashoffset]="100 - (item.completed/item.total)*100" />
+              </svg>
+              <span class="mini-percent">{{((item.completed/item.total)*100).toFixed(0)}}</span>
+            </div>
+            <ion-icon name="checkmark-circle" *ngIf="item.completed === item.total" color="success"
+              class="check-icon"></ion-icon>
           </div>
         </div>
       </div>
 
       <div class="empty-state" *ngIf="items.length === 0">
         <ion-icon name="book-outline"></ion-icon>
-        <p>No juz tracking started yet</p>
+        <p>Start your memorization journey!</p>
+        <p class="empty-hint">Tap + to add your first juz</p>
         <ion-button (click)="add()" fill="outline" size="small">
           <ion-icon name="add" slot="start"></ion-icon>
           Add first juz
@@ -101,7 +177,9 @@
     </div>
   </div>
 
-  <!-- Surah Tracking -->
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- Surah Tracking                              -->
+  <!-- ═══════════════════════════════════════════ -->
   <div class="tracking-section" *ngIf="trackingMode === 'surah'">
     <div class="section-header">
       <h2>Surah Progress</h2>
@@ -112,29 +190,42 @@
     </div>
 
     <div class="progress-list">
-      <div class="progress-item" *ngFor="let item of surahItems" (click)="addSurah(item)"
-        [class.completed]="item.completed === item.total">
+      <div class="progress-item" *ngFor="let item of surahItems; trackBy: trackBySurah" (click)="addSurah(item)"
+        [class.completed]="item.completed === item.total"
+        [class.celebrate]="justCompletedSurah === item.surahNumber">
         <div class="item-progress-bar" 
           [style.width.%]="(item.completed/item.total)*100">
         </div>
         <div class="item-content">
           <div class="item-left">
-            <span class="item-number">{{item.surahNumber}}</span>
+            <div class="item-number" [class.gold]="item.completed === item.total">
+              {{item.surahNumber}}
+            </div>
             <div class="item-details">
               <span class="item-name ar-text">{{item.surahName}}</span>
               <span class="item-meta">{{item.completed}}/{{item.total}} ayahs</span>
             </div>
           </div>
           <div class="item-right">
-            <span class="item-percent">{{((item.completed/item.total)*100).toFixed(0)}}%</span>
-            <ion-icon name="checkmark-circle" *ngIf="item.completed === item.total" color="success"></ion-icon>
+            <div class="mini-ring-wrap">
+              <svg viewBox="0 0 36 36" class="mini-ring">
+                <circle cx="18" cy="18" r="15.9" class="mini-ring-bg" />
+                <circle cx="18" cy="18" r="15.9" class="mini-ring-fill"
+                  [style.strokeDasharray]="100"
+                  [style.strokeDashoffset]="100 - (item.completed/item.total)*100" />
+              </svg>
+              <span class="mini-percent">{{((item.completed/item.total)*100).toFixed(0)}}</span>
+            </div>
+            <ion-icon name="checkmark-circle" *ngIf="item.completed === item.total" color="success"
+              class="check-icon"></ion-icon>
           </div>
         </div>
       </div>
 
       <div class="empty-state" *ngIf="surahItems.length === 0">
         <ion-icon name="document-text-outline"></ion-icon>
-        <p>No surah tracking started yet</p>
+        <p>Start memorizing surahs!</p>
+        <p class="empty-hint">Tap + to add your first surah</p>
         <ion-button (click)="addSurah()" fill="outline" size="small">
           <ion-icon name="add" slot="start"></ion-icon>
           Add first surah
@@ -142,6 +233,7 @@
       </div>
     </div>
   </div>
+
   <!-- FAB Button -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="trackingMode === 'juz' ? add() : addSurah()">
@@ -165,6 +257,10 @@
           <ion-icon slot="start" name="copy-outline"></ion-icon>
           <ion-label>Export data</ion-label>
         </ion-item>
+        <ion-item button (click)="resetStreak()">
+          <ion-icon slot="start" name="refresh-outline"></ion-icon>
+          <ion-label>Reset Streak</ion-label>
+        </ion-item>
         <ion-item button [routerLink]="['/']">
           <ion-icon slot="start" name="home-outline"></ion-icon>
           <ion-label>Back to Home</ion-label>
@@ -172,4 +268,12 @@
       </ion-content>
     </ng-template>
   </ion-popover>
+
+  <!-- Confetti overlay -->
+  <div class="confetti-overlay" *ngIf="showConfetti">
+    <div class="confetti-piece" *ngFor="let p of confettiPieces"
+      [style.left.%]="p.x" [style.animationDelay.ms]="p.delay"
+      [style.background]="p.color">
+    </div>
+  </div>
 </ion-content>

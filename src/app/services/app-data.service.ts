@@ -96,7 +96,9 @@ export class AppDataService {
   async addManualBookmark(
     name: string,
     page: number,
-    folderName = "Default"
+    folderName = "Default",
+    lineNumber?: number,
+    verseKey?: string
   ): Promise<ManualBookmark> {
     const data = await this.getAppData();
     const folders = data.bookmarks.manualFolders || [];
@@ -115,6 +117,8 @@ export class AppDataService {
       id: this.createId(),
       name,
       page,
+      lineNumber,
+      verseKey,
       folderId: folder.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -125,6 +129,56 @@ export class AppDataService {
     data.bookmarks.manual = [...(data.bookmarks.manual || []), bookmark];
     await this.saveAppData(data);
     return bookmark;
+  }
+
+  async getManualBookmarks(): Promise<ManualBookmarkFolder[]> {
+    const data = await this.getAppData();
+    return data.bookmarks.manualFolders || [];
+  }
+
+  async deleteManualBookmark(bookmarkId: string): Promise<void> {
+    const data = await this.getAppData();
+    // Remove from flat list
+    data.bookmarks.manual = (data.bookmarks.manual || []).filter(
+      (b) => b.id !== bookmarkId
+    );
+    // Remove from folders
+    (data.bookmarks.manualFolders || []).forEach((folder) => {
+      folder.bookmarks = folder.bookmarks.filter((b) => b.id !== bookmarkId);
+    });
+    await this.saveAppData(data);
+  }
+
+  async deleteBookmarkFolder(folderId: string): Promise<void> {
+    const data = await this.getAppData();
+    const folder = (data.bookmarks.manualFolders || []).find(
+      (f) => f.id === folderId
+    );
+    if (folder) {
+      // Remove bookmarks in this folder from flat list too
+      const folderBmIds = new Set(folder.bookmarks.map((b) => b.id));
+      data.bookmarks.manual = (data.bookmarks.manual || []).filter(
+        (b) => !folderBmIds.has(b.id)
+      );
+      data.bookmarks.manualFolders = (data.bookmarks.manualFolders || []).filter(
+        (f) => f.id !== folderId
+      );
+    }
+    await this.saveAppData(data);
+  }
+
+  async renameBookmarkFolder(
+    folderId: string,
+    newName: string
+  ): Promise<void> {
+    const data = await this.getAppData();
+    const folder = (data.bookmarks.manualFolders || []).find(
+      (f) => f.id === folderId
+    );
+    if (folder) {
+      folder.name = newName;
+    }
+    await this.saveAppData(data);
   }
 
   async addOrAppendNote(
@@ -176,4 +230,5 @@ export class AppDataService {
     return Math.random().toString(36).slice(2, 10);
   }
 }
+
 

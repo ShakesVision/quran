@@ -35,6 +35,17 @@ import { Bookmarks } from "src/app/models/bookmarks";
 import { TafseerModalComponent } from "src/app/components/tafseer-modal";
 import { QuranDataService } from "src/app/services/quran-data.service";
 import { AppDataService } from "src/app/services/app-data.service";
+import { applyTajweed, TAJWEED_LEGEND } from "src/app/lib/tajweed";
+import { MorphologyService, WordMorphology } from "src/app/services/morphology.service";
+
+export interface WbwWord {
+  arabic: string;
+  translation: string;
+  transliteration?: string;
+  audioUrl?: string;
+  location?: string; // "surah:ayah:word"
+  verseKey?: string;
+}
 
 @Component({
   selector: "app-read",
@@ -81,6 +92,22 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   inlineTransLang: 'en' | 'ur' = 'en';
   inlineTranslations: string[] = [];
   private inlineTransCache: Map<string, string[]> = new Map();
+
+  // Word-by-word translation mode
+  wbwMode = false;
+  wbwData: WbwWord[][] = []; // per line, array of word pairs
+  private wbwCache: Map<string, WbwWord[][]> = new Map();
+
+  // Word detail popover
+  selectedWord: WbwWord | null = null;
+  selectedWordMorphology: WordMorphology | null = null;
+  isWordDetailOpen = false;
+
+  // Tajweed mode
+  tajweedMode = false;
+  tajweedLines: string[] = []; // HTML strings with tajweed coloring
+  tajweedLegend = TAJWEED_LEGEND;
+  private tajweedCache: Map<string, string[]> = new Map();
 
   // Long-press tracking
   private longPressTimer: any;
@@ -187,7 +214,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     private gestureCtrl: GestureController,
     private quranDataService: QuranDataService,
     private appDataService: AppDataService,
-    private actionSheetController: ActionSheetController
+    private actionSheetController: ActionSheetController,
+    private morphologyService: MorphologyService
   ) {}
 
   ngOnInit() {
@@ -393,6 +421,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.setBookmark();
     this.getFirstAndLastAyahNumberOnPage();
     if (this.inlineTransMode) this.loadInlineTranslations();
+    if (this.wbwMode) this.loadWbwTranslations();
+    if (this.tajweedMode) this.loadTajweedText();
     setTimeout(() => {
       this.adjustFontsize();
     }, 100);
@@ -749,7 +779,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     const name = verseKey
       ? `Ayah ${verseKey} (Page ${page}, Line ${lineIndex + 1})`
       : `Page ${page}, Line ${lineIndex + 1}`;
-    await this.appDataService.addManualBookmark(name, page, 'Reading');
+    await this.appDataService.addManualBookmark(name, page, 'Reading', lineIndex, verseKey);
     this.surahService.presentToastWithOptions('Bookmark saved!', 'success', 'bottom');
   }
 
@@ -860,6 +890,182 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ===========================================
+  // WORD-BY-WORD TRANSLATION
+  // ===========================================
+
+  toggleWbwMode(enabled: boolean) {
+    this.wbwMode = enabled;
+    if (enabled) {
+      this.loadWbwTranslations();
+    } else {
+      this.wbwData = [];
+    }
+  }
+
+  private loadWbwTranslations() {
+    const cacheKey = `wbw_${this.currentPage}`;
+    if (this.wbwCache.has(cacheKey)) {
+      this.wbwData = this.wbwCache.get(cacheKey)!;
+      return;
+    }
+
+    if (!this.juzmode || !this.surahInfo) {
+      this.wbwData = [];
+      return;
+    }
+
+    try {
+      const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
+      if (!firstAndLast) {
+        this.wbwData = [];
+        return;
+      }
+
+      const firstKey = firstAndLast.first.verseId;
+      const lastKey = firstAndLast.last.verseId;
+      const [fSurah] = firstKey.split(':').map(Number);
+
+      // Fetch verses with words and word translations
+      const url = `https://api.quran.com/api/v4/verses/by_chapter/${fSurah}?words=true&word_translation_language=en&word_fields=text_indopak,text_uthmani&per_page=50&fields=text_indopak&from=${firstKey}&to=${lastKey}`;
+
+      this.httpClient.get(url).pipe(take(1)).subscribe(
+        (res: any) => {
+          const verseWords: Map<string, WbwWord[]> = new Map();
+          (res.verses || []).forEach((v: any) => {
+            const words: WbwWord[] = (v.words || [])
+              .filter((w: any) => w.char_type_name !== 'end')
+              .map((w: any) => ({
+                arabic: w.text_indopak || w.text_uthmani || w.text || '',
+                translation: w.translation?.text || '',
+                transliteration: w.transliteration?.text || '',
+                audioUrl: w.audio_url ? `https://audio.qurancdn.com/${w.audio_url}` : '',
+                location: w.location || '',
+                verseKey: v.verse_key || '',
+              }));
+            verseWords.set(v.verse_key, words);
+          });
+
+          // Map each line to its verse's word data
+          const result: WbwWord[][] = [];
+          for (let i = 0; i < this.lines.length; i++) {
+            const vk = this.getVerseKeyForLine(i);
+            result.push(vk ? (verseWords.get(vk) || []) : []);
+          }
+          this.wbwData = result;
+          this.wbwCache.set(cacheKey, result);
+        },
+        () => {
+          this.wbwData = [];
+        }
+      );
+    } catch (e) {
+      console.warn('WBW load failed:', e);
+      this.wbwData = [];
+    }
+  }
+
+  // ===========================================
+  // WORD DETAIL (MORPHOLOGY)
+  // ===========================================
+
+  showWordDetail(word: WbwWord) {
+    this.selectedWord = word;
+    this.selectedWordMorphology = null;
+    this.isWordDetailOpen = true;
+
+    // Load morphology data if we have a location
+    if (word.location) {
+      const parts = word.location.split(':');
+      if (parts.length >= 3) {
+        const surah = parseInt(parts[0]);
+        const ayah = parseInt(parts[1]);
+        const wordIdx = parseInt(parts[2]);
+        if (surah && ayah && wordIdx) {
+          this.morphologyService.getWordMorphology(surah, ayah, wordIdx)
+            .pipe(take(1))
+            .subscribe(morph => {
+              this.selectedWordMorphology = morph;
+            });
+        }
+      }
+    }
+  }
+
+  closeWordDetail() {
+    this.isWordDetailOpen = false;
+    this.selectedWord = null;
+    this.selectedWordMorphology = null;
+  }
+
+  playWordAudio(word: WbwWord) {
+    if (!word.audioUrl) return;
+    const audio = new Audio(word.audioUrl);
+    audio.play().catch(() => {});
+  }
+
+  getCorpusUrl(word: WbwWord): string {
+    // Link to corpus.quran.com for detailed morphology
+    // Format: http://corpus.quran.com/wordmorphology.jsp?location=(surah:ayah:word)
+    if (word.location) {
+      return `http://corpus.quran.com/wordmorphology.jsp?location=(${word.location})`;
+    }
+    return '';
+  }
+
+  // ===========================================
+  // TAJWEED COLORS (OFFLINE – no API dependency)
+  // Uses src/app/lib/tajweed – ported from quran/tajweed Java lib
+  // ===========================================
+
+  toggleTajweedMode(enabled: boolean) {
+    this.tajweedMode = enabled;
+    if (enabled) {
+      this.loadTajweedText();
+    } else {
+      this.tajweedLines = [];
+    }
+  }
+
+  /**
+   * Apply tajweed colouring to every line on the current page.
+   * This is fully offline – it analyses the Arabic text directly
+   * using the ported tajweed rules (ghunna, ikhfa, idgham, etc.)
+   * and wraps character ranges with <span class="tj-..."> tags.
+   * The original text is NEVER modified – only wrapped.
+   */
+  private loadTajweedText() {
+    const cacheKey = `tajweed_${this.currentPage}`;
+    if (this.tajweedCache.has(cacheKey)) {
+      this.tajweedLines = this.tajweedCache.get(cacheKey)!;
+      return;
+    }
+
+    if (!this.lines || this.lines.length === 0) {
+      this.tajweedLines = [];
+      return;
+    }
+
+    try {
+      const result: string[] = [];
+      for (const line of this.lines) {
+        const trimmed = line?.trim();
+        if (!trimmed || trimmed === '﷽') {
+          result.push(trimmed || '');
+        } else {
+          // applyTajweed returns HTML with <span class="tj-..."> wrappers.
+          // It NEVER removes any codepoints from the input.
+          result.push(applyTajweed(trimmed, 'class'));
+        }
+      }
+      this.tajweedLines = result;
+      this.tajweedCache.set(cacheKey, result);
+    } catch (e) {
+      console.warn('Tajweed offline processing failed:', e);
+      this.tajweedLines = [];
+    }
+  }
+
+  // ===========================================
   // JUMP TO AYAH
   // ===========================================
 
@@ -956,11 +1162,27 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       });
     }
 
+    // Copy current ruku if applicable
+    if (this.isCompleteMushaf && this.juzCalculated) {
+      buttons.push({
+        text: 'Copy Current Ruku',
+        handler: () => {
+          this.copyRukuText();
+        },
+      });
+    }
+
     buttons.push(
       {
         text: 'Copy Page Range...',
         handler: () => {
           this.promptCopyPageRange();
+        },
+      },
+      {
+        text: 'Save as Text File...',
+        handler: () => {
+          this.saveAsTextFile();
         },
       },
       {
@@ -1032,6 +1254,91 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       ],
     });
     await alert.present();
+  }
+
+  /**
+   * Copy current ruku text (from current ruku mark to next ruku mark)
+   */
+  private copyRukuText() {
+    if (!this.rukuArray || !this.juzCalculated) return;
+    const juzRukus = this.rukuArray[this.juzCalculated - 1];
+    if (!juzRukus?.length) return;
+
+    // Find the current ruku based on page/line
+    let currentRukuIdx = 0;
+    for (let i = 0; i < juzRukus.length; i++) {
+      const ruku = juzRukus[i];
+      const rukuPage = ruku.pageNumber || (this.surahService.juzPageNumbers[this.juzCalculated - 1] + ruku.juzPageIndex);
+      if (rukuPage <= (this.currentPageCalculated || this.currentPage)) {
+        currentRukuIdx = i;
+      }
+    }
+
+    // Get start and end pages/lines for this ruku
+    const currentRuku = juzRukus[currentRukuIdx];
+    const nextRuku = juzRukus[currentRukuIdx + 1];
+    const startPage = currentRuku.pageNumber || (this.surahService.juzPageNumbers[this.juzCalculated - 1] + currentRuku.juzPageIndex);
+    const endPage = nextRuku
+      ? (nextRuku.pageNumber || (this.surahService.juzPageNumbers[this.juzCalculated - 1] + nextRuku.juzPageIndex))
+      : startPage + 2; // approximate
+
+    const textParts: string[] = [];
+    for (let p = startPage - 1; p < Math.min(endPage, this.pages.length); p++) {
+      const pageLines = this.pages[p]?.split('\n') || [];
+      const startLine = (p === startPage - 1) ? (currentRuku.lineIndex || 0) : 0;
+      const endLine = (p === endPage - 1 && nextRuku) ? (nextRuku.lineIndex || pageLines.length) : pageLines.length;
+      textParts.push(pageLines.slice(startLine, endLine).join('\n'));
+    }
+
+    const text = textParts.join('\n');
+    this.copyAnything(text);
+    this.surahService.presentToastWithOptions(
+      `Ruku ${currentRukuIdx + 1} copied!`,
+      'success-light',
+      'bottom'
+    );
+  }
+
+  /**
+   * Save text as a downloadable .txt file
+   */
+  private async saveAsTextFile() {
+    const alert = await this.alertController.create({
+      header: 'Save as Text File',
+      message: 'Choose what to save:',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Current Page',
+          handler: () => {
+            const text = this.lines.join('\n');
+            const page = this.currentPageCalculated || this.currentPage;
+            this.downloadTextFile(text, `quran-page-${page}.txt`);
+          },
+        },
+        {
+          text: 'All Pages',
+          handler: () => {
+            const text = this.pages.join('\n\n--- Page Break ---\n\n');
+            this.downloadTextFile(text, `quran-full-text.txt`);
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private downloadTextFile(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.surahService.presentToastWithOptions(`Saved as ${filename}`, 'success-light', 'bottom');
   }
 
   getNextAyahNumberFromCurrentLine(lineNumber: number) {
@@ -1500,6 +1807,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.updateCalculatedNumbers();
     this.getFirstAndLastAyahNumberOnPage();
     if (this.inlineTransMode) this.loadInlineTranslations();
+    if (this.wbwMode) this.loadWbwTranslations();
+    if (this.tajweedMode) this.loadTajweedText();
     setTimeout(() => {
       this.adjustFontsize();
     }, 1000);
@@ -1989,6 +2298,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async addManualBookmark() {
+    const page = this.currentPageCalculated || this.currentPage || 1;
     const alert = await this.alertController.create({
       header: "Add Bookmark",
       inputs: [
@@ -1996,7 +2306,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           name: "name",
           type: "text",
           placeholder: "Bookmark name",
-          value: `Page ${this.currentPageCalculated || this.currentPage}`,
+          value: `Page ${page}`,
         },
         {
           name: "folder",
@@ -2010,8 +2320,6 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         {
           text: "Save",
           handler: async (data) => {
-            const page =
-              this.currentPageCalculated || this.currentPage || 1;
             const name = (data?.name || "").trim();
             const folder = (data?.folder || "Default").trim();
             if (!name) return;
@@ -2021,6 +2329,65 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               "success",
               "middle"
             );
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  // ===========================================
+  // VIEW / MANAGE BOOKMARKS
+  // ===========================================
+
+  isBookmarksOpen = false;
+  bookmarkFolders: any[] = [];
+
+  async openBookmarksViewer() {
+    this.bookmarkFolders = await this.appDataService.getManualBookmarks();
+    this.isBookmarksOpen = true;
+  }
+
+  navigateToBookmark(bookmark: any) {
+    this.isBookmarksOpen = false;
+    if (bookmark.page) {
+      this.gotoPageNum(bookmark.page);
+      // Highlight the bookmarked line briefly
+      if (bookmark.lineNumber != null) {
+        setTimeout(() => {
+          const lineEl = document.getElementById(`line_${bookmark.lineNumber}`);
+          if (lineEl) {
+            lineEl.classList.add('highlight-line');
+            setTimeout(() => lineEl.classList.remove('highlight-line'), 2000);
+          }
+        }, 500);
+      }
+    }
+  }
+
+  async deleteBookmark(bookmark: any) {
+    await this.appDataService.deleteManualBookmark(bookmark.id);
+    this.bookmarkFolders = await this.appDataService.getManualBookmarks();
+    this.surahService.presentToastWithOptions('Bookmark deleted', 'danger', 'bottom');
+  }
+
+  async deleteFolder(folder: any) {
+    if (folder.id === 'default') {
+      this.surahService.presentToastWithOptions('Cannot delete default folder', 'warning', 'bottom');
+      return;
+    }
+    const alert = await this.alertController.create({
+      header: 'Delete Folder',
+      message: `Delete "${folder.name}" and all its bookmarks?`,
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          cssClass: 'delete-btn',
+          handler: async () => {
+            await this.appDataService.deleteBookmarkFolder(folder.id);
+            this.bookmarkFolders = await this.appDataService.getManualBookmarks();
+            this.surahService.presentToastWithOptions('Folder deleted', 'danger', 'bottom');
           },
         },
       ],

@@ -379,6 +379,36 @@ ion-popover {
 // SEARCH SHEET MODAL (global because ion-modal
 // renders outside the component)
 // ===========================================
+ion-modal.word-detail-modal {
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  .word-detail-content {
+    --background: var(--ion-background-color);
+  }
+}
+
+ion-modal.bookmarks-sheet-modal {
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-width: 0;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+
+  ion-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .bookmarks-modal-content {
+    --background: var(--ion-background-color);
+  }
+}
+
 ion-modal.search-sheet-modal {
   --border-radius: 16px 16px 0 0;
   --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);

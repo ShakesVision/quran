@@ -221,6 +221,64 @@ body.dark ion-content {
       }
     }
 
+    // Word-by-word row
+    .wbw-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      direction: rtl;
+      padding: 2px 0;
+      animation: fadeIn 0.3s ease-out forwards;
+
+      .wbw-word {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2px 4px;
+        border-radius: 6px;
+        background: rgba(var(--ion-color-primary-rgb), 0.05);
+        border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+        min-width: 36px;
+        transition: background 0.15s ease;
+
+        &:hover {
+          background: rgba(var(--ion-color-primary-rgb), 0.12);
+        }
+
+        .wbw-arabic {
+          font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif;
+          font-size: clamp(0.75rem, 2.5vw, 1rem);
+          line-height: 1.4;
+          color: var(--ion-text-color);
+        }
+
+        .wbw-transliteration {
+          font-family: "Segoe UI", "Roboto", sans-serif;
+          font-size: clamp(0.4rem, 1.2vw, 0.55rem);
+          line-height: 1.1;
+          color: var(--ion-color-primary);
+          font-style: italic;
+          direction: ltr;
+          text-align: center;
+        }
+
+        .wbw-meaning {
+          font-family: "Segoe UI", "Roboto", sans-serif;
+          font-size: clamp(0.5rem, 1.5vw, 0.65rem);
+          line-height: 1.2;
+          color: var(--ion-color-medium);
+          text-align: center;
+          direction: ltr;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 60px;
+        }
+      }
+    }
+
     // Hide lines until tatweel/font-sizing is applied, then reveal
     &.text-preparing .line span {
       opacity: 0;
@@ -812,12 +870,409 @@ virtual-scroller {
 }
 
 // ===========================================
+// WORD DETAIL MODAL
+// ===========================================
+.word-detail-wrapper {
+  padding: 20px;
+  text-align: center;
+  animation: fadeSlideUp 0.3s ease-out forwards;
+
+  .word-detail-arabic {
+    font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif;
+    font-size: 2.5rem;
+    line-height: 1.5;
+    color: var(--ion-text-color);
+    margin-bottom: 8px;
+  }
+
+  .word-detail-transliteration {
+    font-size: 1rem;
+    color: var(--ion-color-primary);
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+
+  .word-detail-translation {
+    font-size: 1.1rem;
+    color: var(--ion-color-medium-shade);
+    margin-bottom: 12px;
+  }
+
+  .word-detail-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    .word-location {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  // ── Morphology Section ──
+  .word-morphology {
+    text-align: left;
+    margin: 12px 0 16px;
+    padding: 12px;
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    animation: fadeSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+
+    .morphology-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      ion-icon {
+        font-size: 1.1rem;
+      }
+    }
+
+    .morphology-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+
+      .morph-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .morph-label {
+          font-size: 0.65rem;
+          color: var(--ion-color-medium);
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .morph-value {
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: var(--ion-text-color);
+
+          &.ar {
+            font-family: "IndoPak Waqf Lazim", "Muhammadi", serif;
+            font-size: 1.2rem;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+  }
+
+  .word-detail-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+
+    ion-button {
+      --border-radius: 20px;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// ===========================================
+// BOOKMARKS VIEWER
+// ===========================================
+.bookmarks-wrapper {
+  padding: 12px;
+
+  .bookmark-folder {
+    margin-bottom: 16px;
+    animation: fadeSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .folder-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--ion-color-light-shade);
+    margin-bottom: 4px;
+
+    .folder-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex: 1;
+    }
+
+    .folder-count {
+      font-size: 0.7rem;
+      color: var(--ion-color-medium);
+      background: var(--ion-color-light);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+  }
+
+  .bookmark-list {
+    ion-item {
+      --min-height: 52px;
+      --padding-start: 8px;
+      transition: background 0.15s ease;
+
+      &:active {
+        --background: rgba(var(--ion-color-primary-rgb), 0.08);
+      }
+
+      h3 {
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      p {
+        font-size: 0.7rem;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  .empty-folder-text {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    text-align: center;
+    padding: 8px;
+    font-style: italic;
+  }
+
+  .empty-bookmarks {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--ion-color-medium);
+    animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+
+    p {
+      margin: 8px 0;
+    }
+  }
+}
+
+// ===========================================
 // LINE CONTEXT MENU (Long Press)
 // ===========================================
 :root {
   .line-context-menu {
     .action-sheet-group-cancel {
       padding-bottom: env(safe-area-inset-bottom, 8px);
+    }
+  }
+}
+
+// ===========================================
+// TAJWEED COLORS (offline library classes)
+// ===========================================
+// Ported from https://github.com/quran/tajweed
+// Classes: tj-ghunna, tj-ikhfa, tj-idgham_with_ghunna, etc.
+// Colors use CSS custom properties so users can override them.
+
+:root {
+  // Madani mushaf default palette
+  --tj-ghunna:            #43A047;
+  --tj-ikhfa:             #D4A017;
+  --tj-idgham:            #43A047;
+  --tj-idgham-gray:       #9E9E9E;
+  --tj-iqlab:             #43A047;
+  --tj-qalqalah:          #0091EA;
+  --tj-meem-ikhfa:        #D4A017;
+  --tj-meem-idgham:       #43A047;
+  --tj-maad-long:         #B71C1C;
+  --tj-maad-connected:    #F44336;
+  --tj-maad-sukoon:       #FB8C00;
+  --tj-maad-sila:         #E68A00;
+}
+
+:host ::ng-deep .tajweed-text {
+  // Ghunnah – green
+  .tj-ghunna                { color: var(--tj-ghunna); }
+
+  // Ikhfa – yellow/gold
+  .tj-ikhfa                 { color: var(--tj-ikhfa); }
+
+  // Idgham with ghunnah – green
+  .tj-idgham_with_ghunna    { color: var(--tj-idgham); }
+  // Idgham without ghunnah – gray (not pronounced)
+  .tj-idgham_without_ghunna { color: var(--tj-idgham-gray); }
+  .tj-idgham_not_pronounced { color: var(--tj-idgham-gray); }
+
+  // Iqlab – green
+  .tj-iqlab                 { color: var(--tj-iqlab); }
+  .tj-iqlab_not_pronounced  { color: var(--tj-idgham-gray); }
+
+  // Qalqalah – blue
+  .tj-qalqalah              { color: var(--tj-qalqalah); }
+
+  // Meem rules
+  .tj-meem_ikhfa            { color: var(--tj-meem-ikhfa); }
+  .tj-meem_idgham           { color: var(--tj-meem-idgham); }
+
+  // Madd rules
+  .tj-maad_long             { color: var(--tj-maad-long); }
+  .tj-maad_munfassil        { color: var(--tj-maad-connected); }
+  .tj-maad_sukoon           { color: var(--tj-maad-sukoon); }
+  .tj-maad_sila             { color: var(--tj-maad-sila); }
+}
+
+// Dark mode adjustments
+body.dark {
+  --tj-ghunna:            #66FF66;
+  --tj-ikhfa:             #FFD54F;
+  --tj-idgham:            #66FF66;
+  --tj-idgham-gray:       #BDBDBD;
+  --tj-iqlab:             #66FF66;
+  --tj-qalqalah:          #64B5F6;
+  --tj-meem-ikhfa:        #FFD54F;
+  --tj-meem-idgham:       #66FF66;
+  --tj-maad-long:         #EF5350;
+  --tj-maad-connected:    #FF7043;
+  --tj-maad-sukoon:       #FFB74D;
+  --tj-maad-sila:         #FFA726;
+}
+
+// Tajweed legend tooltip
+.tajweed-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  justify-content: center;
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+  }
+}
+
+// ===========================================
+// COMPACT POPOVER / SETTINGS
+// ===========================================
+.compact-settings {
+  padding: 0;
+
+  ion-item {
+    --min-height: 36px;
+    font-size: 0.85rem;
+  }
+  ion-item-divider {
+    --padding-top: 4px;
+    --padding-bottom: 2px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Quick toggles row (top of popover)
+.quick-toggles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 8px;
+  background: var(--ion-color-light-tint, #f4f5f8);
+  border-radius: 0 0 12px 12px;
+
+  .qt-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--ion-color-medium);
+
+    ion-icon {
+      font-size: 20px;
+    }
+    span {
+      font-size: 0.6rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    &.active {
+      background: var(--ion-color-primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.35);
+    }
+    &:active {
+      transform: scale(0.92);
+    }
+  }
+}
+
+// Font size display
+.font-size-display {
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 28px;
+  text-align: center;
+  color: var(--ion-color-primary);
+}
+
+// Navigation inputs
+.nav-input {
+  max-width: 65px;
+  font-size: 0.8rem;
+}
+
+// Action grid (bookmarks, notes, export etc.)
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px 8px;
+
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 2px;
+    border: 1px solid var(--ion-color-light-shade, #ddd);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--ion-text-color);
+
+    ion-icon {
+      font-size: 18px;
+      color: var(--ion-color-primary);
+    }
+    span {
+      font-size: 0.6rem;
+      font-weight: 500;
+    }
+
+    &:active {
+      transform: scale(0.92);
+      background: var(--ion-color-light);
     }
   }
 }

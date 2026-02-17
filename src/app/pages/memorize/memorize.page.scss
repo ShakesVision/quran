@@ -1,8 +1,7 @@
 // ===========================================
-// MEMORIZE PAGE - Modern Material Design + Animations
+// MEMORIZE PAGE - Gamified Material Design
 // ===========================================
 
-// Header
 ion-header {
   ion-toolbar {
     --background: transparent;
@@ -12,71 +11,158 @@ ion-header {
 ion-content {
   --padding-start: 12px;
   --padding-end: 12px;
-  --padding-top: 12px;
+  --padding-top: 8px;
 }
 
 // ===========================================
-// RECOMMENDED CARD
+// HERO / DASHBOARD CARD
 // ===========================================
-.recommended-card {
-  background: linear-gradient(135deg, var(--ion-color-warning-tint) 0%, var(--ion-color-warning) 100%);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 20px;
-  color: var(--ion-color-warning-contrast);
-  animation: fadeSlideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.hero-card {
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 12px;
+  color: #fff;
+  animation: heroEntrance 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+  box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.3);
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  .recommended-header {
+  .hero-top {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-
-    ion-icon {
-      font-size: 18px;
-      animation: wiggle 2s ease-in-out infinite 1s;
-    }
+    gap: 20px;
   }
+}
 
-  .recommended-text {
-    font-size: 0.8rem;
-    margin: 0 0 12px 0;
-    opacity: 0.9;
+// Progress ring
+.ring-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.progress-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 8;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: #FFD54F;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+
+  .ring-percent {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
   }
+  .ring-percent-sign {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+}
 
-  .recommended-surahs {
+// Hero stats
+.hero-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .hero-stat {
     display: flex;
-    flex-wrap: wrap;
+    align-items: baseline;
     gap: 8px;
-    margin-bottom: 12px;
-  }
 
-  .ar-tag {
-    background: rgba(255, 255, 255, 0.25);
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 0.9rem;
-    font-family: "Muhammadi", serif;
-    transition: transform 0.2s ease, background 0.2s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.4);
-      transform: scale(1.05);
+    .hs-value {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .hs-label {
+      font-size: 0.7rem;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
   }
+}
 
-  .see-more-btn {
-    --color: var(--ion-color-warning-contrast);
-    --padding-start: 0;
-    font-size: 0.8rem;
+// Motivational quote
+.hero-motivation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.78rem;
+  font-style: italic;
+  opacity: 0.85;
+  line-height: 1.4;
+
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+// ===========================================
+// BADGES ROW
+// ===========================================
+.badges-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 12px 0;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar { display: none; }
+
+  .badge-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: var(--ion-color-light);
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+    animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+    &.earned {
+      background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+      border: 1px solid #FFD54F;
+    }
+
+    .badge-emoji {
+      font-size: 1rem;
+    }
+
+    &:active {
+      transform: scale(0.92);
+    }
   }
 }
 
@@ -86,7 +172,7 @@ ion-content {
 .mode-segment {
   --background: var(--ion-color-light);
   border-radius: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
 
   ion-segment-button {
@@ -105,54 +191,121 @@ ion-content {
 }
 
 // ===========================================
-// STATS SUMMARY
+// QUICK STATS
 // ===========================================
-.stats-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+.quick-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
 
-  .stat-item {
+  .qs-item {
+    flex: 1;
+    text-align: center;
     background: var(--ion-color-light);
     border-radius: 12px;
-    padding: 12px 8px;
-    text-align: center;
+    padding: 10px 6px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
-                box-shadow 0.2s ease;
-    will-change: transform;
-    
-    // Staggered entrance
-    opacity: 0;
-    animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    &:nth-child(1) { animation-delay: 0.2s; }
-    &:nth-child(2) { animation-delay: 0.26s; }
-    &:nth-child(3) { animation-delay: 0.32s; }
-
-    &:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
+    align-items: center;
+    gap: 2px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     &:active {
-      transform: scale(0.96);
+      transform: scale(0.95);
     }
 
-    .stat-value {
-      font-size: 1.2rem;
+    .qs-num {
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--ion-color-primary);
     }
-
-    .stat-label {
-      font-size: 0.65rem;
+    .qs-of {
+      font-size: 0.75rem;
       color: var(--ion-color-medium);
+      font-weight: 500;
+    }
+    .qs-label {
+      font-size: 0.6rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      color: var(--ion-color-medium);
     }
+  }
+}
+
+// ===========================================
+// RECOMMENDED CARD
+// ===========================================
+.recommended-card {
+  background: linear-gradient(135deg, var(--ion-color-warning-tint) 0%, var(--ion-color-warning) 100%);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  color: var(--ion-color-warning-contrast);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  animation: fadeSlideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.25s both;
+
+  &:active { transform: scale(0.98); }
+
+  .recommended-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .rec-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+
+      ion-icon { font-size: 16px; }
+    }
+
+    .expand-chevron {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+  }
+
+  .recommended-body {
+    animation: fadeSlideUp 0.3s ease both;
+    padding-top: 8px;
+  }
+
+  .recommended-text {
+    font-size: 0.78rem;
+    margin: 0 0 10px 0;
+    opacity: 0.9;
+  }
+
+  .recommended-surahs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .ar-tag {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 3px 10px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    font-family: "Muhammadi", serif;
+    transition: transform 0.2s ease, background 0.2s ease;
+
+    &:active {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.05);
+    }
+  }
+
+  .see-more-btn {
+    --color: var(--ion-color-warning-contrast);
+    --padding-start: 0;
+    font-size: 0.75rem;
   }
 }
 
@@ -166,10 +319,10 @@ ion-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 
     h2 {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -180,7 +333,7 @@ ion-content {
     ion-button {
       --padding-start: 8px;
       --padding-end: 8px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
     }
   }
 }
@@ -191,17 +344,17 @@ ion-content {
 .progress-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   padding-bottom: 80px;
 }
 
 .progress-item {
   position: relative;
   background: var(--ion-color-light);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.2s ease;
   will-change: transform;
 
@@ -210,30 +363,31 @@ ion-content {
   animation: fadeSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   @for $i from 1 through 30 {
     &:nth-child(#{$i}) {
-      animation-delay: #{0.3 + $i * 0.04}s;
+      animation-delay: #{0.3 + $i * 0.03}s;
     }
   }
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  }
-
   &:active {
-    transform: scale(0.98) !important;
+    transform: scale(0.97) !important;
     transition-duration: 0.08s;
   }
 
   &.completed {
-    border: 1px solid var(--ion-color-success);
+    border: 1.5px solid var(--ion-color-success);
 
     .item-progress-bar {
-      background: var(--ion-color-success-tint);
+      background: linear-gradient(90deg, var(--ion-color-success-tint) 0%, rgba(var(--ion-color-success-rgb), 0.15) 100%);
     }
 
-    .item-right ion-icon {
+    .check-icon {
       animation: checkBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
+  }
+
+  &.celebrate {
+    animation: celebratePulse 0.6s ease 2;
+    border-color: #FFD54F;
+    box-shadow: 0 0 20px rgba(255, 213, 79, 0.5);
   }
 
   .item-progress-bar {
@@ -241,24 +395,9 @@ ion-content {
     top: 0;
     left: 0;
     height: 100%;
-    background: linear-gradient(90deg, var(--ion-color-primary-tint) 0%, rgba(var(--ion-color-primary-rgb), 0.2) 100%);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, rgba(var(--ion-color-primary-rgb), 0.2) 0%, rgba(var(--ion-color-primary-rgb), 0.06) 100%);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 0;
-
-    // Shimmer effect on the progress bar
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.15) 50%,
-        transparent 100%
-      );
-      background-size: 200% 100%;
-      animation: progressShimmer 2.5s ease-in-out infinite;
-    }
   }
 
   .item-content {
@@ -267,7 +406,7 @@ ion-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 10px 14px;
   }
 
   .item-left {
@@ -286,12 +425,13 @@ ion-content {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.85rem;
-    transition: transform 0.2s ease;
-  }
+    font-size: 0.8rem;
+    transition: transform 0.2s ease, background 0.2s ease;
 
-  &:hover .item-number {
-    transform: scale(1.1);
+    &.gold {
+      background: linear-gradient(135deg, #FFD54F, #FFA000);
+      color: #3E2723;
+    }
   }
 
   .item-details {
@@ -300,13 +440,13 @@ ion-content {
     gap: 2px;
 
     .item-name {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--ion-text-color);
     }
 
     .item-meta {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--ion-color-medium);
     }
   }
@@ -316,18 +456,48 @@ ion-content {
     align-items: center;
     gap: 8px;
 
-    .item-percent {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--ion-color-primary);
-      // Smooth number transitions
-      transition: color 0.3s ease;
-    }
-
-    ion-icon {
-      font-size: 20px;
+    .check-icon {
+      font-size: 22px;
     }
   }
+}
+
+// Mini progress ring (per item)
+.mini-ring-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.mini-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+
+  .mini-ring-bg {
+    fill: none;
+    stroke: var(--ion-color-light-shade, #e0e0e0);
+    stroke-width: 3;
+  }
+
+  .mini-ring-fill {
+    fill: none;
+    stroke: var(--ion-color-primary);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.mini-percent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--ion-color-primary);
 }
 
 // ===========================================
@@ -347,8 +517,14 @@ ion-content {
   }
 
   p {
-    margin: 0 0 16px 0;
+    margin: 0 0 8px 0;
     font-size: 0.9rem;
+  }
+
+  .empty-hint {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-bottom: 16px;
   }
 }
 
@@ -361,14 +537,29 @@ ion-fab-button {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.2s ease !important;
 
-  &:hover {
-    transform: scale(1.08);
-    --box-shadow: 0 6px 24px rgba(var(--ion-color-primary-rgb), 0.55);
-  }
-
   &:active {
     transform: scale(0.88) !important;
   }
+}
+
+// ===========================================
+// CONFETTI
+// ===========================================
+.confetti-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 2s ease-out forwards;
 }
 
 // ===========================================
@@ -376,7 +567,7 @@ ion-fab-button {
 // ===========================================
 .ar-text {
   font-family: "Muhammadi", serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   direction: rtl;
 }
 
@@ -384,22 +575,26 @@ ion-fab-button {
 // DARK MODE
 // ===========================================
 body.dark {
+  .hero-card {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
   .recommended-card {
     background: linear-gradient(135deg, var(--ion-color-warning-shade) 0%, var(--ion-color-warning) 100%);
   }
 
-  .progress-item {
-    &:hover {
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    }
-
-    .item-progress-bar {
-      background: linear-gradient(90deg, var(--ion-color-primary-shade) 0%, rgba(var(--ion-color-primary-rgb), 0.15) 100%);
-    }
+  .progress-item .item-progress-bar {
+    background: linear-gradient(90deg, rgba(var(--ion-color-primary-rgb), 0.15) 0%, rgba(var(--ion-color-primary-rgb), 0.05) 100%);
   }
 
-  .stat-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  .badge-chip.earned {
+    background: linear-gradient(135deg, #3E2723, #4E342E);
+    border-color: #FFB300;
+    color: #FFD54F;
+  }
+
+  .mini-ring .mini-ring-bg {
+    stroke: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -410,10 +605,72 @@ body.dark {
   .alert-button.delete-btn {
     color: var(--ion-color-danger) !important;
   }
-
   .alert-button.add-btn {
     font-weight: 600;
   }
+}
+
+// ===========================================
+// ANIMATIONS
+// ===========================================
+@keyframes heroEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes badgePop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkBounce {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes celebratePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 // ===========================================

@@ -346,6 +346,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setBookmark() {
+    if (!this.bookmarks || !this.MUSHAF_MODE) return;
     console.log("setting bookmarks: ", this.bookmarks, this.MUSHAF_MODE);
     if (
       this.juzmode &&
@@ -356,11 +357,11 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       this.storage.set("unicodeBookmark", this.currentPage).then((_) => {});
 
     // complete mushaf
-    if (this.MUSHAF_MODE.COMPLETE_MUSHAF)
+    if (this.MUSHAF_MODE.COMPLETE_MUSHAF && this.bookmarks?.auto)
       this.bookmarks.auto.unicode = this.currentPage;
 
     // juz version
-    if (this.MUSHAF_MODE.JUZ_VERSION) {
+    if (this.MUSHAF_MODE.JUZ_VERSION && this.bookmarks?.auto?.juz) {
       const index = this.bookmarks.auto.juz.findIndex(
         (bookmark) => bookmark.juz === parseInt(this.title)
       );
@@ -374,7 +375,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     // surah (juzsurah) version
-    if (this.MUSHAF_MODE.SURAH_VERSION) {
+    if (this.MUSHAF_MODE.SURAH_VERSION && this.bookmarks?.auto?.surah) {
       console.log("surah version =>", this.bookmarks.auto.surah);
       const index = this.bookmarks.auto.surah.findIndex(
         (bookmark) => bookmark.surah === parseInt(this.title)
@@ -391,12 +392,16 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.storage.set("bookmarks", this.bookmarks).then((_) => {});
   }
   goToPage(n: number) {
-    this.currentPage += n;
-    this.arabicLines = this.pages[this.currentPage - 1].split("\n");
+    const nextPage = this.currentPage + n;
+    // Boundary check: don't go below 1 or above total pages
+    if (nextPage < 1 || nextPage > this.pages.length) return;
+    this.currentPage = nextPage;
+
+    this.arabicLines = this.pages[this.currentPage - 1]?.split("\n") || [];
     this.updateCalculatedNumbers();
     this.scanView = false;
     if (this.translationExists)
-      this.translationLines = this.tPages[this.currentPage - 1].split("\n");
+      this.translationLines = this.tPages[this.currentPage - 1]?.split("\n") || [];
     this.lines = this.tMode ? this.translationLines : this.arabicLines;
 
     //close popup if open
@@ -1342,18 +1347,30 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getNextAyahNumberFromCurrentLine(lineNumber: number) {
-    const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
+    if (!this.lines || this.lines.length === 0) return null;
+
+    // Match ayah marks: ۝ followed by Extended Arabic-Indic (۱-۹) OR Eastern Arabic (١-٩) numerals
+    const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹١-٩]`);
     let lineCounter = lineNumber;
     let txt = "";
-    do {
+    let found = false;
+
+    // Bounded loop — never go past the array
+    while (lineCounter < this.lines.length) {
       txt = this.lines[lineCounter];
       lineCounter++;
-    } while (!re.test(txt));
-    console.log(txt);
-    let verseNum = txt
-      .split(" ")
-      .find((word) => re.test(word))
-      .split(this.surahService.diacritics.AYAH_MARK)[1];
+      if (txt && re.test(txt)) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) return null;
+
+    const matchedWord = txt.split(" ").find((word) => re.test(word));
+    if (!matchedWord) return null;
+
+    let verseNum = matchedWord.split(this.surahService.diacritics.AYAH_MARK)[1];
     verseNum = this.getEnNumber(verseNum);
     return verseNum;
   }
@@ -1677,31 +1694,49 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       !this.juzmode
     )
       return;
-    //first ayah
-    const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹]`);
+
+    if (!this.lines || this.lines.length === 0) return;
+
+    // Match ayah marks: ۝ followed by Extended Arabic-Indic (۱-۹) OR Eastern Arabic (١-٩) numerals
+    const re = new RegExp(`${this.surahService.diacritics.AYAH_MARK}[۱-۹١-٩]`);
+
+    // --- First ayah: scan lines with a BOUNDED loop ---
     let lineCounter = 0;
     let txt = "";
-    do {
+    let foundFirst = false;
+    while (lineCounter < this.lines.length) {
       txt = this.lines[lineCounter];
       lineCounter++;
-    } while (!re.test(txt));
-    let firstVerseNum = parseInt(
-      this.getEnNumber(
-        txt
-          .split(" ")
-          .find((word) => re.test(word))
-          .split(this.surahService.diacritics.AYAH_MARK)[1]
-      )
-    );
-    //last ayah
-    let lastLineWordsArr = this.lines[this.lines?.length - 1].trim().split(" ");
-    let lastVerseNum = parseInt(
-      this.getEnNumber(
-        lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
-          this.surahService.diacritics.AYAH_MARK
-        )[1]
-      )
-    );
+      if (txt && re.test(txt)) {
+        foundFirst = true;
+        break;
+      }
+    }
+
+    if (!foundFirst) {
+      // No ayah mark found on this page — return null safely
+      return null;
+    }
+
+    const firstWord = txt
+      .split(" ")
+      .find((word) => re.test(word));
+    if (!firstWord) return null;
+
+    const firstAyahPart = firstWord.split(this.surahService.diacritics.AYAH_MARK)[1];
+    let firstVerseNum = parseInt(this.getEnNumber(firstAyahPart));
+    if (isNaN(firstVerseNum)) return null;
+
+    // --- Last ayah ---
+    const lastLine = this.lines[this.lines.length - 1];
+    if (!lastLine) return null;
+    let lastLineWordsArr = lastLine.trim().split(" ");
+    const lastWordPart = lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
+      this.surahService.diacritics.AYAH_MARK
+    )[1];
+    let lastVerseNum = parseInt(this.getEnNumber(lastWordPart));
+    if (isNaN(lastVerseNum)) lastVerseNum = firstVerseNum; // fallback
+
     console.log(
       `FIRST AND LAST AYAH ON PAGE: ${firstVerseNum} ${lastVerseNum}`
     );
@@ -1973,6 +2008,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
   playAudio(lang = "en") {
     const ayahList = this.getAyahsListOnPage();
+    if (!ayahList || !ayahList.verseIdList?.length) {
+      this.surahService.presentToastWithOptions(
+        'Could not determine ayahs on this page for audio playback.',
+        'warning',
+        'middle'
+      );
+      return;
+    }
     const [verseIdList, verseIdListForAudio] = [
       ayahList.verseIdList,
       ayahList.verseIdListForAudio,
@@ -2094,16 +2137,22 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   getAyahsListOnPage(): {
     verseIdList: Array<string>;
     verseIdListForAudio: Array<string>;
-  } {
+  } | null {
     const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
+    if (!firstAndLast || !firstAndLast.first || !firstAndLast.last) {
+      return { verseIdList: [], verseIdListForAudio: [] };
+    }
     let verseIdList = [];
     let verseIdListForAudio = [];
-    const firstSurahInfo = this.surahInfo.find((s) => {
+    const firstSurahInfo = this.surahInfo?.find((s) => {
       return parseInt(s.index) == firstAndLast.first.firstSurahNum;
     });
-    const lastSurahInfo = this.surahInfo.find((s) => {
+    const lastSurahInfo = this.surahInfo?.find((s) => {
       return parseInt(s.index) == firstAndLast.last.lastSurahNum;
     });
+    if (!firstSurahInfo) {
+      return { verseIdList: [], verseIdListForAudio: [] };
+    }
     console.log(firstSurahInfo, lastSurahInfo);
 
     let counter = 0;
@@ -2266,17 +2315,26 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     wrapper.classList.remove("text-ready");
     wrapper.classList.add("text-preparing");
 
+    const MIN_FONT_SIZE = 6; // Never go below 6px
+    const MAX_ITERATIONS = 50; // Safety cap to prevent infinite loops
+
     document.querySelectorAll(".line").forEach((el: HTMLElement) => {
+      let iterations = 0;
+      let currentSize = parseFloat(window.getComputedStyle(el).fontSize);
       while (
+        el.clientWidth > 0 &&
+        currentSize > MIN_FONT_SIZE &&
+        iterations < MAX_ITERATIONS &&
         el.clientWidth <
         this.textWidth(
           el.innerText,
           this.getFontProp(el)
         )
-      )
-        el.style.fontSize =
-          (parseFloat(window.getComputedStyle(el).fontSize) - 1).toString() +
-          "px";
+      ) {
+        currentSize -= 1;
+        el.style.fontSize = currentSize + "px";
+        iterations++;
+      }
     });
 
     requestAnimationFrame(() => {

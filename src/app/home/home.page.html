@@ -20,10 +20,10 @@
   <div class="hero-section">
     <div class="hero-content">
       <div class="hero-text" [innerHTML]="banner.text"></div>
-      <ion-button *ngIf="banner.button.show" size="small" [fill]="banner.button.fill" 
-        [color]="banner.button.color" (click)="open(banner.clickAction)" class="hero-btn">
+      <ion-button *ngIf="banner.button.show" size="small" fill="solid"
+        (click)="open(banner.clickAction)" class="hero-btn">
         <ion-icon *ngIf="banner.button.icon.show" [src]="banner.button.icon.src" 
-          [color]="banner.button.icon.color" slot="start"></ion-icon>
+          slot="start"></ion-icon>
         {{ banner.button.text }}
       </ion-button>
     </div>
@@ -33,16 +33,21 @@
   <div class="features-section">
     <h2 class="section-title">Read & Learn</h2>
     <div class="feature-grid">
-      <!-- Full Quran - Primary Card with Mushaf Selection -->
-      <div class="feature-card primary-card" (click)="openMushafSelector()">
-        <div class="card-icon-wrapper">
-          <ion-icon name="book"></ion-icon>
+      <!-- Full Quran - Primary Card: tap opens last-used mushaf, caret opens selector -->
+      <div class="feature-card primary-card">
+        <div class="card-main" (click)="openLastMushaf()">
+          <div class="card-icon-wrapper">
+            <ion-icon name="book"></ion-icon>
+          </div>
+          <div class="card-content">
+            <h3>Full Quran</h3>
+            <p>{{currentMushaf?.name || '15-Line Indopak'}}</p>
+          </div>
+          <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
         </div>
-        <div class="card-content">
-          <h3>Full Quran</h3>
-          <p>{{currentMushaf?.name || '15-Line Indopak'}}</p>
+        <div class="card-caret" (click)="openMushafSelector(); $event.stopPropagation()">
+          <ion-icon name="caret-down-outline"></ion-icon>
         </div>
-        <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
       </div>
 
       <!-- Browse Juz/Surah -->

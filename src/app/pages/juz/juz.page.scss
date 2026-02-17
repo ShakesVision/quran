@@ -120,6 +120,23 @@ ion-content {
         }
       }
     }
+
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+
+      ion-icon {
+        font-size: 12px;
+      }
+    }
   }
 
   .card-arrow {

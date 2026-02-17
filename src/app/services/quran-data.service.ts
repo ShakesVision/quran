@@ -330,7 +330,7 @@ export class QuranDataService {
             }
             pageLines
               .get(firstWord.line_number)!
-              .push(this.surahService?.diacritics?.RUKU_MARK || "۝");
+              .push(this.surahService?.diacritics?.RUKU_MARK || "\u06E7");
           }
           lastRukuNumber = verseRuku;
         }
@@ -384,7 +384,11 @@ export class QuranDataService {
 
   private pickQuranComWordText(word: any, source: TextSource): string {
     if (word?.char_type_name === "end") {
-      return word.text || word.text_uthmani || word.text_indopak || "";
+      // Quran.com end markers are bare digits (e.g. "١"), but the rest of the
+      // app relies on the AYAH_MARK (۝) prefix for ayah detection.  Prepend it.
+      const AYAH_MARK = this.surahService?.diacritics?.AYAH_MARK || "\u06DD";
+      const raw = word.text || word.text_uthmani || word.text_indopak || "";
+      return raw ? `${AYAH_MARK}${raw}` : "";
     }
 
     if (source.id.includes("uthmani")) {

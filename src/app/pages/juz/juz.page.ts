@@ -1,14 +1,17 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Router } from "@angular/router";
 import { PopoverController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { BookmarkCalculation, Bookmarks } from "src/app/models/bookmarks";
 import {
   ListType,
   RukuLocationItem,
   SurahOrJuzListItem,
 } from "src/app/models/common";
+import { QuranDataService } from "src/app/services/quran-data.service";
 import { SurahService } from "src/app/services/surah.service";
 
 @Component({
@@ -16,7 +19,8 @@ import { SurahService } from "src/app/services/surah.service";
   templateUrl: "./juz.page.html",
   styleUrls: ["./juz.page.scss"],
 })
-export class JuzPage implements OnInit {
+export class JuzPage implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   /**
    * The Quran data with ruku information
    */
@@ -102,19 +106,72 @@ export class JuzPage implements OnInit {
    */
   isOnline: boolean = false;
 
+  /** Name of the currently active text source */
+  currentSourceName = '';
+
   constructor(
     private router: Router,
     private storage: Storage,
     private httpClient: HttpClient,
     private surahService: SurahService,
-    private popoverController: PopoverController
+    private popoverController: PopoverController,
+    private quranDataService: QuranDataService
   ) {
     this.storage.create().then((_) => console.log("storage created"));
   }
 
   ngOnInit() {
-    this.loadQuran("Quran");
+    this.loadQuranFromService();
     this.lastSynced();
+
+    // Track source changes to update display
+    this.quranDataService.getCurrentSource()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((source) => {
+        this.currentSourceName = source.name;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Load Quran data using the centralized QuranDataService,
+   * which respects the user's selected text source.
+   */
+  loadQuranFromService() {
+    this.syncing = true;
+    this.quranDataService.loadFullQuran()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (quranText) => {
+          this.syncing = false;
+          if (quranText) {
+            this.juzPages = [];
+            this.juzPagesCopy = [];
+            this.surahPages = [];
+            this.surahPagesCopy = [];
+            this.rukuArray = [];
+            this.calculateJuzData(quranText);
+            this.quranData = {
+              title: "Quran",
+              data: quranText,
+              rukuArray: this.rukuArray,
+              mode: "juz",
+            };
+            this.hasSaved = true;
+            setTimeout(() => (this.hasSaved = false), 1000);
+          }
+        },
+        (err) => {
+          console.error('Failed to load Quran from QuranDataService:', err);
+          this.syncing = false;
+          // Fallback to legacy archive method
+          this.loadQuran("Quran");
+        }
+      );
   }
 
   lastSynced() {

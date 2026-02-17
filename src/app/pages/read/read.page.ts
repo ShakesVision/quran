@@ -469,11 +469,17 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           "top"
         );
       else {
-        this.readTrans(
-          `${this.getCorrectedSurahNumberWithRespectTo(
-            n
-          )}:${this.getNextAyahNumberFromCurrentLine(n)}`
-        );
+        const surahNum = this.getCorrectedSurahNumberWithRespectTo(n);
+        const ayahNum = this.getNextAyahNumberFromCurrentLine(n);
+        if (surahNum && ayahNum) {
+          this.readTrans(`${surahNum}:${ayahNum}`);
+        } else {
+          this.surahService.presentToastWithOptions(
+            'Could not determine the ayah for this line.',
+            'warning',
+            'bottom'
+          );
+        }
       }
     }
   }
@@ -1946,6 +1952,24 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
   readTrans(verseKey, lang = "en") {
+    // Guard: don't fire the request if the key is missing, null-ish, or
+    // contains "null"/"undefined" (e.g. "2:null" from a failed ayah lookup)
+    if (
+      !verseKey ||
+      verseKey === 'null' ||
+      verseKey === 'undefined' ||
+      verseKey.includes('null') ||
+      verseKey.includes('undefined') ||
+      !/^\d+:\d+$/.test(verseKey)
+    ) {
+      console.warn('readTrans: invalid verseKey', verseKey);
+      this.surahService.presentToastWithOptions(
+        'Could not determine the ayah for this line.',
+        'warning',
+        'bottom'
+      );
+      return;
+    }
     let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak&words=true&word_fields=text_indopak&translations=131,151,158,84&translation_fields=resource_name,language_name&audio=2`;
     // const u = "https://api.qurancdn.com/api/qdc/verses/by_chapter/52?words=true&translation_fields=resource_name,language_id&per_page=15&fields=text_uthmani,chapter_id,hizb_number,text_imlaei_simple&translations=131,151,234,158&reciter=7&word_translation_language=en&page=1&from=52:35&to=52:49&word_fields=verse_key,verse_id,page_number,location,text_uthmani,code_v1,qpc_uthmani_hafs&mushaf=2"
     this.httpClient.get(url).subscribe((res: any) => {
@@ -2036,9 +2060,13 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         this.selectionMap.selectedElementId
       );
       const n = parseInt(this.selectionMap.selectedElementId.split("_")[1]);
-      key = `${this.getCorrectedSurahNumberWithRespectTo(
-        n
-      )}:${this.getNextAyahNumberFromCurrentLine(n)}`;
+      const surahNum = this.getCorrectedSurahNumberWithRespectTo(n);
+      const ayahNum = this.getNextAyahNumberFromCurrentLine(n);
+      if (surahNum && ayahNum) {
+        key = `${surahNum}:${ayahNum}`;
+      } else {
+        key = verseIdList[0]; // fallback to first verse on page
+      }
     } else {
       key = verseIdList[0];
     }
@@ -2287,10 +2315,20 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       });
   }
   async loadImg(p: number, quality: ImageQuality = ImageQuality.High) {
+    if (!this.incompleteUrl || !this.identifier) {
+      this.surahService.presentToastWithOptions(
+        'Scan images are loading, please try again in a moment.',
+        'warning',
+        'bottom'
+      );
+      this.scanView = false;
+      return;
+    }
     const fullUrl = `${this.incompleteUrl}${this.surahService.getPaddedNumber(
       p
     )}.jp2&id=${this.identifier}&scale=${quality}&rotate=0`;
     this.fullImageUrl = fullUrl;
+    this.scanView = true;
   }
 
   textWidth(text, fontProp) {
@@ -2644,6 +2682,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     for (let i = 0; i < chars.length; i++) {
       if (!isArabicBase(chars[i])) continue;
 
+      // NEVER insert tatweel BEFORE a non-left-joining letter (alef, dal, etc.)
+      // because it breaks ligatures like lam-alef (لا → لـا looks wrong)
+      if (isNonLeftJoining(chars[i])) continue;
+
       // Walk backward past tashkeel and existing tatweels
       let j = i - 1;
       while (j >= 0 && (isTashkeel(chars[j]) || chars[j] === TATWEEL)) j--;
@@ -2887,7 +2929,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   private finalizeRouteLoad(mode: string) {
     if (this.pages && this.pages.length > 0) {
-      this.lines = this.pages[this.currentPage - 1]?.split('\n') || [];
+      this.arabicLines = this.pages[this.currentPage - 1]?.split('\n') || [];
+      this.lines = this.arabicLines;
     }
 
     this.MUSHAF_MODE = {
@@ -2896,21 +2939,39 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       SURAH_VERSION: mode === 'surah',
     };
 
-    // TODO: Jump to ayah if provided (needs word-level tracking)
+    // For full Quran mode, calculate ruku array for all 30 juz
+    if (mode === 'full' && this.pages.length > 0) {
+      for (let juz = 1; juz <= 30; juz++) {
+        const juzStartPage = this.surahService.juzPageNumbers[juz - 1] - 1; // 0-indexed
+        const juzEndPage = juz < 30
+          ? this.surahService.juzPageNumbers[juz] - 1
+          : this.pages.length;
+        const juzPages = this.pages.slice(juzStartPage, juzEndPage);
+        this.calculateRukuArrayForJuz(juz, juzPages);
+      }
+    }
 
     this.isDataLoaded = true;
     this.updateCalculatedNumbers();
-    this.getFirstAndLastAyahNumberOnPage();
     this.getBookmark();
-    this.adjustFontsize();
 
+    // Load surahInfo FIRST, then run ayah detection + adjustFontsize.
+    // This ensures surahInfo is available for inline/wbw/audio features.
     this.surahService
       .getSurahInfo()
       .pipe(take(1))
       .subscribe((res: any) => {
-      this.surahInfo = res;
-      this.surahService.surahInfo = res;
-    });
+        this.surahInfo = res;
+        this.surahService.surahInfo = res;
+        this.getFirstAndLastAyahNumberOnPage();
+
+        // Use a timeout to let Angular render the lines in the DOM
+        // before adjusting font sizes and applying tatweel
+        setTimeout(() => {
+          this.adjustFontsize();
+          this.setupLinks();
+        }, 150);
+      });
   }
 
   private handleLoadError(err: any) {

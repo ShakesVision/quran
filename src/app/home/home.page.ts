@@ -81,6 +81,16 @@ export class HomePage {
     }
   }
 
+  /**
+   * Open the last-used mushaf directly (no selector)
+   */
+  openLastMushaf() {
+    const mushaf = this.currentMushaf || this.mushafOptions[0];
+    this.router.navigate(['/quran'], {
+      queryParams: { source: mushaf.id }
+    });
+  }
+
   async selectMushaf(mushaf: MushafOption) {
     this.currentMushaf = mushaf;
     await this.storage.set('preferredMushaf', mushaf.id);

@@ -291,8 +291,10 @@ export class MemorizePage implements OnInit {
   // ═══════════════════════════════════════════
 
   async add(item?) {
+    const juzNameHint = item ? `${this.getJuzNameByNumber(item.juz)}` : '';
     const alert = await this.alertController.create({
       subHeader: item ? "Update" : "Add",
+      message: juzNameHint || 'Enter juz number to see its name',
       cssClass: "custom-alert",
       inputs: [
         {
@@ -379,7 +381,23 @@ export class MemorizePage implements OnInit {
         },
       ],
     });
-    alert.present();
+    await alert.present();
+
+    // Dynamically update the alert message to show juz name as user types
+    const juzInput = document.querySelector('ion-alert input[name="juz"]') as HTMLInputElement;
+    if (juzInput) {
+      juzInput.addEventListener('input', () => {
+        const num = parseInt(juzInput.value);
+        const msgEl = document.querySelector('ion-alert .alert-message') as HTMLElement;
+        if (msgEl && num >= 1 && num <= 30) {
+          const name = this.getJuzNameByNumber(num);
+          const pages = this.getJuzInfo(num, 'count');
+          msgEl.textContent = `${name} — ${pages} pages`;
+        } else if (msgEl) {
+          msgEl.textContent = 'Enter juz number to see its name';
+        }
+      });
+    }
   }
 
   saveItems() {
@@ -394,9 +412,22 @@ export class MemorizePage implements OnInit {
   // Surah CRUD
   // ═══════════════════════════════════════════
 
+  getSurahNameByNumber(num: number): string {
+    if (num < 1 || num > 114) return '';
+    const info = this.surahInfo[num - 1];
+    return info?.name || this.surahService.surahNamesEnglish?.[num - 1] || `Surah ${num}`;
+  }
+
+  getJuzNameByNumber(num: number): string {
+    if (num < 1 || num > 30) return '';
+    return this.surahService.juzNames?.[num - 1] || `Juz ${num}`;
+  }
+
   async addSurah(item?: SurahItem) {
+    const surahNameHint = item ? `${this.getSurahNameByNumber(item.surahNumber)}` : '';
     const alert = await this.alertController.create({
       header: item ? "Update Surah" : "Add Surah",
+      message: surahNameHint || 'Enter surah number to see its name',
       cssClass: "custom-alert",
       inputs: [
         {
@@ -491,6 +522,22 @@ export class MemorizePage implements OnInit {
       ]
     });
     await alert.present();
+
+    // Dynamically update the alert message to show surah name as user types
+    const surahInput = document.querySelector('ion-alert input[name="surahNumber"]') as HTMLInputElement;
+    if (surahInput) {
+      surahInput.addEventListener('input', () => {
+        const num = parseInt(surahInput.value);
+        const msgEl = document.querySelector('ion-alert .alert-message') as HTMLElement;
+        if (msgEl && num >= 1 && num <= 114) {
+          const name = this.getSurahNameByNumber(num);
+          const totalAyahs = this.surahInfo[num - 1]?.totalAyah || this.surahService.surahAyahCounts?.[num - 1] || '?';
+          msgEl.textContent = `${name} — ${totalAyahs} ayahs`;
+        } else if (msgEl) {
+          msgEl.textContent = 'Enter surah number to see its name';
+        }
+      });
+    }
   }
 
   // ═══════════════════════════════════════════

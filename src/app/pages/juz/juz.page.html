@@ -28,7 +28,10 @@
         <p class="ar-text">مکمل قرآن پڑھیے</p>
         <div class="card-meta">
           <span><ion-icon name="layers-outline"></ion-icon> 30 Juz</span>
-          <span><ion-icon name="document-outline"></ion-icon> 611 Pages</span>
+          <span><ion-icon name="document-outline"></ion-icon> {{pages?.length || 611}} Pages</span>
+        </div>
+        <div class="source-badge" *ngIf="currentSourceName">
+          <ion-icon name="library-outline"></ion-icon> {{currentSourceName}}
         </div>
       </div>
       <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>

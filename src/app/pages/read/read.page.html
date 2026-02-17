@@ -283,10 +283,10 @@
               <ion-icon slot="start" name="analytics-outline"></ion-icon>
               <ion-label>Page Info</ion-label>
             </ion-item>
-            <ion-item button (click)="loadImg(currentPageCalculated)">
+            <ion-item button (click)="scanView ? scanView=false : loadImg(currentPageCalculated)">
               <ion-icon slot="start" name="image-outline"></ion-icon>
               <ion-label>Scan View</ion-label>
-              <ion-toggle slot="end" [checked]="scanView" (ionChange)="scanView=!scanView"></ion-toggle>
+              <ion-toggle slot="end" [checked]="scanView" (ionChange)="$event.detail.checked ? loadImg(currentPageCalculated) : scanView=false"></ion-toggle>
             </ion-item>
             <div class="action-grid" style="padding-top:4px">
               <button class="action-btn" (click)="exportAppData()">

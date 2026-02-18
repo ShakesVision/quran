@@ -843,8 +843,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // For juz mode (quran.com API) — build verse keys for all lines on this page
-    if (!this.juzmode || !this.surahInfo) {
+    // Need surahInfo for verse key mapping (works for both archive and qurancom)
+    if (!this.surahInfo) {
+      console.warn('Inline translation: surahInfo not loaded yet');
       this.inlineTranslations = [];
       return;
     }
@@ -852,6 +853,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     try {
       const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
       if (!firstAndLast) {
+        console.warn('Inline translation: could not determine ayahs on page', this.currentPage);
         this.inlineTranslations = [];
         return;
       }
@@ -873,10 +875,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      // Fetch translations for all verses at once via chapter endpoint
-      const url = `https://api.quran.com/api/v4/verses/by_key/${firstKey}?translations=${transId}&fields=text_indopak`;
-      // Actually fetch all in batch by using the page-range approach
-      const batchUrl = `https://api.quran.com/api/v4/verses/by_chapter/${fSurah}?translations=${transId}&per_page=50&fields=text_indopak&from=${firstKey}&to=${lastKey}`;
+      // Use quran.com API page endpoint for translations (works for both archive and qurancom)
+      const mushafPage = this.currentPageCalculated || this.currentPage;
+      const batchUrl = `https://api.quran.com/api/v4/verses/by_page/${mushafPage}?translations=${transId}&per_page=50&fields=text_indopak`;
 
       this.httpClient.get(batchUrl).pipe(take(1)).subscribe(
         (res: any) => {
@@ -895,7 +896,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           this.inlineTranslations = result;
           this.inlineTransCache.set(cacheKey, result);
         },
-        () => {
+        (err) => {
+          console.warn('Inline translation API failed:', err);
           this.inlineTranslations = [];
         }
       );
@@ -925,7 +927,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (!this.juzmode || !this.surahInfo) {
+    // Need surahInfo for verse key mapping (works for both archive and qurancom)
+    if (!this.surahInfo) {
+      console.warn('WBW: surahInfo not loaded yet');
       this.wbwData = [];
       return;
     }
@@ -933,16 +937,17 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     try {
       const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
       if (!firstAndLast) {
+        console.warn('WBW: could not determine ayahs on page', this.currentPage);
         this.wbwData = [];
         return;
       }
 
       const firstKey = firstAndLast.first.verseId;
       const lastKey = firstAndLast.last.verseId;
-      const [fSurah] = firstKey.split(':').map(Number);
 
-      // Fetch verses with words and word translations
-      const url = `https://api.quran.com/api/v4/verses/by_chapter/${fSurah}?words=true&word_translation_language=en&word_fields=text_indopak,text_uthmani&per_page=50&fields=text_indopak&from=${firstKey}&to=${lastKey}`;
+      // Use quran.com page endpoint for word-by-word (works for both archive and qurancom)
+      const mushafPage = this.currentPageCalculated || this.currentPage;
+      const url = `https://api.quran.com/api/v4/verses/by_page/${mushafPage}?words=true&word_translation_language=en&word_fields=text_indopak,text_uthmani&per_page=50&fields=text_indopak`;
 
       this.httpClient.get(url).pipe(take(1)).subscribe(
         (res: any) => {
@@ -970,7 +975,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           this.wbwData = result;
           this.wbwCache.set(cacheKey, result);
         },
-        () => {
+        (err) => {
+          console.warn('WBW API failed:', err);
           this.wbwData = [];
         }
       );

@@ -280,6 +280,13 @@
                 <span class="theme-name">{{ t.name }}</span>
               </button>
             </div>
+            <ion-item>
+              <ion-label>Colors</ion-label>
+              <ion-input placeholder="css color" (ionChange)="changeColors($event.target.value,'color')"
+                [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
+              <ion-input placeholder="bg" (ionChange)="changeColors($event.target.value,'bg')" [debounce]="1000"
+                class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
+            </ion-item>
             <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information-circle-outline"></ion-icon>
               <ion-label>About Surah</ion-label>

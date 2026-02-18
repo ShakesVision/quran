@@ -30,6 +30,53 @@ interface WeekDay {
   ayahs: number;
 }
 
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedDate?: string;
+  // Psychology: variable-ratio reinforcement — some achievements are surprise unlocks
+  hidden?: boolean;
+}
+
+// Psychology-based level system using mastery curve (logarithmic progression)
+// Each level requires progressively more effort, but early levels are easy to reach
+// (immediate reward → sustained engagement)
+const LEVEL_THRESHOLDS = [
+  { level: 1,  pages: 0,     title: 'Beginner',          icon: '🌱' },
+  { level: 2,  pages: 20,    title: 'Seeker',            icon: '🔍' },
+  { level: 3,  pages: 100,   title: 'Reader',            icon: '📖' },
+  { level: 4,  pages: 300,   title: 'Devoted',           icon: '💫' },
+  { level: 5,  pages: 604,   title: 'Khatm Complete',    icon: '🏆' },
+  { level: 6,  pages: 1208,  title: 'Double Khatm',      icon: '⭐' },
+  { level: 7,  pages: 1812,  title: 'Triple Khatm',      icon: '🌟' },
+  { level: 8,  pages: 3000,  title: 'Hafiz Path',        icon: '👑' },
+  { level: 9,  pages: 5000,  title: 'Scholar',           icon: '🎓' },
+  { level: 10, pages: 10000, title: 'Master',            icon: '💎' },
+];
+
+const ACHIEVEMENT_DEFS: Omit<Achievement, 'unlocked' | 'unlockedDate'>[] = [
+  // Streak-based (commitment & consistency psychology)
+  { id: 'streak_3',    name: 'Consistent',       description: '3-day reading streak',           icon: '🔥' },
+  { id: 'streak_7',    name: 'Weekly Warrior',    description: '7-day reading streak',           icon: '⚡' },
+  { id: 'streak_30',   name: 'Monthly Master',    description: '30-day reading streak',          icon: '💪' },
+  { id: 'streak_100',  name: 'Centurion',         description: '100-day reading streak',         icon: '🏅', hidden: true },
+  // Volume-based (progress & mastery)
+  { id: 'pages_100',   name: 'First Hundred',     description: 'Read 100 pages total',           icon: '📚' },
+  { id: 'khatm_1',     name: 'First Khatm',       description: 'Complete reading the Quran',     icon: '🏆' },
+  { id: 'khatm_3',     name: 'Triple Crown',      description: 'Complete 3 khatm',               icon: '👑', hidden: true },
+  // Behavior-based (habit formation)
+  { id: 'early_bird',  name: 'Fajr Reader',       description: 'Log reading before 6 AM',        icon: '🌅' },
+  { id: 'night_owl',   name: 'Tahajjud Reader',   description: 'Log reading after 11 PM',        icon: '🌙' },
+  { id: 'overachiever',name: 'Overachiever',       description: 'Exceed daily target by 2x',      icon: '🚀' },
+  { id: 'target_hit',  name: 'On Target',          description: 'Hit daily target 7 days in a row', icon: '🎯' },
+  // Social proof / milestone
+  { id: 'first_log',   name: 'First Step',         description: 'Log your first reading',         icon: '👣' },
+  { id: 'juz_complete',name: 'Juz Champion',       description: 'Read a full juz in one day',     icon: '📗' },
+];
+
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
@@ -43,12 +90,24 @@ export class HomePage {
   targetsEnabled = true;
   dailyPageTarget = 20;  // Default: 20 pages/day = khatm in ~30 days
   dailyAyahTarget = 5;   // Default: 5 ayahs/day memorization
+  khatmTarget = 1;       // Configurable: how many khatm in the target period
+  targetDays = 30;       // Target period in days (default: 30)
   todayPages = 0;
   todayAyahs = 0;
   streakCount = 0;
   weeklyData: WeekDay[] = [];
   ramadanDaysLeft = 0;
   khatmProjection = '';
+  totalPagesRead = 0;    // Total pages read in current target period
+
+  // ── Gamification ──
+  achievements: Achievement[] = [];
+  currentLevel = LEVEL_THRESHOLDS[0];
+  nextLevel = LEVEL_THRESHOLDS[1];
+  levelProgress = 0; // 0-100
+  allTimePagesRead = 0;
+  motivationalQuote = '';
+  newAchievement: Achievement | null = null; // For popup notification
   
   get tilawatProgress(): number {
     return Math.min(100, Math.round((this.todayPages / this.dailyPageTarget) * 100));
@@ -167,8 +226,8 @@ export class HomePage {
         this.loading = false;
       });
 
-    // Load daily targets data
-    this.loadTargets();
+    // Load daily targets data, then gamification
+    this.loadTargets().then(() => this.loadGamification());
 
     // Pre-cache Quran data in background for Discover and offline use
     this.startPreCache();
@@ -214,6 +273,8 @@ export class HomePage {
     if (settings) {
       this.dailyPageTarget = settings.pages || 20;
       this.dailyAyahTarget = settings.ayahs || 5;
+      this.khatmTarget = settings.khatm || 1;
+      this.targetDays = settings.days || 30;
       this.targetsEnabled = settings.enabled !== false;
     }
 
@@ -225,6 +286,9 @@ export class HomePage {
       this.todayAyahs = log.ayahs || 0;
     }
 
+    // Calculate total pages read in target period
+    await this.calculateTotalPagesRead();
+
     // Load streak
     await this.calculateStreak();
 
@@ -233,6 +297,21 @@ export class HomePage {
 
     // Ramadan projection
     this.calculateRamadan();
+  }
+
+  private async calculateTotalPagesRead() {
+    let total = 0;
+    const today = new Date();
+    for (let i = 0; i < this.targetDays; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = this.getDateKey(d);
+      const log: DailyLog = await this.storage.get(`daily_log_${key}`);
+      if (log && log.pages > 0) {
+        total += log.pages;
+      }
+    }
+    this.totalPagesRead = total;
   }
 
   private getTodayKey(): string {
@@ -263,8 +342,13 @@ export class HomePage {
             const pages = parseInt(data.pages);
             if (pages > 0) {
               this.todayPages += pages;
+              this.allTimePagesRead += pages;
               await this.saveTodayLog();
+              await this.storage.set('all_time_pages', this.allTimePagesRead);
               await this.updateStreak();
+              this.updateLevel();
+              await this.checkAndUnlockAchievements();
+              this.calculateRamadan();
               if (this.tilawatProgress >= 100) {
                 this.showCompletionToast('Tilawat target complete! MashaAllah!');
               }
@@ -310,8 +394,8 @@ export class HomePage {
 
   async editTargets() {
     const alert = await this.alertController.create({
-      header: 'Set Daily Targets',
-      message: 'Configure your daily reading and memorization goals.',
+      header: 'Set Targets',
+      message: 'Configure your reading and memorization goals.',
       inputs: [
         {
           name: 'pages',
@@ -319,13 +403,31 @@ export class HomePage {
           placeholder: 'Daily pages target',
           value: this.dailyPageTarget,
           min: 1,
+          label: 'Pages/day',
         },
         {
           name: 'ayahs',
           type: 'number',
-          placeholder: 'Daily ayahs target',
+          placeholder: 'Daily ayahs (hifz)',
           value: this.dailyAyahTarget,
           min: 1,
+          label: 'Ayahs/day',
+        },
+        {
+          name: 'khatm',
+          type: 'number',
+          placeholder: 'Khatm target (e.g. 3)',
+          value: this.khatmTarget,
+          min: 1,
+          label: 'Khatm target',
+        },
+        {
+          name: 'days',
+          type: 'number',
+          placeholder: 'Target period (days)',
+          value: this.targetDays,
+          min: 1,
+          label: 'Period (days)',
         },
       ],
       buttons: [
@@ -338,6 +440,8 @@ export class HomePage {
             await this.storage.set('daily_targets_settings', {
               pages: this.dailyPageTarget,
               ayahs: this.dailyAyahTarget,
+              khatm: this.khatmTarget,
+              days: this.targetDays,
               enabled: false,
             });
           },
@@ -345,12 +449,21 @@ export class HomePage {
         {
           text: 'Save',
           handler: async (data) => {
-            this.dailyPageTarget = parseInt(data.pages) || 20;
+            this.khatmTarget = parseInt(data.khatm) || 1;
+            this.targetDays = parseInt(data.days) || 30;
             this.dailyAyahTarget = parseInt(data.ayahs) || 5;
+
+            // Auto-calculate daily pages from khatm target
+            const totalPages = this.currentMushaf?.pages || 604;
+            const neededPerDay = Math.ceil((totalPages * this.khatmTarget) / this.targetDays);
+            this.dailyPageTarget = parseInt(data.pages) || neededPerDay;
+
             this.targetsEnabled = true;
             await this.storage.set('daily_targets_settings', {
               pages: this.dailyPageTarget,
               ayahs: this.dailyAyahTarget,
+              khatm: this.khatmTarget,
+              days: this.targetDays,
               enabled: true,
             });
             this.calculateRamadan();
@@ -416,36 +529,58 @@ export class HomePage {
   }
 
   private calculateRamadan() {
-    // Ramadan 2026 approx: Feb 18 - Mar 19 (adjust based on moon sighting)
-    const ramadanStart = new Date(2026, 1, 18); // Feb 18, 2026
-    const ramadanEnd = new Date(2026, 2, 19);   // Mar 19, 2026
+    // Ramadan 2026: approx Feb 28 - Mar 29, 2026 (English dates, adjust for moon sighting)
+    const ramadanStart = new Date(2026, 1, 28); // Feb 28, 2026
+    const ramadanEnd = new Date(2026, 2, 29);   // Mar 29, 2026
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const msPerDay = 1000 * 60 * 60 * 24;
 
     if (today >= ramadanStart && today <= ramadanEnd) {
-      const msPerDay = 1000 * 60 * 60 * 24;
+      // Currently in Ramadan
       this.ramadanDaysLeft = Math.ceil((ramadanEnd.getTime() - today.getTime()) / msPerDay);
-
-      // Calculate khatm projection
-      const totalPages = 604; // approx mushaf pages
-      const daysElapsed = Math.ceil((today.getTime() - ramadanStart.getTime()) / msPerDay) + 1;
-      const avgPerDay = this.todayPages > 0
-        ? (this.todayPages / 1) // just today for now, ideally average over days
-        : this.dailyPageTarget;
-      const projectedTotal = avgPerDay * (daysElapsed + this.ramadanDaysLeft);
-      const khatms = (projectedTotal / totalPages).toFixed(1);
-      this.khatmProjection = `On pace for ${khatms} khatm${parseFloat(khatms) !== 1 ? 's' : ''}`;
+      this.updateKhatmProjection(ramadanStart, ramadanEnd, today);
     } else if (today < ramadanStart) {
-      const msPerDay = 1000 * 60 * 60 * 24;
       const daysUntil = Math.ceil((ramadanStart.getTime() - today.getTime()) / msPerDay);
-      this.ramadanDaysLeft = 0; // Not in Ramadan yet
-      this.khatmProjection = `Ramadan starts in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
-      // Show the projection banner anyway when close
-      if (daysUntil <= 7) {
-        this.ramadanDaysLeft = 30; // Show it with full month
+      this.ramadanDaysLeft = 0;
+      this.khatmProjection = `Ramadan starts Feb 28 · ${daysUntil} day${daysUntil !== 1 ? 's' : ''} away`;
+      // Show countdown banner when close (within 14 days)
+      if (daysUntil <= 14) {
+        this.ramadanDaysLeft = daysUntil; // Show countdown
       }
     } else {
       this.ramadanDaysLeft = 0;
+    }
+
+    // Always show khatm target info if targeting khatm
+    this.updateTargetProjection();
+  }
+
+  private updateKhatmProjection(start: Date, end: Date, today: Date) {
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const totalPages = this.currentMushaf?.pages || 604;
+    const totalPagesNeeded = totalPages * this.khatmTarget;
+    const daysElapsed = Math.ceil((today.getTime() - start.getTime()) / msPerDay) + 1;
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / msPerDay) + 1;
+
+    if (this.totalPagesRead > 0) {
+      const avgPerDay = this.totalPagesRead / daysElapsed;
+      const projectedTotal = avgPerDay * totalDays;
+      const khatms = (projectedTotal / totalPages).toFixed(1);
+      this.khatmProjection = `On pace for ${khatms} khatm · Target: ${this.khatmTarget}`;
+    } else {
+      const pagesPerDay = Math.ceil(totalPagesNeeded / this.ramadanDaysLeft);
+      this.khatmProjection = `Need ${pagesPerDay} pages/day for ${this.khatmTarget} khatm`;
+    }
+  }
+
+  private updateTargetProjection() {
+    // Show custom target projection if user set khatm > 1
+    if (this.khatmTarget > 1 && this.ramadanDaysLeft <= 0) {
+      const totalPages = this.currentMushaf?.pages || 604;
+      const totalPagesNeeded = totalPages * this.khatmTarget;
+      const pagesPerDay = Math.ceil(totalPagesNeeded / this.targetDays);
+      this.dailyPageTarget = pagesPerDay;
     }
   }
 
@@ -458,4 +593,132 @@ export class HomePage {
     });
     await alert.present();
   }
+
+  // ===========================================
+  // GAMIFICATION — Psychology-based engagement
+  // ===========================================
+  // Principles used:
+  // 1. Variable-ratio reinforcement: some achievements are hidden (surprise rewards)
+  // 2. Progress visualization: level bar shows incremental progress
+  // 3. Loss aversion: streak count motivates daily consistency
+  // 4. Endowed progress effect: first achievement is easy to get
+  // 5. Social identity: titles give sense of belonging/mastery
+  // 6. Motivational quotes: spiritual connection reinforces habit
+
+  async loadGamification() {
+    // Load all-time pages
+    this.allTimePagesRead = (await this.storage.get('all_time_pages')) || 0;
+
+    // Load achievements
+    const saved: Achievement[] = await this.storage.get('achievements');
+    if (saved) {
+      this.achievements = saved;
+    } else {
+      this.achievements = ACHIEVEMENT_DEFS.map(a => ({ ...a, unlocked: false }));
+    }
+
+    // Calculate level
+    this.updateLevel();
+
+    // Set motivational quote
+    this.setMotivationalQuote();
+  }
+
+  private updateLevel() {
+    for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+      if (this.allTimePagesRead >= LEVEL_THRESHOLDS[i].pages) {
+        this.currentLevel = LEVEL_THRESHOLDS[i];
+        this.nextLevel = LEVEL_THRESHOLDS[i + 1] || LEVEL_THRESHOLDS[i];
+        break;
+      }
+    }
+
+    // Calculate progress to next level (0-100)
+    if (this.currentLevel.level < LEVEL_THRESHOLDS.length) {
+      const current = this.allTimePagesRead - this.currentLevel.pages;
+      const needed = this.nextLevel.pages - this.currentLevel.pages;
+      this.levelProgress = needed > 0 ? Math.min(100, Math.round((current / needed) * 100)) : 100;
+    } else {
+      this.levelProgress = 100;
+    }
+  }
+
+  async checkAndUnlockAchievements() {
+    const now = new Date().toISOString().split('T')[0];
+    const hour = new Date().getHours();
+    let newUnlocks: Achievement[] = [];
+
+    const check = (id: string, condition: boolean) => {
+      const a = this.achievements.find(x => x.id === id);
+      if (a && !a.unlocked && condition) {
+        a.unlocked = true;
+        a.unlockedDate = now;
+        newUnlocks.push(a);
+      }
+    };
+
+    // Check each achievement
+    check('first_log', this.allTimePagesRead > 0);
+    check('pages_100', this.allTimePagesRead >= 100);
+    check('khatm_1', this.allTimePagesRead >= 604);
+    check('khatm_3', this.allTimePagesRead >= 1812);
+    check('streak_3', this.streakCount >= 3);
+    check('streak_7', this.streakCount >= 7);
+    check('streak_30', this.streakCount >= 30);
+    check('streak_100', this.streakCount >= 100);
+    check('early_bird', hour < 6 && this.todayPages > 0);
+    check('night_owl', hour >= 23 && this.todayPages > 0);
+    check('overachiever', this.todayPages >= this.dailyPageTarget * 2);
+    check('juz_complete', this.todayPages >= 20); // ~20 pages per juz
+
+    // Check 7-day target hit streak
+    let targetStreak = 0;
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = this.getDateKey(d);
+      const log: DailyLog = await this.storage.get(`daily_log_${key}`);
+      if (log && log.pages >= this.dailyPageTarget) {
+        targetStreak++;
+      } else {
+        break;
+      }
+    }
+    check('target_hit', targetStreak >= 7);
+
+    // Save and notify
+    if (newUnlocks.length > 0) {
+      await this.storage.set('achievements', this.achievements);
+      // Show the first new unlock as a popup (variable-ratio reward → dopamine)
+      this.newAchievement = newUnlocks[0];
+      setTimeout(() => { this.newAchievement = null; }, 4000);
+    }
+  }
+
+  private setMotivationalQuote() {
+    const quotes = [
+      { text: 'The best among you are those who learn the Quran and teach it.', source: 'Bukhari' },
+      { text: 'Read the Quran, for it will come as an intercessor on the Day of Judgement.', source: 'Muslim' },
+      { text: 'The one who recites the Quran fluently will be with the noble angels.', source: 'Bukhari & Muslim' },
+      { text: 'Whoever reads a letter from the Book of Allah gets a reward, and each reward is multiplied tenfold.', source: 'Tirmidhi' },
+      { text: 'The Quran is a proof for you or against you.', source: 'Muslim' },
+      { text: 'Indeed this Quran guides to that which is most right.', source: 'Quran 17:9' },
+      { text: 'And We have made the Quran easy for remembrance, so is there anyone who will remember?', source: 'Quran 54:17' },
+      { text: 'Verily, in the remembrance of Allah do hearts find rest.', source: 'Quran 13:28' },
+    ];
+    const dayIdx = new Date().getDate() % quotes.length;
+    const q = quotes[dayIdx];
+    this.motivationalQuote = `"${q.text}" — ${q.source}`;
+  }
+
+  get unlockedCount(): number {
+    return this.achievements.filter(a => a.unlocked).length;
+  }
+
+  get visibleAchievements(): Achievement[] {
+    // Show unlocked ones and non-hidden locked ones (hidden ones appear only after unlock)
+    return this.achievements.filter(a => a.unlocked || !a.hidden);
+  }
+
 }

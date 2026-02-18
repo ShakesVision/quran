@@ -150,10 +150,16 @@
       <ion-icon name="add-circle" class="log-btn"></ion-icon>
     </div>
 
-    <!-- Ramadan countdown / khatm projection -->
-    <div class="khatm-projection" *ngIf="ramadanDaysLeft > 0">
-      <ion-icon name="moon-outline"></ion-icon>
-      <span>{{ ramadanDaysLeft }} days of Ramadan left · {{ khatmProjection }}</span>
+    <!-- Khatm target info -->
+    <div class="khatm-projection" *ngIf="khatmTarget > 0">
+      <div class="khatm-row">
+        <ion-icon name="book-outline"></ion-icon>
+        <span>{{ khatmTarget }} khatm in {{ targetDays }} days · {{ dailyPageTarget }} pages/day</span>
+      </div>
+      <div class="khatm-row" *ngIf="khatmProjection">
+        <ion-icon name="moon-outline"></ion-icon>
+        <span>{{ khatmProjection }}</span>
+      </div>
     </div>
 
     <!-- Weekly Heatmap -->
@@ -165,6 +171,61 @@
         <span class="day-label">{{ day.short }}</span>
         <div class="day-dot" [style.opacity]="day.pages > 0 ? 0.4 + (day.pages / dailyPageTarget * 0.6) : 0.15"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Gamification Section -->
+  <div class="gamification-section" *ngIf="targetsEnabled">
+    <!-- Level & Progress Bar -->
+    <div class="level-card">
+      <div class="level-header">
+        <span class="level-icon">{{ currentLevel.icon }}</span>
+        <div class="level-info">
+          <span class="level-title">{{ currentLevel.title }}</span>
+          <span class="level-subtitle">Level {{ currentLevel.level }} · {{ allTimePagesRead }} total pages</span>
+        </div>
+        <span class="level-next" *ngIf="currentLevel.level < 10">Next: {{ nextLevel.icon }} {{ nextLevel.title }}</span>
+      </div>
+      <div class="level-bar-wrapper">
+        <div class="level-bar">
+          <div class="level-fill" [style.width.%]="levelProgress"></div>
+        </div>
+        <span class="level-pct">{{ levelProgress }}%</span>
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="achievements-card" *ngIf="achievements.length > 0">
+      <div class="achievements-header">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <span>Achievements</span>
+        <span class="achievements-count">{{ unlockedCount }} / {{ visibleAchievements.length }}</span>
+      </div>
+      <div class="achievements-grid">
+        <div *ngFor="let a of visibleAchievements"
+             class="achievement-badge"
+             [class.unlocked]="a.unlocked"
+             [class.locked]="!a.unlocked"
+             [title]="a.description">
+          <span class="badge-icon">{{ a.icon }}</span>
+          <span class="badge-name">{{ a.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Motivational Quote -->
+    <div class="motivation-card" *ngIf="motivationalQuote">
+      <ion-icon name="sparkles-outline"></ion-icon>
+      <p>{{ motivationalQuote }}</p>
+    </div>
+  </div>
+
+  <!-- Achievement Unlock Notification -->
+  <div class="achievement-popup" *ngIf="newAchievement">
+    <span class="popup-icon">{{ newAchievement.icon }}</span>
+    <div class="popup-text">
+      <strong>{{ newAchievement.name }}</strong>
+      <span>{{ newAchievement.description }}</span>
     </div>
   </div>
 

@@ -102,7 +102,8 @@
         </span>
       </ng-container>
     </div>
-    <div class="content-wrapper" [class.inline-trans-active]="inlineTransMode">
+    <div class="content-wrapper" [class.inline-trans-active]="inlineTransMode"
+      [class.text-preparing]="preparingText" [class.text-ready]="!preparingText">
       <ng-container class="ion-text-center" *ngIf="currentPage==1 && lines?.length<15 && !juzmode">
         <div class="filler-lines line" *ngFor="let line of [].constructor(15 - (lines?.length+2))"></div>
         <div class="surah-name line centered-table-text">

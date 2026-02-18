@@ -78,10 +78,22 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   audioPlayIndex = 1;
   audioSpeed = "1";
   playingVerseNum: string;
-  reciters = [];
+  reciters = [
+    { id: 7,  name: 'Mishary Rashid Alafasy' },
+    { id: 2,  name: 'Abdul Rahman Al-Sudais' },
+    { id: 6,  name: 'Mahmoud Khalil Al-Husary' },
+    { id: 5,  name: 'Abu Bakr al-Shatri' },
+    { id: 1,  name: 'Abdul Basit (Murattal)' },
+    { id: 3,  name: 'Abdur-Rahman as-Sudais' },
+    { id: 4,  name: 'Ahmed ibn Ali al-Ajamy' },
+    { id: 10, name: 'Saad Al-Ghamdi' },
+    { id: 9,  name: 'Mohamed Siddiq al-Minshawi' },
+    { id: 12, name: 'Maher Al Muaiqly' },
+  ];
   qariId: number = 7;
-  selectedQari;
+  selectedQari = this.reciters[0];
   enableTatweel = true;
+  preparingText = false; // true while text is hidden during tatweel application
   quranComProgress = { loaded: 0, total: 0, done: true };
   showQuranComProgress = false;
   mushafVersion = MushafLines.Fifteen;
@@ -400,6 +412,12 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     const nextPage = this.currentPage + n;
     // Boundary check: don't go below 1 or above total pages
     if (nextPage < 1 || nextPage > this.pages.length) return;
+
+    // Immediately hide text to prevent raw-text flicker before tatweel
+    if (this.enableTatweel) {
+      this.preparingText = true;
+    }
+
     this.currentPage = nextPage;
 
     this.arabicLines = this.pages[this.currentPage - 1]?.split("\n") || [];
@@ -413,17 +431,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     let popup: HTMLElement = document.querySelector(".popup");
     this.resetPopup(popup);
 
-    //show translation only if toggled prop is on
-    // this.translationMode(false);
-
     //if last line of last page, center the text
-    console.log(
-      this.currentPage,
-      this.pages.length,
-      `div#line_${this.arabicLines.length - 1}`
-    );
     if (this.currentPage === this.pages.length) {
-      console.log("running");
       document
         .querySelector(`div#line_${this.arabicLines.length - 1}`)
         ?.classList.add("centered-table-text");
@@ -435,7 +444,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (this.tajweedMode) this.loadTajweedText();
     setTimeout(() => {
       this.adjustFontsize();
-    }, 100);
+    }, 50);
   }
 
   resetPopup(popup: HTMLElement) {
@@ -2048,6 +2057,12 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
   gotoPageNum(p) {
     if (!p || p > this.pages?.length || p < 1) return;
+
+    // Immediately hide text to prevent raw-text flicker before tatweel
+    if (this.enableTatweel) {
+      this.preparingText = true;
+    }
+
     this.currentPage = parseInt(p);
     this.lines = this.pages[this.currentPage - 1].split("\n");
 
@@ -2059,7 +2074,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (this.tajweedMode) this.loadTajweedText();
     setTimeout(() => {
       this.adjustFontsize();
-    }, 1000);
+    }, 50);
   }
   gotoPageAndHighlightLine(r: SearchResultsList) {
     console.log(r.pageIndex, r.lineIndex);
@@ -2424,18 +2439,23 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.surahService
       .fetchQariList()
       .pipe(take(1))
-      .subscribe((res: any) => {
-      console.log(res);
-      this.reciters = res.reciters?.sort((a, b) => a.id - b.id);
-      this.qariId = this.qariId ?? 7;
-      this.selectedQari = this.reciters.find((r) => r.id == this.qariId);
-      console.log(this.selectedQari);
-    });
+      .subscribe(
+        (res: any) => {
+          if (res.reciters?.length) {
+            this.reciters = res.reciters.sort((a, b) => a.id - b.id);
+          }
+          // else keep the hardcoded list
+          this.selectedQari = this.reciters.find((r) => r.id == this.qariId) || this.reciters[0];
+        },
+        () => {
+          // API down — keep hardcoded reciters
+          this.selectedQari = this.reciters.find((r) => r.id == this.qariId) || this.reciters[0];
+        }
+      );
   }
   qariChanged(r) {
-    console.log(r);
-    this.selectedQari = r;
     this.qariId = parseInt(r);
+    this.selectedQari = this.reciters.find((q) => q.id === this.qariId) || this.reciters[0];
   }
   getJuzNumber() {
     if (!this.isDataLoaded) return '';
@@ -2542,10 +2562,6 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     const wrapper = document.querySelector(".content-wrapper") as HTMLElement;
     if (!wrapper) return;
 
-    // Mark preparing — hides text instantly (opacity: 0)
-    wrapper.classList.remove("text-ready");
-    wrapper.classList.add("text-preparing");
-
     const MIN_FONT_SIZE = 6; // Never go below 6px
     const MAX_ITERATIONS = 50; // Safety cap to prevent infinite loops
 
@@ -2570,9 +2586,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     requestAnimationFrame(() => {
       this.applyTatweelToLines();
-      // Reveal with animation after tatweel is done
-      wrapper.classList.remove("text-preparing");
-      wrapper.classList.add("text-ready");
+      // Reveal text after tatweel is applied (prevents flicker)
+      this.preparingText = false;
     });
   }
 

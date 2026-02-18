@@ -82,10 +82,11 @@
   </div>
 
   <!-- ═══════════════════════════════════════════ -->
-  <!-- Weekly Review Heatmap                       -->
+  <!-- Weekly Activity Heatmap                     -->
   <!-- ═══════════════════════════════════════════ -->
   <div class="heatmap-section" *ngIf="items.length > 0 || surahItems.length > 0">
     <h3 class="heatmap-title">This Week's Activity</h3>
+    <p class="heatmap-subtitle">Updates, reviews &amp; progress tracked here</p>
     <div class="heatmap-grid">
       <div class="heatmap-cell" *ngFor="let day of reviewHeatmap"
            [class.active]="day.count > 0"
@@ -101,10 +102,10 @@
   <!-- Mastery Levels Legend                       -->
   <!-- ═══════════════════════════════════════════ -->
   <div class="mastery-legend" *ngIf="items.length > 0 || surahItems.length > 0">
-    <span class="mastery-item"><span class="mastery-dot new"></span>New</span>
-    <span class="mastery-item"><span class="mastery-dot learning"></span>Learning</span>
-    <span class="mastery-item"><span class="mastery-dot reviewing"></span>Reviewing</span>
-    <span class="mastery-item"><span class="mastery-dot mastered"></span>Mastered</span>
+    <span class="mastery-item"><span class="mastery-dot new"></span>New <span class="mastery-count">{{ getMasteryCount('new') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot learning"></span>Learning <span class="mastery-count">{{ getMasteryCount('learning') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot reviewing"></span>Reviewing <span class="mastery-count">{{ getMasteryCount('reviewing') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot mastered"></span>Mastered <span class="mastery-count">{{ getMasteryCount('mastered') }}</span></span>
   </div>
 
   <!-- ═══════════════════════════════════════════ -->

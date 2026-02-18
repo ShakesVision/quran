@@ -429,10 +429,12 @@ export class MemorizePage implements OnInit {
 
   saveItems() {
     this.storage.set("memorize", this.items);
+    this.logReviewActivity(); // Track progress in heatmap
   }
 
   saveSurahItems() {
     this.storage.set("memorize_surah", this.surahItems);
+    this.logReviewActivity(); // Track progress in heatmap
   }
 
   // ═══════════════════════════════════════════
@@ -724,6 +726,13 @@ export class MemorizePage implements OnInit {
       case 'mastered': return 'Strong';
       default: return '';
     }
+  }
+
+  getMasteryCount(level: string): number {
+    if (this.trackingMode === 'juz') {
+      return this.items.filter(item => this.getMasteryLevel(item) === level).length;
+    }
+    return this.surahItems.filter(item => this.getMasteryLevel(item) === level).length;
   }
 
   private daysSince(date: Date): number {

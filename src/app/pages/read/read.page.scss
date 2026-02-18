@@ -318,10 +318,12 @@ body.dark ion-content {
     // Hide lines until tatweel/font-sizing is applied, then reveal
     &.text-preparing .line span {
       opacity: 0;
+      transition: none;
     }
 
     &.text-ready .line span {
-      animation: revealText 0.3s ease-out forwards;
+      opacity: 1;
+      transition: opacity 0.15s ease-out;
     }
     
     .line:last-child {
@@ -561,21 +563,23 @@ ion-footer {
   justify-content: center;
   align-items: center;
   position: absolute;
-  left: -26px;
+  left: -28px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--mushaf-gold-dark, #A07C18);
   line-height: 1;
-  width: 24px;
+  width: 28px;
+  text-align: center;
 
   .ruku-ain-group {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
 
     .ruku-ain {
-      font-size: clamp(16px, 4vw, 22px);
+      font-size: clamp(18px, 4.5vw, 24px);
       font-family: "Traditional Arabic", serif;
       line-height: 1;
       color: var(--mushaf-gold, #C9A227);
@@ -583,21 +587,23 @@ ion-footer {
 
     .ruku-ayah-count {
       position: absolute;
-      font-size: small;
+      font-size: clamp(6px, 1.5vw, 8px);
       font-family: sans-serif;
-      top: 5px;
+      font-weight: 600;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      opacity: 0.85;
+      transform: translate(-50%, -20%);
+      opacity: 0.9;
       color: var(--mushaf-gold-dark, #A07C18);
     }
   }
 
   .ruku-number {
     font-size: clamp(8px, 2vw, 11px);
-    margin-top: 1px;
+    margin-top: 0;
     opacity: 0.8;
     color: var(--mushaf-gold-dark, #A07C18);
+    text-align: center;
   }
 }
 

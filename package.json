@@ -3,14 +3,19 @@
   "version": "1.0.0",
   "author": "Shakeeb Ahmad",
   "homepage": "https://sarbakaf.com/",
+  "engines": {
+    "node": ">=16.0.0 <19.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
+    "build:ghpages": "ng build --configuration production --source-map=false --base-href /quran/",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "build:ci": "ng build --prod --sourceMap=false --base-href /quran15line/"
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {

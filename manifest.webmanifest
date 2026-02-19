@@ -69,9 +69,9 @@
       "description": "Open and read the complete Quran",
       "icons": [
         {
-          "src": "assets/icons/icon-96x96.png",
+          "src": "assets/icons/shortcut-read.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -82,9 +82,9 @@
       "description": "Browse Juz & Surah list",
       "icons": [
         {
-          "src": "assets/icons/icon-96x96.png",
+          "src": "assets/icons/shortcut-browse.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -95,9 +95,9 @@
       "description": "Swipe through random beautiful Ayah cards",
       "icons": [
         {
-          "src": "assets/icons/icon-96x96.png",
+          "src": "assets/icons/shortcut-discover.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -108,9 +108,9 @@
       "description": "Track your Quran memorization progress",
       "icons": [
         {
-          "src": "assets/icons/icon-96x96.png",
+          "src": "assets/icons/shortcut-memorize.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     }

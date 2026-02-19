@@ -105,6 +105,10 @@ const routes: Routes = [
     path: 'scanned/page/:page',
     loadChildren: () => import('./pages/scanned/scanned.module').then(m => m.ScannedPageModule)
   },
+  {
+    path: 'playground',
+    loadChildren: () => import('./pages/playground/playground.module').then(m => m.PlaygroundPageModule)
+  },
   
   // Wildcard - redirect to home
   { 

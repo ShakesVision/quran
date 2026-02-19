@@ -39,10 +39,26 @@ export class SurahPage implements OnInit {
   }
 
   gotoRead(item) {
-    // Navigate to the new URL-based surah reader route
-    const surahNo = item.surahNo || item.remoteId;
-    console.log('Navigating to surah:', surahNo, item);
-    this.router.navigate(['/surah', surahNo]);
+    // Fetch full surah data from Firestore, then navigate to reader in Firestore mode
+    const docId = item.remoteId;
+    console.log('Fetching Firestore surah:', docId, item);
+    this.surahService.getSurahById(docId).subscribe(
+      (surahData) => {
+        if (!surahData) {
+          this.toast('Surah data not found', 'danger');
+          return;
+        }
+        // Store fetched data on the service for the reader to pick up
+        this.surahService.currentSurah = { ...surahData, name: item.surahName };
+        this.router.navigate(['/quran'], {
+          state: { firestoreMode: true }
+        });
+      },
+      (err) => {
+        console.error('Failed to fetch surah:', err);
+        this.toast('Failed to load surah data', 'danger');
+      }
+    );
   }
 
   async loginAlert() {

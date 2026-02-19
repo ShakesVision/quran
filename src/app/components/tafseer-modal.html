@@ -60,9 +60,22 @@
         <ion-icon [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
       </div>
       <div *ngIf="wbwExpanded" class="wbw-table-wrapper">
+        <!-- WBW Language Switcher -->
+        <div class="wbw-lang-chips">
+          <ion-chip *ngFor="let lang of wbwLanguages"
+                    [outline]="wbwTransLang !== lang.code"
+                    [color]="wbwTransLang === lang.code ? 'primary' : 'medium'"
+                    (click)="changeWbwLang(lang.code)"
+                    class="wbw-lang-chip">
+            {{ lang.label }}
+          </ion-chip>
+        </div>
         <p class="wbw-hint">
           <ion-icon name="musical-notes-outline"></ion-icon> Tap a word to hear its pronunciation
         </p>
+        <div *ngIf="wbwLangLoading" class="wbw-lang-loading">
+          <ion-spinner name="dots" color="primary"></ion-spinner>
+        </div>
         <table class="verse-words-table">
           <tr *ngFor="let word of verse?.words; let i = index" (click)="playWord(word)" class="wbw-row ion-activatable">
             <ion-ripple-effect></ion-ripple-effect>

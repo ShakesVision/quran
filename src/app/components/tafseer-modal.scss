@@ -456,6 +456,30 @@
   animation: fadeSlideIn 0.2s ease;
 }
 
+.wbw-lang-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+
+  .wbw-lang-chip {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    height: 26px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.wbw-lang-loading {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
 .wbw-hint {
   display: flex;
   align-items: center;

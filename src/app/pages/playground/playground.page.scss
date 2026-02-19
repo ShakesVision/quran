@@ -1,0 +1,290 @@
+// =============================================
+// QURAN TEXT STUDIO (Playground)
+// =============================================
+
+.playground-layout {
+  display: flex;
+  min-height: 100%;
+  gap: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+// ── Controls Panel (Left) ──
+.controls-panel {
+  width: 320px;
+  min-width: 280px;
+  max-width: 380px;
+  background: var(--ion-card-background, #fff);
+  border-right: 1px solid rgba(var(--ion-color-medium-rgb), 0.15);
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.15);
+    max-height: 45vh;
+  }
+}
+
+// ── Preview Panel (Right) ──
+.preview-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  background: rgba(var(--ion-color-medium-rgb), 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Panel Header ──
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.1);
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--ion-color-primary);
+  }
+
+  .page-info {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--ion-color-medium);
+  }
+}
+
+// ── Control Group ──
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ion-color-medium-shade);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  ion-segment {
+    --background: rgba(var(--ion-color-medium-rgb), 0.08);
+  }
+
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    --color-checked: white;
+    font-size: 0.72rem;
+    min-height: 32px;
+  }
+
+  ion-select {
+    --padding-start: 8px;
+    font-size: 0.82rem;
+    border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+    border-radius: 8px;
+    min-height: 36px;
+  }
+
+  ion-range {
+    --bar-height: 3px;
+    --knob-size: 20px;
+    padding: 0;
+  }
+}
+
+.custom-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.78rem;
+  background: rgba(var(--ion-color-medium-rgb), 0.04);
+  color: var(--ion-text-color);
+  resize: vertical;
+  direction: rtl;
+
+  &::placeholder {
+    direction: ltr;
+    text-align: left;
+  }
+}
+
+.export-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  ion-button {
+    --border-radius: 8px;
+    font-size: 0.72rem;
+    --padding-start: 10px;
+    --padding-end: 10px;
+  }
+}
+
+.mt-4 {
+  margin-top: 4px;
+}
+
+// ── Status / Warnings ──
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(var(--ion-color-primary-rgb), 0.06);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  color: var(--ion-color-primary-shade);
+
+  ion-icon { font-size: 16px; }
+}
+
+.warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.warning-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(255, 152, 0, 0.08);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  color: #e65100;
+  line-height: 1.4;
+
+  ion-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+}
+
+// ── Preview Empty State ──
+.preview-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+  }
+
+  .hint {
+    font-size: 0.72rem;
+    color: var(--ion-color-medium-tint);
+  }
+}
+
+// ── Preview Content ──
+.preview-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 0 8px;
+
+  .page-input {
+    --background: rgba(var(--ion-color-medium-rgb), 0.08);
+    --border-radius: 6px;
+    --padding-start: 8px;
+    font-size: 0.82rem;
+    text-align: center;
+    max-width: 60px;
+  }
+}
+
+// ── Page Preview Box ──
+.page-preview {
+  margin: 0 auto;
+  background: var(--reader-bg-color, #faf8f0);
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px 12px;
+  direction: rtl;
+  min-height: 300px;
+  position: relative;
+}
+
+.preview-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  position: relative;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(var(--ion-color-primary-rgb), 0.06);
+  }
+
+  &.has-page-break {
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+    border-bottom: 2px dashed var(--ion-color-danger);
+  }
+
+  .line-number {
+    font-size: 0.55rem;
+    color: var(--ion-color-medium-tint);
+    min-width: 16px;
+    text-align: center;
+    direction: ltr;
+    flex-shrink: 0;
+  }
+
+  .line-text {
+    flex: 1;
+    text-align: justify;
+    line-height: 2.2;
+  }
+}
+
+.page-break-marker {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  color: var(--ion-color-danger);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  direction: ltr;
+}
+

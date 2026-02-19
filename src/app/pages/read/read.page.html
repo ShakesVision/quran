@@ -72,14 +72,50 @@
       </div>
     </div>
   </div>
-  <div class="scan-view" [hidden]="!scanView">
+  <!-- Side-by-side: Scan + Unicode -->
+  <div class="side-by-side-container" *ngIf="sideBySideMode === 'scan-unicode'" [ngClass]="currentFontClass">
+    <div class="sbs-panel sbs-scan">
+      <pinch-zoom [properties]="zoomProperties">
+        <div class="scan-image-wrapper">
+          <ion-img [src]="fullImageUrl"></ion-img>
+        </div>
+      </pinch-zoom>
+    </div>
+    <div class="sbs-panel sbs-unicode page-wrapper ar">
+      <div *ngFor="let line of lines;let i = index" class="line">
+        <span class="arabic-line-text">{{line}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side-by-side: Two Pages -->
+  <div class="side-by-side-container two-pages" *ngIf="sideBySideMode === 'two-pages'" [ngClass]="currentFontClass">
+    <div class="sbs-panel sbs-page page-wrapper ar">
+      <div class="sbs-page-num">{{ surahService.e2a(currentPage.toString()) }}</div>
+      <div *ngFor="let line of lines;let i = index" class="line">
+        <span class="arabic-line-text">{{line}}</span>
+      </div>
+    </div>
+    <div class="sbs-panel sbs-page page-wrapper ar" *ngIf="getSecondPageLines().length > 0">
+      <div class="sbs-page-num">{{ surahService.e2a(getSecondPageNumber().toString()) }}</div>
+      <div *ngFor="let line of getSecondPageLines();let i = index" class="line">
+        <span class="arabic-line-text">{{line}}</span>
+      </div>
+    </div>
+    <div class="sbs-page-range">
+      {{ surahService.e2a(currentPage.toString()) }}-{{ surahService.e2a(getSecondPageNumber().toString()) }} / {{ surahService.e2a(pages.length.toString()) }}
+    </div>
+  </div>
+
+  <!-- Normal single views -->
+  <div class="scan-view" [hidden]="!scanView || sideBySideMode !== 'off'">
     <pinch-zoom [properties]="zoomProperties">
       <div class="scan-image-wrapper">
         <ion-img [src]="fullImageUrl"></ion-img>
       </div>
     </pinch-zoom>
   </div>
-  <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass" [hidden]="scanView">
+  <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass" [hidden]="scanView || sideBySideMode !== 'off'">
     <div class="page-top-info" *ngIf="isDataLoaded">
       <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
         <span class="juz-number"> {{ getJuzNumber() }} </span>
@@ -317,6 +353,16 @@
               <ion-icon slot="start" name="image-outline"></ion-icon>
               <ion-label>Scan View</ion-label>
               <ion-toggle slot="end" [checked]="scanView" (ionChange)="$event.detail.checked ? loadImg(currentPageCalculated) : scanView=false"></ion-toggle>
+            </ion-item>
+            <ion-item>
+              <ion-icon slot="start" name="tablet-landscape-outline"></ion-icon>
+              <ion-label>Side-by-Side</ion-label>
+              <ion-select slot="end" [(ngModel)]="sideBySideMode" interface="action-sheet"
+                          (ionChange)="toggleSideBySide($event.detail.value)">
+                <ion-select-option value="off">Off</ion-select-option>
+                <ion-select-option value="scan-unicode">Scan + Text</ion-select-option>
+                <ion-select-option value="two-pages">Two Pages</ion-select-option>
+              </ion-select>
             </ion-item>
             <div class="action-grid" style="padding-top:4px">
               <button class="action-btn" (click)="exportAppData()">

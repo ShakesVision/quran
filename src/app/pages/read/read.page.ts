@@ -189,6 +189,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   copyResultsBG = "dark";
   scanView: boolean = false;
   fullImageUrl: string;
+  sideBySideMode: 'off' | 'scan-unicode' | 'two-pages' = 'off';
   identifier;
   incompleteUrl;
   zoomProperties = {
@@ -265,10 +266,29 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     // Check for route params first (new URL-based navigation)
     const routeParams = this.activatedRoute.snapshot.params;
     const routeData = this.activatedRoute.snapshot.data;
-    const juzData = this.router.getCurrentNavigation()?.extras?.state?.juzData;
+    const navState = this.router.getCurrentNavigation()?.extras?.state;
+    const juzData = navState?.juzData;
     
+    // Handle Firestore-sourced surah data (from /surahs page)
+    if (navState?.firestoreMode && this.surahService.currentSurah) {
+      console.log('[Reader] Firestore mode — loading surah from surahService.currentSurah');
+      this.juzmode = false;
+      this.surah = this.surahService.currentSurah;
+      this.title = this.surah.name || 'Surah';
+      this.pages = this.surah.arabic?.split('\n\n') || [];
+      this.arabicLines = this.pages[this.currentPage - 1]?.split('\n') || [];
+      this.lines = this.arabicLines;
+      if (this.surah.urdu && this.surah.urdu !== '') {
+        this.translationExists = true;
+        this.tPages = this.surah.urdu.split('\n\n');
+        this.translationLines = this.tPages[this.currentPage - 1]?.split('\n') || [];
+      }
+      this.isDataLoaded = true;
+      // Clear to prevent stale data on future navigations
+      this.surahService.currentSurah = null;
+    }
     // Handle URL-based navigation (refresh-safe)
-    if (routeParams.id || routeData.mode === 'full') {
+    else if (routeParams.id || routeData.mode === 'full') {
       this.initFromRouteParams(routeParams, routeData);
       // initFromRouteParams handles async data loading, so return early
       // The rest of initialization will be done after data loads
@@ -2878,6 +2898,39 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         }
       });
   }
+  /**
+   * Toggle side-by-side layout mode.
+   * 'scan-unicode': scan image left, unicode text right (requires scan to be loaded)
+   * 'two-pages': two consecutive unicode pages side by side
+   * 'off': normal single-page view
+   */
+  toggleSideBySide(mode: 'off' | 'scan-unicode' | 'two-pages') {
+    if (mode === 'scan-unicode') {
+      // Load scan image if not already loaded
+      if (!this.fullImageUrl) {
+        this.loadImg(this.currentPageCalculated);
+      }
+      this.scanView = false; // Don't use the old full-scan mode
+    }
+    this.sideBySideMode = mode;
+    this.changeDetectorRef.detectChanges();
+  }
+
+  /** Get lines for the second page when in two-pages mode */
+  getSecondPageLines(): string[] {
+    if (this.sideBySideMode !== 'two-pages' || !this.pages?.length) return [];
+    const nextPageIdx = this.currentPage; // currentPage is 1-based, so index for next page = currentPage
+    if (nextPageIdx < this.pages.length) {
+      return this.pages[nextPageIdx]?.split('\n') || [];
+    }
+    return [];
+  }
+
+  /** Get page number for the second page in two-pages mode */
+  getSecondPageNumber(): number {
+    return this.currentPage + 1;
+  }
+
   async loadImg(p: number, quality: ImageQuality = ImageQuality.High) {
     if (!this.incompleteUrl || !this.identifier) {
       this.surahService.presentToastWithOptions(

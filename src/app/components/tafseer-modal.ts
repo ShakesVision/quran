@@ -28,6 +28,20 @@ interface TranslationOrder {
   position: number;
 }
 
+/** Supported WBW translation languages (Quran.com API) */
+const WBW_LANGUAGES: { code: string; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'ur', label: 'اردو' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'tr', label: 'Türkçe' },
+  { code: 'id', label: 'Bahasa' },
+  { code: 'fa', label: 'فارسی' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'fr', label: 'Français' },
+  { code: 'ru', label: 'Русский' },
+  { code: 'de', label: 'Deutsch' },
+];
+
 // Color palette for translation blocks (deterministic by language + index)
 const TRANSLATION_COLORS: Record<string, string[]> = {
   urdu: ['#1B5E20', '#006064', '#4E342E', '#1A237E', '#BF360C', '#33691E', '#880E4F'],
@@ -74,6 +88,11 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedWordIndex: number | null = null;
   selectedWordMorphology: WordMorphology | null = null;
   morphologyLoading = false;
+
+  // WBW language switcher
+  wbwLanguages = WBW_LANGUAGES;
+  wbwTransLang = 'en';
+  wbwLangLoading = false;
 
   // Organized translation blocks
   translations: TranslationDisplay[] = [];
@@ -211,6 +230,37 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
           this.morphologyLoading = false;
         }
       );
+  }
+
+  /**
+   * Change the WBW translation language and re-fetch word data
+   */
+  changeWbwLang(langCode: string) {
+    if (langCode === this.wbwTransLang || !this.verse?.verse_key) return;
+    this.wbwTransLang = langCode;
+    this.wbwLangLoading = true;
+
+    const url = `https://api.quran.com/api/v4/verses/by_key/${this.verse.verse_key}?language=${langCode}&words=true&word_fields=text_indopak,text_uthmani&word_translation_language=${langCode}`;
+    this.httpClient.get<any>(url).pipe(take(1)).subscribe(
+      (res) => {
+        if (res?.verse?.words) {
+          // Update word translations while keeping existing word objects structure
+          const newWords = res.verse.words;
+          if (this.verse.words) {
+            this.verse.words.forEach((w: any, i: number) => {
+              if (newWords[i]) {
+                w.translation = newWords[i].translation;
+                w.transliteration = newWords[i].transliteration;
+              }
+            });
+          }
+        }
+        this.wbwLangLoading = false;
+      },
+      () => {
+        this.wbwLangLoading = false;
+      }
+    );
   }
 
   /**

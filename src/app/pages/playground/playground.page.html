@@ -1,0 +1,191 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Quran Text Studio</ion-title>
+    <ion-chip slot="end" color="warning" outline>
+      <ion-icon name="flask-outline"></ion-icon>
+      <ion-label>Experimental</ion-label>
+    </ion-chip>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="playground-layout">
+
+    <!-- ── LEFT: Controls Panel ── -->
+    <div class="controls-panel">
+      <div class="panel-header">
+        <ion-icon name="settings-outline"></ion-icon>
+        <span>Controls</span>
+      </div>
+
+      <!-- Text Source -->
+      <div class="control-group">
+        <label>Text Source</label>
+        <ion-segment [(ngModel)]="textSource" mode="ios">
+          <ion-segment-button value="qurancom">
+            <ion-label>Quran.com</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="tanzil">
+            <ion-label>Tanzil</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="custom">
+            <ion-label>Custom</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Custom Text Input (shown when custom is selected) -->
+      <div class="control-group" *ngIf="textSource === 'custom'">
+        <label>Input Format</label>
+        <ion-select [(ngModel)]="inputFormat" interface="action-sheet">
+          <ion-select-option value="archive">Archive (page/line split)</ion-select-option>
+          <ion-select-option value="ayah-per-line">Ayah per line (surah:ayah|text)</ion-select-option>
+          <ion-select-option value="json-ayahs">JSON array</ion-select-option>
+        </ion-select>
+        <textarea class="custom-input" [(ngModel)]="customText"
+                  placeholder="Paste your Quran text here...&#10;&#10;Format: 1:1|بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ&#10;1:2|الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"
+                  rows="8"></textarea>
+      </div>
+
+      <!-- Font Settings -->
+      <div class="control-group">
+        <label>Font</label>
+        <ion-select [(ngModel)]="fontFamily" interface="action-sheet">
+          <ion-select-option *ngFor="let f of fonts" [value]="f.value">{{ f.label }}</ion-select-option>
+        </ion-select>
+      </div>
+
+      <div class="control-group">
+        <label>Font Size: {{ fontSize }}px</label>
+        <ion-range [(ngModel)]="fontSize" [min]="14" [max]="40" [step]="1" color="primary"
+                   (ionChange)="buildPreview()">
+          <ion-label slot="start">14</ion-label>
+          <ion-label slot="end">40</ion-label>
+        </ion-range>
+      </div>
+
+      <!-- Page Settings -->
+      <div class="control-group">
+        <label>Lines per Page</label>
+        <ion-segment [(ngModel)]="linesPerPage" mode="ios" (ionChange)="buildPreview()">
+          <ion-segment-button [value]="13"><ion-label>13</ion-label></ion-segment-button>
+          <ion-segment-button [value]="15"><ion-label>15</ion-label></ion-segment-button>
+          <ion-segment-button [value]="16"><ion-label>16</ion-label></ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <div class="control-group">
+        <label>Preview Width: {{ pageWidth }}px</label>
+        <ion-range [(ngModel)]="pageWidth" [min]="250" [max]="700" [step]="10" color="primary">
+          <ion-label slot="start">250</ion-label>
+          <ion-label slot="end">700</ion-label>
+        </ion-range>
+      </div>
+
+      <!-- Actions -->
+      <div class="control-group">
+        <ion-button expand="block" (click)="loadText()" [disabled]="loading" color="primary">
+          <ion-icon slot="start" name="cloud-download-outline"></ion-icon>
+          {{ loading ? 'Loading...' : 'Load Text' }}
+        </ion-button>
+      </div>
+
+      <div class="control-group" *ngIf="allLines.length > 0">
+        <ion-button expand="block" fill="outline" (click)="autoMarkPages()" color="secondary">
+          <ion-icon slot="start" name="grid-outline"></ion-icon>
+          Auto-Mark Pages ({{ linesPerPage }}/page)
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="clearPageBreaks()" color="medium" class="mt-4">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Clear Page Breaks
+        </ion-button>
+      </div>
+
+      <!-- Export -->
+      <div class="control-group" *ngIf="previewPages.length > 0">
+        <label>Export</label>
+        <div class="export-buttons">
+          <ion-button fill="outline" size="small" (click)="exportData('json')">
+            <ion-icon slot="start" name="code-slash-outline"></ion-icon> JSON
+          </ion-button>
+          <ion-button fill="outline" size="small" (click)="exportData('archive')">
+            <ion-icon slot="start" name="document-text-outline"></ion-icon> TXT
+          </ion-button>
+          <ion-button fill="outline" size="small" (click)="exportData('csv')">
+            <ion-icon slot="start" name="grid-outline"></ion-icon> CSV
+          </ion-button>
+        </div>
+        <ion-button expand="block" fill="solid" color="success" class="mt-4" (click)="saveAsCustomSource()">
+          <ion-icon slot="start" name="save-outline"></ion-icon>
+          Save as Custom Source
+        </ion-button>
+      </div>
+
+      <!-- Status -->
+      <div class="status-bar" *ngIf="statusMessage">
+        <ion-icon [name]="loading ? 'hourglass-outline' : 'information-circle-outline'"></ion-icon>
+        <span>{{ statusMessage }}</span>
+      </div>
+
+      <div class="warnings" *ngIf="warnings.length > 0">
+        <div *ngFor="let w of warnings" class="warning-item">
+          <ion-icon name="warning-outline" color="warning"></ion-icon>
+          <span>{{ w }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: Preview Panel ── -->
+    <div class="preview-panel">
+      <div class="panel-header">
+        <ion-icon name="eye-outline"></ion-icon>
+        <span>Preview</span>
+        <span class="page-info" *ngIf="previewPages.length > 0">
+          Page {{ currentPreviewPage + 1 }} / {{ previewPages.length }}
+        </span>
+      </div>
+
+      <div class="preview-empty" *ngIf="previewPages.length === 0">
+        <ion-icon name="book-outline" size="large" color="medium"></ion-icon>
+        <p>Load text to see preview</p>
+        <p class="hint">Click between lines to mark page breaks</p>
+      </div>
+
+      <div class="preview-content" *ngIf="previewPages.length > 0">
+        <!-- Page Navigation -->
+        <div class="preview-nav">
+          <ion-button fill="clear" size="small" (click)="goToPreviewPage(-1)"
+                      [disabled]="currentPreviewPage <= 0">
+            <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+          </ion-button>
+          <ion-input type="number" [(ngModel)]="currentPreviewPage" [min]="0" [max]="previewPages.length - 1"
+                     class="page-input" style="max-width:60px; text-align:center"></ion-input>
+          <ion-button fill="clear" size="small" (click)="goToPreviewPage(1)"
+                      [disabled]="currentPreviewPage >= previewPages.length - 1">
+            <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <!-- Page Preview -->
+        <div class="page-preview" [style.max-width.px]="pageWidth"
+             [style.font-family]="fontFamily" [style.font-size.px]="fontSize">
+          <div *ngFor="let line of previewPages[currentPreviewPage]; let i = index"
+               class="preview-line"
+               [class.has-page-break]="hasPageBreak(getGlobalLineIndex(i))"
+               (click)="togglePageBreak(getGlobalLineIndex(i))">
+            <span class="line-number">{{ i + 1 }}</span>
+            <span class="line-text ar-text rtl">{{ line }}</span>
+            <div class="page-break-marker" *ngIf="hasPageBreak(getGlobalLineIndex(i))">
+              <span>── page break ──</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+

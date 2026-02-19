@@ -724,4 +724,61 @@ export class HomePage implements OnDestroy {
     return this.achievements.filter(a => a.unlocked || !a.hidden);
   }
 
+  // ═════════════════════════════════════════════
+  // CHANGELOG (from GitHub commits)
+  // ═════════════════════════════════════════════
+
+  changelogItems: { date: string; message: string; author: string; sha: string }[] = [];
+  changelogLoading = false;
+  changelogOpen = false;
+
+  async showChangelog() {
+    this.changelogOpen = true;
+    this.changelogLoading = true;
+    this.changelogItems = [];
+
+    try {
+      const url = 'https://api.github.com/repos/ShakesVision/quran/commits?per_page=50';
+      const commits: any[] = await this.httpClient.get<any[]>(url).toPromise();
+      this.changelogItems = (commits || []).map(c => ({
+        date: c.commit?.author?.date || '',
+        message: c.commit?.message || '',
+        author: c.commit?.author?.name || c.author?.login || 'Unknown',
+        sha: (c.sha || '').substring(0, 7),
+      }));
+    } catch (e) {
+      console.warn('Failed to fetch changelog from GitHub', e);
+      this.changelogItems = [{
+        date: new Date().toISOString(),
+        message: 'Could not load changelog. Check your internet connection.',
+        author: '',
+        sha: '',
+      }];
+    }
+
+    this.changelogLoading = false;
+  }
+
+  closeChangelog() {
+    this.changelogOpen = false;
+  }
+
+  /**
+   * Group changelog items by date (YYYY-MM-DD) for display.
+   */
+  get groupedChangelog(): { date: string; displayDate: string; items: typeof this.changelogItems }[] {
+    const groups = new Map<string, typeof this.changelogItems>();
+    for (const item of this.changelogItems) {
+      const d = item.date ? new Date(item.date) : new Date();
+      const key = d.toISOString().split('T')[0];
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(item);
+    }
+    return Array.from(groups.entries()).map(([date, items]) => ({
+      date,
+      displayDate: new Date(date).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }),
+      items,
+    }));
+  }
+
 }

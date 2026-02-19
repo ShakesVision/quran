@@ -40,6 +40,25 @@ const MADANI_RULES: TajweedRule[] = [
 ];
 
 /**
+ * Normalize IndoPak / archive text to standard Arabic for tajweed analysis.
+ * The normalization only maps variant codepoints used in IndoPak text to their
+ * standard Arabic equivalents so that the tajweed rules can detect them.
+ *
+ * IMPORTANT: The normalized text is used ONLY for rule detection (position finding).
+ * The original text is preserved for display output — positions map 1:1 since
+ * every replacement is exactly one codepoint → one codepoint (same string length).
+ */
+function normalizeForTajweed(text: string): string {
+  // Each mapping: IndoPak variant → standard Arabic equivalent
+  return text
+    .replace(/\u06C1/g, '\u0647')   // Heh Goal → Heh
+    .replace(/\u06BE/g, '\u0647')   // Heh Doachashmee → Heh
+    .replace(/\u06CC/g, '\u064A')   // Farsi Yeh → Arabic Yeh
+    .replace(/\u06A9/g, '\u0643')   // Keheh → Kaf
+    .replace(/\u06C3/g, '\u0629');  // Teh Marbuta Goal → Teh Marbuta
+}
+
+/**
  * Apply tajweed colour highlighting to a piece of Arabic text.
  *
  * @param text  The Arabic text (Uthmani or Indopak)
@@ -53,11 +72,15 @@ export function applyTajweed(
 ): string {
   if (!text || text.trim().length === 0) return text;
 
-  // 1. Collect results from every rule
+  // Normalize text for rule analysis (IndoPak → standard Arabic mapping).
+  // Positions are preserved 1:1, so results from normalized text apply to original.
+  const normalized = normalizeForTajweed(text);
+
+  // 1. Collect results from every rule (using normalized text)
   const results: TajweedResult[] = [];
   for (const rule of MADANI_RULES) {
     try {
-      results.push(...rule.checkAyah(text));
+      results.push(...rule.checkAyah(normalized));
     } catch {
       // If one rule fails, others still work
     }
@@ -69,7 +92,7 @@ export function applyTajweed(
   sortResults(results);
   fixOverlapping(results);
 
-  // 3. Build HTML output
+  // 3. Build HTML output (using ORIGINAL text for display, normalized positions)
   const buf: string[] = [];
   let cursor = 0;
 
@@ -148,15 +171,15 @@ function escapeHtml(str: string): string {
  * Human-readable names for the legend.
  */
 export const TAJWEED_LEGEND: { type: ResultType; label: string; labelAr: string; color: string }[] = [
-  { type: ResultType.GHUNNA,                  label: 'Ghunnah',         labelAr: 'غنہ',    color: '#43A047' },
-  { type: ResultType.IKHFA,                   label: 'Ikhfa',           labelAr: 'اخفا',   color: '#EACE00' },
-  { type: ResultType.IDGHAM_WITH_GHUNNA,      label: 'Idgham',          labelAr: 'ادغام',  color: '#43A047' },
-  { type: ResultType.IQLAB,                   label: 'Iqlab',           labelAr: 'اقلاب',  color: '#43A047' },
-  { type: ResultType.QALQALAH,                label: 'Qalqalah',       labelAr: 'قلقلہ',  color: '#0091EA' },
-  { type: ResultType.MEEM_IKHFA,              label: 'Meem Ikhfa',     labelAr: 'اخفا شفوی', color: '#EACE00' },
-  { type: ResultType.MEEM_IDGHAM,             label: 'Meem Idgham',    labelAr: 'ادغام شفوی', color: '#43A047' },
-  { type: ResultType.MAAD_LONG,               label: 'Madd (6)',       labelAr: 'مد لازم', color: '#B71C1C' },
-  { type: ResultType.MAAD_MUNFASSIL_MUTASSIL, label: 'Madd (4-5)',     labelAr: 'مد متصل/منفصل', color: '#F44336' },
-  { type: ResultType.MAAD_SUKOON,             label: 'Madd (2-6)',     labelAr: 'مد عارض', color: '#FB8C00' },
+  { type: ResultType.GHUNNA,                  label: 'Ghunnah',               labelAr: 'غنّہ',              color: '#43A047' },
+  { type: ResultType.IKHFA,                   label: 'Ikhfa',                 labelAr: 'اخفاء',             color: '#EACE00' },
+  { type: ResultType.IDGHAM_WITH_GHUNNA,      label: 'Idgham',                labelAr: 'ادغام',             color: '#43A047' },
+  { type: ResultType.IQLAB,                   label: 'Iqlab',                 labelAr: 'اقلاب',             color: '#43A047' },
+  { type: ResultType.QALQALAH,                label: 'Qalqalah',              labelAr: 'قلقلہ',             color: '#0091EA' },
+  { type: ResultType.MEEM_IKHFA,              label: 'Ikhfa Shafawi',         labelAr: 'اخفاء شفوی',        color: '#EACE00' },
+  { type: ResultType.MEEM_IDGHAM,             label: 'Idgham Shafawi',        labelAr: 'ادغام شفوی',        color: '#43A047' },
+  { type: ResultType.MAAD_LONG,               label: 'Madd Lazim (6)',        labelAr: 'مد لازم',           color: '#B71C1C' },
+  { type: ResultType.MAAD_MUNFASSIL_MUTASSIL, label: 'Madd Muttasil (4-5)',   labelAr: 'مد متصل/منفصل',     color: '#F44336' },
+  { type: ResultType.MAAD_SUKOON,             label: 'Madd \'Aarid (2-6)',    labelAr: 'مد عارض للسکون',    color: '#FB8C00' },
 ];
 

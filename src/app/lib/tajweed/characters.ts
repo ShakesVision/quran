@@ -1,6 +1,12 @@
 /**
  * Arabic character constants used in Tajweed rule detection.
  * Ported from https://github.com/quran/tajweed (Java → TypeScript)
+ *
+ * Extended for IndoPak (archive) text support:
+ *   - Heh Goal (U+06C1), Heh Doachashmee (U+06BE)
+ *   - Farsi Yeh (U+06CC), Keheh (U+06A9)
+ *   - End-of-Ayah mark (U+06DD), Rub El Hizb (U+06DE)
+ *   - Additional small/ornamental markers
  */
 
 // ─── Diacritics / Tashkeel ────────────────────────────────────────
@@ -12,7 +18,7 @@ export const DAMMA          = 0x064F;
 export const KASRA          = 0x0650;
 export const SUKUN          = 0x0652;
 export const SHADDA         = 0x0651;
-export const SMALL_ALEF     = 0x0670;   // superscript alef
+export const SMALL_ALEF     = 0x0670;   // superscript alef (dagger alef)
 export const JAZM           = 0x06E1;   // naskh sukun
 export const MAAD_MARKER    = 0x0653;
 export const SMALL_HIGH_MEEM_ISOLATED = 0x06E2;
@@ -24,6 +30,12 @@ export const SMALL_HIGH_MEEM      = 0x06D8;
 export const SMALL_LAAM_ALEF      = 0x06D9;
 export const SMALL_HIGH_JEEM      = 0x06DA;
 export const SMALL_THREE_DOTS     = 0x06DB;
+
+// ─── Quranic meta marks (NOT letters, NOT diacritics) ──────────────
+export const END_OF_AYAH          = 0x06DD; // ۝ Arabic End of Ayah
+export const RUB_EL_HIZB          = 0x06DE; // ۞ Arabic Start of Rub El Hizb
+export const SAJDAH_MARK          = 0x06E9; // ۩ Place of Sajdah
+export const SMALL_HIGH_SEEN      = 0x06DC; // ۜ (used in some Indopak texts)
 
 // ─── Letters ───────────────────────────────────────────────────────
 export const ALEF           = 0x0627;
@@ -54,6 +66,13 @@ export const HAMZA          = 0x0621;
 
 export const TATWEEL        = 0x0640;
 
+// ─── IndoPak letter variants (mapped to standard equivalents by normalizeForTajweed) ──
+export const HEH_GOAL       = 0x06C1;   // ہ – used for ه in archive
+export const HEH_DOACHASHMEE = 0x06BE;  // ھ – used in some IndoPak
+export const FARSI_YEH      = 0x06CC;   // ی – used for ي in IndoPak
+export const KEHEH          = 0x06A9;   // ک – used for ك in IndoPak
+export const TEH_MARBUTA_GOAL = 0x06C3; // ۃ – used for ة in IndoPak
+
 // ─── Maad-related small letters ────────────────────────────────────
 export const ALEF_SUGHRA    = 0x0670;
 export const WAW_SUGHRA     = 0x06E5;
@@ -71,11 +90,36 @@ export function isDiaMark(c: number): boolean {
 export function isEndMark(c: number): boolean {
   return c === SMALL_SAAD_LAAM_ALEF || c === SMALL_QAAF_LAAM_ALEF ||
     c === SMALL_HIGH_MEEM || c === SMALL_LAAM_ALEF ||
-    c === SMALL_HIGH_JEEM || c === SMALL_THREE_DOTS;
+    c === SMALL_HIGH_JEEM || c === SMALL_THREE_DOTS ||
+    c === END_OF_AYAH || c === RUB_EL_HIZB ||
+    c === SAJDAH_MARK || c === SMALL_HIGH_SEEN;
 }
 
+/**
+ * True if c is a "real" Arabic base letter (something that carries diacritics
+ * and participates in tajweed rules). Excludes:
+ * - diacritics, end/stop marks, spaces, tatweel
+ * - Quranic meta marks (end-of-ayah ۝, rub-el-hizb ۞, etc.)
+ * - Ayah number digits (U+0660–U+066F, U+06F0–U+06F9)
+ */
 export function isLetter(c: number): boolean {
-  return !isEndMark(c) && !isDiaMark(c) && c !== 0x20 && c !== TATWEEL;
+  if (isEndMark(c) || isDiaMark(c)) return false;
+  if (c === 0x20 || c === TATWEEL) return false;
+  // Exclude Arabic-Indic digits (٠١٢...٩) and Extended Arabic-Indic digits (۰۱۲...۹)
+  if (c >= 0x0660 && c <= 0x0669) return false;
+  if (c >= 0x06F0 && c <= 0x06F9) return false;
+  // Exclude miscellaneous Quranic ornaments/symbols
+  if (c === END_OF_AYAH || c === RUB_EL_HIZB || c === SAJDAH_MARK) return false;
+  // Exclude small high signs used as annotations (U+06D6–U+06ED range not caught above)
+  if (c >= 0x06E2 && c <= 0x06ED) return false;
+  // Must be in Arabic Unicode blocks (0600–06FF, 08A0–08FF, FB50–FDFF, FE70–FEFF)
+  if ((c >= 0x0621 && c <= 0x064A) || // standard Arabic letters
+      (c >= 0x0671 && c <= 0x06D3) || // extended Arabic letters (includes IndoPak variants)
+      (c >= 0x06FA && c <= 0x06FC) || // additional
+      c === 0x066E || c === 0x066F) {
+    return true;
+  }
+  return false;
 }
 
 export function isTanween(c: number): boolean {

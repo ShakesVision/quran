@@ -280,6 +280,43 @@
         <ion-icon name="stats-chart"></ion-icon>
         <span>Progress</span>
       </div>
+      <div class="tool-card" (click)="showChangelog()">
+        <ion-icon name="git-commit-outline"></ion-icon>
+        <span>Changelog</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Changelog Overlay -->
+  <div *ngIf="changelogOpen" class="changelog-overlay" (click)="closeChangelog()">
+    <div class="changelog-panel" (click)="$event.stopPropagation()">
+      <div class="changelog-header">
+        <h2><ion-icon name="git-branch-outline"></ion-icon> Changelog</h2>
+        <ion-button fill="clear" size="small" (click)="closeChangelog()">
+          <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+      <div class="changelog-subtitle">Recent updates from <a href="https://github.com/ShakesVision/quran" target="_blank">GitHub</a></div>
+      
+      <div *ngIf="changelogLoading" class="changelog-loading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Loading commits...</span>
+      </div>
+
+      <div *ngIf="!changelogLoading" class="changelog-body">
+        <div *ngFor="let group of groupedChangelog" class="changelog-date-group">
+          <div class="changelog-date-label">{{group.displayDate}}</div>
+          <div *ngFor="let item of group.items" class="changelog-item">
+            <div class="commit-dot"></div>
+            <div class="commit-content">
+              <p class="commit-msg">{{item.message.split('\n')[0]}}</p>
+              <span class="commit-meta" *ngIf="item.sha">
+                <code>{{item.sha}}</code> · {{item.author}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

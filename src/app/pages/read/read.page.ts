@@ -433,8 +433,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     // Boundary check: don't go below 1 or above total pages
     if (nextPage < 1 || nextPage > this.pages.length) return;
 
-    // Immediately hide text to prevent raw-text flicker before tatweel
-    if (this.enableTatweel) {
+    // Immediately hide text to prevent raw-text flicker before tatweel/tajweed
+    if (this.enableTatweel || this.tajweedMode) {
       this.preparingText = true;
     }
 
@@ -461,7 +461,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.getFirstAndLastAyahNumberOnPage();
     if (this.inlineTransMode) this.loadInlineTranslations();
     if (this.wbwMode) this.loadWbwTranslations();
-    if (this.tajweedMode) this.loadTajweedText();
+    // Tajweed is now handled inside applyTatweelToLines() called from adjustFontsize()
     setTimeout(() => {
       this.adjustFontsize();
     }, 50);
@@ -1170,11 +1170,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   toggleTajweedMode(enabled: boolean) {
     console.log('[Toggle] Tajweed mode:', enabled, 'lines:', this.lines?.length, 'page:', this.currentPage);
     this.tajweedMode = enabled;
-    if (enabled) {
-      this.loadTajweedText();
-    } else {
-      this.tajweedLines = [];
-    }
+    // Re-render all lines through the unified pipeline (handles tatweel + tajweed)
+    this.applyTatweelToLines();
     this.changeDetectorRef.detectChanges();
   }
 
@@ -2258,8 +2255,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   gotoPageNum(p) {
     if (!p || p > this.pages?.length || p < 1) return;
 
-    // Immediately hide text to prevent raw-text flicker before tatweel
-    if (this.enableTatweel) {
+    // Immediately hide text to prevent raw-text flicker before tatweel/tajweed
+    if (this.enableTatweel || this.tajweedMode) {
       this.preparingText = true;
     }
 
@@ -2271,7 +2268,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.getFirstAndLastAyahNumberOnPage();
     if (this.inlineTransMode) this.loadInlineTranslations();
     if (this.wbwMode) this.loadWbwTranslations();
-    if (this.tajweedMode) this.loadTajweedText();
+    // Tajweed is now handled inside applyTatweelToLines() called from adjustFontsize()
     setTimeout(() => {
       this.adjustFontsize();
     }, 50);
@@ -2799,6 +2796,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   toggleTatweel(enabled: boolean) {
     this.enableTatweel = enabled;
+    // Unified pipeline handles both tatweel and tajweed
     this.applyTatweelToLines();
   }
 
@@ -2998,51 +2996,46 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private applyTatweelToLines() {
-    const lines = document.querySelectorAll(".line span");
-    console.log(`[Tatweel] applyTatweelToLines called, found ${lines.length} line spans, enableTatweel=${this.enableTatweel}`);
+    const lines = document.querySelectorAll(".line span.arabic-line-text");
+    console.log(`[Tatweel] applyTatweelToLines called, found ${lines.length} line spans, enableTatweel=${this.enableTatweel}, tajweedMode=${this.tajweedMode}`);
     lines.forEach((spanEl: HTMLElement) => {
+      // data-raw-text is set by Angular's [attr.data-raw-text]="line" binding.
+      // Fallback to innerText (stripping any existing HTML) if somehow missing.
       const rawText =
         spanEl.getAttribute("data-raw-text") ?? spanEl.innerText ?? "";
 
-      if (!spanEl.getAttribute("data-raw-text")) {
-        spanEl.setAttribute("data-raw-text", rawText);
+      if (!rawText.trim()) return;
+
+      // ── Compute display text (with or without tatweel) ──
+      let displayText = rawText;
+
+      if (this.enableTatweel && this.shouldApplyTatweel(rawText)) {
+        const parent = spanEl.parentElement as HTMLElement;
+        if (parent) {
+          const computed = window.getComputedStyle(spanEl);
+          const fontProp = computed.font || `${computed.fontSize} ${computed.fontFamily}`;
+          const containerWidth = parent.clientWidth;
+          const currentWidth = this.textWidth(rawText, fontProp);
+
+          if (currentWidth < containerWidth) {
+            const tatweelWidth = this.textWidth("ـ", fontProp);
+            if (tatweelWidth > 0) {
+              const deficit = containerWidth - currentWidth;
+              const tatweelCount = Math.floor(deficit / tatweelWidth);
+              if (tatweelCount > 0) {
+                displayText = this.insertTatweel(rawText, tatweelCount);
+              }
+            }
+          }
+        }
       }
 
-      if (!this.enableTatweel) {
-        spanEl.innerText = rawText;
-        return;
+      // ── Render: apply tajweed highlighting if active ──
+      if (this.tajweedMode) {
+        spanEl.innerHTML = applyTajweed(displayText, 'class');
+      } else {
+        spanEl.innerText = displayText;
       }
-
-      if (!this.shouldApplyTatweel(rawText)) {
-        spanEl.innerText = rawText;
-        return;
-      }
-
-      const parent = spanEl.parentElement as HTMLElement;
-      if (!parent) return;
-      const computed = window.getComputedStyle(spanEl);
-      const fontProp = computed.font || `${computed.fontSize} ${computed.fontFamily}`;
-      const containerWidth = parent.clientWidth;
-      const currentWidth = this.textWidth(rawText, fontProp);
-      if (currentWidth >= containerWidth) {
-        spanEl.innerText = rawText;
-        return;
-      }
-
-      const tatweelWidth = this.textWidth("ـ", fontProp);
-      if (!tatweelWidth || tatweelWidth <= 0) {
-        spanEl.innerText = rawText;
-        return;
-      }
-
-      const deficit = containerWidth - currentWidth;
-      const tatweelCount = Math.floor(deficit / tatweelWidth);
-      if (tatweelCount <= 0) {
-        spanEl.innerText = rawText;
-        return;
-      }
-
-      spanEl.innerText = this.insertTatweel(rawText, tatweelCount);
     });
   }
 

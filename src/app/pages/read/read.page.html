@@ -129,8 +129,8 @@
         (contextmenu)="onLineContextMenu($event,i)">
         <div *ngIf="hasIndicator(line, i)" class="ruku-wrapper"
           [innerHTML]="addIndicators(line,i)"></div>
-        <span class="arabic-line-text" *ngIf="!tajweedMode"> {{line}} </span>
-        <span class="arabic-line-text tajweed-text" *ngIf="tajweedMode" [innerHTML]="tajweedLines[i] || line"></span>
+        <span class="arabic-line-text" [class.tajweed-text]="tajweedMode"
+              [attr.data-raw-text]="line">{{line}}</span>
         <span *ngIf="inlineTransMode && inlineTranslations[i]" class="inline-translation"
           [ngClass]="{'ur': inlineTransLang==='ur'}">
           {{inlineTranslations[i]}}

@@ -346,6 +346,62 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.attachSelectionListeners();
     this.loadSavedTheme();
     this.loadTajweedColors();
+    this.loadSavedToggleSettings();
+  }
+
+  /**
+   * Load all persisted toggle settings from storage.
+   * Called once on init so the reader restores the user's last state.
+   */
+  private async loadSavedToggleSettings() {
+    try {
+      const [tajweed, tatweel, inline, wbw, inlineLang, fontSize, immersive] = await Promise.all([
+        this.storage.get('readerTajweedMode'),
+        this.storage.get('readerEnableTatweel'),
+        this.storage.get('readerInlineTransMode'),
+        this.storage.get('readerWbwMode'),
+        this.storage.get('readerInlineLang'),
+        this.storage.get('readerFontSize'),
+        this.storage.get('readerImmersive'),
+      ]);
+      // Tajweed: default true if never set
+      this.tajweedMode = tajweed !== null ? tajweed : true;
+      // Tatweel: default true if never set
+      this.enableTatweel = tatweel !== null ? tatweel : this.enableTatweel;
+      // Inline translation
+      if (inline !== null) this.inlineTransMode = inline;
+      // Word-by-word
+      if (wbw !== null) this.wbwMode = wbw;
+      // Inline language
+      if (inlineLang) this.inlineTransLang = inlineLang;
+      // Font size: restore saved value
+      if (fontSize !== null && !isNaN(fontSize)) {
+        const el: HTMLElement = document.querySelector('.content-wrapper');
+        if (el) {
+          el.style.setProperty('--reader-font-size', `${fontSize}px`);
+          this.pageFontSize = Math.round(fontSize).toString();
+        }
+      }
+      // Immersive mode
+      if (immersive === true) {
+        this.isImmersive = true;
+        document.body.classList.add('immersive-mode');
+      }
+
+      // Trigger re-render if needed
+      if (this.tajweedMode || this.enableTatweel) {
+        setTimeout(() => this.applyTatweelToLines(), 100);
+      }
+      if (this.inlineTransMode) {
+        setTimeout(() => this.loadInlineTranslations(), 200);
+      }
+      if (this.wbwMode) {
+        setTimeout(() => this.loadWbwTranslations(), 300);
+      }
+      this.changeDetectorRef.detectChanges();
+    } catch (e) {
+      console.warn('[Settings] Failed to load saved toggle settings:', e);
+    }
   }
 
   async getBookmark() {
@@ -733,6 +789,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const verseKey = this.getVerseKeyForLine(lineIndex);
+    console.log('[Audio] Play from line', lineIndex, 'verseKey:', verseKey);
     if (!verseKey) {
       this.surahService.presentToastWithOptions(
         'Could not determine ayah for this line',
@@ -747,11 +804,19 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (!ayahList) return;
 
     const { verseIdList, verseIdListForAudio } = ayahList;
-    const startIdx = verseIdList.indexOf(verseKey);
+    console.log('[Audio] verseIdList:', verseIdList, 'looking for:', verseKey);
+    let startIdx = verseIdList.indexOf(verseKey);
+
+    // If exact match fails, find the nearest verse in the list
     if (startIdx === -1) {
-      // Verse not in the page list — just play the single verse
-      this.playSingleVerse(verseKey);
-      return;
+      const [vSurah, vAyah] = verseKey.split(':').map(Number);
+      // Try to find the closest verse on or after the clicked line's verse
+      startIdx = verseIdList.findIndex(id => {
+        const [s, a] = id.split(':').map(Number);
+        return s === vSurah && a >= vAyah;
+      });
+      if (startIdx === -1) startIdx = 0; // fallback to start of page
+      console.log('[Audio] Exact match failed, using nearest index:', startIdx);
     }
 
     // Slice lists from the clicked line's ayah onwards
@@ -863,6 +928,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   toggleInlineTranslation(enabled: boolean) {
     console.log('[Toggle] Inline translation:', enabled, 'surahInfo:', !!this.surahInfo, 'lines:', this.lines?.length, 'page:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     this.inlineTransMode = enabled;
+    this.storage.set('readerInlineTransMode', enabled);
     if (enabled) {
       this.loadInlineTranslations();
     } else {
@@ -874,6 +940,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Reload inline translations (e.g., when language changes)
    */
   reloadInlineTranslations() {
+    this.storage.set('readerInlineLang', this.inlineTransLang);
     if (this.inlineTransMode) {
       this.loadInlineTranslations();
     }
@@ -999,6 +1066,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   toggleWbwMode(enabled: boolean) {
     console.log('[Toggle] WBW mode:', enabled, 'surahInfo:', !!this.surahInfo, 'lines:', this.lines?.length, 'page:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     this.wbwMode = enabled;
+    this.storage.set('readerWbwMode', enabled);
     if (enabled) {
       this.loadWbwTranslations();
     } else {
@@ -1224,6 +1292,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   toggleTajweedMode(enabled: boolean) {
     console.log('[Toggle] Tajweed mode:', enabled, 'lines:', this.lines?.length, 'page:', this.currentPage);
     this.tajweedMode = enabled;
+    this.storage.set('readerTajweedMode', enabled);
     // Re-render all lines through the unified pipeline (handles tatweel + tajweed)
     this.applyTatweelToLines();
     this.changeDetectorRef.detectChanges();
@@ -1662,7 +1731,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Looks at the current line and subsequent lines for the nearest ayah end.
    */
   private getNextAyahNumberFromMetadata(lineNumber: number): string | null {
-    const pageIdx = this.currentPage; // 1-indexed in this.pages
+    const pageIdx = this.getQuranComPageIndex();
     const ayahsOnPage = this.quranDataService.getQuranComAyahsForPage(pageIdx);
     if (!ayahsOnPage || ayahsOnPage.length === 0) return null;
 
@@ -1691,7 +1760,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Get surah number from metadata for qurancom.
    */
   private getSurahNumberFromMetadata(lineNumber: number): number | null {
-    const pageIdx = this.currentPage;
+    const pageIdx = this.getQuranComPageIndex();
     const ayahsOnPage = this.quranDataService.getQuranComAyahsForPage(pageIdx);
     if (!ayahsOnPage || ayahsOnPage.length === 0) return null;
 
@@ -1798,6 +1867,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (!isNaN(nextSize)) {
       el.style.setProperty("--reader-font-size", `${nextSize}px`);
       this.pageFontSize = Math.round(nextSize).toString();
+      this.storage.set('readerFontSize', nextSize);
       this.applyTatweelToLines();
     }
   }
@@ -2148,6 +2218,21 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   toggleMuhammadiFont() {
     document.querySelector(".page-wrapper").classList.toggle("ar2");
   }
+  /**
+   * Get the correct page index for qurancom ayah map lookup.
+   * Full mushaf mode has a title page at index 0, so currentPage is off by 1.
+   * Juz/Surah modes use currentPageCalculated (global mushaf page).
+   */
+  private getQuranComPageIndex(): number {
+    if (this.isCompleteMushaf) {
+      // Full mushaf: pages[0]=title, pages[1]=mushaf page 1
+      // quranComAyahMap index 1 = mushaf page 1
+      return this.currentPage - 1;
+    }
+    // Juz/Surah: use calculated global mushaf page
+    return this.currentPageCalculated || this.currentPage;
+  }
+
   getFirstAndLastAyahNumberOnPage(): FirstLastAyah {
     // Skip the title page (page 1 of a complete mushaf has no ayahs)
     if (this.isCompleteMushaf && this.currentPage === 1)
@@ -2156,7 +2241,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (!this.lines || this.lines.length === 0) return;
 
     // ── Qurancom: use metadata (word.text has no ۝+digits) ──
-    const qcAyahs = this.quranDataService.getQuranComAyahsForPage(this.currentPage);
+    const qcAyahs = this.quranDataService.getQuranComAyahsForPage(this.getQuranComPageIndex());
     if (qcAyahs && qcAyahs.length > 0) {
       const first = qcAyahs[0];
       const last = qcAyahs[qcAyahs.length - 1];
@@ -2204,14 +2289,25 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     let firstVerseNum = parseInt(this.getEnNumber(firstAyahPart));
     if (isNaN(firstVerseNum)) return null;
 
-    // --- Last ayah ---
-    const lastLine = this.lines[this.lines.length - 1];
-    if (!lastLine) return null;
-    let lastLineWordsArr = lastLine.trim().split(" ");
-    const lastWordPart = lastLineWordsArr[lastLineWordsArr.length - 1]?.split(
-      this.surahService.diacritics.AYAH_MARK
-    )[1];
-    let lastVerseNum = parseInt(this.getEnNumber(lastWordPart));
+    // --- Last ayah: scan backwards through all lines to find last ayah mark ---
+    let lastVerseNum = NaN;
+    for (let li = this.lines.length - 1; li >= 0; li--) {
+      const line = this.lines[li];
+      if (!line) continue;
+      const words = line.trim().split(" ");
+      // Scan words from end to find the last ayah mark on this line
+      for (let wi = words.length - 1; wi >= 0; wi--) {
+        if (re.test(words[wi])) {
+          const ayahPart = words[wi].split(this.surahService.diacritics.AYAH_MARK)[1];
+          const parsed = parseInt(this.getEnNumber(ayahPart));
+          if (!isNaN(parsed)) {
+            lastVerseNum = parsed;
+            break;
+          }
+        }
+      }
+      if (!isNaN(lastVerseNum)) break;
+    }
     if (isNaN(lastVerseNum)) lastVerseNum = firstVerseNum; // fallback
 
     let firstSurahNum = this.getCorrectedSurahNumberWithRespectTo(0);
@@ -2492,6 +2588,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
   playAudio(lang = "en") {
     const ayahList = this.getAyahsListOnPage();
+    console.log('[Audio] playAudio called, verseIdList:', ayahList?.verseIdList, 'currentPage:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     if (!ayahList || !ayahList.verseIdList?.length) {
       this.surahService.presentToastWithOptions(
         'Could not determine ayahs on this page for audio playback.',
@@ -2627,6 +2724,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     verseIdListForAudio: Array<string>;
   } | null {
     const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
+    console.log('[Audio] getAyahsListOnPage firstAndLast:', JSON.stringify(firstAndLast));
     if (!firstAndLast || !firstAndLast.first || !firstAndLast.last) {
       return { verseIdList: [], verseIdListForAudio: [] };
     }
@@ -2639,9 +2737,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       return parseInt(s.index) == firstAndLast.last.lastSurahNum;
     });
     if (!firstSurahInfo) {
+      console.warn('[Audio] No surahInfo found for surah', firstAndLast.first.firstSurahNum);
       return { verseIdList: [], verseIdListForAudio: [] };
     }
-    console.log(firstSurahInfo, lastSurahInfo);
+    console.log('[Audio] firstSurah:', firstSurahInfo?.index, 'lastSurah:', lastSurahInfo?.index);
 
     let counter = 0;
     for (
@@ -2850,6 +2949,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   toggleTatweel(enabled: boolean) {
     this.enableTatweel = enabled;
+    this.storage.set('readerEnableTatweel', enabled);
     // Unified pipeline handles both tatweel and tajweed
     this.applyTatweelToLines();
   }
@@ -3337,8 +3437,33 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Toggle immersive mode for full-screen reading
    */
+  async showFooterOverflow() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Page Navigation',
+      buttons: [
+        {
+          text: 'Jump to First Page',
+          icon: 'play-skip-back-outline',
+          handler: () => { this.gotoPageNum(this.pages?.length); },
+        },
+        {
+          text: 'Jump to Last Page',
+          icon: 'play-skip-forward-outline',
+          handler: () => { this.gotoPageNum(1); },
+        },
+        {
+          text: 'Cancel',
+          icon: 'close-outline',
+          role: 'cancel',
+        },
+      ],
+    });
+    await actionSheet.present();
+  }
+
   toggleImmersiveMode() {
     this.isImmersive = !this.isImmersive;
+    this.storage.set('readerImmersive', this.isImmersive);
     if (this.isImmersive) {
       document.body.classList.add('immersive-mode');
     } else {

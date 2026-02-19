@@ -2,8 +2,9 @@ import { HttpClient } from "@angular/common/http";
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
 import { AlertController, GestureController, Gesture, ModalController, Platform } from "@ionic/angular";
 import { Subscription } from "rxjs";
-import { finalize, map } from "rxjs/operators";
+import { finalize, map, take } from "rxjs/operators";
 import { SurahService } from "../services/surah.service";
+import { MorphologyService, WordMorphology } from "../services/morphology.service";
 import { QuranData } from "src/assets/data/quran-data";
 import { Storage } from "@ionic/storage-angular";
 
@@ -69,6 +70,11 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   isConfigMode = false;
   wbwExpanded = false;
 
+  // Morphology on word tap
+  selectedWordIndex: number | null = null;
+  selectedWordMorphology: WordMorphology | null = null;
+  morphologyLoading = false;
+
   // Organized translation blocks
   translations: TranslationDisplay[] = [];
 
@@ -89,7 +95,8 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     private alertController: AlertController,
     private storage: Storage,
     private gestureCtrl: GestureController,
-    private platform: Platform
+    private platform: Platform,
+    private morphologyService: MorphologyService
   ) {}
 
   async ngOnInit() {
@@ -163,9 +170,47 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   playWord(word: any) {
-    const url = `${this.baseurl}${word.audio_url}`;
-    const audio = new Audio(url);
-    audio.play();
+    if (word.audio_url) {
+      const url = `${this.baseurl}${word.audio_url}`;
+      const audio = new Audio(url);
+      audio.play().catch(() => {});
+    }
+  }
+
+  /**
+   * Show morphology for a word in the arabic-card.
+   * The word object from the API has position/location data.
+   */
+  onArabicWordClick(word: any, index: number) {
+    // Play audio
+    this.playWord(word);
+
+    // Toggle morphology for this word
+    if (this.selectedWordIndex === index) {
+      this.selectedWordIndex = null;
+      this.selectedWordMorphology = null;
+      return;
+    }
+
+    this.selectedWordIndex = index;
+    this.selectedWordMorphology = null;
+    this.morphologyLoading = true;
+
+    // Extract surah:ayah:word from word position
+    const [surah, ayah] = this.verse.verse_key.split(':').map(Number);
+    const wordPosition = word.position || (index + 1);
+
+    this.morphologyService.getWordMorphology(surah, ayah, wordPosition)
+      .pipe(take(1))
+      .subscribe(
+        (morph) => {
+          this.selectedWordMorphology = morph;
+          this.morphologyLoading = false;
+        },
+        () => {
+          this.morphologyLoading = false;
+        }
+      );
   }
 
   /**

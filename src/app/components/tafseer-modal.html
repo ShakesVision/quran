@@ -10,8 +10,40 @@
     <!-- Arabic Text Card -->
     <div class="arabic-card">
       <p class="verse ar-text rtl">
-        <span class="ayah-word" *ngFor="let word of verse?.words" (click)="playWord(word)">{{ word.text }}</span>
+        <span class="ayah-word" *ngFor="let word of verse?.words; let wi = index"
+              [class.word-selected]="selectedWordIndex === wi"
+              (click)="onArabicWordClick(word, wi)">{{ word.text }}</span>
       </p>
+      <p class="word-tap-hint" *ngIf="!selectedWordMorphology && !morphologyLoading">
+        <ion-icon name="finger-print-outline" size="small"></ion-icon> Tap any word for morphology details
+      </p>
+      <!-- Morphology inline panel -->
+      <div class="morphology-inline" *ngIf="morphologyLoading">
+        <ion-spinner name="dots" color="primary"></ion-spinner>
+      </div>
+      <div class="morphology-inline" *ngIf="selectedWordMorphology">
+        <div class="morph-row" *ngIf="selectedWordMorphology.posLabel">
+          <span class="morph-label">POS</span><span class="morph-val">{{ selectedWordMorphology.posLabel }}</span>
+        </div>
+        <div class="morph-row" *ngIf="selectedWordMorphology.root">
+          <span class="morph-label">Root</span><span class="morph-val ar">{{ selectedWordMorphology.root }}</span>
+        </div>
+        <div class="morph-row" *ngIf="selectedWordMorphology.lemma">
+          <span class="morph-label">Lemma</span><span class="morph-val ar">{{ selectedWordMorphology.lemma }}</span>
+        </div>
+        <div class="morph-row" *ngIf="selectedWordMorphology.verbForm">
+          <span class="morph-label">Form</span><span class="morph-val">{{ selectedWordMorphology.verbForm }}</span>
+        </div>
+        <div class="morph-row" *ngIf="selectedWordMorphology.aspectLabel">
+          <span class="morph-label">Aspect</span><span class="morph-val">{{ selectedWordMorphology.aspectLabel }}</span>
+        </div>
+        <div class="morph-row" *ngIf="selectedWordMorphology.stateLabel">
+          <span class="morph-label">Case</span><span class="morph-val">{{ selectedWordMorphology.stateLabel }}</span>
+        </div>
+        <div class="morph-row" *ngIf="selectedWordMorphology.features">
+          <span class="morph-label">Features</span><span class="morph-val">{{ selectedWordMorphology.features }}</span>
+        </div>
+      </div>
       <div class="arabic-meta">
         <span *ngIf="sajdahMessage" class="sajdah-badge">
           <ion-icon name="warning-outline"></ion-icon> {{ sajdahMessage }}

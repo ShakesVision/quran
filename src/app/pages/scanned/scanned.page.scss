@@ -1,55 +1,202 @@
+// ─── Header ─────────────────────────────
 ion-header {
-  font-size: small;
-  height: 50px;
   ion-toolbar {
-    height: 50px;
+    --min-height: 44px;
   }
+
+  .quality-select {
+    font-size: 0.8rem;
+    --padding-start: 8px;
+    --padding-end: 4px;
+    max-width: 80px;
+  }
+}
+
+.source-toolbar {
+  --min-height: 40px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+
+  .source-select {
+    font-size: 0.85rem;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    width: 100%;
+    max-width: 100%;
+    color: var(--ion-color-primary);
+    font-weight: 500;
+  }
+}
+
+.nav-toolbar {
+  --min-height: 42px;
+  --padding-top: 0;
+  --padding-bottom: 4px;
+
   .header-controls {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    .juz-controls-wrapper {
+    justify-content: center;
+    gap: 16px;
+    padding: 0 12px;
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       position: relative;
-      .small-label {
-        font-size: x-small;
-        color: var(--ion-color-medium);
-        bottom: 0;
-        left: 7px;
+
+      .compact-input {
+        font-size: 0.85rem;
+        max-width: 60px;
+        text-align: center;
+        --padding-start: 4px;
+        --padding-end: 4px;
+        --padding-top: 2px;
+        --padding-bottom: 2px;
+        border: 1px solid var(--ion-color-light-shade);
+        border-radius: 8px;
+        background: var(--ion-color-light);
       }
-      .juz-controls {
-        display: flex;
-        .juz-section-dropdown {
-          width: 85px;
-        }
+
+      .control-label {
+        font-size: 0.6rem;
+        color: var(--ion-color-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 1px;
+      }
+    }
+
+    .juz-group {
+      flex-direction: row;
+      gap: 4px;
+      align-items: flex-start;
+
+      .section-select {
+        font-size: 0.8rem;
+        max-width: 70px;
+        --padding-start: 4px;
+        border: 1px solid var(--ion-color-light-shade);
+        border-radius: 8px;
+        background: var(--ion-color-light);
+      }
+
+      .control-label {
+        align-self: flex-end;
+        margin-bottom: 2px;
       }
     }
   }
 }
-.page-number-input {
-  max-width: 100px;
-  text-align: center;
-  background: var(--ion-color-light);
-  border-radius: 30px;
-}
-.btmNav {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: center;
-}
-.img-element {
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position-x: center;
-  height: 100%;
-  width: 100%;
-}
+
+// ─── Content ────────────────────────────
 .image-wrapper {
   display: flex;
   justify-content: center;
   height: 100%;
   direction: rtl;
+
+  .main-image {
+    height: calc(100vh - 140px);
+    min-width: 50vw;
+  }
+
   ion-img {
-    height: calc(100vh - 110px);
+    height: calc(100vh - 140px);
+  }
+}
+
+// ─── Error State ────────────────────────
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+  padding: 24px;
+
+  .error-icon {
+    font-size: 64px;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 48px;
+    color: var(--ion-color-medium);
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+}
+
+// ─── Footer ─────────────────────────────
+.footer-toolbar {
+  --min-height: 50px;
+}
+
+.footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  .page-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    padding: 0 12px;
+
+    .page-input {
+      max-width: 70px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      --padding-top: 4px;
+      --padding-bottom: 4px;
+    }
+
+    .page-total {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium);
+      white-space: nowrap;
+    }
+  }
+
+  ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+
+    ion-icon {
+      font-size: 24px;
+    }
   }
 }

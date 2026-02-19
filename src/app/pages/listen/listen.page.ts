@@ -9,13 +9,26 @@ import { SurahService } from "src/app/services/surah.service";
   styleUrls: ["./listen.page.scss"],
 })
 export class ListenPage implements OnInit {
+  // Hardcoded popular reciters as fallback
+  private readonly HARDCODED_RECITERS = [
+    { id: 7, name: 'Mishari Rashid al-`Afasy' },
+    { id: 2, name: 'Abdul-Rahman Al-Sudais' },
+    { id: 1, name: 'AbdulBaset AbdulSamad' },
+    { id: 3, name: 'Abdullah Basfar' },
+    { id: 5, name: 'Hani ar-Rifai' },
+    { id: 6, name: 'Mahmoud Khalil Al-Husary' },
+    { id: 4, name: 'Abu Bakr al-Shatri' },
+    { id: 10, name: 'Saud ash-Shuraim' },
+    { id: 9, name: 'Mohamed al-Tablawi' },
+    { id: 8, name: 'Sa`ud ash-Shuraym' },
+  ];
   ayahNumber: number;
   audioSrc: string;
   nowPlaying;
   media: HTMLAudioElement;
   spin: boolean = false;
-  qariId: number = 3;
-  selectedQariName: string = '';
+  qariId: number = 7;
+  selectedQariName: string = 'Al-Afasy';
   surahInfo = [];
   surahInfoCopy = [];
   reciters = [];
@@ -30,19 +43,25 @@ export class ListenPage implements OnInit {
       this.surahInfo = [...res];
       this.surahInfoCopy = [...res];
       this.surahService.surahInfo = [...res];
-      //assign media element too
-      this.media = <HTMLAudioElement>document.getElementById("audio");
     });
     this.fetchQariList();
   }
 
+  private getMediaEl(): HTMLAudioElement | null {
+    // Try ViewChild first, then fallback to DOM query
+    if (this.audioEl?.nativeElement) return this.audioEl.nativeElement;
+    return document.getElementById('audio') as HTMLAudioElement;
+  }
+
   get $player(): HTMLAudioElement {
-    return this.audioEl.nativeElement;
+    return this.audioEl?.nativeElement;
   }
 
   listen(s, targetEl: HTMLElement) {
     let num = s.index;
-    this.media.pause();
+    // Guard against null media element (audio element is inside *ngIf)
+    const media = this.getMediaEl();
+    if (media) media.pause();
     this.spin = true;
     // replace http with https in prod
     // this.audioSrc = `http://cdn.islamic.network/quran/audio/64/ar.abdurrahmaansudais/${ayahNumber}.mp3`;
@@ -51,12 +70,15 @@ export class ListenPage implements OnInit {
       this.spin = false;
       console.log(res);
       this.audioSrc = res.audio_file.audio_url;
-      this.media.src = this.audioSrc;
+      this.nowPlaying = s;
+      // Wait for Angular to render the audio element (inside *ngIf="nowPlaying")
       setTimeout(() => {
-        this.media.play();
-        console.log(targetEl.parentElement);
-        this.nowPlaying = s;
-      }, 150);
+        const el = this.getMediaEl();
+        if (el) {
+          el.src = this.audioSrc;
+          el.play();
+        }
+      }, 200);
     });
   }
 
@@ -80,10 +102,23 @@ export class ListenPage implements OnInit {
     });
   }
   fetchQariList() {
-    this.surahService.fetchQariList().subscribe((res: any) => {
-      console.log(res);
-      this.reciters = res.reciters;
-    });
+    this.surahService.fetchQariList().subscribe(
+      (res: any) => {
+        console.log(res);
+        this.reciters = res.reciters?.sort((a, b) => a.id - b.id) || this.HARDCODED_RECITERS;
+        this.updateSelectedQariName();
+      },
+      (error) => {
+        console.warn('Failed to fetch Qari list from API, using hardcoded list.', error);
+        this.reciters = this.HARDCODED_RECITERS;
+        this.updateSelectedQariName();
+      }
+    );
+  }
+
+  private updateSelectedQariName() {
+    const qari = this.reciters.find(r => r.id === this.qariId);
+    this.selectedQariName = qari?.name?.split(' ')[0] || 'Qaari';
   }
 
   qariSelect() {

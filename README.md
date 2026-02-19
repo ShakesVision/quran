@@ -29,7 +29,7 @@ Will be available on PlayStore soon.
 1. Clone the repository: `git clone https://github.com/your-repo-name.git`
 2. Install dependencies: `npm install`
 3. Build the application: `ionic build`
-4. Run the application: `ionic serve`
+4. Run the application: `ionic serve` or if causing issues `cd C:/Users/username/workspace/OTHER/quran && export PATH="/c/Users/username/AppData/Local/nvm/v18.10.0:$PATH" && npx ng serve --port 4200 2>&1`
 
 ## Contributing
 

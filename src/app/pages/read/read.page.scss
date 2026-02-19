@@ -578,14 +578,14 @@ ion-footer {
     justify-content: center;
     width: 100%;
 
-    .ruku-ain {
+    span.ruku-ain {
       font-size: clamp(18px, 4.5vw, 24px);
       font-family: "Traditional Arabic", serif;
       line-height: 1;
       color: var(--mushaf-gold, #C9A227);
     }
 
-    .ruku-ayah-count {
+    span.ruku-ayah-count {
       position: absolute;
       font-size: clamp(6px, 1.5vw, 8px);
       font-family: sans-serif;
@@ -1444,7 +1444,6 @@ body.dark {
     }
   }
 }
-
 // ===========================================
 // REDUCED MOTION
 // ===========================================

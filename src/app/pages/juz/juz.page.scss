@@ -185,7 +185,7 @@ ion-content {
   ion-segment-button {
     --indicator-color: var(--ion-color-primary);
     --color: var(--ion-color-medium);
-    --color-checked: var(--ion-color-primary);
+    --color-checked: var(--ion-color-primary-contrast, #fff);
     font-weight: 500;
     text-transform: none;
     min-height: 40px;

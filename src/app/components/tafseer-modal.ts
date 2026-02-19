@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, Input, OnInit } from "@angular/core";
-import { AlertController, ModalController } from "@ionic/angular";
+import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
+import { AlertController, GestureController, Gesture, ModalController, Platform } from "@ionic/angular";
+import { Subscription } from "rxjs";
 import { finalize, map } from "rxjs/operators";
 import { SurahService } from "../services/surah.service";
 import { QuranData } from "src/assets/data/quran-data";
@@ -55,8 +56,9 @@ const TRANSLATION_ICONS: Record<number, string> = {
   templateUrl: "tafseer-modal.html",
   styleUrls: ["tafseer-modal.scss"],
 })
-export class TafseerModalComponent implements OnInit {
+export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() verseKey: string;
+  @ViewChild('swipeArea', { read: ElementRef }) swipeArea: ElementRef;
 
   verse: any;
   audioSrc: string;
@@ -74,17 +76,86 @@ export class TafseerModalComponent implements OnInit {
   private readonly STORAGE_KEY_TRANS_ORDER = 'ReaderTranslationOrder';
   translationOrder: TranslationOrder[] = [];
 
+  // Swipe gesture for navigating between ayahs
+  private swipeGesture: Gesture | null = null;
+
+  // Back button subscription
+  private backButtonSub: Subscription;
+
   constructor(
     private modalCtrl: ModalController,
     private httpClient: HttpClient,
     private surahService: SurahService,
     private alertController: AlertController,
-    private storage: Storage
+    private storage: Storage,
+    private gestureCtrl: GestureController,
+    private platform: Platform
   ) {}
 
   async ngOnInit() {
     await this.loadTranslationOrder();
     this.fetchTrans(this.verseKey);
+
+    // Intercept hardware/browser back button to dismiss modal instead of closing app
+    this.backButtonSub = this.platform.backButton.subscribeWithPriority(200, () => {
+      console.log('[TafseerModal] Back button intercepted → dismissing modal');
+      this.dismissModal();
+    });
+  }
+
+  ngAfterViewInit() {
+    // Wait for content to render, then try to set up gesture
+    setTimeout(() => this.setupSwipeGesture(), 500);
+  }
+
+  ngOnDestroy() {
+    if (this.swipeGesture) {
+      this.swipeGesture.destroy();
+      this.swipeGesture = null;
+    }
+    if (this.backButtonSub) {
+      this.backButtonSub.unsubscribe();
+    }
+  }
+
+  /**
+   * Setup horizontal swipe gesture for navigating between ayahs.
+   * Uses a wrapper div inside ion-content (shadow DOM blocks gestures on ion-content itself).
+   */
+  private setupSwipeGesture() {
+    const el = this.swipeArea?.nativeElement;
+    if (!el) {
+      console.warn('[TafseerModal] swipeArea element not found, retrying in 500ms...');
+      setTimeout(() => this.setupSwipeGesture(), 500);
+      return;
+    }
+
+    console.log('[TafseerModal] Setting up swipe gesture on', el.tagName, el.className);
+
+    this.swipeGesture = this.gestureCtrl.create({
+      el,
+      gestureName: 'tafseer-swipe',
+      threshold: 15,
+      onStart: () => {
+        console.log('[TafseerModal] Swipe started');
+      },
+      onEnd: (ev) => {
+        console.log('[TafseerModal] Swipe ended, deltaX:', ev.deltaX);
+        const SWIPE_THRESHOLD = 50;
+        if (ev.deltaX > SWIPE_THRESHOLD) {
+          // Swipe right → next ayah (RTL: right = forward in Arabic)
+          console.log('[TafseerModal] Swipe RIGHT → next ayah');
+          this.loadNextAyah(1);
+        } else if (ev.deltaX < -SWIPE_THRESHOLD) {
+          // Swipe left → previous ayah
+          console.log('[TafseerModal] Swipe LEFT → prev ayah');
+          this.loadNextAyah(-1);
+        }
+      },
+    }, true); // runInsideAngularZone = true
+
+    this.swipeGesture.enable(true);
+    console.log('[TafseerModal] Swipe gesture enabled');
   }
 
   dismissModal() {

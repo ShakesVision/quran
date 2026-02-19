@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { PopoverController } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { Subject } from "rxjs";
@@ -111,6 +111,7 @@ export class JuzPage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private storage: Storage,
     private httpClient: HttpClient,
     private surahService: SurahService,
@@ -478,6 +479,14 @@ export class JuzPage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     this.setupBookmark();
     this.updateMemorizeArray();
+
+    // Read tab query param for direct segment navigation
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab === 'surah') {
+      this.segment = `${ListType.SURAH}`;
+    } else if (tab === 'juz') {
+      this.segment = `${ListType.JUZ}`;
+    }
   }
   async ionViewWillLeave() {
     const popover = await this.popoverController.getTop();

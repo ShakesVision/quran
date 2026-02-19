@@ -46,8 +46,8 @@ export const AVAILABLE_TRANSLATIONS: TranslationResource[] = [
   { id: 819, name: 'Wahiduddin Khan', author: 'Maulana Wahiduddin Khan', language: 'urdu' },
 ];
 
-export const DEFAULT_EN_TRANSLATION_ID = 20; // Saheeh International
-export const DEFAULT_UR_TRANSLATION_ID = 97; // Maududi
+export const DEFAULT_EN_TRANSLATION_ID = 84; // Mufti Taqi Usmani
+export const DEFAULT_UR_TRANSLATION_ID = 158; // Dr. Israr Ahmad (Bayan-ul-Quran)
 
 export interface PageData {
   pageNumber: number;
@@ -1075,6 +1075,28 @@ export class QuranDataService {
   getTranslationName(resourceId: number): string {
     const t = AVAILABLE_TRANSLATIONS.find(tr => tr.id === resourceId);
     return t ? t.name : `Translation #${resourceId}`;
+  }
+
+  /**
+   * Fetch a specific translation for a verse on-demand from Quran.com API.
+   * Used when the selected translation is not in pre-cached data.
+   */
+  async fetchTranslationOnDemand(verseKey: string, translationId: number): Promise<string> {
+    try {
+      const url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?translations=${translationId}&translation_fields=resource_name`;
+      const res: any = await this.http.get(url).toPromise();
+      const translation = res?.verse?.translations?.[0];
+      if (translation?.text) {
+        return (translation.text || '')
+          .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
+          .replace(/<[^>]+>/g, '')
+          .trim();
+      }
+      return '';
+    } catch (err) {
+      console.warn(`[QuranDataService] On-demand translation fetch failed for ${verseKey}:${translationId}`, err);
+      return '';
+    }
   }
 
   /**

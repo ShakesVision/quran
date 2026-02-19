@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Component } from "@angular/core";
+import { Component, OnDestroy } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
 import { ActionSheetButton, ActionSheetController, AlertController, ModalController } from "@ionic/angular";
@@ -82,7 +82,7 @@ const ACHIEVEMENT_DEFS: Omit<Achievement, 'unlocked' | 'unlockedDate'>[] = [
   templateUrl: "home.page.html",
   styleUrls: ["home.page.scss"],
 })
-export class HomePage {
+export class HomePage implements OnDestroy {
   loading = false;
   currentMushaf: MushafOption | null = null;
 
@@ -144,6 +144,9 @@ export class HomePage {
       common: "",
     },
   };
+  banners: HomePageBanner[] = [];
+  currentBannerIndex = 0;
+  private bannerInterval: any;
   discoverReady = false;
   preCacheProgress = '';
 
@@ -218,11 +221,21 @@ export class HomePage {
     const url = `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/App/HomePageBanner.json`;
     this.httpClient
       .get(url, { responseType: "json" })
-      .subscribe((res: HomePageBanner) => {
-        this.banner = res;
-        this.banner.text = this.domSanatizer.bypassSecurityTrustHtml(
-          res.text as string
-        );
+      .subscribe((res: any) => {
+        // Support both single banner object and array of banners
+        const bannerArray: HomePageBanner[] = Array.isArray(res) ? res : [res];
+        this.banners = bannerArray.map(b => ({
+          ...b,
+          text: this.domSanatizer.bypassSecurityTrustHtml(b.text as string),
+        }));
+        if (this.banners.length > 0) {
+          this.banner = this.banners[0];
+          this.currentBannerIndex = 0;
+        }
+        // Auto-rotate if multiple banners
+        if (this.banners.length > 1) {
+          this.startBannerRotation();
+        }
         this.loading = false;
       });
 
@@ -231,6 +244,29 @@ export class HomePage {
 
     // Pre-cache Quran data in background for Discover and offline use
     this.startPreCache();
+  }
+
+  ngOnDestroy() {
+    if (this.bannerInterval) {
+      clearInterval(this.bannerInterval);
+    }
+  }
+
+  private startBannerRotation() {
+    if (this.bannerInterval) clearInterval(this.bannerInterval);
+    this.bannerInterval = setInterval(() => {
+      this.currentBannerIndex = (this.currentBannerIndex + 1) % this.banners.length;
+      this.banner = this.banners[this.currentBannerIndex];
+    }, 5000);
+  }
+
+  goToBanner(index: number) {
+    this.currentBannerIndex = index;
+    this.banner = this.banners[index];
+    // Reset the timer
+    if (this.banners.length > 1) {
+      this.startBannerRotation();
+    }
   }
 
   private async startPreCache() {
@@ -344,6 +380,7 @@ export class HomePage {
               this.todayPages += pages;
               this.allTimePagesRead += pages;
               await this.saveTodayLog();
+              await this.buildWeeklyData();
               await this.storage.set('all_time_pages', this.allTimePagesRead);
               await this.updateStreak();
               this.updateLevel();
@@ -380,6 +417,7 @@ export class HomePage {
             if (ayahs > 0) {
               this.todayAyahs += ayahs;
               await this.saveTodayLog();
+              await this.buildWeeklyData();
               await this.updateStreak();
               if (this.hifzProgress >= 100) {
                 this.showCompletionToast('Hifz target complete! Excellent!');
@@ -395,39 +433,44 @@ export class HomePage {
   async editTargets() {
     const alert = await this.alertController.create({
       header: 'Set Targets',
-      message: 'Configure your reading and memorization goals.',
+      message: 'Fields: ① Pages/day ② Ayahs/day (hifz) ③ Khatm count ④ Period (days)',
+      cssClass: 'target-alert-labeled',
       inputs: [
         {
           name: 'pages',
           type: 'number',
-          placeholder: 'Daily pages target',
+          placeholder: '📖 Pages/day',
           value: this.dailyPageTarget,
           min: 1,
           label: 'Pages/day',
+          attributes: { inputmode: 'numeric' },
         },
         {
           name: 'ayahs',
           type: 'number',
-          placeholder: 'Daily ayahs (hifz)',
+          placeholder: '🕌 Ayahs/day (hifz)',
           value: this.dailyAyahTarget,
           min: 1,
           label: 'Ayahs/day',
+          attributes: { inputmode: 'numeric' },
         },
         {
           name: 'khatm',
           type: 'number',
-          placeholder: 'Khatm target (e.g. 3)',
+          placeholder: '📚 Khatm target',
           value: this.khatmTarget,
           min: 1,
           label: 'Khatm target',
+          attributes: { inputmode: 'numeric' },
         },
         {
           name: 'days',
           type: 'number',
-          placeholder: 'Target period (days)',
+          placeholder: '📅 Period (days)',
           value: this.targetDays,
           min: 1,
           label: 'Period (days)',
+          attributes: { inputmode: 'numeric' },
         },
       ],
       buttons: [
@@ -529,58 +572,18 @@ export class HomePage {
   }
 
   private calculateRamadan() {
-    // Ramadan 2026: approx Feb 28 - Mar 29, 2026 (English dates, adjust for moon sighting)
-    const ramadanStart = new Date(2026, 1, 28); // Feb 28, 2026
-    const ramadanEnd = new Date(2026, 2, 29);   // Mar 29, 2026
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const msPerDay = 1000 * 60 * 60 * 24;
-
-    if (today >= ramadanStart && today <= ramadanEnd) {
-      // Currently in Ramadan
-      this.ramadanDaysLeft = Math.ceil((ramadanEnd.getTime() - today.getTime()) / msPerDay);
-      this.updateKhatmProjection(ramadanStart, ramadanEnd, today);
-    } else if (today < ramadanStart) {
-      const daysUntil = Math.ceil((ramadanStart.getTime() - today.getTime()) / msPerDay);
-      this.ramadanDaysLeft = 0;
-      this.khatmProjection = `Ramadan starts Feb 28 · ${daysUntil} day${daysUntil !== 1 ? 's' : ''} away`;
-      // Show countdown banner when close (within 14 days)
-      if (daysUntil <= 14) {
-        this.ramadanDaysLeft = daysUntil; // Show countdown
-      }
-    } else {
-      this.ramadanDaysLeft = 0;
-    }
-
-    // Always show khatm target info if targeting khatm
+    // Calculate khatm target projection (not Ramadan-specific)
     this.updateTargetProjection();
   }
 
-  private updateKhatmProjection(start: Date, end: Date, today: Date) {
-    const msPerDay = 1000 * 60 * 60 * 24;
+  private updateTargetProjection() {
     const totalPages = this.currentMushaf?.pages || 604;
     const totalPagesNeeded = totalPages * this.khatmTarget;
-    const daysElapsed = Math.ceil((today.getTime() - start.getTime()) / msPerDay) + 1;
-    const totalDays = Math.ceil((end.getTime() - start.getTime()) / msPerDay) + 1;
+    const pagesPerDay = Math.ceil(totalPagesNeeded / this.targetDays);
 
-    if (this.totalPagesRead > 0) {
-      const avgPerDay = this.totalPagesRead / daysElapsed;
-      const projectedTotal = avgPerDay * totalDays;
-      const khatms = (projectedTotal / totalPages).toFixed(1);
-      this.khatmProjection = `On pace for ${khatms} khatm · Target: ${this.khatmTarget}`;
-    } else {
-      const pagesPerDay = Math.ceil(totalPagesNeeded / this.ramadanDaysLeft);
-      this.khatmProjection = `Need ${pagesPerDay} pages/day for ${this.khatmTarget} khatm`;
-    }
-  }
-
-  private updateTargetProjection() {
-    // Show custom target projection if user set khatm > 1
-    if (this.khatmTarget > 1 && this.ramadanDaysLeft <= 0) {
-      const totalPages = this.currentMushaf?.pages || 604;
-      const totalPagesNeeded = totalPages * this.khatmTarget;
-      const pagesPerDay = Math.ceil(totalPagesNeeded / this.targetDays);
+    if (this.khatmTarget >= 1) {
       this.dailyPageTarget = pagesPerDay;
+      this.khatmProjection = `${this.khatmTarget} khatm in ${this.targetDays} days · ${pagesPerDay} pages/day`;
     }
   }
 

@@ -36,6 +36,12 @@
   --background: var(--ion-background-color);
 }
 
+// Swipe area wrapper — fills ion-content so gesture captures all touches
+.modal-swipe-area {
+  min-height: 100%;
+  touch-action: pan-y; // allow vertical scroll but let gesture controller handle X
+}
+
 .tafsir-content-wrapper {
   padding: 12px;
   max-width: 680px;

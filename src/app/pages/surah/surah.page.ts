@@ -39,11 +39,10 @@ export class SurahPage implements OnInit {
   }
 
   gotoRead(item) {
-    this.surahService.getSurahById(item.remoteId).subscribe((res) => {
-      console.log("my item: ", res);
-      this.surahService.currentSurah = res;
-      this.router.navigate(["/read"]);
-    });
+    // Navigate to the new URL-based surah reader route
+    const surahNo = item.surahNo || item.remoteId;
+    console.log('Navigating to surah:', surahNo, item);
+    this.router.navigate(['/surah', surahNo]);
   }
 
   async loginAlert() {

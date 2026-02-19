@@ -234,7 +234,7 @@
   <div class="tracking-section" *ngIf="trackingMode === 'surah'">
     <div class="section-header">
       <h2>Surah Progress</h2>
-      <ion-button routerLink="/browse" fill="clear" size="small">
+      <ion-button [routerLink]="['/browse']" [queryParams]="{tab: 'surah'}" fill="clear" size="small">
         <ion-icon name="grid-outline" slot="start"></ion-icon>
         Browse Surahs
       </ion-button>

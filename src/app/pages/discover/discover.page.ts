@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef 
 import { Router } from '@angular/router';
 import { Platform, GestureController, Gesture, ActionSheetController } from '@ionic/angular';
 import { AyahCard } from '../../models/ayah-card';
-import { QuranDataService, TranslationResource, AVAILABLE_TRANSLATIONS } from '../../services/quran-data.service';
+import { QuranDataService, TranslationResource } from '../../services/quran-data.service';
 
 @Component({
   selector: 'app-discover',
@@ -50,9 +50,9 @@ export class DiscoverPage implements OnInit, OnDestroy {
   async ngOnInit() {
     this.isLoading = true;
 
-    // Load translation options and current preferences (only cached ones for Discover)
-    this.englishTranslations = this.quranDataService.getAvailableTranslations('english', true);
-    this.urduTranslations = this.quranDataService.getAvailableTranslations('urdu', true);
+    // Load all translation options and current preferences
+    this.englishTranslations = this.quranDataService.getAvailableTranslations('english', false);
+    this.urduTranslations = this.quranDataService.getAvailableTranslations('urdu', false);
     this.selectedEnId = this.quranDataService.getSelectedEnTranslationId();
     this.selectedUrId = this.quranDataService.getSelectedUrTranslationId();
     this.currentEnName = this.quranDataService.getTranslationName(this.selectedEnId);
@@ -69,6 +69,9 @@ export class DiscoverPage implements OnInit, OnDestroy {
       this.cards = initialCards;
       this.isLoading = false;
       this.cdr.detectChanges();
+
+      // Fill any missing translations (for non-cached translation IDs)
+      this.fillMissingTranslations(this.cards).then(() => this.cdr.detectChanges());
 
       // Set up swipe gesture after view is ready
       setTimeout(() => this.setupGesture(), 100);
@@ -240,6 +243,8 @@ export class DiscoverPage implements OnInit, OnDestroy {
   private async loadMoreCards() {
     const newCards = await this.quranDataService.getRandomAyahCards(this.BUFFER_SIZE);
     this.cards = [...this.cards, ...newCards];
+    // Fill missing translations for new cards
+    this.fillMissingTranslations(newCards).then(() => this.cdr.detectChanges());
   }
 
   /**
@@ -256,7 +261,16 @@ export class DiscoverPage implements OnInit, OnDestroy {
     const card = this.currentCard;
     if (!card) return;
 
-    const shareText = `${card.arabicText}\n\n${card.englishTranslation}\n\n— Surah ${card.surahNameEn} (${card.verseKey})\n\nvia Quran Hifz Helper by Shakeeb Ahmad\nhttps://ur.shakeeb.in`;
+    // Build share text with Arabic + all available translations
+    let shareText = card.arabicText;
+    if (card.urduTranslation) {
+      shareText += `\n\n${card.urduTranslation}`;
+    }
+    if (card.englishTranslation) {
+      shareText += `\n\n${card.englishTranslation}`;
+    }
+    shareText += `\n\n— Surah ${card.surahNameEn} (${card.verseKey})`;
+    shareText += `\n\nquran.shakeeb.in`;
 
     if (navigator.share) {
       try {
@@ -396,7 +410,8 @@ export class DiscoverPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Reload cards with the new translation preferences
+   * Reload cards with the new translation preferences.
+   * If selected translation is not in cached data, fetch on-demand.
    */
   private async rebuildCardsWithNewTranslation() {
     const newCards = await this.quranDataService.getRandomAyahCards(this.INITIAL_LOAD);
@@ -404,6 +419,34 @@ export class DiscoverPage implements OnInit, OnDestroy {
       this.cards = newCards;
       this.currentIndex = 0;
       this.cdr.detectChanges();
+
+      // Check if any cards are missing the selected translations and fetch on-demand
+      await this.fillMissingTranslations(this.cards);
+      this.cdr.detectChanges();
+    }
+  }
+
+  /**
+   * For cards where the selected translation wasn't in the cache, fetch on-demand from API.
+   */
+  private async fillMissingTranslations(cards: AyahCard[]) {
+    const promises: Promise<void>[] = [];
+    for (const card of cards) {
+      if (!card.englishTranslation) {
+        promises.push(
+          this.quranDataService.fetchTranslationOnDemand(card.verseKey, this.selectedEnId)
+            .then(text => { card.englishTranslation = text; })
+        );
+      }
+      if (!card.urduTranslation) {
+        promises.push(
+          this.quranDataService.fetchTranslationOnDemand(card.verseKey, this.selectedUrId)
+            .then(text => { card.urduTranslation = text; })
+        );
+      }
+    }
+    if (promises.length > 0) {
+      await Promise.all(promises);
     }
   }
 }

@@ -1,33 +1,52 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <div class="header-controls">
-      <ion-input type="number" [min]="1" [max]="114" (keyup.enter)="jumpToSurah($event.target.value)"
-        placeholder="Surah no." [(ngModel)]="surahNumberField"></ion-input>
-      <div class="juz-controls-wrapper">
-        <div class="juz-controls">
-          <ion-input #juzInput type="number" [(ngModel)]="juzNumberField"
-            (keyup.enter)="jumpToSection(juzSection.value)" [min]="1" [max]="30" placeholder="Juz no."
-            style="max-width: 40px"></ion-input>
-          <ion-select #juzSection [disabled]="!juzInput" [value]="0" (ionChange)="jumpToSection($event.target.value)"
-            placeholder="Section" class="juz-section-dropdown">
-            <ion-select-option [value]="0">Start</ion-select-option>
-            <ion-select-option [value]="0.25">¼</ion-select-option>
-            <ion-select-option [value]="0.5">½</ion-select-option>
-            <ion-select-option [value]="0.75">¾</ion-select-option>
-            <ion-select-option [value]="1">End</ion-select-option>
-          </ion-select>
-        </div>
-        <div class="small-label" style="position: absolute">Juz</div>
-      </div>
-      <ion-select slot="end" value="imgQuality" [(ngModel)]="imgQuality" (ionChange)="loadImg(page,imgQuality)"
-        placeholder="Image Quality">
+    <ion-title>Scanned Pages</ion-title>
+    <ion-buttons slot="end">
+      <ion-select [(ngModel)]="imgQuality" (ionChange)="loadImg(page, imgQuality)"
+        interface="popover" class="quality-select">
         <ion-select-option [value]="ImageQuality.Low">Low</ion-select-option>
         <ion-select-option [value]="ImageQuality.High">High</ion-select-option>
         <ion-select-option [value]="ImageQuality.HD">HD</ion-select-option>
       </ion-select>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Source Selector -->
+  <ion-toolbar class="source-toolbar">
+    <ion-select [(ngModel)]="selectedSourceId" (ionChange)="onSourceChange($event.target.value)"
+      interface="action-sheet" class="source-select" placeholder="Select Mushaf">
+      <ion-select-option *ngFor="let s of sources" [value]="s.id">{{s.label}}</ion-select-option>
+    </ion-select>
+  </ion-toolbar>
+
+  <!-- Juz/Surah jump controls - only for 15-line Saudi -->
+  <ion-toolbar class="nav-toolbar" *ngIf="selectedSource.hasJuzSurahMeta">
+    <div class="header-controls">
+      <div class="control-group">
+        <ion-input type="number" [min]="1" [max]="114"
+          (keyup.enter)="jumpToSurah($event.target.value)"
+          placeholder="Surah" [(ngModel)]="surahNumberField"
+          class="compact-input"></ion-input>
+        <span class="control-label">Surah</span>
+      </div>
+
+      <div class="control-group juz-group">
+        <ion-input #juzInput type="number" [(ngModel)]="juzNumberField"
+          (keyup.enter)="jumpToSection(juzSection.value)" [min]="1" [max]="30"
+          placeholder="Juz" class="compact-input" style="max-width: 50px"></ion-input>
+        <ion-select #juzSection [value]="0" (ionChange)="jumpToSection($event.target.value)"
+          placeholder="Sec" class="section-select" interface="popover">
+          <ion-select-option [value]="0">Start</ion-select-option>
+          <ion-select-option [value]="0.25">¼</ion-select-option>
+          <ion-select-option [value]="0.5">½</ion-select-option>
+          <ion-select-option [value]="0.75">¾</ion-select-option>
+          <ion-select-option [value]="1">End</ion-select-option>
+        </ion-select>
+        <span class="control-label">Juz</span>
+      </div>
     </div>
   </ion-toolbar>
 
@@ -35,58 +54,53 @@
 </ion-header>
 
 <ion-content scrollX="true" scrollY="true">
-  <pinch-zoom [properties]="zoomProperties">
-    <div class="image-wrapper">
-      <ion-img style="visibility: hidden;width: 0;" [src]="urls[0]"></ion-img>
-      <ion-img [src]="urls[1]"></ion-img>
-      <ion-img style="visibility: hidden;width: 0;" [src]="urls[2]"></ion-img>
-      <!-- <ion-img [src]="url"></ion-img> -->
-      <!-- <ion-img [src]="url2"></ion-img> -->
+  <!-- Error State -->
+  <div class="error-state" *ngIf="errorLoading">
+    <ion-icon name="cloud-offline-outline" class="error-icon"></ion-icon>
+    <h3>Could not load scanned pages</h3>
+    <p>Please check your connection and try again.</p>
+    <ion-button fill="outline" (click)="setupLinks()">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Retry
+    </ion-button>
+  </div>
 
-      <!-- <div
-        #one
-        class="img-element"
-        [style.background-image]="'url('+url+')'"
-      ></div> -->
-      <!--<div #two [style.background-image]="'url('+url2+')'"></div>
-      <div [style.background-image]="'url('+url3+')'"></div> -->
+  <!-- Image Viewer -->
+  <pinch-zoom *ngIf="!errorLoading && urls.length > 0" [properties]="zoomProperties">
+    <div class="image-wrapper">
+      <ion-img style="visibility: hidden; width: 0;" [src]="urls[0]"></ion-img>
+      <ion-img [src]="urls[1]" class="main-image"></ion-img>
+      <ion-img style="visibility: hidden; width: 0;" [src]="urls[2]"></ion-img>
     </div>
   </pinch-zoom>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!errorLoading && urls.length === 0 && !loading">
+    <ion-icon name="image-outline" class="empty-icon"></ion-icon>
+    <p>Select a mushaf source to view scanned pages</p>
+  </div>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar>
-    <div class="btmNav">
-      <ion-button shape="round" fill="clear" [disabled]="page > 616" (click)="loadImg((+page)+1,imgQuality)">
-        <ion-icon name="chevron-back-circle-outline"></ion-icon>
+<ion-footer class="ion-no-border">
+  <ion-toolbar class="footer-toolbar">
+    <div class="footer-nav">
+      <ion-button shape="round" fill="clear" size="large"
+        [disabled]="page >= (selectedSource.totalPages || 9999)"
+        (click)="loadImg((+page)+1, imgQuality)">
+        <ion-icon name="chevron-back-outline"></ion-icon>
       </ion-button>
-      <ion-input (keyup.enter)="loadImg(page,imgQuality)" type="number" placeholder="Page number..." [(ngModel)]="page"
-        class="page-number-input"></ion-input>
-      <ion-button shape="round" fill="clear" [disabled]="page<0" (click)="loadImg(page-1,imgQuality)">
-        <ion-icon name="chevron-forward-circle-outline"></ion-icon>
+      <div class="page-info">
+        <ion-input (keyup.enter)="loadImg(page, imgQuality)" type="number"
+          placeholder="Page" [(ngModel)]="page" class="page-input"></ion-input>
+        <span class="page-total" *ngIf="selectedSource.totalPages">
+          / {{selectedSource.totalPages}}
+        </span>
+      </div>
+      <ion-button shape="round" fill="clear" size="large"
+        [disabled]="page <= 1"
+        (click)="loadImg(page-1, imgQuality)">
+        <ion-icon name="chevron-forward-outline"></ion-icon>
       </ion-button>
-      <!-- <ion-button
-        color="success"
-        shape="round"
-        fill="clear"
-        [disabled]="page<0"
-        (click)="loadImg(+page+2,imgQuality)"
-      >
-        <ion-icon name="chevron-back-circle-outline"></ion-icon>
-      </ion-button>
-      <ion-button
-        color="success"
-        shape="round"
-        fill="clear"
-        [disabled]="page<0"
-        (click)="loadImg(+page-2,imgQuality)"
-      >
-        <ion-icon name="chevron-forward-circle-outline"></ion-icon>
-      </ion-button> -->
-
-      <!-- <ion-button (click)="addClass(one,two)">
-        <ion-icon slot="icon-only" name="add"></ion-icon>
-      </ion-button> -->
     </div>
   </ion-toolbar>
 </ion-footer>

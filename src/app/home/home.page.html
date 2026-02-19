@@ -17,15 +17,20 @@
 
 <ion-content>
   <!-- Hero Banner -->
-  <div class="hero-section">
+  <div class="hero-section" *ngIf="banner">
     <div class="hero-content">
       <div class="hero-text" [innerHTML]="banner.text"></div>
-      <ion-button *ngIf="banner.button.show" size="small" fill="solid"
+      <ion-button *ngIf="banner.button?.show" size="small" fill="solid"
         (click)="open(banner.clickAction)" class="hero-btn">
-        <ion-icon *ngIf="banner.button.icon.show" [src]="banner.button.icon.src" 
+        <ion-icon *ngIf="banner.button?.icon?.show" [src]="banner.button.icon.src" 
           slot="start"></ion-icon>
         {{ banner.button.text }}
       </ion-button>
+    </div>
+    <div class="banner-dots" *ngIf="banners.length > 1">
+      <span *ngFor="let b of banners; let i = index" 
+            [class.active]="i === currentBannerIndex"
+            (click)="goToBanner(i)"></span>
     </div>
   </div>
 
@@ -83,6 +88,18 @@
         <div class="card-content">
           <h3>Listen</h3>
           <p>Audio recitation</p>
+        </div>
+        <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
+      </div>
+
+      <!-- Memorize -->
+      <div class="feature-card" routerLink="/memorize">
+        <div class="card-icon-wrapper" style="background: linear-gradient(135deg, #ff9800, #f57c00);">
+          <ion-icon name="bulb"></ion-icon>
+        </div>
+        <div class="card-content">
+          <h3>Memorize</h3>
+          <p>Hifz tracking & review</p>
         </div>
         <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
       </div>
@@ -177,10 +194,6 @@
         <ion-icon name="book-outline"></ion-icon>
         <span>{{ khatmTarget }} khatm in {{ targetDays }} days · {{ dailyPageTarget }} pages/day</span>
       </div>
-      <div class="khatm-row" *ngIf="khatmProjection">
-        <ion-icon name="moon-outline"></ion-icon>
-        <span>{{ khatmProjection }}</span>
-      </div>
     </div>
 
     <!-- Weekly Heatmap -->
@@ -254,10 +267,6 @@
   <div class="tools-section">
     <h2 class="section-title">Tools</h2>
     <div class="tools-grid">
-      <div class="tool-card" routerLink="/memorize">
-        <ion-icon name="bulb"></ion-icon>
-        <span>Memorize</span>
-      </div>
       <div class="tool-card" (click)="open('download')">
         <ion-icon name="download"></ion-icon>
         <span>Download</span>

@@ -129,6 +129,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   private longPressTriggered = false;
   private readonly LONG_PRESS_DURATION = 500; // ms
 
+  // Text selection mode
+  textSelectionMode = false;
+
   searchResults: SearchResults;
 
   juzPages = [];
@@ -634,6 +637,31 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       });
     }
 
+    // Text selection toggle
+    if (this.textSelectionMode) {
+      buttons.push({
+        text: 'Exit Text Selection Mode',
+        icon: 'hand-left-outline',
+        handler: () => {
+          this.textSelectionMode = false;
+          const wrapper = document.querySelector('.content-wrapper') as HTMLElement;
+          if (wrapper) wrapper.style.userSelect = 'none';
+          this.surahService.presentToastWithOptions('Text selection disabled', 'medium', 'bottom');
+        },
+      });
+    } else {
+      buttons.push({
+        text: 'Select Text (copy mode)',
+        icon: 'text-outline',
+        handler: () => {
+          this.textSelectionMode = true;
+          const wrapper = document.querySelector('.content-wrapper') as HTMLElement;
+          if (wrapper) wrapper.style.userSelect = 'text';
+          this.surahService.presentToastWithOptions('Text selection enabled — long-press again to exit', 'success', 'bottom');
+        },
+      });
+    }
+
     buttons.push(
       {
         text: 'Bookmark this line',
@@ -816,6 +844,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Toggle inline translation mode
    */
   toggleInlineTranslation(enabled: boolean) {
+    console.log('[Toggle] Inline translation:', enabled, 'surahInfo:', !!this.surahInfo, 'lines:', this.lines?.length, 'page:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     this.inlineTransMode = enabled;
     if (enabled) {
       this.loadInlineTranslations();
@@ -838,9 +867,11 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Maps each line to the ayah(s) it contains, fetches translations.
    */
   private loadInlineTranslations() {
+    console.log('[InlineTrans] Loading for page:', this.currentPage, 'calcPage:', this.currentPageCalculated, 'lang:', this.inlineTransLang);
     const cacheKey = `${this.currentPage}_${this.inlineTransLang}`;
     if (this.inlineTransCache.has(cacheKey)) {
       this.inlineTranslations = this.inlineTransCache.get(cacheKey)!;
+      console.log('[InlineTrans] Loaded from cache, lines:', this.inlineTranslations.length);
       return;
     }
 
@@ -849,13 +880,20 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       const tLines = this.tPages[this.currentPage - 1]?.split('\n') || [];
       this.inlineTranslations = tLines;
       this.inlineTransCache.set(cacheKey, tLines);
+      console.log('[InlineTrans] Loaded from existing translation data, lines:', tLines.length);
       return;
     }
 
     // Need surahInfo for verse key mapping (works for both archive and qurancom)
     if (!this.surahInfo) {
-      console.warn('Inline translation: surahInfo not loaded yet');
+      console.warn('[InlineTrans] surahInfo not loaded yet, retrying in 500ms...');
       this.inlineTranslations = [];
+      // Retry after surahInfo loads
+      setTimeout(() => {
+        if (this.surahInfo && this.inlineTransMode) {
+          this.loadInlineTranslations();
+        }
+      }, 500);
       return;
     }
 
@@ -904,14 +942,16 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           }
           this.inlineTranslations = result;
           this.inlineTransCache.set(cacheKey, result);
+          console.log('[InlineTrans] Loaded', result.filter(r => !!r).length, 'translations for', this.lines.length, 'lines');
+          this.changeDetectorRef.detectChanges();
         },
         (err) => {
-          console.warn('Inline translation API failed:', err);
+          console.warn('[InlineTrans] API failed:', err);
           this.inlineTranslations = [];
         }
       );
     } catch (e) {
-      console.warn('Inline translation failed:', e);
+      console.warn('[InlineTrans] Failed:', e);
       this.inlineTranslations = [];
     }
   }
@@ -921,6 +961,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   // ===========================================
 
   toggleWbwMode(enabled: boolean) {
+    console.log('[Toggle] WBW mode:', enabled, 'surahInfo:', !!this.surahInfo, 'lines:', this.lines?.length, 'page:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     this.wbwMode = enabled;
     if (enabled) {
       this.loadWbwTranslations();
@@ -930,16 +971,24 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadWbwTranslations() {
+    console.log('[WBW] Loading for page:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     const cacheKey = `wbw_${this.currentPage}`;
     if (this.wbwCache.has(cacheKey)) {
       this.wbwData = this.wbwCache.get(cacheKey)!;
+      console.log('[WBW] Loaded from cache, lines:', this.wbwData.length);
       return;
     }
 
     // Need surahInfo for verse key mapping (works for both archive and qurancom)
     if (!this.surahInfo) {
-      console.warn('WBW: surahInfo not loaded yet');
+      console.warn('[WBW] surahInfo not loaded yet, retrying in 500ms...');
       this.wbwData = [];
+      // Retry after surahInfo loads
+      setTimeout(() => {
+        if (this.surahInfo && this.wbwMode) {
+          this.loadWbwTranslations();
+        }
+      }, 500);
       return;
     }
 
@@ -983,14 +1032,16 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           }
           this.wbwData = result;
           this.wbwCache.set(cacheKey, result);
+          console.log('[WBW] Loaded', result.filter(r => r?.length > 0).length, 'word rows for', this.lines.length, 'lines');
+          this.changeDetectorRef.detectChanges();
         },
         (err) => {
-          console.warn('WBW API failed:', err);
+          console.warn('[WBW] API failed:', err);
           this.wbwData = [];
         }
       );
     } catch (e) {
-      console.warn('WBW load failed:', e);
+      console.warn('[WBW] Load failed:', e);
       this.wbwData = [];
     }
   }
@@ -1049,12 +1100,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   // ===========================================
 
   toggleTajweedMode(enabled: boolean) {
+    console.log('[Toggle] Tajweed mode:', enabled, 'lines:', this.lines?.length, 'page:', this.currentPage);
     this.tajweedMode = enabled;
     if (enabled) {
       this.loadTajweedText();
     } else {
       this.tajweedLines = [];
     }
+    this.changeDetectorRef.detectChanges();
   }
 
   /**
@@ -1065,13 +1118,16 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * The original text is NEVER modified – only wrapped.
    */
   private loadTajweedText() {
+    console.log('[Tajweed] Loading for page:', this.currentPage, 'lines:', this.lines?.length);
     const cacheKey = `tajweed_${this.currentPage}`;
     if (this.tajweedCache.has(cacheKey)) {
       this.tajweedLines = this.tajweedCache.get(cacheKey)!;
+      console.log('[Tajweed] Loaded from cache');
       return;
     }
 
     if (!this.lines || this.lines.length === 0) {
+      console.warn('[Tajweed] No lines available');
       this.tajweedLines = [];
       return;
     }
@@ -1090,8 +1146,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       }
       this.tajweedLines = result;
       this.tajweedCache.set(cacheKey, result);
+      console.log('[Tajweed] Processed', result.length, 'lines');
+      this.changeDetectorRef.detectChanges();
     } catch (e) {
-      console.warn('Tajweed offline processing failed:', e);
+      console.warn('[Tajweed] Offline processing failed:', e);
       this.tajweedLines = [];
     }
   }
@@ -2201,6 +2259,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       componentProps: {
         verseKey,
       },
+      backdropDismiss: true,
     });
     modal.present();
   }
@@ -2798,6 +2857,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   private applyTatweelToLines() {
     const lines = document.querySelectorAll(".line span");
+    console.log(`[Tatweel] applyTatweelToLines called, found ${lines.length} line spans, enableTatweel=${this.enableTatweel}`);
     lines.forEach((spanEl: HTMLElement) => {
       const rawText =
         spanEl.getAttribute("data-raw-text") ?? spanEl.innerText ?? "";
@@ -2874,11 +2934,65 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     // Right-joining-only letters — they do NOT connect to the left,
     // so tatweel CANNOT follow them (it would float disconnected).
-    // ا أ إ آ ٱ ى د ذ ر ز و ؤ
+    // ا أ إ آ ٱ ى د ذ ر ز و ؤ ء (hamzah is standalone, non-joining)
     const isNonLeftJoining = (c: string) =>
-      /[\u0627\u0623\u0625\u0622\u0671\u0649\u062F\u0630\u0631\u0632\u0648\u0624]/.test(c);
+      /[\u0621\u0627\u0623\u0625\u0622\u0671\u0649\u062F\u0630\u0631\u0632\u0648\u0624]/.test(c);
 
     const chars = [...text]; // spread handles multi-byte correctly
+
+    // --- Detect protected word ranges (Allah ligature) ---
+    // The Muhammadi (archive) font renders "الله" with a special ligature that
+    // includes shadda + dagger alef as part of the glyph — they are NOT explicit
+    // characters in the text. Inserting tatweel between the lams or before ha
+    // breaks this ligature and the marks vanish. IndoPak Waqf Lazim (qurancom)
+    // handles tatweel inside Allah correctly, so protection is archive-only.
+    //
+    // Ha variants in different mushaf texts:
+    //   ه  U+0647 (Arabic Heh)       — standard Arabic
+    //   ہ  U+06C1 (Heh Goal)         — IndoPak / archive text
+    //   ھ  U+06BE (Heh Doachashmee)  — some IndoPak variants
+    const isHa = (c: string) => c === '\u0647' || c === '\u06C1' || c === '\u06BE';
+
+    const protectedRanges: Array<[number, number]> = [];
+    const source = this.quranDataService.getCurrentSourceValue();
+    const isArchiveFont = source.type === 'archive';
+
+    if (isArchiveFont) {
+      // Match: lam + [tashkeel*] + lam + [tashkeel*] + ha(any variant)
+      // Covers: الله، لله، بالله، فلله، وللہ، لِلّٰہِ etc.
+      for (let i = 0; i < chars.length - 2; i++) {
+        if (chars[i] === '\u0644') { // first lam (ل)
+          // Skip tashkeel / existing tatweel after first lam
+          let n = i + 1;
+          while (n < chars.length && (isTashkeel(chars[n]) || chars[n] === TATWEEL)) n++;
+          if (n < chars.length && chars[n] === '\u0644') { // second lam (ل)
+            // Skip tashkeel / existing tatweel after second lam
+            let h = n + 1;
+            while (h < chars.length && (isTashkeel(chars[h]) || chars[h] === TATWEEL)) h++;
+            if (h < chars.length && isHa(chars[h])) {
+              // Protect from first lam to ha (inclusive)
+              protectedRanges.push([i, h]);
+              console.log(
+                `[Tatweel] Protected Allah ligature chars[${i}..${h}]: ` +
+                `"${chars.slice(i, h + 1).join('')}" ` +
+                `(ha=U+${chars[h].codePointAt(0).toString(16).toUpperCase()})`
+              );
+            }
+          }
+        }
+      }
+
+      if (protectedRanges.length > 0) {
+        console.log(`[Tatweel] Found ${protectedRanges.length} Allah ligature(s) to protect in line (archive font)`);
+      }
+    }
+
+    const isProtected = (idx: number): boolean => {
+      for (const [start, end] of protectedRanges) {
+        if (idx >= start && idx <= end) return true;
+      }
+      return false;
+    };
 
     // --- Find eligible insertion positions ---
     // For each Arabic base letter at index i, look backward (past tashkeel)
@@ -2894,6 +3008,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       // because it breaks ligatures like lam-alef (لا → لـا looks wrong)
       if (isNonLeftJoining(chars[i])) continue;
 
+      // NEVER insert tatweel inside the Allah ligature — it breaks shadda + dagger alef
+      if (isProtected(i)) continue;
+
       // Walk backward past tashkeel and existing tatweels
       let j = i - 1;
       while (j >= 0 && (isTashkeel(chars[j]) || chars[j] === TATWEEL)) j--;
@@ -2903,6 +3020,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       const prev = chars[j];
       if (!isArabicBase(prev)) continue; // previous is space, symbol, etc.
       if (isNonLeftJoining(prev)) continue; // previous letter doesn't connect left
+
+      // Also check if the previous letter is inside a protected range
+      if (isProtected(j)) continue;
 
       // Make sure there is no space between j and i
       let hasGap = false;

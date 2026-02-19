@@ -116,6 +116,32 @@ ion-content {
       transform: scale(0.95) !important;
     }
   }
+
+  .banner-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+
+    span {
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+
+      &.active {
+        background: white;
+        transform: scale(1.2);
+      }
+
+      &:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
 }
 
 // ===========================================

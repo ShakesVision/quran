@@ -409,6 +409,23 @@ ion-modal.bookmarks-sheet-modal {
   }
 }
 
+// Target alert with visible labels above inputs
+.target-alert-labeled {
+  .alert-input-group {
+    position: relative;
+
+    .alert-input {
+      margin-top: 6px;
+    }
+  }
+
+  .alert-message {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    padding-bottom: 4px;
+  }
+}
+
 ion-modal.search-sheet-modal {
   --border-radius: 16px 16px 0 0;
   --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);

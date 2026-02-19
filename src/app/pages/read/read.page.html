@@ -30,7 +30,7 @@
           </ion-button>
         </div>
         <div *ngIf="!audioPlaying" class="qari-wrapper">
-          <ion-select *ngIf="reciters" interface="popover" (ionChange)="qariChanged($event.target.value)"
+          <ion-select *ngIf="reciters" interface="action-sheet" (ionChange)="qariChanged($event.target.value)"
             [placeholder]="selectedQari?selectedQari?.id+'. '+selectedQari?.name:'Qaari'" [(ngModel)]="qariId">
             <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.id+'.
               '+r.name}}</ion-select-option>

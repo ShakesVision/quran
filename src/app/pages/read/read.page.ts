@@ -35,7 +35,7 @@ import { Bookmarks } from "src/app/models/bookmarks";
 import { TafseerModalComponent } from "src/app/components/tafseer-modal";
 import { QuranDataService } from "src/app/services/quran-data.service";
 import { AppDataService } from "src/app/services/app-data.service";
-import { applyTajweed, TAJWEED_LEGEND } from "src/app/lib/tajweed";
+import { applyTajweed, TAJWEED_LEGEND, ResultType } from "src/app/lib/tajweed";
 import { MorphologyService, WordMorphology } from "src/app/services/morphology.service";
 
 export interface WbwWord {
@@ -121,8 +121,24 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   // Tajweed mode
   tajweedMode = false;
   tajweedLines: string[] = []; // HTML strings with tajweed coloring
-  tajweedLegend = TAJWEED_LEGEND;
+  tajweedLegend = TAJWEED_LEGEND.map(item => ({ ...item })); // mutable copy for custom colors
+  tajweedEditMode = false;
   private tajweedCache: Map<string, string[]> = new Map();
+
+  // Mapping from ResultType to CSS custom property name
+  private readonly TAJWEED_CSS_VAR_MAP: Partial<Record<string, string>> = {
+    [ResultType.GHUNNA]:                  '--tj-ghunna',
+    [ResultType.IKHFA]:                   '--tj-ikhfa',
+    [ResultType.IDGHAM_WITH_GHUNNA]:      '--tj-idgham',
+    [ResultType.IQLAB]:                   '--tj-iqlab',
+    [ResultType.QALQALAH]:               '--tj-qalqalah',
+    [ResultType.MEEM_IKHFA]:             '--tj-meem-ikhfa',
+    [ResultType.MEEM_IDGHAM]:            '--tj-meem-idgham',
+    [ResultType.MAAD_LONG]:              '--tj-maad-long',
+    [ResultType.MAAD_MUNFASSIL_MUTASSIL]:'--tj-maad-connected',
+    [ResultType.MAAD_SUKOON]:            '--tj-maad-sukoon',
+  };
+  private readonly TAJWEED_COLORS_STORAGE_KEY = 'TajweedCustomColors';
 
   // Long-press tracking
   private longPressTimer: any;
@@ -323,12 +339,13 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.fetchQariList();
     var el: HTMLElement = document.querySelector(".content-wrapper");
-    this.pageFontSize = window
-      .getComputedStyle(el, null)
-      .getPropertyValue("font-size");
+    this.pageFontSize = Math.round(
+      parseFloat(window.getComputedStyle(el, null).getPropertyValue("font-size"))
+    ).toString();
     this.setupSwipeGesture();
     this.attachSelectionListeners();
     this.loadSavedTheme();
+    this.loadTajweedColors();
   }
 
   async getBookmark() {
@@ -1162,6 +1179,78 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
+   * Update a single tajweed rule color (from color picker).
+   * Persists to storage and applies as CSS custom property.
+   */
+  updateTajweedColor(item: any, newColor: string) {
+    item.color = newColor;
+    const cssVar = this.TAJWEED_CSS_VAR_MAP[item.type];
+    if (cssVar) {
+      document.documentElement.style.setProperty(cssVar, newColor);
+    }
+    this.saveTajweedColors();
+  }
+
+  /**
+   * Open a native color picker for a tajweed rule (fallback for legend dot tap).
+   */
+  openTajweedColorPicker(item: any) {
+    // Programmatically trigger color input for this item
+    const idx = this.tajweedLegend.indexOf(item);
+    const inputs = document.querySelectorAll('.tj-color-input');
+    if (inputs[idx]) {
+      (inputs[idx] as HTMLInputElement).click();
+    }
+  }
+
+  /**
+   * Reset all tajweed colors to defaults.
+   */
+  resetTajweedColors() {
+    this.tajweedLegend = TAJWEED_LEGEND.map(item => ({ ...item }));
+    // Remove custom CSS properties (fall back to :root defaults in global.scss)
+    for (const item of this.tajweedLegend) {
+      const cssVar = this.TAJWEED_CSS_VAR_MAP[item.type];
+      if (cssVar) {
+        document.documentElement.style.removeProperty(cssVar);
+      }
+    }
+    this.storage.remove(this.TAJWEED_COLORS_STORAGE_KEY);
+    this.tajweedEditMode = false;
+  }
+
+  /**
+   * Save custom tajweed colors to storage.
+   */
+  private saveTajweedColors() {
+    const colors: Record<string, string> = {};
+    for (const item of this.tajweedLegend) {
+      colors[item.type] = item.color;
+    }
+    this.storage.set(this.TAJWEED_COLORS_STORAGE_KEY, colors);
+  }
+
+  /**
+   * Load saved tajweed colors from storage and apply as CSS variables.
+   */
+  private async loadTajweedColors() {
+    try {
+      const saved = await this.storage.get(this.TAJWEED_COLORS_STORAGE_KEY);
+      if (saved && typeof saved === 'object') {
+        for (const item of this.tajweedLegend) {
+          if (saved[item.type]) {
+            item.color = saved[item.type];
+            const cssVar = this.TAJWEED_CSS_VAR_MAP[item.type];
+            if (cssVar) {
+              document.documentElement.style.setProperty(cssVar, saved[item.type]);
+            }
+          }
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  /**
    * Apply tajweed colouring to every line on the current page.
    * This is fully offline – it analyses the Arabic text directly
    * using the ported tajweed rules (ghunna, ikhfa, idgham, etc.)
@@ -1657,7 +1746,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     const nextSize = inputValue ? parseFloat(val) : currentSize + val;
     if (!isNaN(nextSize)) {
       el.style.setProperty("--reader-font-size", `${nextSize}px`);
-      this.pageFontSize = `${nextSize}px`;
+      this.pageFontSize = Math.round(nextSize).toString();
       this.applyTatweelToLines();
     }
   }

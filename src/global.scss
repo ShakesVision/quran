@@ -426,6 +426,78 @@ ion-modal.bookmarks-sheet-modal {
   }
 }
 
+// ===========================================
+// TAJWEED COLORS (offline library classes)
+// ===========================================
+// Ported from https://github.com/quran/tajweed
+// Classes: tj-ghunna, tj-ikhfa, tj-idgham_with_ghunna, etc.
+// Colors use CSS custom properties so users can override them.
+// Defined here (global.scss) so :root actually applies to the document root.
+
+:root {
+  // Madani mushaf default palette
+  --tj-ghunna:            #43A047;
+  --tj-ikhfa:             #D4A017;
+  --tj-idgham:            #43A047;
+  --tj-idgham-gray:       #9E9E9E;
+  --tj-iqlab:             #43A047;
+  --tj-qalqalah:          #0091EA;
+  --tj-meem-ikhfa:        #D4A017;
+  --tj-meem-idgham:       #43A047;
+  --tj-maad-long:         #B71C1C;
+  --tj-maad-connected:    #F44336;
+  --tj-maad-sukoon:       #FB8C00;
+  --tj-maad-sila:         #E68A00;
+}
+
+// Tajweed text class rules — applied to [innerHTML] injected content
+.tajweed-text {
+  // Ghunnah – green
+  .tj-ghunna                { color: var(--tj-ghunna); }
+
+  // Ikhfa – yellow/gold
+  .tj-ikhfa                 { color: var(--tj-ikhfa); }
+
+  // Idgham with ghunnah – green
+  .tj-idgham_with_ghunna    { color: var(--tj-idgham); }
+  // Idgham without ghunnah – gray (not pronounced)
+  .tj-idgham_without_ghunna { color: var(--tj-idgham-gray); }
+  .tj-idgham_not_pronounced { color: var(--tj-idgham-gray); }
+
+  // Iqlab – green
+  .tj-iqlab                 { color: var(--tj-iqlab); }
+  .tj-iqlab_not_pronounced  { color: var(--tj-idgham-gray); }
+
+  // Qalqalah – blue
+  .tj-qalqalah              { color: var(--tj-qalqalah); }
+
+  // Meem rules
+  .tj-meem_ikhfa            { color: var(--tj-meem-ikhfa); }
+  .tj-meem_idgham           { color: var(--tj-meem-idgham); }
+
+  // Madd rules
+  .tj-maad_long             { color: var(--tj-maad-long); }
+  .tj-maad_munfassil        { color: var(--tj-maad-connected); }
+  .tj-maad_sukoon           { color: var(--tj-maad-sukoon); }
+  .tj-maad_sila             { color: var(--tj-maad-sila); }
+}
+
+// Dark mode tajweed adjustments
+body.dark {
+  --tj-ghunna:            #66FF66;
+  --tj-ikhfa:             #FFD54F;
+  --tj-idgham:            #66FF66;
+  --tj-idgham-gray:       #BDBDBD;
+  --tj-iqlab:             #66FF66;
+  --tj-qalqalah:          #64B5F6;
+  --tj-meem-ikhfa:        #FFD54F;
+  --tj-meem-idgham:       #66FF66;
+  --tj-maad-long:         #EF5350;
+  --tj-maad-connected:    #FF7043;
+  --tj-maad-sukoon:       #FFB74D;
+  --tj-maad-sila:         #FFA726;
+}
+
 ion-modal.search-sheet-modal {
   --border-radius: 16px 16px 0 0;
   --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);

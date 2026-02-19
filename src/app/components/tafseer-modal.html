@@ -20,6 +20,30 @@
       </div>
     </div>
 
+    <!-- Word by Word Section (collapsed by default, right after Arabic card) -->
+    <div class="wbw-section">
+      <div class="section-header" (click)="wbwExpanded = !wbwExpanded">
+        <ion-icon name="grid-outline"></ion-icon>
+        <span>Word by Word</span>
+        <ion-icon [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+      </div>
+      <div *ngIf="wbwExpanded" class="wbw-table-wrapper">
+        <p class="wbw-hint">
+          <ion-icon name="musical-notes-outline"></ion-icon> Tap a word to hear its pronunciation
+        </p>
+        <table class="verse-words-table">
+          <tr *ngFor="let word of verse?.words; let i = index" (click)="playWord(word)" class="wbw-row ion-activatable">
+            <ion-ripple-effect></ion-ripple-effect>
+            <td class="translation-col">{{ word.translation?.text }}</td>
+            <td class="transliteration-col">{{ word.transliteration?.text }}</td>
+            <td class="arabic-col" [ngClass]="{'ar-text': i !== verse.words.length - 1, 'ar-text2': i === verse.words.length - 1}">
+              {{ word.text }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
     <!-- Config Mode Banner -->
     <div *ngIf="isConfigMode" class="config-banner">
       <ion-icon name="reorder-four-outline"></ion-icon>
@@ -71,30 +95,6 @@
             {{ tr.text }}
           </p>
         </div>
-      </div>
-    </div>
-
-    <!-- Word by Word Section -->
-    <div class="wbw-section">
-      <div class="section-header" (click)="wbwExpanded = !wbwExpanded">
-        <ion-icon name="grid-outline"></ion-icon>
-        <span>Word by Word</span>
-        <ion-icon [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
-      </div>
-      <div *ngIf="wbwExpanded" class="wbw-table-wrapper">
-        <p class="wbw-hint">
-          <ion-icon name="musical-notes-outline"></ion-icon> Tap a word to hear its pronunciation
-        </p>
-        <table class="verse-words-table">
-          <tr *ngFor="let word of verse?.words; let i = index" (click)="playWord(word)" class="wbw-row ion-activatable">
-            <ion-ripple-effect></ion-ripple-effect>
-            <td class="translation-col">{{ word.translation?.text }}</td>
-            <td class="transliteration-col">{{ word.transliteration?.text }}</td>
-            <td class="arabic-col" [ngClass]="{'ar-text': i !== verse.words.length - 1, 'ar-text2': i === verse.words.length - 1}">
-              {{ word.text }}
-            </td>
-          </tr>
-        </table>
       </div>
     </div>
 

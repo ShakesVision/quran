@@ -186,9 +186,23 @@
               </button>
             </div>
             <div *ngIf="tajweedMode" class="tajweed-legend">
-              <span class="legend-item" *ngFor="let item of tajweedLegend">
+              <span class="legend-item" *ngFor="let item of tajweedLegend"
+                    (click)="tajweedEditMode && openTajweedColorPicker(item)">
                 <span class="color-dot" [style.background]="item.color"></span>{{item.label}}
               </span>
+              <button class="tj-customize-btn" (click)="tajweedEditMode = !tajweedEditMode">
+                <ion-icon [name]="tajweedEditMode ? 'checkmark-outline' : 'color-fill-outline'" size="small"></ion-icon>
+              </button>
+            </div>
+            <div *ngIf="tajweedMode && tajweedEditMode" class="tajweed-color-editor">
+              <div class="tj-color-row" *ngFor="let item of tajweedLegend">
+                <span class="tj-color-label">{{item.label}}</span>
+                <input type="color" [value]="item.color"
+                       (change)="updateTajweedColor(item, $event.target.value)" class="tj-color-input">
+              </div>
+              <ion-button size="small" fill="clear" color="medium" (click)="resetTajweedColors()">
+                <ion-icon name="refresh-outline" slot="start"></ion-icon>Reset to defaults
+              </ion-button>
             </div>
 
             <!-- ── Reading settings ── -->

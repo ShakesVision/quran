@@ -31,9 +31,8 @@
         </div>
         <div *ngIf="!audioPlaying" class="qari-wrapper">
           <ion-select *ngIf="reciters" interface="action-sheet" (ionChange)="qariChanged($event.target.value)"
-            [placeholder]="selectedQari?selectedQari?.id+'. '+selectedQari?.name:'Qaari'" [(ngModel)]="qariId">
-            <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.id+'.
-              '+r.name}}</ion-select-option>
+            [placeholder]="selectedQari ? selectedQari?.name + ' (id: ' + selectedQari?.id + ')' : 'Qaari'" [(ngModel)]="qariId">
+            <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.name}} (id: {{r.id}})</ion-select-option>
           </ion-select>
         </div>
         <ion-button (click)="playAudio()">
@@ -51,6 +50,10 @@
       </ion-button>
       <ion-button (click)="isSearchOpen = true" slot="end" size="small">
         <ion-icon slot="icon-only" name="search-outline" style="font-size:20px"></ion-icon>
+      </ion-button>
+      <ion-button (click)="toggleImmersiveMode()" slot="end" size="small"
+        [color]="isImmersive ? 'warning' : ''">
+        <ion-icon slot="icon-only" [name]="isImmersive ? 'contract-outline' : 'expand-outline'" style="font-size:20px"></ion-icon>
       </ion-button>
       <ion-button id="popover-trigger-btn" slot="end" size="small">
         <ion-icon slot="icon-only" name="menu-outline" style="font-size:20px"></ion-icon>
@@ -547,10 +550,18 @@
 </ion-content>
 <ion-footer [class.immersive-hidden]="isImmersive">
   <div class="btmNav">
-    <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==pages?.length"
-      (click)="gotoPageNum(pages?.length)">
-      <ion-icon name="play-skip-back-outline"></ion-icon>
+    <!-- Font size controls (moved here for easy access) -->
+    <ion-button class="nav-btns font-btn" fill="clear" (click)="changeFontSize(-1)">
+      <ion-icon name="remove-outline" style="font-size:16px"></ion-icon>
     </ion-button>
+    <span class="font-size-badge">{{pageFontSize}}</span>
+    <ion-button class="nav-btns font-btn" fill="clear" (click)="changeFontSize(1)">
+      <ion-icon name="add-outline" style="font-size:16px"></ion-icon>
+    </ion-button>
+
+    <span class="nav-separator">|</span>
+
+    <!-- Core page navigation -->
     <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==pages?.length" (click)="goToPage(1)">
       <ion-icon name="chevron-back-outline"></ion-icon>
     </ion-button>
@@ -563,11 +574,24 @@
     <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==1" (click)="goToPage(-1)">
       <ion-icon name="chevron-forward-outline"></ion-icon>
     </ion-button>
-    <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==1" (click)="gotoPageNum(1)">
-      <ion-icon name="play-skip-forward-outline"></ion-icon>
+
+    <!-- Overflow menu for destructive jump actions -->
+    <ion-button class="nav-btns" fill="clear" id="footer-overflow-btn">
+      <ion-icon name="ellipsis-vertical-outline" style="font-size:16px"></ion-icon>
     </ion-button>
+    <ion-popover trigger="footer-overflow-btn" side="top" alignment="end" [dismissOnSelect]="true">
+      <ng-template>
+        <ion-list lines="none" class="footer-overflow-list">
+          <ion-item button (click)="gotoPageNum(pages?.length)" [disabled]="currentPage==pages?.length">
+            <ion-icon slot="start" name="play-skip-back-outline"></ion-icon>
+            <ion-label>First page</ion-label>
+          </ion-item>
+          <ion-item button (click)="gotoPageNum(1)" [disabled]="currentPage==1">
+            <ion-icon slot="start" name="play-skip-forward-outline"></ion-icon>
+            <ion-label>Last page</ion-label>
+          </ion-item>
+        </ion-list>
+      </ng-template>
+    </ion-popover>
   </div>
-  <!-- <ion-button (click)="isFullscreen=!isFullscreen" fill="clear">
-    <ion-icon slot="icon-only" name="resize"></ion-icon>
-  </ion-button> -->
 </ion-footer>

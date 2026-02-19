@@ -105,12 +105,12 @@ export class ListenPage implements OnInit {
     this.surahService.fetchQariList().subscribe(
       (res: any) => {
         console.log(res);
-        this.reciters = res.reciters?.sort((a, b) => a.id - b.id) || this.HARDCODED_RECITERS;
+        this.reciters = (res.reciters || this.HARDCODED_RECITERS).sort((a, b) => a.name.localeCompare(b.name));
         this.updateSelectedQariName();
       },
       (error) => {
         console.warn('Failed to fetch Qari list from API, using hardcoded list.', error);
-        this.reciters = this.HARDCODED_RECITERS;
+        this.reciters = [...this.HARDCODED_RECITERS].sort((a, b) => a.name.localeCompare(b.name));
         this.updateSelectedQariName();
       }
     );

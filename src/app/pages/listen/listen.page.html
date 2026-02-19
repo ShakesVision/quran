@@ -38,7 +38,7 @@
       interface="action-sheet"
       class="qari-select">
       <ion-select-option *ngFor="let r of reciters" [value]="r.id">
-        {{r.name}}
+        {{r.name}} (id: {{r.id}})
       </ion-select-option>
     </ion-select>
     <span class="qari-count">{{reciters.length}} reciters</span>

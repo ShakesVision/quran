@@ -403,17 +403,47 @@ ion-footer {
   align-items: center;
   width: 100%;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   padding: 4px 0;
   
   .nav-btns {
-    --padding-start: 8px;
-    --padding-end: 8px;
+    --padding-start: 6px;
+    --padding-end: 6px;
     transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:active {
       transform: scale(0.85);
     }
+
+    &.font-btn {
+      --padding-start: 4px;
+      --padding-end: 4px;
+      min-width: 28px;
+    }
+  }
+
+  .font-size-badge {
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+    color: var(--ion-color-medium);
+    user-select: none;
+  }
+
+  .nav-separator {
+    font-size: 14px;
+    color: var(--ion-color-step-200, #ccc);
+    margin: 0 2px;
+    user-select: none;
+  }
+}
+
+// Footer overflow popover for jump actions
+.footer-overflow-list {
+  ion-item {
+    --min-height: 40px;
+    font-size: 0.85rem;
   }
 }
 
@@ -555,20 +585,24 @@ ion-footer {
 
 // ===========================================
 // RUKU INDICATOR (IndoPak style)
+// NOTE: Inner elements (.ruku-ain-group, .ruku-ain, .ruku-ayah-count,
+// .ruku-number) are injected via [innerHTML] and bypass Angular's
+// emulated ViewEncapsulation.  We must use ::ng-deep so the
+// component-scoped styles actually reach those DOM nodes.
 // ===========================================
-.ruku-wrapper {
+:host ::ng-deep .ruku-wrapper {
   user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   position: absolute;
-  left: -28px;
+  left: -30px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--mushaf-gold-dark, #A07C18);
   line-height: 1;
-  width: 28px;
+  width: 30px;
   text-align: center;
 
   .ruku-ain-group {
@@ -590,9 +624,9 @@ ion-footer {
       font-size: clamp(6px, 1.5vw, 8px);
       font-family: sans-serif;
       font-weight: 600;
-      top: 50%;
+      top: 2px;
       left: 50%;
-      transform: translate(-50%, -20%);
+      transform: translateX(-50%);
       opacity: 0.9;
       color: var(--mushaf-gold-dark, #A07C18);
     }

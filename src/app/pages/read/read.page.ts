@@ -79,16 +79,16 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   audioSpeed = "1";
   playingVerseNum: string;
   reciters = [
-    { id: 7,  name: 'Mishary Rashid Alafasy' },
-    { id: 2,  name: 'Abdul Rahman Al-Sudais' },
-    { id: 6,  name: 'Mahmoud Khalil Al-Husary' },
-    { id: 5,  name: 'Abu Bakr al-Shatri' },
     { id: 1,  name: 'Abdul Basit (Murattal)' },
+    { id: 2,  name: 'Abdul Rahman Al-Sudais' },
     { id: 3,  name: 'Abdur-Rahman as-Sudais' },
+    { id: 5,  name: 'Abu Bakr al-Shatri' },
     { id: 4,  name: 'Ahmed ibn Ali al-Ajamy' },
-    { id: 10, name: 'Saad Al-Ghamdi' },
-    { id: 9,  name: 'Mohamed Siddiq al-Minshawi' },
     { id: 12, name: 'Maher Al Muaiqly' },
+    { id: 6,  name: 'Mahmoud Khalil Al-Husary' },
+    { id: 7,  name: 'Mishary Rashid Alafasy' },
+    { id: 9,  name: 'Mohamed Siddiq al-Minshawi' },
+    { id: 10, name: 'Saad Al-Ghamdi' },
   ];
   qariId: number = 7;
   selectedQari = this.reciters[0];
@@ -911,45 +911,64 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       const [fSurah, fAyah] = firstKey.split(':').map(Number);
       const [lSurah, lAyah] = lastKey.split(':').map(Number);
 
-      // Build a list of all verse keys on this page
-      const verseKeys: string[] = [];
+      console.log('[InlineTrans] Verse range:', firstKey, '->', lastKey);
+
+      // Build the set of verse keys we need
+      const neededKeys: Set<string> = new Set();
       for (let s = fSurah; s <= lSurah; s++) {
         const startA = s === fSurah ? fAyah : 1;
         const surahAyahCount = this.surahService.surahAyahCounts?.[s - 1] || 999;
         const endA = s === lSurah ? lAyah : surahAyahCount;
         for (let a = startA; a <= endA; a++) {
-          verseKeys.push(`${s}:${a}`);
+          neededKeys.add(`${s}:${a}`);
         }
       }
+      console.log('[InlineTrans] Need', neededKeys.size, 'verses:', Array.from(neededKeys));
 
-      // Use quran.com API page endpoint for translations (works for both archive and qurancom)
-      const mushafPage = this.currentPageCalculated || this.currentPage;
-      const batchUrl = `https://api.quran.com/api/v4/verses/by_page/${mushafPage}?translations=${transId}&per_page=50&fields=text_indopak`;
+      // Fetch by chapter (with enough per_page to cover the needed range), then filter client-side
+      const verseTrans: Map<string, string> = new Map();
+      const surahsInRange: number[] = [];
+      for (let s = fSurah; s <= lSurah; s++) surahsInRange.push(s);
 
-      this.httpClient.get(batchUrl).pipe(take(1)).subscribe(
-        (res: any) => {
-          const verseTrans: Map<string, string> = new Map();
-          (res.verses || []).forEach((v: any) => {
-            const transText = v.translations?.[0]?.text || '';
-            verseTrans.set(v.verse_key, this.convertToPlain(transText));
-          });
+      let completedRequests = 0;
+      const totalRequests = surahsInRange.length;
 
-          // Map each line to a translation based on which ayah it contains
-          const result: string[] = [];
-          for (let i = 0; i < this.lines.length; i++) {
-            const vk = this.getVerseKeyForLine(i);
-            result.push(vk ? (verseTrans.get(vk) || '') : '');
+      for (const surah of surahsInRange) {
+        const ayahCount = this.surahService.surahAyahCounts?.[surah - 1] || 286;
+        const url = `https://api.quran.com/api/v4/verses/by_chapter/${surah}?translations=${transId}&per_page=${ayahCount}&fields=text_indopak`;
+
+        this.httpClient.get(url).pipe(take(1)).subscribe(
+          (res: any) => {
+            (res.verses || []).forEach((v: any) => {
+              if (neededKeys.has(v.verse_key)) {
+                const transText = v.translations?.[0]?.text || '';
+                verseTrans.set(v.verse_key, this.convertToPlain(transText));
+              }
+            });
+            completedRequests++;
+            if (completedRequests >= totalRequests) {
+              // All surahs fetched, map to lines
+              const result: string[] = [];
+              for (let i = 0; i < this.lines.length; i++) {
+                const vk = this.getVerseKeyForLine(i);
+                result.push(vk ? (verseTrans.get(vk) || '') : '');
+              }
+              this.inlineTranslations = result;
+              this.inlineTransCache.set(cacheKey, result);
+              console.log('[InlineTrans] Loaded', result.filter(r => !!r).length, 'translations for', this.lines.length, 'lines from', verseTrans.size, 'verses');
+              this.changeDetectorRef.detectChanges();
+            }
+          },
+          (err) => {
+            console.warn('[InlineTrans] API failed for surah', surah, ':', err);
+            completedRequests++;
+            if (completedRequests >= totalRequests) {
+              this.inlineTranslations = [];
+              this.changeDetectorRef.detectChanges();
+            }
           }
-          this.inlineTranslations = result;
-          this.inlineTransCache.set(cacheKey, result);
-          console.log('[InlineTrans] Loaded', result.filter(r => !!r).length, 'translations for', this.lines.length, 'lines');
-          this.changeDetectorRef.detectChanges();
-        },
-        (err) => {
-          console.warn('[InlineTrans] API failed:', err);
-          this.inlineTranslations = [];
-        }
-      );
+        );
+      }
     } catch (e) {
       console.warn('[InlineTrans] Failed:', e);
       this.inlineTranslations = [];
@@ -1002,44 +1021,76 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
       const firstKey = firstAndLast.first.verseId;
       const lastKey = firstAndLast.last.verseId;
+      const [fSurah, fAyah] = firstKey.split(':').map(Number);
+      const [lSurah, lAyah] = lastKey.split(':').map(Number);
 
-      // Use quran.com page endpoint for word-by-word (works for both archive and qurancom)
-      const mushafPage = this.currentPageCalculated || this.currentPage;
-      const url = `https://api.quran.com/api/v4/verses/by_page/${mushafPage}?words=true&word_translation_language=en&word_fields=text_indopak,text_uthmani&per_page=50&fields=text_indopak`;
+      console.log('[WBW] Verse range:', firstKey, '->', lastKey);
 
-      this.httpClient.get(url).pipe(take(1)).subscribe(
-        (res: any) => {
-          const verseWords: Map<string, WbwWord[]> = new Map();
-          (res.verses || []).forEach((v: any) => {
-            const words: WbwWord[] = (v.words || [])
-              .filter((w: any) => w.char_type_name !== 'end')
-              .map((w: any) => ({
-                arabic: w.text_indopak || w.text_uthmani || w.text || '',
-                translation: w.translation?.text || '',
-                transliteration: w.transliteration?.text || '',
-                audioUrl: w.audio_url ? `https://audio.qurancdn.com/${w.audio_url}` : '',
-                location: w.location || '',
-                verseKey: v.verse_key || '',
-              }));
-            verseWords.set(v.verse_key, words);
-          });
-
-          // Map each line to its verse's word data
-          const result: WbwWord[][] = [];
-          for (let i = 0; i < this.lines.length; i++) {
-            const vk = this.getVerseKeyForLine(i);
-            result.push(vk ? (verseWords.get(vk) || []) : []);
-          }
-          this.wbwData = result;
-          this.wbwCache.set(cacheKey, result);
-          console.log('[WBW] Loaded', result.filter(r => r?.length > 0).length, 'word rows for', this.lines.length, 'lines');
-          this.changeDetectorRef.detectChanges();
-        },
-        (err) => {
-          console.warn('[WBW] API failed:', err);
-          this.wbwData = [];
+      // Build the set of verse keys we need
+      const neededKeys: Set<string> = new Set();
+      for (let s = fSurah; s <= lSurah; s++) {
+        const startA = s === fSurah ? fAyah : 1;
+        const ayahCount = this.surahService.surahAyahCounts?.[s - 1] || 286;
+        const endA = s === lSurah ? lAyah : ayahCount;
+        for (let a = startA; a <= endA; a++) {
+          neededKeys.add(`${s}:${a}`);
         }
-      );
+      }
+      console.log('[WBW] Need', neededKeys.size, 'verses');
+
+      // Fetch by chapter (full chapter), then filter client-side for the needed verse keys
+      const verseWords: Map<string, WbwWord[]> = new Map();
+      const surahsInRange: number[] = [];
+      for (let s = fSurah; s <= lSurah; s++) surahsInRange.push(s);
+
+      let completedRequests = 0;
+      const totalRequests = surahsInRange.length;
+
+      for (const surah of surahsInRange) {
+        const chapAyahCount = this.surahService.surahAyahCounts?.[surah - 1] || 286;
+        const url = `https://api.quran.com/api/v4/verses/by_chapter/${surah}?words=true&word_translation_language=en&word_fields=text_indopak,text_uthmani&per_page=${chapAyahCount}&fields=text_indopak`;
+
+        this.httpClient.get(url).pipe(take(1)).subscribe(
+          (res: any) => {
+            (res.verses || []).forEach((v: any) => {
+              if (neededKeys.has(v.verse_key)) {
+                const words: WbwWord[] = (v.words || [])
+                  .filter((w: any) => w.char_type_name !== 'end')
+                  .map((w: any) => ({
+                    arabic: w.text_indopak || w.text_uthmani || w.text || '',
+                    translation: w.translation?.text || '',
+                    transliteration: w.transliteration?.text || '',
+                    audioUrl: w.audio_url ? `https://audio.qurancdn.com/${w.audio_url}` : '',
+                    location: w.location || '',
+                    verseKey: v.verse_key || '',
+                  }));
+                verseWords.set(v.verse_key, words);
+              }
+            });
+            completedRequests++;
+            if (completedRequests >= totalRequests) {
+              // All surahs fetched, map to lines
+              const result: WbwWord[][] = [];
+              for (let i = 0; i < this.lines.length; i++) {
+                const vk = this.getVerseKeyForLine(i);
+                result.push(vk ? (verseWords.get(vk) || []) : []);
+              }
+              this.wbwData = result;
+              this.wbwCache.set(cacheKey, result);
+              console.log('[WBW] Loaded', result.filter(r => r?.length > 0).length, 'word rows for', this.lines.length, 'lines from', verseWords.size, 'verses');
+              this.changeDetectorRef.detectChanges();
+            }
+          },
+          (err) => {
+            console.warn('[WBW] API failed for surah', surah, ':', err);
+            completedRequests++;
+            if (completedRequests >= totalRequests) {
+              this.wbwData = [];
+              this.changeDetectorRef.detectChanges();
+            }
+          }
+        );
+      }
     } catch (e) {
       console.warn('[WBW] Load failed:', e);
       this.wbwData = [];
@@ -1146,7 +1197,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       }
       this.tajweedLines = result;
       this.tajweedCache.set(cacheKey, result);
-      console.log('[Tajweed] Processed', result.length, 'lines');
+      const spanCount = result.reduce((sum, line) => sum + (line.match(/<span/g) || []).length, 0);
+      console.log('[Tajweed] Processed', result.length, 'lines,', spanCount, 'colored spans total');
+      if (result[0]) console.log('[Tajweed] Sample output (line 0, first 200 chars):', result[0].substring(0, 200));
       this.changeDetectorRef.detectChanges();
     } catch (e) {
       console.warn('[Tajweed] Offline processing failed:', e);
@@ -2501,7 +2554,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (res: any) => {
           if (res.reciters?.length) {
-            this.reciters = res.reciters.sort((a, b) => a.id - b.id);
+            this.reciters = res.reciters.sort((a, b) => a.name.localeCompare(b.name));
           }
           // else keep the hardcoded list
           this.selectedQari = this.reciters.find((r) => r.id == this.qariId) || this.reciters[0];

@@ -738,9 +738,16 @@ export class HomePage implements OnDestroy {
     this.changelogItems = [];
 
     try {
-      const url = 'https://api.github.com/repos/ShakesVision/quran/commits?per_page=50';
-      const commits: any[] = await this.httpClient.get<any[]>(url).toPromise();
-      this.changelogItems = (commits || []).map(c => ({
+      // Fetch up to 5 pages of 100 commits each (500 total) to get deep history
+      const allCommits: any[] = [];
+      for (let page = 1; page <= 5; page++) {
+        const url = `https://api.github.com/repos/ShakesVision/quran/commits?per_page=100&page=${page}`;
+        const commits: any[] = await this.httpClient.get<any[]>(url).toPromise();
+        if (!commits || commits.length === 0) break;
+        allCommits.push(...commits);
+        if (commits.length < 100) break; // Last page
+      }
+      this.changelogItems = allCommits.map(c => ({
         date: c.commit?.author?.date || '',
         message: c.commit?.message || '',
         author: c.commit?.author?.name || c.author?.login || 'Unknown',

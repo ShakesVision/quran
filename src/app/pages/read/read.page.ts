@@ -119,7 +119,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   isWordDetailOpen = false;
 
   // Tajweed mode
-  tajweedMode = false;
+  tajweedMode = true; // ON by default
   tajweedLines: string[] = []; // HTML strings with tajweed coloring
   tajweedLegend = TAJWEED_LEGEND.map(item => ({ ...item })); // mutable copy for custom colors
   tajweedEditMode = false;
@@ -1010,9 +1010,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     console.log('[WBW] Loading for page:', this.currentPage, 'calcPage:', this.currentPageCalculated);
     const cacheKey = `wbw_${this.currentPage}`;
     if (this.wbwCache.has(cacheKey)) {
-      this.wbwData = this.wbwCache.get(cacheKey)!;
-      console.log('[WBW] Loaded from cache, lines:', this.wbwData.length);
-      return;
+      const cached = this.wbwCache.get(cacheKey)!;
+      // Only use cache if it has actual data (don't cache failures)
+      if (cached.some(r => r?.length > 0)) {
+        this.wbwData = cached;
+        console.log('[WBW] Loaded from cache, lines:', this.wbwData.length, 'non-empty:', cached.filter(r => r?.length > 0).length);
+        this.changeDetectorRef.detectChanges();
+        return;
+      }
     }
 
     // Need surahInfo for verse key mapping (works for both archive and qurancom)
@@ -1031,7 +1036,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     try {
       const firstAndLast = this.getFirstAndLastAyahNumberOnPage();
       if (!firstAndLast) {
-        console.warn('WBW: could not determine ayahs on page', this.currentPage);
+        console.warn('[WBW] could not determine ayahs on page', this.currentPage);
         this.wbwData = [];
         return;
       }
@@ -1043,10 +1048,13 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
       console.log('[WBW] Verse range:', firstKey, '->', lastKey);
 
+      // Include one ayah BEFORE the first (page may start mid-ayah)
+      const extFirstAyah = fAyah > 1 ? fAyah - 1 : fAyah;
+
       // Build the set of verse keys we need
       const neededKeys: Set<string> = new Set();
       for (let s = fSurah; s <= lSurah; s++) {
-        const startA = s === fSurah ? fAyah : 1;
+        const startA = s === fSurah ? extFirstAyah : 1;
         const ayahCount = this.surahService.surahAyahCounts?.[s - 1] || 286;
         const endA = s === lSurah ? lAyah : ayahCount;
         for (let a = startA; a <= endA; a++) {
@@ -1086,15 +1094,15 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
             });
             completedRequests++;
             if (completedRequests >= totalRequests) {
-              // All surahs fetched, map to lines
-              const result: WbwWord[][] = [];
-              for (let i = 0; i < this.lines.length; i++) {
-                const vk = this.getVerseKeyForLine(i);
-                result.push(vk ? (verseWords.get(vk) || []) : []);
-              }
+              // All surahs fetched → map verse words to lines using robust fallback
+              const result = this.mapWbwToLines(verseWords);
               this.wbwData = result;
-              this.wbwCache.set(cacheKey, result);
-              console.log('[WBW] Loaded', result.filter(r => r?.length > 0).length, 'word rows for', this.lines.length, 'lines from', verseWords.size, 'verses');
+              const nonEmpty = result.filter(r => r?.length > 0).length;
+              console.log('[WBW] Loaded', nonEmpty, 'word rows for', this.lines.length, 'lines from', verseWords.size, 'verses');
+              // Only cache if we have actual data
+              if (nonEmpty > 0) {
+                this.wbwCache.set(cacheKey, result);
+              }
               this.changeDetectorRef.detectChanges();
             }
           },
@@ -1112,6 +1120,52 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       console.warn('[WBW] Load failed:', e);
       this.wbwData = [];
     }
+  }
+
+  /**
+   * Map verse WBW data to lines with robust fallback.
+   * First tries getVerseKeyForLine, then fills gaps using nearest known verse key.
+   */
+  private mapWbwToLines(verseWords: Map<string, WbwWord[]>): WbwWord[][] {
+    const lineKeys: (string | null)[] = [];
+
+    // Step 1: try to determine verse key for each line
+    for (let i = 0; i < this.lines.length; i++) {
+      const vk = this.getVerseKeyForLine(i);
+      lineKeys.push(vk);
+    }
+    console.log('[WBW] Line keys (raw):', lineKeys);
+
+    // Step 2: fill null gaps — forward pass (use the same key as the next non-null)
+    for (let i = lineKeys.length - 2; i >= 0; i--) {
+      if (!lineKeys[i] && lineKeys[i + 1]) {
+        lineKeys[i] = lineKeys[i + 1];
+      }
+    }
+    // Backward pass — fill any remaining nulls at the end using previous non-null
+    for (let i = 1; i < lineKeys.length; i++) {
+      if (!lineKeys[i] && lineKeys[i - 1]) {
+        lineKeys[i] = lineKeys[i - 1];
+      }
+    }
+    console.log('[WBW] Line keys (filled):', lineKeys);
+
+    // Step 3: map to WBW data — show words for the verse each line belongs to
+    // Track which verse keys we've already shown to avoid repeating WBW under every line of the same ayah
+    const shownVerseKeys = new Set<string>();
+    const result: WbwWord[][] = [];
+
+    for (let i = 0; i < this.lines.length; i++) {
+      const vk = lineKeys[i];
+      if (vk && verseWords.has(vk) && !shownVerseKeys.has(vk)) {
+        result.push(verseWords.get(vk)!);
+        shownVerseKeys.add(vk);
+      } else {
+        result.push([]);
+      }
+    }
+
+    return result;
   }
 
   // ===========================================

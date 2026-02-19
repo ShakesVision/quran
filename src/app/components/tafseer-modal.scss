@@ -5,17 +5,23 @@
 // ── Footer Toolbar (thumb-friendly controls at bottom) ──
 .tafseer-footer {
   ion-toolbar {
-    --background: var(--ion-background-color);
-    --border-color: rgba(var(--ion-color-medium-rgb), 0.15);
+    --background: var(--ion-color-primary);
+    --color: #fff;
+    --border-color: transparent;
     --min-height: 44px;
     --padding-start: 4px;
     --padding-end: 4px;
+
+    ion-button {
+      --color: #fff;
+    }
   }
 
   ion-title {
     font-size: 0.85rem;
     font-weight: 600;
     text-align: center;
+    color: #fff;
   }
 
   .verse-key {

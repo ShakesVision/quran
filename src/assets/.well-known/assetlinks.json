@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "in.shakeeb.quran.twa",
+        "sha256_cert_fingerprints": ["8C:28:C9:CE:A0:30:E2:91:99:6B:12:E6:E5:75:20:63:4A:42:8E:CD:71:BC:7C:2E:1F:7D:FF:7A:FE:83:2B:6B"]
+      }
+    }]

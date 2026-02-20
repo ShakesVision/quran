@@ -1,0 +1,189 @@
+.notes-container {
+  padding: 16px;
+}
+
+.search-container {
+  margin-bottom: 16px;
+
+  .search-bar {
+    --background: var(--ion-color-light);
+    --border-radius: 12px;
+  }
+}
+
+.notes-list {
+  display: grid;
+  gap: 12px;
+}
+
+.note-card {
+  background: white;
+  border: 1px solid var(--ion-border-color);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:active {
+    background: var(--ion-color-light);
+    transform: translateY(-2px);
+  }
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    .note-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      flex: 1;
+      word-break: break-word;
+      color: var(--ion-color-dark);
+    }
+
+    .note-meta {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+
+      ion-badge {
+        font-size: 0.75rem;
+      }
+    }
+  }
+
+  .note-preview {
+    font-size: 0.95rem;
+    color: var(--ion-color-medium);
+    margin: 0 0 8px;
+    line-height: 1.5;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .note-context {
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 8px;
+
+    small {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+
+      span {
+        display: inline-block;
+        padding: 2px 6px;
+        background: var(--ion-color-light);
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .note-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+
+    ion-button {
+      --padding-start: 4px;
+      --padding-end: 4px;
+      height: 32px;
+    }
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 16px;
+  color: var(--ion-color-medium);
+
+  p {
+    margin: 0;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 20px;
+
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--ion-color-dark);
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .note-card {
+    background: var(--ion-color-medium-dark);
+    border-color: var(--ion-border-color);
+
+    &:active {
+      background: var(--ion-color-dark);
+    }
+
+    .note-title {
+      color: white;
+    }
+  }
+}
+
+// Modal adjustments
+ion-modal {
+  ion-list {
+    padding: 0;
+  }
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+
+    ion-label {
+      font-size: 0.95rem;
+    }
+
+    ion-textarea {
+      --padding-start: 0;
+      --padding-end: 0;
+      margin-top: 8px;
+    }
+  }
+}

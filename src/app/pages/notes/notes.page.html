@@ -1,0 +1,117 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>My Notes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="notes-container">
+    <!-- Search Bar -->
+    <div class="search-container">
+      <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterNotes()" placeholder="Search notes..."
+        class="search-bar">
+      </ion-searchbar>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="dots" color="primary"></ion-spinner>
+      <p>Loading notes...</p>
+    </div>
+
+    <!-- Notes List -->
+    <div *ngIf="!isLoading && filteredNotes.length > 0" class="notes-list">
+      <div *ngFor="let note of filteredNotes" class="note-card" (click)="openNote(note)">
+        <div class="note-header">
+          <h3 class="note-title">{{ note.title }}</h3>
+          <div class="note-meta">
+            <ion-badge color="primary">{{ formatDate(note.updatedAt) }}</ion-badge>
+          </div>
+        </div>
+
+        <p class="note-preview">{{ note.content.substring(0, 100) }}{{ note.content.length > 100 ? '...' : '' }}</p>
+
+        <div class="note-context" *ngIf="note.context">
+          <small>
+            <ion-icon name="location-outline" size="small"></ion-icon>
+            <span *ngIf="note.context.surah">Surah {{ note.context.surah }}</span>
+            <span *ngIf="note.context.juz">Juz {{ note.context.juz }}</span>
+            <span *ngIf="note.context.page">Page {{ note.context.page }}</span>
+          </small>
+        </div>
+
+        <div class="note-actions">
+          <ion-button fill="clear" size="small" (click)="deleteNote(note); $event.stopPropagation()">
+            <ion-icon name="trash-outline" color="danger"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredNotes.length === 0" class="empty-state">
+      <ion-icon name="create-outline" class="empty-icon"></ion-icon>
+      <h3>{{ searchQuery ? 'No notes found' : 'No notes yet' }}</h3>
+      <p *ngIf="!searchQuery">
+        Notes you create while reading will appear here. Add notes from the reader to get started.
+      </p>
+      <p *ngIf="searchQuery">
+        Try a different search term
+      </p>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <ion-modal #editModal>
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="editModal.dismiss()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>Edit Note</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="saveNote()" color="primary" [strong]="true">Save</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content *ngIf="selectedNote">
+        <ion-list>
+          <ion-item>
+            <ion-label position="stacked">Title</ion-label>
+            <ion-input [(ngModel)]="editingTitle" placeholder="Note title">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Content</ion-label>
+            <ion-textarea [(ngModel)]="editingContent" placeholder="Write your note..." rows="10">
+            </ion-textarea>
+          </ion-item>
+
+          <ion-item *ngIf="selectedNote.context" lines="none">
+            <ion-label>
+              <strong>Context:</strong>
+              <p *ngIf="selectedNote.context.surah">Surah {{ selectedNote.context.surah }}</p>
+              <p *ngIf="selectedNote.context.juz">Juz {{ selectedNote.context.juz }}</p>
+              <p *ngIf="selectedNote.context.page">Page {{ selectedNote.context.page }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label>
+              <strong>Created:</strong>
+              <p>{{ formatDate(selectedNote.createdAt) }}</p>
+              <strong>Updated:</strong>
+              <p>{{ formatDate(selectedNote.updatedAt) }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

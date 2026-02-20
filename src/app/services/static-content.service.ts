@@ -1,0 +1,162 @@
+import { Injectable } from "@angular/core";
+
+export const PRIVACY_POLICY_HTML = `
+<h1>Privacy Policy</h1>
+<p><strong>Quran Hifz Helper</strong> • February 2026</p>
+
+<h2>Overview</h2>
+<p>
+Quran Hifz Helper is a free, open-source Progressive Web App (PWA) for reading and memorizing the Holy Quran. 
+We are committed to protecting your privacy.
+</p>
+
+<h2>What We Collect</h2>
+<p><strong>Short Answer: We collect nothing.</strong></p>
+
+<p>
+Quran Hifz Helper is designed to operate entirely on your device. 
+<strong>No personal data is sent to our servers.</strong> We do not use analytics, tracking, or advertising services.
+</p>
+
+<h3>Data Stored Locally</h3>
+<p>
+The following data is stored <strong>only on your device</strong> using your browser's local storage:
+</p>
+<ul>
+  <li><strong>Reading Progress</strong> — Your last page/surah/juz viewed</li>
+  <li><strong>Bookmarks</strong> — Personal bookmarks and notes you create</li>
+  <li><strong>Memorization Progress</strong> — Hifz tracker data (juz/surah completion)</li>
+  <li><strong>Settings</strong> — Font size, theme preferences, tajweed colors</li>
+  <li><strong>Notes</strong> — Personal notes you add while reading</li>
+</ul>
+
+<p>
+<strong>This data is never sent anywhere.</strong> It exists only in your browser's local storage on your device.
+</p>
+
+<h2>What We Don't Do</h2>
+<ul>
+  <li>❌ We don't track your reading habits</li>
+  <li>❌ We don't store your data on servers</li>
+  <li>❌ We don't use analytics or telemetry</li>
+  <li>❌ We don't show you ads</li>
+  <li>❌ We don't sell or share your data</li>
+  <li>❌ We don't require account creation</li>
+  <li>❌ We don't use cookies for tracking</li>
+</ul>
+
+<h2>External Resources</h2>
+<p>
+The app loads Quranic text and audio from these trusted sources:
+</p>
+<ul>
+  <li><strong>archive.org</strong> — Quran text and scanned mushaf images</li>
+  <li><strong>quran.com</strong> — Translations, word-by-word data, tafseer</li>
+  <li><strong>everyayah.com</strong> — Audio recitation files</li>
+  <li><strong>tafsir.app</strong> — Detailed tafseer commentary (external link)</li>
+</ul>
+
+<p>
+When you access these external resources, their own privacy policies apply. 
+We recommend reviewing their privacy policies directly.
+</p>
+
+<h2>Service Worker & Offline Caching</h2>
+<p>
+To enable offline functionality, the app uses a Service Worker to cache:
+</p>
+<ul>
+  <li>App shell (UI components and styles)</li>
+  <li>Quran text files you have accessed</li>
+</ul>
+
+<p>
+This cache is stored locally on your device and is not shared with us or any third party.
+</p>
+
+<h2>Your Data Control</h2>
+<p>
+You have complete control over all your data:
+</p>
+<ul>
+  <li><strong>View:</strong> Open your browser's developer tools → Application → Local Storage</li>
+  <li><strong>Backup:</strong> Use the app's export feature to download your data as JSON</li>
+  <li><strong>Delete:</strong> Clear your browser's local storage or uninstall the app</li>
+</ul>
+
+<h2>HTTPS & Security</h2>
+<p>
+The app is served over HTTPS from <code>https://quran.shakeeb.in</code>. 
+Your connection is encrypted, preventing unauthorized interception of data in transit.
+</p>
+
+<h2>Third-Party Services</h2>
+<p>
+The app links to or uses these external services:
+</p>
+<ul>
+  <li><strong>OneSignal:</strong> Push notification library (optional, can be disabled)</li>
+  <li><strong>Google Play Store:</strong> If installed as Android app</li>
+  <li><strong>Telegram:</strong> Feedback and support link</li>
+</ul>
+
+<p>
+Each service has its own privacy policy. We recommend reviewing them if you use these integrations.
+</p>
+
+<h2>Children's Privacy</h2>
+<p>
+This app is designed for all ages, including children. Since we don't collect any personal data, 
+there is no privacy risk to children using the app.
+</p>
+
+<h2>Data Retention</h2>
+<p>
+All your data is retained on your device until you manually delete it. 
+Clearing your browser cache or uninstalling the app will remove all data permanently.
+</p>
+
+<h2>Policy Updates</h2>
+<p>
+We may update this privacy policy occasionally. The latest version is always available at 
+<code>https://quran.shakeeb.in/privacy</code>.
+</p>
+
+<h2>Contact & Support</h2>
+<p>
+If you have privacy concerns or questions, please reach out:
+</p>
+<ul>
+  <li><strong>Website:</strong> <a href="https://quran.shakeeb.in" target="_blank">quran.shakeeb.in</a></li>
+  <li><strong>Telegram:</strong> <a href="https://t.me/ShakesVision" target="_blank">@ShakesVision</a></li>
+  <li><strong>GitHub:</strong> <a href="https://github.com/ShakesVision/quran" target="_blank">github.com/ShakesVision/quran</a></li>
+</ul>
+
+<h2>Summary</h2>
+<p>
+<strong>Quran Hifz Helper respects your privacy by design:</strong>
+</p>
+<ul>
+  <li>✅ No data collection</li>
+  <li>✅ No tracking or analytics</li>
+  <li>✅ No ads or monetization</li>
+  <li>✅ All data stays on your device</li>
+  <li>✅ Free and open-source</li>
+  <li>✅ Complete user control</li>
+</ul>
+
+<p style="margin-top: 40px; font-size: 0.9em; opacity: 0.7; border-top: 1px solid #ccc; padding-top: 20px;">
+Last updated: February 2026 | Made with ❤️ for the Ummah
+</p>
+`;
+
+@Injectable({
+  providedIn: "root",
+})
+export class StaticContentService {
+  constructor() {}
+
+  getPrivacyPolicy(): string {
+    return PRIVACY_POLICY_HTML;
+  }
+}

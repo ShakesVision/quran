@@ -1,0 +1,177 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Morphology</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="morphology-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <h2>Word Morphology Explorer</h2>
+      <p class="subtitle">Analyze the grammatical structure of any Quranic verse</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-group">
+        <ion-searchbar [(ngModel)]="searchQuery" placeholder="Verse key (e.g., 2:255)" class="search-bar">
+        </ion-searchbar>
+        <ion-button (click)="searchByVerseKey()" color="primary">
+          <ion-icon name="search-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Selection Section -->
+    <div class="selection-section">
+      <div class="selector-group">
+        <div class="selector-item">
+          <label>Surah:</label>
+          <ion-select [(ngModel)]="selectedSurah" (ionChange)="onSurahChange()" class="select-input">
+            <ion-select-option *ngFor="let surah of surahList" [value]="surah.index">
+              {{ surah.index }}. {{ surah.titleAr }} ({{ surah.title }})
+            </ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="selector-item">
+          <label>Ayah:</label>
+          <ion-select [(ngModel)]="selectedAyah" (ionChange)="onAyahChange()" class="select-input">
+            <ion-select-option *ngFor="let i of [].constructor(ayahCount); let idx = index" [value]="idx + 1">
+              {{ idx + 1 }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="dots" color="primary"></ion-spinner>
+      <p>Loading morphology data...</p>
+    </div>
+
+    <!-- Morphology Data -->
+    <div *ngIf="!isLoading && morphologyData.length > 0" class="morphology-data">
+      <div class="morphology-header">
+        <h3>Verse {{ selectedSurah }}:{{ selectedAyah }}</h3>
+        <span class="word-count">{{ morphologyData.length }} words</span>
+      </div>
+
+      <div class="words-grid">
+        <div *ngFor="let word of morphologyData; let idx = index" class="word-card">
+          <div class="word-number">Word {{ idx + 1 }}</div>
+
+          <!-- Arabic Text -->
+          <div class="word-arabic" *ngIf="word.text">
+            {{ word.text }}
+          </div>
+
+          <!-- Key Morphology Fields -->
+          <div class="morph-section">
+            <!-- Part of Speech -->
+            <div class="morph-field" *ngIf="word.posLabel">
+              <span class="morph-label">POS:</span>
+              <span class="morph-value">{{ word.posLabel }}</span>
+            </div>
+
+            <!-- Root -->
+            <div class="morph-field" *ngIf="word.root">
+              <span class="morph-label">Root:</span>
+              <span class="morph-value ar">{{ word.root }}</span>
+            </div>
+
+            <!-- Lemma -->
+            <div class="morph-field" *ngIf="word.lemma">
+              <span class="morph-label">Lemma:</span>
+              <span class="morph-value ar">{{ word.lemma }}</span>
+            </div>
+
+            <!-- Verb Form -->
+            <div class="morph-field" *ngIf="word.verbForm">
+              <span class="morph-label">Form:</span>
+              <span class="morph-value">{{ word.verbForm }}</span>
+            </div>
+
+            <!-- Aspect -->
+            <div class="morph-field" *ngIf="word.aspectLabel">
+              <span class="morph-label">Aspect:</span>
+              <span class="morph-value">{{ word.aspectLabel }}</span>
+            </div>
+
+            <!-- Voice -->
+            <div class="morph-field" *ngIf="word.voiceLabel">
+              <span class="morph-label">Voice:</span>
+              <span class="morph-value">{{ word.voiceLabel }}</span>
+            </div>
+
+            <!-- Mood -->
+            <div class="morph-field" *ngIf="word.moodLabel">
+              <span class="morph-label">Mood:</span>
+              <span class="morph-value">{{ word.moodLabel }}</span>
+            </div>
+
+            <!-- Case -->
+            <div class="morph-field" *ngIf="word.stateLabel">
+              <span class="morph-label">Case:</span>
+              <span class="morph-value">{{ word.stateLabel }}</span>
+            </div>
+
+            <!-- Gender & Number -->
+            <div class="morph-field" *ngIf="word.genderLabel">
+              <span class="morph-label">Gender:</span>
+              <span class="morph-value">{{ word.genderLabel }}</span>
+            </div>
+
+            <div class="morph-field" *ngIf="word.numberLabel">
+              <span class="morph-label">Number:</span>
+              <span class="morph-value">{{ word.numberLabel }}</span>
+            </div>
+
+            <!-- Features -->
+            <div class="morph-field" *ngIf="word.features">
+              <span class="morph-label">Features:</span>
+              <span class="morph-value">{{ formatFeatures(word.features) }}</span>
+            </div>
+
+            <!-- Derivation -->
+            <div class="morph-field" *ngIf="word.derivationLabel">
+              <span class="morph-label">Derivation:</span>
+              <span class="morph-value">{{ word.derivationLabel }}</span>
+            </div>
+
+            <!-- Prefix & Suffix -->
+            <div class="morph-field" *ngIf="word.prefix">
+              <span class="morph-label">Prefix:</span>
+              <span class="morph-value">{{ word.prefix }}</span>
+            </div>
+
+            <div class="morph-field" *ngIf="word.suffix">
+              <span class="morph-label">Suffix:</span>
+              <span class="morph-value">{{ word.suffix }}</span>
+            </div>
+          </div>
+
+          <!-- Corpus Link -->
+          <div class="corpus-link">
+            <ion-button fill="outline" size="small" color="primary" [href]="getCorpusUrl(idx + 1)" target="_blank">
+              <ion-icon name="open-outline" slot="start"></ion-icon>
+              Corpus
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && morphologyData.length === 0" class="empty-state">
+      <ion-icon name="school-outline" class="empty-icon"></ion-icon>
+      <h3>No Data Available</h3>
+      <p>Select a verse to view its morphological analysis</p>
+    </div>
+  </div>
+</ion-content>

@@ -20,17 +20,15 @@
   <div class="hero-section" *ngIf="banner">
     <div class="hero-content">
       <div class="hero-text" [innerHTML]="banner.text"></div>
-      <ion-button *ngIf="banner.button?.show" size="small" fill="solid"
-        (click)="open(banner.clickAction)" class="hero-btn">
-        <ion-icon *ngIf="banner.button?.icon?.show" [src]="banner.button.icon.src" 
-          slot="start"></ion-icon>
+      <ion-button *ngIf="banner.button?.show" size="small" fill="solid" (click)="open(banner.clickAction)"
+        class="hero-btn">
+        <ion-icon *ngIf="banner.button?.icon?.show" [src]="banner.button.icon.src" slot="start"></ion-icon>
         {{ banner.button.text }}
       </ion-button>
     </div>
     <div class="banner-dots" *ngIf="banners.length > 1">
-      <span *ngFor="let b of banners; let i = index" 
-            [class.active]="i === currentBannerIndex"
-            (click)="goToBanner(i)"></span>
+      <span *ngFor="let b of banners; let i = index" [class.active]="i === currentBannerIndex"
+        (click)="goToBanner(i)"></span>
     </div>
   </div>
 
@@ -198,10 +196,8 @@
 
     <!-- Weekly Heatmap -->
     <div class="weekly-heatmap">
-      <div class="heatmap-day" *ngFor="let day of weeklyData"
-           [class.active]="day.pages > 0"
-           [class.done]="day.pages >= dailyPageTarget"
-           [title]="day.label + ': ' + day.pages + ' pages'">
+      <div class="heatmap-day" *ngFor="let day of weeklyData" [class.active]="day.pages > 0"
+        [class.done]="day.pages >= dailyPageTarget" [title]="day.label + ': ' + day.pages + ' pages'">
         <span class="day-label">{{ day.short }}</span>
         <div class="day-dot" [style.opacity]="day.pages > 0 ? 0.4 + (day.pages / dailyPageTarget * 0.6) : 0.15"></div>
       </div>
@@ -236,11 +232,8 @@
         <span class="achievements-count">{{ unlockedCount }} / {{ visibleAchievements.length }}</span>
       </div>
       <div class="achievements-grid">
-        <div *ngFor="let a of visibleAchievements"
-             class="achievement-badge"
-             [class.unlocked]="a.unlocked"
-             [class.locked]="!a.unlocked"
-             [title]="a.description">
+        <div *ngFor="let a of visibleAchievements" class="achievement-badge" [class.unlocked]="a.unlocked"
+          [class.locked]="!a.unlocked" [title]="a.description">
           <span class="badge-icon">{{ a.icon }}</span>
           <span class="badge-name">{{ a.name }}</span>
         </div>
@@ -289,6 +282,18 @@
         <span>Text Studio</span>
         <ion-badge color="tertiary" style="font-size:0.55rem">Beta</ion-badge>
       </div>
+      <div class="tool-card" routerLink="/notes">
+        <ion-icon name="book-outline"></ion-icon>
+        <span>Notes</span>
+      </div>
+      <div class="tool-card" routerLink="/morphology">
+        <ion-icon name="grid-outline"></ion-icon>
+        <span>Morphology</span>
+      </div>
+      <div class="tool-card" routerLink="/tajweed">
+        <ion-icon name="text-outline"></ion-icon>
+        <span>Tajweed</span>
+      </div>
     </div>
   </div>
 
@@ -306,8 +311,9 @@
         <img src="assets/icon/hifz-helper-logo.svg" alt="Quran Hifz Helper">
         <span class="changelog-app-name">Quran Hifz Helper</span>
       </div>
-      <div class="changelog-subtitle">Recent updates from <a href="https://github.com/ShakesVision/quran" target="_blank">GitHub</a></div>
-      
+      <div class="changelog-subtitle">A project by <a href="https://www.sarbakaf.com" target="_blank">Sarbakaf Group</a>
+      </div>
+
       <div *ngIf="changelogLoading" class="changelog-loading">
         <ion-spinner name="crescent"></ion-spinner>
         <span>Loading commits...</span>

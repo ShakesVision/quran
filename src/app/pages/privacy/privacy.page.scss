@@ -1,0 +1,122 @@
+.privacy-content {
+  --padding-start: 0;
+  --padding-end: 0;
+
+  ion-toolbar {
+    --border-width: 0 0 1px 0;
+    --border-color: var(--ion-border-color);
+  }
+}
+
+.privacy-container {
+  max-width: 100%;
+  padding: 20px;
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+
+  h1 {
+    font-size: 1.75rem;
+    color: var(--ion-color-primary);
+    margin: 0 0 10px 0;
+    margin-top: 20px;
+
+    &:first-of-type {
+      margin-top: 0;
+    }
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    color: var(--ion-color-primary);
+    margin-top: 25px;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    color: var(--ion-color-secondary);
+    margin-top: 15px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin-bottom: 12px;
+    line-height: 1.8;
+    text-align: justify;
+  }
+
+  ul,
+  ol {
+    margin-left: 25px;
+    margin-bottom: 12px;
+    padding-left: 5px;
+  }
+
+  li {
+    margin-bottom: 6px;
+    line-height: 1.6;
+  }
+
+  a {
+    color: var(--ion-color-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ion-color-primary);
+
+    &:hover {
+      color: var(--ion-color-secondary);
+      border-bottom-color: var(--ion-color-secondary);
+    }
+  }
+
+  code {
+    background: var(--ion-color-light);
+    color: var(--ion-color-dark);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 0.95em;
+  }
+
+  blockquote {
+    border-left: 4px solid var(--ion-color-primary);
+    padding-left: 15px;
+    margin: 15px 0;
+    opacity: 0.85;
+    font-style: italic;
+  }
+
+  .meta {
+    font-size: 0.9em;
+    color: var(--ion-color-medium);
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--ion-border-color);
+  }
+
+  .footer {
+    margin-top: 40px;
+    padding-top: 15px;
+    border-top: 1px solid var(--ion-border-color);
+    font-size: 0.85em;
+    color: var(--ion-color-medium);
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .privacy-container {
+    padding: 15px;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+  }
+}

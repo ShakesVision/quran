@@ -32,3 +32,27 @@ npm-debug.log*
 /plugins
 /www
 *.keystore
+
+# Build files and directories
+/.gradle/
+/app/
+/build/
+/gradle/
+gradlew
+gradlew.bat
+build.gradle
+settings.gradle
+gradle.properties
+twa-manifest.json
+manifest-checksum.txt
+
+# Generated APK/AAB files
+*.apk
+*.aab
+*.idsig
+
+# Build scripts and temporary files
+build-app.bat
+build-app.ps1
+build-output.txt
+passwords.txt

@@ -1,45 +1,73 @@
 {
   "packageId": "in.shakeeb.quran.twa",
   "host": "quran.shakeeb.in",
-  "name": "Quran Hifz Helper",
+  "name": "Quran: Hifz Helper",
   "launcherName": "Quran Hifz",
   "display": "standalone",
   "themeColor": "#055533",
-  "navigationColor": "#055533",
-  "navigationColorDark": "#0f588c",
-  "navigationDividerColor": "#055533",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
   "backgroundColor": "#055533",
-  "enableNotifications": false,
+  "enableNotifications": true,
   "startUrl": "/",
   "iconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
   "maskableIconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
+  "monochromeIconUrl": "https://quran.shakeeb.in/assets/icons/hifz-helper-mono.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "./sarbakaf.keystore",
+    "path": "C:\\Shakeeb\\Home\\Ionic\\quran15line\\sarbakaf.keystore",
     "alias": "sarbakaf"
   },
+  "appVersionName": "1",
   "appVersionCode": 1,
-  "appVersion": "1.0.0",
   "shortcuts": [
     {
       "name": "Full Quran",
-      "short_name": "Read",
-      "url": "/quran",
-      "icons": [{"src": "https://quran.shakeeb.in/assets/icons/icon-192x192.png"}]
+      "shortName": "Read",
+      "url": "https://quran.shakeeb.in/quran",
+      "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-read.svg"
     },
     {
       "name": "Browse Juz & Surah",
-      "short_name": "Browse",
-      "url": "/browse",
-      "icons": [{"src": "https://quran.shakeeb.in/assets/icons/icon-192x192.png"}]
+      "shortName": "Browse",
+      "url": "https://quran.shakeeb.in/browse",
+      "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-browse.svg"
     },
     {
       "name": "Discover Ayahs",
-      "short_name": "Discover",
-      "url": "/discover",
-      "icons": [{"src": "https://quran.shakeeb.in/assets/icons/icon-192x192.png"}]
+      "shortName": "Discover",
+      "url": "https://quran.shakeeb.in/discover",
+      "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-discover.svg"
+    },
+    {
+      "name": "Memorize",
+      "shortName": "Memorize",
+      "url": "https://quran.shakeeb.in/memorize",
+      "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-memorize.svg"
     }
   ],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://quran.shakeeb.in/manifest.webmanifest"
+  "webManifestUrl": "https://quran.shakeeb.in/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://quran.shakeeb.in/",
+  "minSdkVersion": 21,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1"
 }

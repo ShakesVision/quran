@@ -2,7 +2,7 @@
   "packageId": "in.shakeeb.quran.twa",
   "host": "quran.shakeeb.in",
   "name": "Quran: Hifz Helper",
-  "launcherName": "Quran Hifz",
+  "launcherName": "Hifz Helper",
   "display": "standalone",
   "themeColor": "#055533",
   "themeColorDark": "#000000",
@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#055533",
   "enableNotifications": true,
-  "startUrl": "/",
+  "startUrl": "https://quran.shakeeb.in/",
   "iconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
   "maskableIconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
   "monochromeIconUrl": "https://quran.shakeeb.in/assets/icons/hifz-helper-mono.png",
@@ -21,8 +21,8 @@
     "path": "C:\\Shakeeb\\Home\\Ionic\\quran15line\\sarbakaf.keystore",
     "alias": "sarbakaf"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionName": "3",
+  "appVersionCode": 3,
   "shortcuts": [
     {
       "name": "Full Quran",
@@ -69,5 +69,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1"
+  "appVersion": "3"
 }

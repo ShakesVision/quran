@@ -18,9 +18,10 @@ import { IonicStorageModule, Storage } from "@ionic/storage-angular";
 import { OneSignal } from "@ionic-native/onesignal/ngx";
 import { HttpClientModule } from "@angular/common/http";
 import { ServiceWorkerModule } from "@angular/service-worker";
+import { StaticContentModalComponent } from "./components/static-content-modal";
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, StaticContentModalComponent],
   imports: [
     BrowserModule,
     IonicModule.forRoot(),

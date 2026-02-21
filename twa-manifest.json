@@ -1,0 +1,45 @@
+{
+  "packageId": "in.shakeeb.quran.twa",
+  "host": "quran.shakeeb.in",
+  "name": "Quran Hifz Helper",
+  "launcherName": "Quran Hifz",
+  "display": "standalone",
+  "themeColor": "#055533",
+  "navigationColor": "#055533",
+  "navigationColorDark": "#0f588c",
+  "navigationDividerColor": "#055533",
+  "backgroundColor": "#055533",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
+  "maskableIconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./sarbakaf.keystore",
+    "alias": "sarbakaf"
+  },
+  "appVersionCode": 1,
+  "appVersion": "1.0.0",
+  "shortcuts": [
+    {
+      "name": "Full Quran",
+      "short_name": "Read",
+      "url": "/quran",
+      "icons": [{"src": "https://quran.shakeeb.in/assets/icons/icon-192x192.png"}]
+    },
+    {
+      "name": "Browse Juz & Surah",
+      "short_name": "Browse",
+      "url": "/browse",
+      "icons": [{"src": "https://quran.shakeeb.in/assets/icons/icon-192x192.png"}]
+    },
+    {
+      "name": "Discover Ayahs",
+      "short_name": "Discover",
+      "url": "/discover",
+      "icons": [{"src": "https://quran.shakeeb.in/assets/icons/icon-192x192.png"}]
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://quran.shakeeb.in/manifest.webmanifest"
+}

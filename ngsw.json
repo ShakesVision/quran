@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1771642968599,
+  "timestamp": 1771646663586,
   "index": "/quran/index.html",
   "assetGroups": [
     {
@@ -130,6 +130,7 @@
         "/quran/assets/icons/android/android-launchericon-512-512.png",
         "/quran/assets/icons/android/android-launchericon-72-72.png",
         "/quran/assets/icons/android/android-launchericon-96-96.png",
+        "/quran/assets/icons/hifz-helper-mono.png",
         "/quran/assets/icons/icon-128x128.png",
         "/quran/assets/icons/icon-144x144.png",
         "/quran/assets/icons/icon-152x152.png",
@@ -605,6 +606,7 @@
     "/quran/assets/icons/android/android-launchericon-512-512.png": "e37307b526601707438496b165963f349affc556",
     "/quran/assets/icons/android/android-launchericon-72-72.png": "cd52f1b11be10cb32fe678b4f126b91912964309",
     "/quran/assets/icons/android/android-launchericon-96-96.png": "5c796b8942a828a0ba8f695f65f1aa15181c3bcd",
+    "/quran/assets/icons/hifz-helper-mono.png": "22de1d10939b496c3492815648442d008d8a958c",
     "/quran/assets/icons/icon-128x128.png": "a9db6e0266cb315a06768c6030175ac71d3a7227",
     "/quran/assets/icons/icon-144x144.png": "113b36891b02c56009fbcd02821fd2b9e48e4d8c",
     "/quran/assets/icons/icon-152x152.png": "ffc3e83b6ce551f32b0d72af770afc4a423708b3",

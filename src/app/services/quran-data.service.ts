@@ -1,8 +1,15 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Storage } from '@ionic/storage-angular';
-import { BehaviorSubject, Observable, of, from } from 'rxjs';
-import { map, catchError, switchMap, tap, mergeMap, toArray } from 'rxjs/operators';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Storage } from "@ionic/storage-angular";
+import { BehaviorSubject, Observable, of, from } from "rxjs";
+import {
+  map,
+  catchError,
+  switchMap,
+  tap,
+  mergeMap,
+  toArray,
+} from "rxjs/operators";
 import {
   TextSource,
   TEXT_SOURCES,
@@ -10,9 +17,15 @@ import {
   QuranComChapterResponse,
   QuranComVerse,
   MUSHAF_CODES,
-} from '../models/text-sources';
-import { SurahService } from './surah.service';
-import { AyahCard, CardDesign, CARD_PALETTES, CARD_PATTERNS, SURAH_NAMES_EN } from '../models/ayah-card';
+} from "../models/text-sources";
+import { SurahService } from "./surah.service";
+import {
+  AyahCard,
+  CardDesign,
+  CARD_PALETTES,
+  CARD_PATTERNS,
+  SURAH_NAMES_EN,
+} from "../models/ayah-card";
 
 /**
  * Available translation resource definition
@@ -21,7 +34,7 @@ export interface TranslationResource {
   id: number;
   name: string;
   author: string;
-  language: 'english' | 'urdu';
+  language: "english" | "urdu";
 }
 
 /**
@@ -30,20 +43,85 @@ export interface TranslationResource {
  */
 export const AVAILABLE_TRANSLATIONS: TranslationResource[] = [
   // English translations (first 3 are in Discover cache)
-  { id: 20, name: 'Saheeh International', author: 'Saheeh International', language: 'english' },
-  { id: 85, name: 'Abdel Haleem', author: 'M.A.S. Abdel Haleem', language: 'english' },
-  { id: 84, name: 'Mufti Taqi Usmani', author: 'Mufti Taqi Usmani', language: 'english' },
-  { id: 95, name: 'Tafhim (Maududi)', author: 'Sayyid Abul Ala Maududi', language: 'english' },
-  { id: 22, name: 'Yusuf Ali', author: 'Abdullah Yusuf Ali', language: 'english' },
-  { id: 203, name: 'Al-Hilali & Khan', author: 'Al-Hilali & Khan', language: 'english' },
+  {
+    id: 20,
+    name: "Saheeh International",
+    author: "Saheeh International",
+    language: "english",
+  },
+  {
+    id: 85,
+    name: "Abdel Haleem",
+    author: "M.A.S. Abdel Haleem",
+    language: "english",
+  },
+  {
+    id: 84,
+    name: "Mufti Taqi Usmani",
+    author: "Mufti Taqi Usmani",
+    language: "english",
+  },
+  {
+    id: 95,
+    name: "Tafhim (Maududi)",
+    author: "Sayyid Abul Ala Maududi",
+    language: "english",
+  },
+  {
+    id: 22,
+    name: "Yusuf Ali",
+    author: "Abdullah Yusuf Ali",
+    language: "english",
+  },
+  {
+    id: 203,
+    name: "Al-Hilali & Khan",
+    author: "Al-Hilali & Khan",
+    language: "english",
+  },
   // Urdu translations (first 2 are in Discover cache)
-  { id: 97, name: 'Tafheem-ul-Quran', author: 'Syed Abu Ali Maududi', language: 'urdu' },
-  { id: 54, name: 'Junagarhi', author: 'Maulana Muhammad Junagarhi', language: 'urdu' },
-  { id: 234, name: 'Jalandhari', author: 'Fatah Muhammad Jalandhari', language: 'urdu' },
-  { id: 151, name: 'Tafsir E Usmani', author: 'Shaykh al-Hind Mahmud al-Hasan', language: 'urdu' },
-  { id: 158, name: 'Bayan-ul-Quran', author: 'Dr. Israr Ahmad', language: 'urdu' },
-  { id: 156, name: 'Fe Zilal al-Quran', author: 'Sayyid Ibrahim Qutb', language: 'urdu' },
-  { id: 819, name: 'Wahiduddin Khan', author: 'Maulana Wahiduddin Khan', language: 'urdu' },
+  {
+    id: 97,
+    name: "Tafheem-ul-Quran",
+    author: "Syed Abu Ali Maududi",
+    language: "urdu",
+  },
+  {
+    id: 54,
+    name: "Junagarhi",
+    author: "Maulana Muhammad Junagarhi",
+    language: "urdu",
+  },
+  {
+    id: 234,
+    name: "Jalandhari",
+    author: "Fatah Muhammad Jalandhari",
+    language: "urdu",
+  },
+  {
+    id: 151,
+    name: "Tafsir E Usmani",
+    author: "Shaykh al-Hind Mahmud al-Hasan",
+    language: "urdu",
+  },
+  {
+    id: 158,
+    name: "Bayan-ul-Quran",
+    author: "Dr. Israr Ahmad",
+    language: "urdu",
+  },
+  {
+    id: 156,
+    name: "Fe Zilal al-Quran",
+    author: "Sayyid Ibrahim Qutb",
+    language: "urdu",
+  },
+  {
+    id: 819,
+    name: "Wahiduddin Khan",
+    author: "Maulana Wahiduddin Khan",
+    language: "urdu",
+  },
 ];
 
 export const DEFAULT_EN_TRANSLATION_ID = 84; // Mufti Taqi Usmani
@@ -62,11 +140,11 @@ export interface JuzData {
   pages: string;
   rukuArray: any[];
   title: string;
-  mode: 'juz' | 'surah';
+  mode: "juz" | "surah";
 }
 
 export interface NavigationTarget {
-  type: 'page' | 'juz' | 'surah' | 'ayah';
+  type: "page" | "juz" | "surah" | "ayah";
   page?: number;
   juz?: number;
   surah?: number;
@@ -81,17 +159,17 @@ export interface QuranComProgress {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class QuranDataService {
-  private readonly STORAGE_KEY_SOURCE = 'selectedTextSource';
-  private readonly STORAGE_KEY_QURAN = 'QuranData';
-  private readonly STORAGE_KEY_CUSTOM_SOURCES = 'customSources';
-  private readonly STORAGE_KEY_AYAH_DATA = 'QuranAyahData';
-  private readonly STORAGE_KEY_AYAH_DATA_V2 = 'QuranAyahData_v2'; // Stores all translations per ayah
-  private readonly STORAGE_KEY_PRECACHE_DONE = 'QuranPreCacheDone';
-  private readonly STORAGE_KEY_EN_TRANSLATION = 'DiscoverEnTranslation';
-  private readonly STORAGE_KEY_UR_TRANSLATION = 'DiscoverUrTranslation';
+  private readonly STORAGE_KEY_SOURCE = "selectedTextSource";
+  private readonly STORAGE_KEY_QURAN = "QuranData";
+  private readonly STORAGE_KEY_CUSTOM_SOURCES = "customSources";
+  private readonly STORAGE_KEY_AYAH_DATA = "QuranAyahData";
+  private readonly STORAGE_KEY_AYAH_DATA_V2 = "QuranAyahData_v2"; // Stores all translations per ayah
+  private readonly STORAGE_KEY_PRECACHE_DONE = "QuranPreCacheDone";
+  private readonly STORAGE_KEY_EN_TRANSLATION = "DiscoverEnTranslation";
+  private readonly STORAGE_KEY_UR_TRANSLATION = "DiscoverUrTranslation";
 
   /** User's preferred translation resource IDs for Discover */
   private selectedEnTranslationId: number = DEFAULT_EN_TRANSLATION_ID;
@@ -99,7 +177,10 @@ export class QuranDataService {
 
   private quranComPageNumbers: number[] = [];
   private quranComPageIndexByNumber: Map<number, number> = new Map();
-  private quranComPageMeta: Map<number, { juzs: Set<number>; surahs: Set<number> }> = new Map();
+  private quranComPageMeta: Map<
+    number,
+    { juzs: Set<number>; surahs: Set<number> }
+  > = new Map();
 
   /**
    * Ruku end positions for qurancom text (absolute page + line).
@@ -114,10 +195,13 @@ export class QuranDataService {
    * Value = array of {line (0-based), surah, ayah} sorted by occurrence.
    * Used by the reader for ayah detection since word.text doesn't contain ۝+digits.
    */
-  private quranComAyahMap: Map<number, { line: number; surah: number; ayah: number }[]> = new Map();
+  private quranComAyahMap: Map<
+    number,
+    { line: number; surah: number; ayah: number }[]
+  > = new Map();
 
   private currentSource$ = new BehaviorSubject<TextSource>(
-    TEXT_SOURCES.find((s) => s.isDefault) || TEXT_SOURCES[0]
+    TEXT_SOURCES.find((s) => s.isDefault) || TEXT_SOURCES[0],
   );
 
   private quranData$ = new BehaviorSubject<string | null>(null);
@@ -131,24 +215,29 @@ export class QuranDataService {
   constructor(
     private http: HttpClient,
     private storage: Storage,
-    private surahService: SurahService
+    private surahService: SurahService,
   ) {
     this.initStorage();
   }
 
   private async initStorage() {
     await this.storage.create();
-    
+
     // Clean up old (pre-v2) qurancom cache entries that lack bismillah injection
     try {
       const keys = await this.storage.keys();
       for (const key of keys) {
-        if (key.startsWith(this.STORAGE_KEY_QURAN + '_qurancom') && !key.includes('_raw_v2_')) {
+        if (
+          key.startsWith(this.STORAGE_KEY_QURAN + "_qurancom") &&
+          !key.includes("_raw_v2_")
+        ) {
           await this.storage.remove(key);
-          console.log('Cleaned up old cache:', key);
+          console.log("Cleaned up old cache:", key);
         }
       }
-    } catch (e) { /* ignore cleanup errors */ }
+    } catch (e) {
+      /* ignore cleanup errors */
+    }
 
     // Load translation preferences for Discover
     try {
@@ -156,7 +245,9 @@ export class QuranDataService {
       if (enId) this.selectedEnTranslationId = enId;
       const urId = await this.storage.get(this.STORAGE_KEY_UR_TRANSLATION);
       if (urId) this.selectedUrTranslationId = urId;
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
 
     // Migrate old ayah cache to v2 format (store all translations)
     try {
@@ -165,13 +256,17 @@ export class QuranDataService {
       if (oldCache && !newCache) {
         // Old cache exists but no v2 — remove old so it re-downloads with all translations
         await this.storage.remove(this.STORAGE_KEY_AYAH_DATA);
-        console.log('Removed old ayah cache to force v2 re-download with all translations');
+        console.log(
+          "Removed old ayah cache to force v2 re-download with all translations",
+        );
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
 
     // Load custom sources first
     await this.loadCustomSources();
-    
+
     // Then load the saved source preference
     const savedSourceId = await this.storage.get(this.STORAGE_KEY_SOURCE);
     if (savedSourceId) {
@@ -195,7 +290,8 @@ export class QuranDataService {
    * Load custom sources from storage
    */
   async loadCustomSources(): Promise<TextSource[]> {
-    this.customSources = (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
+    this.customSources =
+      (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
     return this.customSources;
   }
 
@@ -234,7 +330,9 @@ export class QuranDataService {
    * Get ayah ends on a specific page (1-based page index in this.pages).
    * Returns [{line (0-based), surah, ayah}] sorted by occurrence, or null if not qurancom.
    */
-  getQuranComAyahsForPage(pageIndex: number): { line: number; surah: number; ayah: number }[] | null {
+  getQuranComAyahsForPage(
+    pageIndex: number,
+  ): { line: number; surah: number; ayah: number }[] | null {
     if (this.quranComAyahMap.size === 0) return null;
     return this.quranComAyahMap.get(pageIndex) || [];
   }
@@ -244,8 +342,10 @@ export class QuranDataService {
    * Used by the reader for ruku ayah counts when text doesn't contain ۝+digits.
    */
   countQuranComAyahsBetween(
-    startPage: number, startLine: number,
-    endPage: number, endLine: number
+    startPage: number,
+    startLine: number,
+    endPage: number,
+    endLine: number,
   ): number {
     if (this.quranComAyahMap.size === 0) return 0;
     let count = 0;
@@ -280,15 +380,15 @@ export class QuranDataService {
   loadFullQuran(): Observable<string> {
     const source = this.currentSource$.getValue();
 
-    if (source.type === 'archive') {
+    if (source.type === "archive") {
       return this.loadArchiveQuran(source);
-    } else if (source.type === 'qurancom') {
+    } else if (source.type === "qurancom") {
       return this.loadQuranComQuran(source);
-    } else if (source.type === 'custom') {
+    } else if (source.type === "custom") {
       return this.loadCustomQuran(source);
     }
 
-    return of('');
+    return of("");
   }
 
   /**
@@ -298,32 +398,34 @@ export class QuranDataService {
     this.isLoading$.next(true);
 
     // Check cache first
-    return from(this.storage.get(`${this.STORAGE_KEY_QURAN}_${source.id}`)).pipe(
+    return from(
+      this.storage.get(`${this.STORAGE_KEY_QURAN}_${source.id}`),
+    ).pipe(
       switchMap((cached) => {
         if (cached && !navigator.onLine) {
-          console.log('Using cached archive data');
+          console.log("Using cached archive data");
           return of(cached);
         }
 
         // Fetch from network
         const url = `${source.baseUrl}/Quran.txt`;
-        return this.http.get(url, { responseType: 'text' }).pipe(
+        return this.http.get(url, { responseType: "text" }).pipe(
           tap((data) => {
             // Cache the data
             this.storage.set(`${this.STORAGE_KEY_QURAN}_${source.id}`, data);
           }),
           catchError((error) => {
-            console.error('Failed to fetch archive Quran:', error);
+            console.error("Failed to fetch archive Quran:", error);
             // Return cached data if available
             if (cached) return of(cached);
             throw error;
-          })
+          }),
         );
       }),
       tap((data) => {
         this.quranData$.next(data);
         this.isLoading$.next(false);
-      })
+      }),
     );
   }
 
@@ -337,29 +439,29 @@ export class QuranDataService {
     return from(this.storage.get(cacheKey)).pipe(
       switchMap((cached) => {
         if (cached && !navigator.onLine) {
-          console.log('Using cached custom source data');
+          console.log("Using cached custom source data");
           return of(cached);
         }
 
-        const url = source.baseUrl.endsWith('.txt')
+        const url = source.baseUrl.endsWith(".txt")
           ? source.baseUrl
           : `${source.baseUrl}/Quran.txt`;
 
-        return this.http.get(url, { responseType: 'text' }).pipe(
+        return this.http.get(url, { responseType: "text" }).pipe(
           tap((data) => {
             this.storage.set(cacheKey, data);
           }),
           catchError((error) => {
-            console.error('Failed to fetch custom Quran:', error);
+            console.error("Failed to fetch custom Quran:", error);
             if (cached) return of(cached);
             throw error;
-          })
+          }),
         );
       }),
       tap((data) => {
         this.quranData$.next(data);
         this.isLoading$.next(false);
-      })
+      }),
     );
   }
 
@@ -378,7 +480,9 @@ export class QuranDataService {
     return from(this.storage.get(rawCacheKey)).pipe(
       switchMap((cachedChapters: QuranComChapterResponse[] | null) => {
         if (cachedChapters && cachedChapters.length === totalChapters) {
-          console.log('Using cached quran.com chapter data, rebuilding text...');
+          console.log(
+            "Using cached quran.com chapter data, rebuilding text...",
+          );
           this.quranComProgress$.next({
             loaded: totalChapters,
             total: totalChapters,
@@ -401,9 +505,9 @@ export class QuranDataService {
           }),
           map((chapters) => this.buildQuranComText(chapters, source)),
           catchError((error) => {
-            console.error('Failed to fetch Quran.com data:', error);
+            console.error("Failed to fetch Quran.com data:", error);
             throw error;
-          })
+          }),
         );
       }),
       tap((data) => {
@@ -414,50 +518,59 @@ export class QuranDataService {
           total: totalChapters,
           done: true,
         });
-      })
+      }),
     );
   }
 
-  private fetchQuranComChapters(source: TextSource): Observable<QuranComChapterResponse[]> {
+  private fetchQuranComChapters(
+    source: TextSource,
+  ): Observable<QuranComChapterResponse[]> {
     const chapters = Array.from({ length: 114 }, (_, i) => i + 1);
     const total = chapters.length;
     let loaded = 0;
     return from(chapters).pipe(
       mergeMap(
         (chapterId) =>
-          this.http.get<QuranComChapterResponse>(`${source.baseUrl}/${chapterId}.json`).pipe(
-          tap(() => {
-            loaded += 1;
-            this.quranComProgress$.next({
-              loaded,
-              total,
-              done: loaded >= total,
-            });
-          }),
-          catchError((error) => {
-            console.warn(`Failed to fetch chapter ${chapterId}:`, error);
-            loaded += 1;
-            this.quranComProgress$.next({
-              loaded,
-              total,
-              done: loaded >= total,
-            });
-            return of({ verses: [] } as QuranComChapterResponse);
-          })
-          ),
-        6
+          this.http
+            .get<QuranComChapterResponse>(`${source.baseUrl}/${chapterId}.json`)
+            .pipe(
+              tap(() => {
+                loaded += 1;
+                this.quranComProgress$.next({
+                  loaded,
+                  total,
+                  done: loaded >= total,
+                });
+              }),
+              catchError((error) => {
+                console.warn(`Failed to fetch chapter ${chapterId}:`, error);
+                loaded += 1;
+                this.quranComProgress$.next({
+                  loaded,
+                  total,
+                  done: loaded >= total,
+                });
+                return of({ verses: [] } as QuranComChapterResponse);
+              }),
+            ),
+        6,
       ),
-      toArray()
+      toArray(),
     );
   }
 
-  private buildQuranComText(chapters: QuranComChapterResponse[], source: TextSource): string {
+  private buildQuranComText(
+    chapters: QuranComChapterResponse[],
+    source: TextSource,
+  ): string {
     const pages: Map<number, Map<number, string[]>> = new Map();
-    const pageMeta: Map<number, { juzs: Set<number>; surahs: Set<number> }> = new Map();
+    const pageMeta: Map<number, { juzs: Set<number>; surahs: Set<number> }> =
+      new Map();
     let lastRukuNumber: number | null = null;
 
     // Track the first word position of each chapter for header/bismillah injection
-    const chapterFirstWord: Map<number, { page: number; line: number }> = new Map();
+    const chapterFirstWord: Map<number, { page: number; line: number }> =
+      new Map();
 
     // Collect ruku end positions — ruku mark goes at the END of the last ayah of
     // each ruku (matching the archive text convention). We detect this when a new
@@ -467,7 +580,12 @@ export class QuranDataService {
 
     // Collect ayah end positions for metadata (since word.text for end markers
     // doesn't contain ۝+digits, the reader needs this for ayah detection).
-    const ayahEnds: { mushafPage: number; line: number; surah: number; ayah: number }[] = [];
+    const ayahEnds: {
+      mushafPage: number;
+      line: number;
+      surah: number;
+      ayah: number;
+    }[] = [];
 
     chapters.forEach((chapter) => {
       (chapter?.verses || []).forEach((verse: any) => {
@@ -476,7 +594,12 @@ export class QuranDataService {
         const verseRuku = verse.ruku_number || null;
 
         // When ruku number changes, the PREVIOUS verse was the last of the old ruku
-        if (verseRuku && verseRuku !== lastRukuNumber && lastRukuNumber !== null && prevVerseLastWordPos) {
+        if (
+          verseRuku &&
+          verseRuku !== lastRukuNumber &&
+          lastRukuNumber !== null &&
+          prevVerseLastWordPos
+        ) {
           rukuPositions.push({ ...prevVerseLastWordPos });
         }
         lastRukuNumber = verseRuku;
@@ -491,7 +614,10 @@ export class QuranDataService {
 
           // Track first word of each chapter
           if (surahNumber && !chapterFirstWord.has(surahNumber)) {
-            chapterFirstWord.set(surahNumber, { page: pageNumber, line: lineNumber });
+            chapterFirstWord.set(surahNumber, {
+              page: pageNumber,
+              line: lineNumber,
+            });
           }
 
           if (!pages.has(pageNumber)) {
@@ -501,17 +627,21 @@ export class QuranDataService {
           if (!pageLines.has(lineNumber)) {
             pageLines.set(lineNumber, []);
           }
-
           const wordText = this.pickQuranComWordText(word, source);
           if (wordText) {
             pageLines.get(lineNumber)!.push(wordText);
           }
 
           // Record ayah end positions for metadata
-          if (word.char_type_name === 'end' && verse.verse_key) {
-            const [s, a] = verse.verse_key.split(':').map(Number);
+          if (word.char_type_name === "end" && verse.verse_key) {
+            const [s, a] = verse.verse_key.split(":").map(Number);
             if (s && a) {
-              ayahEnds.push({ mushafPage: pageNumber, line: lineNumber, surah: s, ayah: a });
+              ayahEnds.push({
+                mushafPage: pageNumber,
+                line: lineNumber,
+                surah: s,
+                ayah: a,
+              });
             }
           }
 
@@ -548,7 +678,7 @@ export class QuranDataService {
       const pageLines = pages.get(firstWord.page)!;
 
       // Build surah header text
-      const surahName = surahNames[chapterNum - 1] || '';
+      const surahName = surahNames[chapterNum - 1] || "";
       const headerText = `سُوْرَةُ ${surahName}`;
 
       if (isFatiha) {
@@ -592,7 +722,7 @@ export class QuranDataService {
     this.quranComPageNumbers = pageNumbers;
     // +1 offset because we prepend a title page at index 0
     this.quranComPageIndexByNumber = new Map(
-      pageNumbers.map((pageNumber, index) => [pageNumber, index + 1])
+      pageNumbers.map((pageNumber, index) => [pageNumber, index + 1]),
     );
     this.quranComPageMeta = pageMeta;
 
@@ -627,7 +757,7 @@ export class QuranDataService {
       const linesMap = pages.get(pageNumber)!;
       const lineNumbers = Array.from(linesMap.keys()).sort((a, b) => a - b);
       const lines = lineNumbers.map((lineNumber) =>
-        (linesMap.get(lineNumber) || []).join(" ")
+        (linesMap.get(lineNumber) || []).join(" "),
       );
       return lines.join("\n");
     });
@@ -663,11 +793,11 @@ export class QuranDataService {
   getJuz(juzNumber: number): Observable<JuzData> {
     return this.loadFullQuran().pipe(
       map((quranText) => {
-        const pages = quranText.split('\n\n');
+        const pages = quranText.split("\n\n");
         const source = this.currentSource$.getValue();
         let juzPages: string[] = [];
 
-        if (source.type === 'qurancom' && this.quranComPageNumbers.length > 0) {
+        if (source.type === "qurancom" && this.quranComPageNumbers.length > 0) {
           const pageNumbers = this.quranComPageNumbers.filter((pageNumber) => {
             const meta = this.quranComPageMeta.get(pageNumber);
             return meta?.juzs.has(juzNumber);
@@ -675,23 +805,24 @@ export class QuranDataService {
           juzPages = pageNumbers
             .map((pageNumber) => {
               const idx = this.quranComPageIndexByNumber.get(pageNumber);
-              return idx !== undefined ? pages[idx] : '';
+              return idx !== undefined ? pages[idx] : "";
             })
             .filter((p) => p);
         } else {
           const startPage = this.surahService.juzPageNumbers[juzNumber - 1];
-          const endPage = this.surahService.juzPageNumbers[juzNumber] || pages.length + 1;
+          const endPage =
+            this.surahService.juzPageNumbers[juzNumber] || pages.length + 1;
           juzPages = pages.slice(startPage - 1, endPage - 1);
         }
 
         return {
           juzNumber,
-          pages: juzPages.join('\n\n'),
+          pages: juzPages.join("\n\n"),
           rukuArray: [], // Will be populated by the component
           title: juzNumber.toString(),
-          mode: 'juz' as const,
+          mode: "juz" as const,
         };
-      })
+      }),
     );
   }
 
@@ -701,12 +832,12 @@ export class QuranDataService {
   getSurah(surahNumber: number): Observable<JuzData> {
     return this.loadFullQuran().pipe(
       map((quranText) => {
-        const pages = quranText.split('\n\n');
+        const pages = quranText.split("\n\n");
         const source = this.currentSource$.getValue();
         let surahPages: string[] = [];
         let juzNumberForSurah = 0;
 
-        if (source.type === 'qurancom' && this.quranComPageNumbers.length > 0) {
+        if (source.type === "qurancom" && this.quranComPageNumbers.length > 0) {
           const pageNumbers = this.quranComPageNumbers.filter((pageNumber) => {
             const meta = this.quranComPageMeta.get(pageNumber);
             return meta?.surahs.has(surahNumber);
@@ -716,12 +847,12 @@ export class QuranDataService {
             const minPage = Math.min(...pageNumbers);
             const maxPage = Math.max(...pageNumbers);
             const pageRange = this.quranComPageNumbers.filter(
-              (p) => p >= minPage && p <= maxPage
+              (p) => p >= minPage && p <= maxPage,
             );
             surahPages = pageRange
               .map((pageNumber) => {
                 const idx = this.quranComPageIndexByNumber.get(pageNumber);
-                return idx !== undefined ? pages[idx] : '';
+                return idx !== undefined ? pages[idx] : "";
               })
               .filter((p) => p);
 
@@ -732,7 +863,8 @@ export class QuranDataService {
           }
         } else {
           const startPage = this.surahService.surahPageNumbers[surahNumber - 1];
-          const endPage = this.surahService.surahPageNumbers[surahNumber] || pages.length + 1;
+          const endPage =
+            this.surahService.surahPageNumbers[surahNumber] || pages.length + 1;
 
           // Handle surahs that share a page
           surahPages = pages.filter((_, i) => {
@@ -744,12 +876,12 @@ export class QuranDataService {
 
         return {
           juzNumber: juzNumberForSurah,
-          pages: surahPages.join('\n\n'),
+          pages: surahPages.join("\n\n"),
           rukuArray: [],
           title: surahNumber.toString(),
-          mode: 'surah' as const,
+          mode: "surah" as const,
         };
-      })
+      }),
     );
   }
 
@@ -765,22 +897,25 @@ export class QuranDataService {
   /**
    * Navigate to a specific target
    */
-  resolveNavigation(target: NavigationTarget): { page: number; lineIndex?: number } {
-    if (target.type === 'page' && target.page) {
+  resolveNavigation(target: NavigationTarget): {
+    page: number;
+    lineIndex?: number;
+  } {
+    if (target.type === "page" && target.page) {
       return { page: target.page };
     }
 
-    if (target.type === 'juz' && target.juz) {
+    if (target.type === "juz" && target.juz) {
       const page = this.surahService.juzPageNumbers[target.juz - 1];
       return { page };
     }
 
-    if (target.type === 'surah' && target.surah) {
+    if (target.type === "surah" && target.surah) {
       const page = this.surahService.surahPageNumbers[target.surah - 1];
       return { page };
     }
 
-    if (target.type === 'ayah' && target.surah && target.ayah) {
+    if (target.type === "ayah" && target.surah && target.ayah) {
       const page = this.getPageForAyah(target.surah, target.ayah);
       return { page };
     }
@@ -803,7 +938,8 @@ export class QuranDataService {
    * Add a custom text source
    */
   async addCustomSource(source: TextSource): Promise<void> {
-    const customSources = (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
+    const customSources =
+      (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
     customSources.push(source);
     await this.storage.set(this.STORAGE_KEY_CUSTOM_SOURCES, customSources);
     this.customSources = customSources;
@@ -813,14 +949,16 @@ export class QuranDataService {
    * Remove a custom text source
    */
   async removeCustomSource(sourceId: string): Promise<void> {
-    let customSources = (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
+    let customSources =
+      (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
     customSources = customSources.filter((s: TextSource) => s.id !== sourceId);
     await this.storage.set(this.STORAGE_KEY_CUSTOM_SOURCES, customSources);
     this.customSources = customSources;
-    
+
     // If the removed source was selected, switch to default
     if (this.currentSource$.getValue().id === sourceId) {
-      const defaultSource = TEXT_SOURCES.find(s => s.isDefault) || TEXT_SOURCES[0];
+      const defaultSource =
+        TEXT_SOURCES.find((s) => s.isDefault) || TEXT_SOURCES[0];
       this.currentSource$.next(defaultSource);
       await this.storage.set(this.STORAGE_KEY_SOURCE, defaultSource.id);
     }
@@ -829,8 +967,12 @@ export class QuranDataService {
   /**
    * Update a custom text source
    */
-  async updateCustomSource(sourceId: string, updates: Partial<TextSource>): Promise<void> {
-    let customSources = (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
+  async updateCustomSource(
+    sourceId: string,
+    updates: Partial<TextSource>,
+  ): Promise<void> {
+    let customSources =
+      (await this.storage.get(this.STORAGE_KEY_CUSTOM_SOURCES)) || [];
     const index = customSources.findIndex((s: TextSource) => s.id === sourceId);
     if (index >= 0) {
       customSources[index] = { ...customSources[index], ...updates };
@@ -852,13 +994,13 @@ export class QuranDataService {
   getCurrentFontClass(): string {
     const source = this.currentSource$.getValue();
     switch (source.fontFamily) {
-      case 'IndoPak Waqf Lazim':
-        return 'ar-waqflazim';
-      case 'Uthmanic Hafs':
-        return 'ar-uthmani';
-      case 'Muhammadi':
+      case "IndoPak Waqf Lazim":
+        return "ar-waqflazim";
+      case "Uthmanic Hafs":
+        return "ar-uthmani";
+      case "Muhammadi":
       default:
-        return 'ar2';
+        return "ar2";
     }
   }
 
@@ -885,7 +1027,8 @@ export class QuranDataService {
     }
 
     this.preCacheInProgress = true;
-    const sourceUrl = 'https://raw.githubusercontent.com/ShakesVision/quran-archive/master/qurancom/comprehensive-15Lines';
+    const sourceUrl =
+      "https://raw.githubusercontent.com/ShakesVision/quran-archive/master/qurancom/comprehensive-15Lines";
 
     try {
       const allAyahs: any[] = [];
@@ -913,9 +1056,9 @@ export class QuranDataService {
             // Store ALL translations (v2 format) so user can switch without re-downloading
             const trs = (verse.translations || []).map((t: any) => ({
               id: t.resource_id,
-              t: (t.text || '')
-                .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
-                .replace(/<[^>]+>/g, '')
+              t: (t.text || "")
+                .replace(/<sup[^>]*>.*?<\/sup>/gi, "")
+                .replace(/<[^>]+>/g, "")
                 .trim(),
             }));
 
@@ -923,8 +1066,8 @@ export class QuranDataService {
               vk: verse.verse_key,
               sn: verse.chapter_id || chapterId,
               an: verse.verse_number,
-              ar: verse.text_indopak || verse.text_uthmani || '',
-              aru: verse.text_uthmani || '',
+              ar: verse.text_indopak || verse.text_uthmani || "",
+              aru: verse.text_uthmani || "",
               trs, // Array of { id: number, t: string }
             });
           }
@@ -934,10 +1077,12 @@ export class QuranDataService {
       if (allAyahs.length > 0) {
         await this.storage.set(this.STORAGE_KEY_AYAH_DATA_V2, allAyahs);
         this.ayahDataCache = allAyahs;
-        console.log(`Pre-cached ${allAyahs.length} ayahs (v2 with all translations) for Discover feature`);
+        console.log(
+          `Pre-cached ${allAyahs.length} ayahs (v2 with all translations) for Discover feature`,
+        );
       }
     } catch (err) {
-      console.error('Pre-cache failed:', err);
+      console.error("Pre-cache failed:", err);
     } finally {
       this.preCacheInProgress = false;
     }
@@ -947,13 +1092,13 @@ export class QuranDataService {
    * Extract translations from comprehensive verse data
    */
   private extractTranslations(translations: any[]): { en: string; ur: string } {
-    let en = '';
-    let ur = '';
+    let en = "";
+    let ur = "";
 
     for (const t of translations) {
-      const text = (t.text || '')
-        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
-        .replace(/<[^>]+>/g, '')
+      const text = (t.text || "")
+        .replace(/<sup[^>]*>.*?<\/sup>/gi, "")
+        .replace(/<[^>]+>/g, "")
         .trim();
 
       // English: resource_id 20 (Sahih), 85 (Haleem), 84 (Usmani)
@@ -974,7 +1119,9 @@ export class QuranDataService {
    */
   async getRandomAyahCard(): Promise<AyahCard | null> {
     if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
-      this.ayahDataCache = await this.storage.get(this.STORAGE_KEY_AYAH_DATA_V2);
+      this.ayahDataCache = await this.storage.get(
+        this.STORAGE_KEY_AYAH_DATA_V2,
+      );
     }
 
     if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
@@ -991,7 +1138,9 @@ export class QuranDataService {
    */
   async getRandomAyahCards(count: number): Promise<AyahCard[]> {
     if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
-      this.ayahDataCache = await this.storage.get(this.STORAGE_KEY_AYAH_DATA_V2);
+      this.ayahDataCache = await this.storage.get(
+        this.STORAGE_KEY_AYAH_DATA_V2,
+      );
     }
 
     if (!this.ayahDataCache || this.ayahDataCache.length === 0) {
@@ -1001,7 +1150,11 @@ export class QuranDataService {
     const cards: AyahCard[] = [];
     const usedIndices = new Set<number>();
 
-    for (let i = 0; i < count && usedIndices.size < this.ayahDataCache.length; i++) {
+    for (
+      let i = 0;
+      i < count && usedIndices.size < this.ayahDataCache.length;
+      i++
+    ) {
       let idx: number;
       do {
         idx = Math.floor(Math.random() * this.ayahDataCache.length);
@@ -1033,9 +1186,14 @@ export class QuranDataService {
    * Get available translations filtered by language.
    * @param cachedOnly If true, only returns translations in the pre-cached data (for Discover)
    */
-  getAvailableTranslations(language: 'english' | 'urdu', cachedOnly = false): TranslationResource[] {
-    return AVAILABLE_TRANSLATIONS.filter(t =>
-      t.language === language && (!cachedOnly || this.CACHED_TRANSLATION_IDS.includes(t.id))
+  getAvailableTranslations(
+    language: "english" | "urdu",
+    cachedOnly = false,
+  ): TranslationResource[] {
+    return AVAILABLE_TRANSLATIONS.filter(
+      (t) =>
+        t.language === language &&
+        (!cachedOnly || this.CACHED_TRANSLATION_IDS.includes(t.id)),
     );
   }
 
@@ -1073,7 +1231,7 @@ export class QuranDataService {
    * Get translation name for display by resource ID
    */
   getTranslationName(resourceId: number): string {
-    const t = AVAILABLE_TRANSLATIONS.find(tr => tr.id === resourceId);
+    const t = AVAILABLE_TRANSLATIONS.find((tr) => tr.id === resourceId);
     return t ? t.name : `Translation #${resourceId}`;
   }
 
@@ -1081,21 +1239,27 @@ export class QuranDataService {
    * Fetch a specific translation for a verse on-demand from Quran.com API.
    * Used when the selected translation is not in pre-cached data.
    */
-  async fetchTranslationOnDemand(verseKey: string, translationId: number): Promise<string> {
+  async fetchTranslationOnDemand(
+    verseKey: string,
+    translationId: number,
+  ): Promise<string> {
     try {
       const url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?translations=${translationId}&translation_fields=resource_name`;
       const res: any = await this.http.get(url).toPromise();
       const translation = res?.verse?.translations?.[0];
       if (translation?.text) {
-        return (translation.text || '')
-          .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
-          .replace(/<[^>]+>/g, '')
+        return (translation.text || "")
+          .replace(/<sup[^>]*>.*?<\/sup>/gi, "")
+          .replace(/<[^>]+>/g, "")
           .trim();
       }
-      return '';
+      return "";
     } catch (err) {
-      console.warn(`[QuranDataService] On-demand translation fetch failed for ${verseKey}:${translationId}`, err);
-      return '';
+      console.warn(
+        `[QuranDataService] On-demand translation fetch failed for ${verseKey}:${translationId}`,
+        err,
+      );
+      return "";
     }
   }
 
@@ -1104,36 +1268,44 @@ export class QuranDataService {
    */
   private buildAyahCard(ayah: any): AyahCard {
     const surahIdx = (ayah.sn || 1) - 1;
-    const arabicText = ayah.ar || '';
+    const arabicText = ayah.ar || "";
     const design = this.generateCardDesign(arabicText);
 
     // Pick translations based on user preference (v2 format: trs array)
-    let enText = '';
-    let urText = '';
+    let enText = "";
+    let urText = "";
 
     if (ayah.trs && Array.isArray(ayah.trs)) {
       // V2 format: array of { id, t }
-      const enTr = ayah.trs.find((t: any) => t.id === this.selectedEnTranslationId);
-      enText = enTr?.t || '';
+      const enTr = ayah.trs.find(
+        (t: any) => t.id === this.selectedEnTranslationId,
+      );
+      enText = enTr?.t || "";
       // Fallback: try any English translation
       if (!enText) {
-        const enIds = AVAILABLE_TRANSLATIONS.filter(t => t.language === 'english').map(t => t.id);
+        const enIds = AVAILABLE_TRANSLATIONS.filter(
+          (t) => t.language === "english",
+        ).map((t) => t.id);
         const fallback = ayah.trs.find((t: any) => enIds.includes(t.id));
-        enText = fallback?.t || '';
+        enText = fallback?.t || "";
       }
 
-      const urTr = ayah.trs.find((t: any) => t.id === this.selectedUrTranslationId);
-      urText = urTr?.t || '';
+      const urTr = ayah.trs.find(
+        (t: any) => t.id === this.selectedUrTranslationId,
+      );
+      urText = urTr?.t || "";
       // Fallback: try any Urdu translation
       if (!urText) {
-        const urIds = AVAILABLE_TRANSLATIONS.filter(t => t.language === 'urdu').map(t => t.id);
+        const urIds = AVAILABLE_TRANSLATIONS.filter(
+          (t) => t.language === "urdu",
+        ).map((t) => t.id);
         const fallback = ayah.trs.find((t: any) => urIds.includes(t.id));
-        urText = fallback?.t || '';
+        urText = fallback?.t || "";
       }
     } else if (ayah.tr) {
       // Legacy v1 format: { en, ur }
-      enText = ayah.tr.en || '';
-      urText = ayah.tr.ur || '';
+      enText = ayah.tr.en || "";
+      urText = ayah.tr.ur || "";
     }
 
     return {
@@ -1143,8 +1315,8 @@ export class QuranDataService {
       arabicText,
       urduTranslation: urText,
       englishTranslation: enText,
-      surahNameAr: this.surahService.surahNames?.[surahIdx] || '',
-      surahNameEn: SURAH_NAMES_EN[surahIdx] || '',
+      surahNameAr: this.surahService.surahNames?.[surahIdx] || "",
+      surahNameEn: SURAH_NAMES_EN[surahIdx] || "",
       design,
     };
   }
@@ -1159,13 +1331,13 @@ export class QuranDataService {
 
     // Determine font size based on text length
     const textLen = arabicText.length;
-    let fontSizeClass: 'large' | 'medium' | 'small';
+    let fontSizeClass: "large" | "medium" | "small";
     if (textLen < 80) {
-      fontSizeClass = 'large';
+      fontSizeClass = "large";
     } else if (textLen < 250) {
-      fontSizeClass = 'medium';
+      fontSizeClass = "medium";
     } else {
-      fontSizeClass = 'small';
+      fontSizeClass = "small";
     }
 
     return {
@@ -1177,4 +1349,3 @@ export class QuranDataService {
     };
   }
 }
-

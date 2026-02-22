@@ -109,7 +109,9 @@
     margin: 4px 0 0;
     opacity: 0.7;
 
-    ion-icon { font-size: 13px; }
+    ion-icon {
+      font-size: 13px;
+    }
   }
 
   .morphology-inline {
@@ -175,7 +177,9 @@
     border-radius: 20px;
     font-weight: 500;
 
-    ion-icon { font-size: 14px; }
+    ion-icon {
+      font-size: 14px;
+    }
   }
 
   .verse-audio {
@@ -329,7 +333,7 @@
   font-weight: 600;
   outline: none;
   -moz-appearance: textfield;
-  
+
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -414,6 +418,45 @@
   }
 }
 
+// ── Morphology SVG Section ──
+.morphology-svg-section {
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.morphology-svg-content {
+  padding: 12px;
+  animation: fadeSlideIn 0.2s ease;
+
+  .svg-wrapper {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+}
+
+.download-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+
+  ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 0.7rem;
+  }
+}
+
 // ── Word by Word Section ──
 .wbw-section {
   border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
@@ -443,7 +486,9 @@
     color: var(--ion-color-primary);
   }
 
-  span { flex: 1; }
+  span {
+    flex: 1;
+  }
 
   .expand-icon {
     font-size: 16px;
@@ -488,7 +533,9 @@
   color: var(--ion-color-medium);
   margin: 0 0 8px;
 
-  ion-icon { font-size: 14px; }
+  ion-icon {
+    font-size: 14px;
+  }
 }
 
 .verse-words-table {
@@ -594,4 +641,8 @@
   &.en-text p {
     line-height: 1.6;
   }
+}
+.morphology-svg svg {
+  max-width: 100%;
+  height: auto;
 }

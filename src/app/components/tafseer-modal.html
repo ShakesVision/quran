@@ -1,180 +1,219 @@
 <ion-content class="tafseer-content">
   <div class="modal-swipe-area" #swipeArea>
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading-wrapper">
-    <ion-spinner name="crescent" color="primary"></ion-spinner>
-  </div>
-
-  <div *ngIf="!loading && verse" class="tafsir-content-wrapper">
-
-    <!-- Arabic Text Card -->
-    <div class="arabic-card">
-      <p class="verse ar-text rtl">
-        <span class="ayah-word" *ngFor="let word of verse?.words; let wi = index"
-              [class.word-selected]="selectedWordIndex === wi"
-              (click)="onArabicWordClick(word, wi)">{{ word.text }}</span>
-      </p>
-      <p class="word-tap-hint" *ngIf="!selectedWordMorphology && !morphologyLoading">
-        <ion-icon name="finger-print-outline" size="small"></ion-icon> Tap any word for morphology details
-      </p>
-      <!-- Morphology inline panel -->
-      <div class="morphology-inline" *ngIf="morphologyLoading">
-        <ion-spinner name="dots" color="primary"></ion-spinner>
-      </div>
-      <div class="morphology-inline" *ngIf="selectedWordMorphology">
-        <div class="morph-row" *ngIf="selectedWordMorphology.posLabel">
-          <span class="morph-label">POS</span><span class="morph-val">{{ selectedWordMorphology.posLabel }}</span>
-        </div>
-        <div class="morph-row" *ngIf="selectedWordMorphology.root">
-          <span class="morph-label">Root</span><span class="morph-val ar">{{ selectedWordMorphology.root }}</span>
-        </div>
-        <div class="morph-row" *ngIf="selectedWordMorphology.lemma">
-          <span class="morph-label">Lemma</span><span class="morph-val ar">{{ selectedWordMorphology.lemma }}</span>
-        </div>
-        <div class="morph-row" *ngIf="selectedWordMorphology.verbForm">
-          <span class="morph-label">Form</span><span class="morph-val">{{ selectedWordMorphology.verbForm }}</span>
-        </div>
-        <div class="morph-row" *ngIf="selectedWordMorphology.aspectLabel">
-          <span class="morph-label">Aspect</span><span class="morph-val">{{ selectedWordMorphology.aspectLabel }}</span>
-        </div>
-        <div class="morph-row" *ngIf="selectedWordMorphology.stateLabel">
-          <span class="morph-label">Case</span><span class="morph-val">{{ selectedWordMorphology.stateLabel }}</span>
-        </div>
-        <div class="morph-row" *ngIf="selectedWordMorphology.features">
-          <span class="morph-label">Features</span><span class="morph-val">{{ selectedWordMorphology.features }}</span>
-        </div>
-      </div>
-      <div class="arabic-meta">
-        <span *ngIf="sajdahMessage" class="sajdah-badge">
-          <ion-icon name="warning-outline"></ion-icon> {{ sajdahMessage }}
-        </span>
-        <audio controls [src]="audioSrc" class="verse-audio"></audio>
-      </div>
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-wrapper">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
     </div>
 
-    <!-- Word by Word Section (collapsed by default, right after Arabic card) -->
-    <div class="wbw-section">
-      <div class="section-header" (click)="wbwExpanded = !wbwExpanded">
-        <ion-icon name="grid-outline"></ion-icon>
-        <span>Word by Word</span>
-        <ion-icon [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
-      </div>
-      <div *ngIf="wbwExpanded" class="wbw-table-wrapper">
-        <!-- WBW Language Switcher -->
-        <div class="wbw-lang-chips">
-          <ion-chip *ngFor="let lang of wbwLanguages"
-                    [outline]="wbwTransLang !== lang.code"
-                    [color]="wbwTransLang === lang.code ? 'primary' : 'medium'"
-                    (click)="changeWbwLang(lang.code)"
-                    class="wbw-lang-chip">
-            {{ lang.label }}
-          </ion-chip>
-        </div>
-        <p class="wbw-hint">
-          <ion-icon name="musical-notes-outline"></ion-icon> Tap a word to hear its pronunciation
+    <div *ngIf="!loading && verse" class="tafsir-content-wrapper">
+
+      <!-- Arabic Text Card -->
+      <div class="arabic-card">
+        <p class="verse ar-text rtl">
+          <span class="ayah-word" *ngFor="let word of verse?.words; let wi = index"
+            [class.word-selected]="selectedWordIndex === wi" (click)="onArabicWordClick(word, wi)">{{ word.text
+            }}</span>
         </p>
-        <div *ngIf="wbwLangLoading" class="wbw-lang-loading">
+        <p class="word-tap-hint" *ngIf="!selectedWordMorphology && !morphologyLoading">
+          <ion-icon name="finger-print-outline" size="small"></ion-icon> Tap any word for morphology details
+        </p>
+        <!-- Morphology inline panel -->
+        <div class="morphology-inline" *ngIf="morphologyLoading">
           <ion-spinner name="dots" color="primary"></ion-spinner>
         </div>
-        <table class="verse-words-table">
-          <tr *ngFor="let word of verse?.words; let i = index" (click)="playWord(word)" class="wbw-row ion-activatable">
-            <ion-ripple-effect></ion-ripple-effect>
-            <td class="translation-col">{{ word.translation?.text }}</td>
-            <td class="transliteration-col">{{ word.transliteration?.text }}</td>
-            <td class="arabic-col" [ngClass]="{'ar-text': i !== verse.words.length - 1, 'ar-text2': i === verse.words.length - 1}">
-              {{ word.text }}
-            </td>
-          </tr>
-        </table>
+        <div class="morphology-inline" *ngIf="selectedWordMorphology">
+          <div class="morph-row" *ngIf="selectedWordMorphology.posLabel">
+            <span class="morph-label">POS</span><span class="morph-val">{{ selectedWordMorphology.posLabel }}</span>
+          </div>
+          <div class="morph-row" *ngIf="selectedWordMorphology.root">
+            <span class="morph-label">Root</span><span class="morph-val ar">{{ selectedWordMorphology.root }}</span>
+          </div>
+          <div class="morph-row" *ngIf="selectedWordMorphology.lemma">
+            <span class="morph-label">Lemma</span><span class="morph-val ar">{{ selectedWordMorphology.lemma }}</span>
+          </div>
+          <div class="morph-row" *ngIf="selectedWordMorphology.verbForm">
+            <span class="morph-label">Form</span><span class="morph-val">{{ selectedWordMorphology.verbForm }}</span>
+          </div>
+          <div class="morph-row" *ngIf="selectedWordMorphology.aspectLabel">
+            <span class="morph-label">Aspect</span><span class="morph-val">{{ selectedWordMorphology.aspectLabel
+              }}</span>
+          </div>
+          <div class="morph-row" *ngIf="selectedWordMorphology.stateLabel">
+            <span class="morph-label">Case</span><span class="morph-val">{{ selectedWordMorphology.stateLabel }}</span>
+          </div>
+          <div class="morph-row" *ngIf="selectedWordMorphology.features">
+            <span class="morph-label">Features</span><span class="morph-val">{{ selectedWordMorphology.features
+              }}</span>
+          </div>
+        </div>
+        <div class="arabic-meta">
+          <span *ngIf="sajdahMessage" class="sajdah-badge">
+            <ion-icon name="warning-outline"></ion-icon> {{ sajdahMessage }}
+          </span>
+          <audio controls [src]="audioSrc" class="verse-audio"></audio>
+        </div>
       </div>
-    </div>
 
-    <!-- Config Mode Banner -->
-    <div *ngIf="isConfigMode" class="config-banner">
-      <ion-icon name="reorder-four-outline"></ion-icon>
-      <span>Reorder or hide translations. Tap arrows to move, eye to toggle.</span>
-    </div>
+      <!-- Morphology SVG Section (collapsed by default) -->
+      <div class="morphology-svg-section" *ngIf="svgContent">
+        <div class="section-header" (click)="svgExpanded = !svgExpanded">
+          <ion-icon name="finger-print-outline"></ion-icon>
+          <span>Morphology</span> <span class="ar-text2">ترکیب</span>
+          <ion-icon [name]="svgExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+        </div>
+        <div *ngIf="svgExpanded" class="morphology-svg-content">
+          <pinch-zoom [properties]="zoomProperties">
+            <div class="svg-wrapper" [innerHTML]="svgContent"></div>
+          </pinch-zoom>
+          <div class="download-controls">
+            <ion-button size="small" fill="outline" (click)="downloadMorphologySvg('1x', 'svg')">
+              <ion-icon slot="start" name="download-outline"></ion-icon>
+              SVG 1x
+            </ion-button>
+            <ion-button size="small" fill="outline" (click)="downloadMorphologySvg('2x', 'svg')">
+              <ion-icon slot="start" name="download-outline"></ion-icon>
+              SVG 2x
+            </ion-button>
+            <ion-button size="small" fill="outline" (click)="downloadMorphologySvg('1x', 'png')">
+              <ion-icon slot="start" name="download-outline"></ion-icon>
+              PNG 1x
+            </ion-button>
+            <ion-button size="small" fill="outline" (click)="downloadMorphologySvg('2x', 'png')">
+              <ion-icon slot="start" name="download-outline"></ion-icon>
+              PNG 2x
+            </ion-button>
+          </div>
+        </div>
+      </div>
 
-    <!-- Translation Blocks -->
-    <div class="translations-container">
-      <div *ngFor="let tr of translations; let i = index"
-           class="translation-block"
-           [class.collapsed]="!tr.expanded && !isConfigMode"
-           [class.hidden-trans]="!isVisible(tr) && !isConfigMode"
-           [style.--accent-color]="tr.color">
+      <!-- Word by Word Section (collapsed by default, right after Morphology) -->
+      <div class="wbw-section">
+        <div class="section-header" (click)="wbwExpanded = !wbwExpanded">
+          <ion-icon name="grid-outline"></ion-icon>
+          <span>Word by Word</span>
+          <ion-icon [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+        </div>
+        <div *ngIf="wbwExpanded" class="wbw-table-wrapper">
+          <!-- WBW Language Switcher -->
+          <div class="wbw-lang-chips">
+            <ion-chip *ngFor="let lang of wbwLanguages" [outline]="wbwTransLang !== lang.code"
+              [color]="wbwTransLang === lang.code ? 'primary' : 'medium'" (click)="changeWbwLang(lang.code)"
+              class="wbw-lang-chip">
+              {{ lang.label }}
+            </ion-chip>
+          </div>
+          <p class="wbw-hint">
+            <ion-icon name="musical-notes-outline"></ion-icon> Tap a word to hear its pronunciation
+          </p>
+          <div *ngIf="wbwLangLoading" class="wbw-lang-loading">
+            <ion-spinner name="dots" color="primary"></ion-spinner>
+          </div>
+          <table class="verse-words-table">
+            <tr *ngFor="let word of verse?.words; let i = index" (click)="playWord(word)"
+              class="wbw-row ion-activatable">
+              <ion-ripple-effect></ion-ripple-effect>
+              <td class="translation-col">{{ word.translation?.text }}</td>
+              <td class="transliteration-col">{{ word.transliteration?.text }}</td>
+              <td class="arabic-col"
+                [ngClass]="{'ar-text': i !== verse.words.length - 1, 'ar-text2': i === verse.words.length - 1}">
+                {{ word.text }}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
 
-        <!-- Header (always visible) — click to expand/collapse -->
-        <div class="trans-header" (click)="!isConfigMode && toggleTranslation(tr)">
-          <div class="trans-header-left">
-            <div class="trans-color-bar" [style.background]="tr.color"></div>
-            <ion-icon [name]="tr.icon" class="trans-icon" [style.color]="tr.color"></ion-icon>
-            <div class="trans-meta">
-              <span class="trans-name">{{ tr.resourceName }}</span>
-              <span class="trans-lang" [class.lang-urdu]="tr.languageName === 'urdu'">{{ tr.languageName }}</span>
+      <!-- Config Mode Banner -->
+      <div *ngIf="isConfigMode" class="config-banner">
+        <ion-icon name="reorder-four-outline"></ion-icon>
+        <span>Reorder or hide translations. Tap arrows to move, eye to toggle.</span>
+      </div>
+
+      <!-- Translation Blocks -->
+      <div class="translations-container">
+        <div *ngFor="let tr of translations; let i = index" class="translation-block"
+          [class.collapsed]="!tr.expanded && !isConfigMode" [class.hidden-trans]="!isVisible(tr) && !isConfigMode"
+          [style.--accent-color]="tr.color">
+
+          <!-- Header (always visible) — click to expand/collapse -->
+          <div class="trans-header" (click)="!isConfigMode && toggleTranslation(tr)">
+            <div class="trans-header-left">
+              <div class="trans-color-bar" [style.background]="tr.color"></div>
+              <ion-icon [name]="tr.icon" class="trans-icon" [style.color]="tr.color"></ion-icon>
+              <div class="trans-meta">
+                <span class="trans-name">{{ tr.resourceName }}</span>
+                <span class="trans-lang" [class.lang-urdu]="tr.languageName === 'urdu'">{{ tr.languageName }}</span>
+              </div>
+            </div>
+            <div class="trans-header-right">
+              <!-- Config mode controls -->
+              <ng-container *ngIf="isConfigMode">
+                <input type="number" class="priority-input" [value]="i + 1" min="1" [max]="translations.length"
+                  (change)="moveToPosition(i, $event.target.value); $event.stopPropagation()"
+                  (click)="$event.stopPropagation()" />
+                <button class="config-btn" (click)="moveUp(i); $event.stopPropagation()" [disabled]="i === 0">
+                  <ion-icon name="chevron-up-outline"></ion-icon>
+                </button>
+                <button class="config-btn" (click)="moveDown(i); $event.stopPropagation()"
+                  [disabled]="i === translations.length - 1">
+                  <ion-icon name="chevron-down-outline"></ion-icon>
+                </button>
+                <button class="config-btn" (click)="toggleVisibility(tr); $event.stopPropagation()">
+                  <ion-icon [name]="isVisible(tr) ? 'eye-outline' : 'eye-off-outline'"
+                    [style.color]="isVisible(tr) ? '#4caf50' : '#ef5350'"></ion-icon>
+                </button>
+              </ng-container>
+              <!-- Expand/collapse chevron -->
+              <ion-icon *ngIf="!isConfigMode" [name]="tr.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+                class="expand-icon"></ion-icon>
             </div>
           </div>
-          <div class="trans-header-right">
-            <!-- Config mode controls -->
-            <ng-container *ngIf="isConfigMode">
-              <input type="number" class="priority-input" [value]="i + 1" min="1" [max]="translations.length"
-                     (change)="moveToPosition(i, $event.target.value); $event.stopPropagation()"
-                     (click)="$event.stopPropagation()" />
-              <button class="config-btn" (click)="moveUp(i); $event.stopPropagation()" [disabled]="i === 0">
-                <ion-icon name="chevron-up-outline"></ion-icon>
-              </button>
-              <button class="config-btn" (click)="moveDown(i); $event.stopPropagation()" [disabled]="i === translations.length - 1">
-                <ion-icon name="chevron-down-outline"></ion-icon>
-              </button>
-              <button class="config-btn" (click)="toggleVisibility(tr); $event.stopPropagation()">
-                <ion-icon [name]="isVisible(tr) ? 'eye-outline' : 'eye-off-outline'" [style.color]="isVisible(tr) ? '#4caf50' : '#ef5350'"></ion-icon>
-              </button>
-            </ng-container>
-            <!-- Expand/collapse chevron -->
-            <ion-icon *ngIf="!isConfigMode" [name]="tr.expanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+
+          <!-- Body (collapsible) -->
+          <div class="trans-body" *ngIf="tr.expanded || isConfigMode"
+            [class.hidden-text]="!isVisible(tr) && !isConfigMode">
+            <p [ngClass]="{'rtl ur': tr.languageName === 'urdu', 'en-text': tr.languageName === 'english'}">
+              {{ tr.text }}
+            </p>
           </div>
         </div>
+      </div>
 
-        <!-- Body (collapsible) -->
-        <div class="trans-body" *ngIf="tr.expanded || isConfigMode" [class.hidden-text]="!isVisible(tr) && !isConfigMode">
-          <p [ngClass]="{'rtl ur': tr.languageName === 'urdu', 'en-text': tr.languageName === 'english'}">
-            {{ tr.text }}
-          </p>
+      <!-- Tafsir Section -->
+      <div class="tafsir-section">
+        <div class="section-header">
+          <ion-icon name="book-outline"></ion-icon>
+          <span>Tafsir / Commentary</span>
+        </div>
+        <div class="tafsir-buttons">
+          <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" size="small" fill="outline" color="medium"
+            [disabled]="loading">
+            Ibn Kathir (عربی)
+          </ion-button>
+          <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" size="small" fill="outline" color="medium"
+            [disabled]="loading">
+            Ibn Kathir (اُردو)
+          </ion-button>
+          <ion-button *ngIf="!tafsir.en" (click)="loadTafsir('en')" size="small" fill="outline" color="medium"
+            [disabled]="loading">
+            Ma'arif ul Quran
+          </ion-button>
+        </div>
+        <div *ngIf="tafsir.ar" class="tafsir-block ar-text2 rtl">
+          <h4>ابن کثیر (عَرَبِی)</h4>
+          <p>{{ tafsir.ar }}</p>
+        </div>
+        <div *ngIf="tafsir.ur" class="tafsir-block ur rtl">
+          <h4>ابن کثیر (اُردو)</h4>
+          <p>{{ tafsir.ur }}</p>
+        </div>
+        <div *ngIf="tafsir.en" class="tafsir-block en-text">
+          <h4>Ma'arif ul Quran (Mufti Shafi Usmani)</h4>
+          <p>{{ tafsir.en }}</p>
         </div>
       </div>
-    </div>
 
-    <!-- Tafsir Section -->
-    <div class="tafsir-section">
-      <div class="section-header">
-        <ion-icon name="book-outline"></ion-icon>
-        <span>Tafsir / Commentary</span>
-      </div>
-      <div class="tafsir-buttons">
-        <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" size="small" fill="outline" color="medium" [disabled]="loading">
-          Ibn Kathir (عربی)
-        </ion-button>
-        <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" size="small" fill="outline" color="medium" [disabled]="loading">
-          Ibn Kathir (اُردو)
-        </ion-button>
-        <ion-button *ngIf="!tafsir.en" (click)="loadTafsir('en')" size="small" fill="outline" color="medium" [disabled]="loading">
-          Ma'arif ul Quran
-        </ion-button>
-      </div>
-      <div *ngIf="tafsir.ar" class="tafsir-block ar-text2 rtl">
-        <h4>ابن کثیر (عَرَبِی)</h4>
-        <p>{{ tafsir.ar }}</p>
-      </div>
-      <div *ngIf="tafsir.ur" class="tafsir-block ur rtl">
-        <h4>ابن کثیر (اُردو)</h4>
-        <p>{{ tafsir.ur }}</p>
-      </div>
-      <div *ngIf="tafsir.en" class="tafsir-block en-text">
-        <h4>Ma'arif ul Quran (Mufti Shafi Usmani)</h4>
-        <p>{{ tafsir.en }}</p>
-      </div>
     </div>
-
-  </div>
   </div>
 </ion-content>
 

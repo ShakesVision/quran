@@ -24,6 +24,7 @@ import {
 } from "../services/morphology.service";
 import { QuranData } from "src/assets/data/quran-data";
 import { Storage } from "@ionic/storage-angular";
+import { DomSanitizer } from "@angular/platform-browser";
 
 /**
  * Translation resource info for display
@@ -140,6 +141,16 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   // Back button subscription
   private backButtonSub: Subscription;
 
+  svgContent: string = ""; // will hold the SVG HTML for morphology visualization
+  svgExpanded = false; // collapsed by default
+  zoomProperties = {
+    "double-tap": true,
+    overflow: "hidden",
+    wheel: false,
+    disableZoomControl: "disable",
+    backgroundColor: "rgba(0,0,0,0)",
+  };
+
   constructor(
     private modalCtrl: ModalController,
     private httpClient: HttpClient,
@@ -149,12 +160,14 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     private gestureCtrl: GestureController,
     private platform: Platform,
     private morphologyService: MorphologyService,
+    private sanitizer: DomSanitizer,
   ) {}
 
   async ngOnInit() {
     await this.loadTranslationOrder();
     this.fetchTrans(this.verseKey);
 
+    this.getSvgContent(this.verseKey);
     // Intercept hardware/browser back button to dismiss modal instead of closing app
     this.backButtonSub = this.platform.backButton.subscribeWithPriority(
       200,
@@ -458,6 +471,8 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   fetchTrans(verse_key: string) {
+    // Also fetch morphology for the new ayah
+    this.getSvgContent(verse_key);
     this.loading = true;
     this.translations = [];
     this.tafsir = { ur: null, ar: null, en: null };
@@ -577,5 +592,127 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (e) {
       /* ignore */
     }
+  }
+
+  /**
+   * Download morphology SVG or PNG
+   * size: '1x' or '2x'
+   * format: 'svg' or 'png'
+   */
+  downloadMorphologySvg(size: "1x" | "2x", format: "svg" | "png") {
+    if (!this.svgContent) {
+      console.warn("SVG content not available");
+      return;
+    }
+
+    const [s, a] = this.verseKey.split(":");
+    const filename = `quran-morphology-${s}-${a}-${size}.${format}`;
+
+    if (format === "svg") {
+      // Extract SVG from HTML content
+      const div = document.createElement("div");
+      div.innerHTML = this.svgContent as string;
+      const svgElement = div.querySelector("svg");
+
+      if (svgElement) {
+        // Scale if 2x
+        if (size === "2x") {
+          svgElement.setAttribute(
+            "width",
+            (
+              parseInt(svgElement.getAttribute("width") || "800") * 2
+            ).toString(),
+          );
+          svgElement.setAttribute(
+            "height",
+            (
+              parseInt(svgElement.getAttribute("height") || "600") * 2
+            ).toString(),
+          );
+        }
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svgElement);
+        const blob = new Blob([svgString], { type: "image/svg+xml" });
+        this.downloadBlob(blob, filename);
+      }
+    } else if (format === "png") {
+      const div = document.createElement("div");
+      div.innerHTML = this.svgContent as string;
+      const svgElement = div.querySelector("svg") as SVGSVGElement;
+
+      if (svgElement) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let width = parseInt(svgElement.getAttribute("width") || "800");
+        let height = parseInt(svgElement.getAttribute("height") || "600");
+
+        if (size === "2x") {
+          width *= 2;
+          height *= 2;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Ensure namespace (important for export)
+        svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svgElement);
+
+        // ✅ Use Blob instead of btoa (Unicode safe)
+        const svgBlob = new Blob([svgString], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+
+        const url = URL.createObjectURL(svgBlob);
+        const img = new Image();
+
+        img.onload = () => {
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              this.downloadBlob(blob, filename);
+            }
+          }, "image/png");
+
+          URL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+      }
+    }
+  }
+
+  /**
+   * Helper to download blob as file
+   */
+  private downloadBlob(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
+  getSvgContent(verseKey: string) {
+    // URL of your JSON file
+    const [s, a] = verseKey.split(":");
+    const url = `https://raw.githubusercontent.com/ShakesVision/quran-archive/refs/heads/master/morphology/raw_svg/${s}/${a}.json`;
+
+    this.httpClient.get<{ data: string }>(url).subscribe({
+      next: (res) => {
+        this.svgContent = this.sanitizer.bypassSecurityTrustHtml(
+          res.data,
+        ) as string;
+      },
+      error: (err) => console.error("Failed to load SVG JSON:", err),
+    });
   }
 }

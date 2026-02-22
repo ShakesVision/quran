@@ -418,6 +418,9 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
       case "ar":
         slug = "ar-tafsir-ibn-kathir";
         break;
+      case "sadi":
+        slug = "ar-tafseer-al-saddi";
+        break;
       case "ur":
         slug = "ur-tafseer-ibn-e-kaseer";
         break;
@@ -704,7 +707,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   getSvgContent(verseKey: string) {
     // URL of your JSON file
     const [s, a] = verseKey.split(":");
-    const url = `https://raw.githubusercontent.com/ShakesVision/quran-archive/refs/heads/master/morphology/raw_svg/${s}/${a}.json`;
+    const url = `https://cdn.jsdelivr.net/gh/ShakesVision/quran-archive@master/morphology/raw_svg/${s}/${a}.json`;
 
     this.httpClient.get<{ data: string }>(url).subscribe({
       next: (res) => {

@@ -190,6 +190,10 @@
             [disabled]="loading">
             Ibn Kathir (عربی)
           </ion-button>
+          <ion-button *ngIf="!tafsir.sadi" (click)="loadTafsir('sadi')" size="small" fill="outline" color="medium"
+            [disabled]="loading">
+            Sa'adi (عربی)
+          </ion-button>
           <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" size="small" fill="outline" color="medium"
             [disabled]="loading">
             Ibn Kathir (اُردو)
@@ -202,6 +206,14 @@
         <div *ngIf="tafsir.ar" class="tafsir-block ar-text2 rtl">
           <h4>ابن کثیر (عَرَبِی)</h4>
           <p>{{ tafsir.ar }}</p>
+        </div>
+        <div *ngIf="tafsir.ar" class="tafsir-block ar-text2 rtl">
+          <h4>ابن کثیر (عَرَبِی)</h4>
+          <p>{{ tafsir.ar }}</p>
+        </div>
+        <div *ngIf="tafsir.sadi" class="tafsir-block ar-text2 rtl">
+          <h4>سعدی (عَرَبِی)</h4>
+          <p>{{ tafsir.sadi }}</p>
         </div>
         <div *ngIf="tafsir.ur" class="tafsir-block ur rtl">
           <h4>ابن کثیر (اُردو)</h4>

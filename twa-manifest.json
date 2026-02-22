@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#055533",
   "enableNotifications": true,
-  "startUrl": "https://quran.shakeeb.in/",
+  "startUrl": "/",
   "iconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
   "maskableIconUrl": "https://quran.shakeeb.in/assets/icons/icon-512x512.png",
   "monochromeIconUrl": "https://quran.shakeeb.in/assets/icons/hifz-helper-mono.png",
@@ -27,25 +27,25 @@
     {
       "name": "Full Quran",
       "shortName": "Read",
-      "url": "https://quran.shakeeb.in/quran",
+      "url": "/quran",
       "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-read.svg"
     },
     {
       "name": "Browse Juz & Surah",
       "shortName": "Browse",
-      "url": "https://quran.shakeeb.in/browse",
+      "url": "/browse",
       "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-browse.svg"
     },
     {
       "name": "Discover Ayahs",
       "shortName": "Discover",
-      "url": "https://quran.shakeeb.in/discover",
+      "url": "/discover",
       "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-discover.svg"
     },
     {
       "name": "Memorize",
       "shortName": "Memorize",
-      "url": "https://quran.shakeeb.in/memorize",
+      "url": "/memorize",
       "chosenIconUrl": "https://quran.shakeeb.in/assets/icons/shortcut-memorize.svg"
     }
   ],

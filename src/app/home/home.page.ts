@@ -2,7 +2,12 @@ import { HttpClient } from "@angular/common/http";
 import { Component, OnDestroy } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
-import { ActionSheetButton, ActionSheetController, AlertController, ModalController } from "@ionic/angular";
+import {
+  ActionSheetButton,
+  ActionSheetController,
+  AlertController,
+  ModalController,
+} from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
 import { HomePageBanner } from "../models/common";
 import { ProgressPage } from "../pages/progress/progress.page";
@@ -45,36 +50,103 @@ interface Achievement {
 // Each level requires progressively more effort, but early levels are easy to reach
 // (immediate reward → sustained engagement)
 const LEVEL_THRESHOLDS = [
-  { level: 1,  pages: 0,     title: 'Beginner',          icon: '🌱' },
-  { level: 2,  pages: 20,    title: 'Seeker',            icon: '🔍' },
-  { level: 3,  pages: 100,   title: 'Reader',            icon: '📖' },
-  { level: 4,  pages: 300,   title: 'Devoted',           icon: '💫' },
-  { level: 5,  pages: 604,   title: 'Khatm Complete',    icon: '🏆' },
-  { level: 6,  pages: 1208,  title: 'Double Khatm',      icon: '⭐' },
-  { level: 7,  pages: 1812,  title: 'Triple Khatm',      icon: '🌟' },
-  { level: 8,  pages: 3000,  title: 'Hafiz Path',        icon: '👑' },
-  { level: 9,  pages: 5000,  title: 'Scholar',           icon: '🎓' },
-  { level: 10, pages: 10000, title: 'Master',            icon: '💎' },
+  { level: 1, pages: 0, title: "Beginner", icon: "🌱" },
+  { level: 2, pages: 20, title: "Seeker", icon: "🔍" },
+  { level: 3, pages: 100, title: "Reader", icon: "📖" },
+  { level: 4, pages: 300, title: "Devoted", icon: "💫" },
+  { level: 5, pages: 604, title: "Khatm Complete", icon: "🏆" },
+  { level: 6, pages: 1208, title: "Double Khatm", icon: "⭐" },
+  { level: 7, pages: 1812, title: "Triple Khatm", icon: "🌟" },
+  { level: 8, pages: 3000, title: "Hafiz Path", icon: "👑" },
+  { level: 9, pages: 5000, title: "Scholar", icon: "🎓" },
+  { level: 10, pages: 10000, title: "Master", icon: "💎" },
 ];
 
-const ACHIEVEMENT_DEFS: Omit<Achievement, 'unlocked' | 'unlockedDate'>[] = [
+const ACHIEVEMENT_DEFS: Omit<Achievement, "unlocked" | "unlockedDate">[] = [
   // Streak-based (commitment & consistency psychology)
-  { id: 'streak_3',    name: 'Consistent',       description: '3-day reading streak',           icon: '🔥' },
-  { id: 'streak_7',    name: 'Weekly Warrior',    description: '7-day reading streak',           icon: '⚡' },
-  { id: 'streak_30',   name: 'Monthly Master',    description: '30-day reading streak',          icon: '💪' },
-  { id: 'streak_100',  name: 'Centurion',         description: '100-day reading streak',         icon: '🏅', hidden: true },
+  {
+    id: "streak_3",
+    name: "Consistent",
+    description: "3-day reading streak",
+    icon: "🔥",
+  },
+  {
+    id: "streak_7",
+    name: "Weekly Warrior",
+    description: "7-day reading streak",
+    icon: "⚡",
+  },
+  {
+    id: "streak_30",
+    name: "Monthly Master",
+    description: "30-day reading streak",
+    icon: "💪",
+  },
+  {
+    id: "streak_100",
+    name: "Centurion",
+    description: "100-day reading streak",
+    icon: "🏅",
+    hidden: true,
+  },
   // Volume-based (progress & mastery)
-  { id: 'pages_100',   name: 'First Hundred',     description: 'Read 100 pages total',           icon: '📚' },
-  { id: 'khatm_1',     name: 'First Khatm',       description: 'Complete reading the Quran',     icon: '🏆' },
-  { id: 'khatm_3',     name: 'Triple Crown',      description: 'Complete 3 khatm',               icon: '👑', hidden: true },
+  {
+    id: "pages_100",
+    name: "First Hundred",
+    description: "Read 100 pages total",
+    icon: "📚",
+  },
+  {
+    id: "khatm_1",
+    name: "First Khatm",
+    description: "Complete reading the Quran",
+    icon: "🏆",
+  },
+  {
+    id: "khatm_3",
+    name: "Triple Crown",
+    description: "Complete 3 khatm",
+    icon: "👑",
+    hidden: true,
+  },
   // Behavior-based (habit formation)
-  { id: 'early_bird',  name: 'Fajr Reader',       description: 'Log reading before 6 AM',        icon: '🌅' },
-  { id: 'night_owl',   name: 'Tahajjud Reader',   description: 'Log reading after 11 PM',        icon: '🌙' },
-  { id: 'overachiever',name: 'Overachiever',       description: 'Exceed daily target by 2x',      icon: '🚀' },
-  { id: 'target_hit',  name: 'On Target',          description: 'Hit daily target 7 days in a row', icon: '🎯' },
+  {
+    id: "early_bird",
+    name: "Fajr Reader",
+    description: "Log reading before 6 AM",
+    icon: "🌅",
+  },
+  {
+    id: "night_owl",
+    name: "Tahajjud Reader",
+    description: "Log reading after 11 PM",
+    icon: "🌙",
+  },
+  {
+    id: "overachiever",
+    name: "Overachiever",
+    description: "Exceed daily target by 2x",
+    icon: "🚀",
+  },
+  {
+    id: "target_hit",
+    name: "On Target",
+    description: "Hit daily target 7 days in a row",
+    icon: "🎯",
+  },
   // Social proof / milestone
-  { id: 'first_log',   name: 'First Step',         description: 'Log your first reading',         icon: '👣' },
-  { id: 'juz_complete',name: 'Juz Champion',       description: 'Read a full juz in one day',     icon: '📗' },
+  {
+    id: "first_log",
+    name: "First Step",
+    description: "Log your first reading",
+    icon: "👣",
+  },
+  {
+    id: "juz_complete",
+    name: "Juz Champion",
+    description: "Read a full juz in one day",
+    icon: "📗",
+  },
 ];
 
 @Component({
@@ -88,17 +160,17 @@ export class HomePage implements OnDestroy {
 
   // ── Daily Targets ──
   targetsEnabled = true;
-  dailyPageTarget = 20;  // Default: 20 pages/day = khatm in ~30 days
-  dailyAyahTarget = 5;   // Default: 5 ayahs/day memorization
-  khatmTarget = 1;       // Configurable: how many khatm in the target period
-  targetDays = 30;       // Target period in days (default: 30)
+  dailyPageTarget = 20; // Default: 20 pages/day = khatm in ~30 days
+  dailyAyahTarget = 5; // Default: 5 ayahs/day memorization
+  khatmTarget = 1; // Configurable: how many khatm in the target period
+  targetDays = 30; // Target period in days (default: 30)
   todayPages = 0;
   todayAyahs = 0;
   streakCount = 0;
   weeklyData: WeekDay[] = [];
   ramadanDaysLeft = 0;
-  khatmProjection = '';
-  totalPagesRead = 0;    // Total pages read in current target period
+  khatmProjection = "";
+  totalPagesRead = 0; // Total pages read in current target period
 
   // ── Gamification ──
   achievements: Achievement[] = [];
@@ -106,23 +178,51 @@ export class HomePage implements OnDestroy {
   nextLevel = LEVEL_THRESHOLDS[1];
   levelProgress = 0; // 0-100
   allTimePagesRead = 0;
-  motivationalQuote = '';
+  motivationalQuote = "";
   newAchievement: Achievement | null = null; // For popup notification
-  
+
   get tilawatProgress(): number {
-    return Math.min(100, Math.round((this.todayPages / this.dailyPageTarget) * 100));
+    return Math.min(
+      100,
+      Math.round((this.todayPages / this.dailyPageTarget) * 100),
+    );
   }
   get hifzProgress(): number {
-    return Math.min(100, Math.round((this.todayAyahs / this.dailyAyahTarget) * 100));
+    return Math.min(
+      100,
+      Math.round((this.todayAyahs / this.dailyAyahTarget) * 100),
+    );
   }
 
   mushafOptions: MushafOption[] = [
-    { id: 'archive-15', name: '15-Line Indopak', description: 'Saudi Mushaf Style', pages: 611, source: 'archive', linesPerPage: 15 },
-    { id: 'archive-16', name: '16-Line Indopak', description: 'Pakistan/India Style', pages: 548, source: 'archive', linesPerPage: 16 },
-    { id: 'qurancom-indopak-15', name: 'Quran.com 15-Line', description: 'Madani Mushaf', pages: 604, source: 'qurancom', linesPerPage: 15 },
-    { id: 'qurancom-indopak-16', name: 'Quran.com 16-Line', description: 'Indopak Mushaf', pages: 548, source: 'qurancom', linesPerPage: 16 },
+    {
+      id: "archive-15",
+      name: "15-Line Indopak",
+      description: "Saudi Mushaf Style",
+      pages: 611,
+      source: "archive",
+      linesPerPage: 15,
+    },
+    // Removing this until we have proper 16-line data, as the page count and layout differ (newline after every new page required to be entered manually.)
+    // { id: 'archive-16', name: '16-Line Indopak', description: 'Pakistan/India Style', pages: 548, source: 'archive', linesPerPage: 16 },
+    {
+      id: "qurancom-indopak-15",
+      name: "Quran.com 15-Line",
+      description: "Madani Mushaf",
+      pages: 611,
+      source: "qurancom",
+      linesPerPage: 15,
+    },
+    {
+      id: "qurancom-indopak-16",
+      name: "Quran.com 16-Line",
+      description: "Indopak Mushaf",
+      pages: 548,
+      source: "qurancom",
+      linesPerPage: 16,
+    },
   ];
-  
+
   banner: HomePageBanner = {
     text: "We are digitizing the 15 Lines Quran & translation in Unicode, which is a work in progress. You can also help us complete this project.",
     button: {
@@ -148,7 +248,7 @@ export class HomePage implements OnDestroy {
   currentBannerIndex = 0;
   private bannerInterval: any;
   discoverReady = false;
-  preCacheProgress = '';
+  preCacheProgress = "";
 
   constructor(
     private alertController: AlertController,
@@ -158,7 +258,7 @@ export class HomePage implements OnDestroy {
     private domSanatizer: DomSanitizer,
     private router: Router,
     private storage: Storage,
-    private quranDataService: QuranDataService
+    private quranDataService: QuranDataService,
   ) {
     this.initStorage();
   }
@@ -166,9 +266,11 @@ export class HomePage implements OnDestroy {
   async initStorage() {
     await this.storage.create();
     // Load saved mushaf preference
-    const savedMushaf = await this.storage.get('preferredMushaf');
+    const savedMushaf = await this.storage.get("preferredMushaf");
     if (savedMushaf) {
-      this.currentMushaf = this.mushafOptions.find(m => m.id === savedMushaf) || this.mushafOptions[0];
+      this.currentMushaf =
+        this.mushafOptions.find((m) => m.id === savedMushaf) ||
+        this.mushafOptions[0];
     } else {
       this.currentMushaf = this.mushafOptions[0]; // Default to 15-line
     }
@@ -179,39 +281,41 @@ export class HomePage implements OnDestroy {
    */
   openLastMushaf() {
     const mushaf = this.currentMushaf || this.mushafOptions[0];
-    this.router.navigate(['/quran'], {
-      queryParams: { source: mushaf.id }
+    this.router.navigate(["/quran"], {
+      queryParams: { source: mushaf.id },
     });
   }
 
   async selectMushaf(mushaf: MushafOption) {
     this.currentMushaf = mushaf;
-    await this.storage.set('preferredMushaf', mushaf.id);
+    await this.storage.set("preferredMushaf", mushaf.id);
     // Navigate to quran reader with the exact source ID
-    this.router.navigate(['/quran'], { 
-      queryParams: { 
-        source: mushaf.id
-      } 
+    this.router.navigate(["/quran"], {
+      queryParams: {
+        source: mushaf.id,
+      },
     });
   }
 
   async openMushafSelector() {
-    const buttons: ActionSheetButton[] = this.mushafOptions.map((mushaf): ActionSheetButton => ({
-      text: `${mushaf.name} (${mushaf.pages} pages)`,
-      cssClass: this.currentMushaf?.id === mushaf.id ? 'selected-mushaf' : '',
-      handler: () => {
-        this.selectMushaf(mushaf);
-      }
-    }));
+    const buttons: ActionSheetButton[] = this.mushafOptions.map(
+      (mushaf): ActionSheetButton => ({
+        text: `${mushaf.name} (${mushaf.pages} pages)`,
+        cssClass: this.currentMushaf?.id === mushaf.id ? "selected-mushaf" : "",
+        handler: () => {
+          this.selectMushaf(mushaf);
+        },
+      }),
+    );
     buttons.push({
-      text: 'Cancel',
-      role: 'cancel',
-      cssClass: ''
+      text: "Cancel",
+      role: "cancel",
+      cssClass: "",
     });
 
     const actionSheet = await this.actionSheetController.create({
-      header: 'Choose Mushaf',
-      buttons: buttons
+      header: "Choose Mushaf",
+      buttons: buttons,
     });
     await actionSheet.present();
   }
@@ -219,25 +323,23 @@ export class HomePage implements OnDestroy {
   ngOnInit() {
     this.loading = true;
     const url = `https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/App/HomePageBanner.json`;
-    this.httpClient
-      .get(url, { responseType: "json" })
-      .subscribe((res: any) => {
-        // Support both single banner object and array of banners
-        const bannerArray: HomePageBanner[] = Array.isArray(res) ? res : [res];
-        this.banners = bannerArray.map(b => ({
-          ...b,
-          text: this.domSanatizer.bypassSecurityTrustHtml(b.text as string),
-        }));
-        if (this.banners.length > 0) {
-          this.banner = this.banners[0];
-          this.currentBannerIndex = 0;
-        }
-        // Auto-rotate if multiple banners
-        if (this.banners.length > 1) {
-          this.startBannerRotation();
-        }
-        this.loading = false;
-      });
+    this.httpClient.get(url, { responseType: "json" }).subscribe((res: any) => {
+      // Support both single banner object and array of banners
+      const bannerArray: HomePageBanner[] = Array.isArray(res) ? res : [res];
+      this.banners = bannerArray.map((b) => ({
+        ...b,
+        text: this.domSanatizer.bypassSecurityTrustHtml(b.text as string),
+      }));
+      if (this.banners.length > 0) {
+        this.banner = this.banners[0];
+        this.currentBannerIndex = 0;
+      }
+      // Auto-rotate if multiple banners
+      if (this.banners.length > 1) {
+        this.startBannerRotation();
+      }
+      this.loading = false;
+    });
 
     // Load daily targets data, then gamification
     this.loadTargets().then(() => this.loadGamification());
@@ -255,7 +357,8 @@ export class HomePage implements OnDestroy {
   private startBannerRotation() {
     if (this.bannerInterval) clearInterval(this.bannerInterval);
     this.bannerInterval = setInterval(() => {
-      this.currentBannerIndex = (this.currentBannerIndex + 1) % this.banners.length;
+      this.currentBannerIndex =
+        (this.currentBannerIndex + 1) % this.banners.length;
       this.banner = this.banners[this.currentBannerIndex];
     }, 5000);
   }
@@ -276,14 +379,14 @@ export class HomePage implements OnDestroy {
       return;
     }
 
-    this.preCacheProgress = 'Preparing Quran data...';
+    this.preCacheProgress = "Preparing Quran data...";
     try {
       await this.quranDataService.preCacheQuranData();
       this.discoverReady = true;
-      this.preCacheProgress = '';
+      this.preCacheProgress = "";
     } catch (err) {
-      console.error('Pre-cache error:', err);
-      this.preCacheProgress = '';
+      console.error("Pre-cache error:", err);
+      this.preCacheProgress = "";
     }
   }
   async open(name) {
@@ -305,7 +408,7 @@ export class HomePage implements OnDestroy {
 
   private async loadTargets() {
     // Load settings
-    const settings = await this.storage.get('daily_targets_settings');
+    const settings = await this.storage.get("daily_targets_settings");
     if (settings) {
       this.dailyPageTarget = settings.pages || 20;
       this.dailyAyahTarget = settings.ayahs || 5;
@@ -352,28 +455,30 @@ export class HomePage implements OnDestroy {
 
   private getTodayKey(): string {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
 
   private getDateKey(date: Date): string {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   }
 
   async logReading() {
     const alert = await this.alertController.create({
-      header: 'Log Tilawat',
+      header: "Log Tilawat",
       message: `How many pages did you read? (Target: ${this.dailyPageTarget})`,
-      inputs: [{
-        name: 'pages',
-        type: 'number',
-        placeholder: 'Pages read',
-        min: 1,
-        max: 100,
-      }],
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
+      inputs: [
         {
-          text: 'Log',
+          name: "pages",
+          type: "number",
+          placeholder: "Pages read",
+          min: 1,
+          max: 100,
+        },
+      ],
+      buttons: [
+        { text: "Cancel", role: "cancel" },
+        {
+          text: "Log",
           handler: async (data) => {
             const pages = parseInt(data.pages);
             if (pages > 0) {
@@ -381,37 +486,41 @@ export class HomePage implements OnDestroy {
               this.allTimePagesRead += pages;
               await this.saveTodayLog();
               await this.buildWeeklyData();
-              await this.storage.set('all_time_pages', this.allTimePagesRead);
+              await this.storage.set("all_time_pages", this.allTimePagesRead);
               await this.updateStreak();
               this.updateLevel();
               await this.checkAndUnlockAchievements();
               this.calculateRamadan();
               if (this.tilawatProgress >= 100) {
-                this.showCompletionToast('Tilawat target complete! MashaAllah!');
+                this.showCompletionToast(
+                  "Tilawat target complete! MashaAllah!",
+                );
               }
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
 
   async logMemorization() {
     const alert = await this.alertController.create({
-      header: 'Log Hifz',
+      header: "Log Hifz",
       message: `How many ayahs did you memorize? (Target: ${this.dailyAyahTarget})`,
-      inputs: [{
-        name: 'ayahs',
-        type: 'number',
-        placeholder: 'Ayahs memorized',
-        min: 1,
-        max: 50,
-      }],
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
+      inputs: [
         {
-          text: 'Log',
+          name: "ayahs",
+          type: "number",
+          placeholder: "Ayahs memorized",
+          min: 1,
+          max: 50,
+        },
+      ],
+      buttons: [
+        { text: "Cancel", role: "cancel" },
+        {
+          text: "Log",
           handler: async (data) => {
             const ayahs = parseInt(data.ayahs);
             if (ayahs > 0) {
@@ -420,67 +529,68 @@ export class HomePage implements OnDestroy {
               await this.buildWeeklyData();
               await this.updateStreak();
               if (this.hifzProgress >= 100) {
-                this.showCompletionToast('Hifz target complete! Excellent!');
+                this.showCompletionToast("Hifz target complete! Excellent!");
               }
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
 
   async editTargets() {
     const alert = await this.alertController.create({
-      header: 'Set Targets',
-      message: 'Fields: ① Pages/day ② Ayahs/day (hifz) ③ Khatm count ④ Period (days)',
-      cssClass: 'target-alert-labeled',
+      header: "Set Targets",
+      message:
+        "Fields: ① Pages/day ② Ayahs/day (hifz) ③ Khatm count ④ Period (days)",
+      cssClass: "target-alert-labeled",
       inputs: [
         {
-          name: 'pages',
-          type: 'number',
-          placeholder: '📖 Pages/day',
+          name: "pages",
+          type: "number",
+          placeholder: "📖 Pages/day",
           value: this.dailyPageTarget,
           min: 1,
-          label: 'Pages/day',
-          attributes: { inputmode: 'numeric' },
+          label: "Pages/day",
+          attributes: { inputmode: "numeric" },
         },
         {
-          name: 'ayahs',
-          type: 'number',
-          placeholder: '🕌 Ayahs/day (hifz)',
+          name: "ayahs",
+          type: "number",
+          placeholder: "🕌 Ayahs/day (hifz)",
           value: this.dailyAyahTarget,
           min: 1,
-          label: 'Ayahs/day',
-          attributes: { inputmode: 'numeric' },
+          label: "Ayahs/day",
+          attributes: { inputmode: "numeric" },
         },
         {
-          name: 'khatm',
-          type: 'number',
-          placeholder: '📚 Khatm target',
+          name: "khatm",
+          type: "number",
+          placeholder: "📚 Khatm target",
           value: this.khatmTarget,
           min: 1,
-          label: 'Khatm target',
-          attributes: { inputmode: 'numeric' },
+          label: "Khatm target",
+          attributes: { inputmode: "numeric" },
         },
         {
-          name: 'days',
-          type: 'number',
-          placeholder: '📅 Period (days)',
+          name: "days",
+          type: "number",
+          placeholder: "📅 Period (days)",
           value: this.targetDays,
           min: 1,
-          label: 'Period (days)',
-          attributes: { inputmode: 'numeric' },
+          label: "Period (days)",
+          attributes: { inputmode: "numeric" },
         },
       ],
       buttons: [
-        { text: 'Cancel', role: 'cancel' },
+        { text: "Cancel", role: "cancel" },
         {
-          text: 'Disable',
-          cssClass: 'alert-button-danger',
+          text: "Disable",
+          cssClass: "alert-button-danger",
           handler: async () => {
             this.targetsEnabled = false;
-            await this.storage.set('daily_targets_settings', {
+            await this.storage.set("daily_targets_settings", {
               pages: this.dailyPageTarget,
               ayahs: this.dailyAyahTarget,
               khatm: this.khatmTarget,
@@ -490,7 +600,7 @@ export class HomePage implements OnDestroy {
           },
         },
         {
-          text: 'Save',
+          text: "Save",
           handler: async (data) => {
             this.khatmTarget = parseInt(data.khatm) || 1;
             this.targetDays = parseInt(data.days) || 30;
@@ -498,11 +608,13 @@ export class HomePage implements OnDestroy {
 
             // Auto-calculate daily pages from khatm target
             const totalPages = this.currentMushaf?.pages || 604;
-            const neededPerDay = Math.ceil((totalPages * this.khatmTarget) / this.targetDays);
+            const neededPerDay = Math.ceil(
+              (totalPages * this.khatmTarget) / this.targetDays,
+            );
             this.dailyPageTarget = parseInt(data.pages) || neededPerDay;
 
             this.targetsEnabled = true;
-            await this.storage.set('daily_targets_settings', {
+            await this.storage.set("daily_targets_settings", {
               pages: this.dailyPageTarget,
               ayahs: this.dailyAyahTarget,
               khatm: this.khatmTarget,
@@ -551,8 +663,16 @@ export class HomePage implements OnDestroy {
   }
 
   private async buildWeeklyData() {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const fullDays = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
     this.weeklyData = [];
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0=Sun
@@ -589,10 +709,10 @@ export class HomePage implements OnDestroy {
 
   private async showCompletionToast(message: string) {
     const alert = await this.alertController.create({
-      header: 'MashaAllah!',
+      header: "MashaAllah!",
       message,
-      buttons: ['Alhamdulillah'],
-      cssClass: 'completion-alert',
+      buttons: ["Alhamdulillah"],
+      cssClass: "completion-alert",
     });
     await alert.present();
   }
@@ -610,14 +730,17 @@ export class HomePage implements OnDestroy {
 
   async loadGamification() {
     // Load all-time pages
-    this.allTimePagesRead = (await this.storage.get('all_time_pages')) || 0;
+    this.allTimePagesRead = (await this.storage.get("all_time_pages")) || 0;
 
     // Load achievements
-    const saved: Achievement[] = await this.storage.get('achievements');
+    const saved: Achievement[] = await this.storage.get("achievements");
     if (saved) {
       this.achievements = saved;
     } else {
-      this.achievements = ACHIEVEMENT_DEFS.map(a => ({ ...a, unlocked: false }));
+      this.achievements = ACHIEVEMENT_DEFS.map((a) => ({
+        ...a,
+        unlocked: false,
+      }));
     }
 
     // Calculate level
@@ -640,19 +763,20 @@ export class HomePage implements OnDestroy {
     if (this.currentLevel.level < LEVEL_THRESHOLDS.length) {
       const current = this.allTimePagesRead - this.currentLevel.pages;
       const needed = this.nextLevel.pages - this.currentLevel.pages;
-      this.levelProgress = needed > 0 ? Math.min(100, Math.round((current / needed) * 100)) : 100;
+      this.levelProgress =
+        needed > 0 ? Math.min(100, Math.round((current / needed) * 100)) : 100;
     } else {
       this.levelProgress = 100;
     }
   }
 
   async checkAndUnlockAchievements() {
-    const now = new Date().toISOString().split('T')[0];
+    const now = new Date().toISOString().split("T")[0];
     const hour = new Date().getHours();
     let newUnlocks: Achievement[] = [];
 
     const check = (id: string, condition: boolean) => {
-      const a = this.achievements.find(x => x.id === id);
+      const a = this.achievements.find((x) => x.id === id);
       if (a && !a.unlocked && condition) {
         a.unlocked = true;
         a.unlockedDate = now;
@@ -661,18 +785,18 @@ export class HomePage implements OnDestroy {
     };
 
     // Check each achievement
-    check('first_log', this.allTimePagesRead > 0);
-    check('pages_100', this.allTimePagesRead >= 100);
-    check('khatm_1', this.allTimePagesRead >= 604);
-    check('khatm_3', this.allTimePagesRead >= 1812);
-    check('streak_3', this.streakCount >= 3);
-    check('streak_7', this.streakCount >= 7);
-    check('streak_30', this.streakCount >= 30);
-    check('streak_100', this.streakCount >= 100);
-    check('early_bird', hour < 6 && this.todayPages > 0);
-    check('night_owl', hour >= 23 && this.todayPages > 0);
-    check('overachiever', this.todayPages >= this.dailyPageTarget * 2);
-    check('juz_complete', this.todayPages >= 20); // ~20 pages per juz
+    check("first_log", this.allTimePagesRead > 0);
+    check("pages_100", this.allTimePagesRead >= 100);
+    check("khatm_1", this.allTimePagesRead >= 604);
+    check("khatm_3", this.allTimePagesRead >= 1812);
+    check("streak_3", this.streakCount >= 3);
+    check("streak_7", this.streakCount >= 7);
+    check("streak_30", this.streakCount >= 30);
+    check("streak_100", this.streakCount >= 100);
+    check("early_bird", hour < 6 && this.todayPages > 0);
+    check("night_owl", hour >= 23 && this.todayPages > 0);
+    check("overachiever", this.todayPages >= this.dailyPageTarget * 2);
+    check("juz_complete", this.todayPages >= 20); // ~20 pages per juz
 
     // Check 7-day target hit streak
     let targetStreak = 0;
@@ -688,27 +812,53 @@ export class HomePage implements OnDestroy {
         break;
       }
     }
-    check('target_hit', targetStreak >= 7);
+    check("target_hit", targetStreak >= 7);
 
     // Save and notify
     if (newUnlocks.length > 0) {
-      await this.storage.set('achievements', this.achievements);
+      await this.storage.set("achievements", this.achievements);
       // Show the first new unlock as a popup (variable-ratio reward → dopamine)
       this.newAchievement = newUnlocks[0];
-      setTimeout(() => { this.newAchievement = null; }, 4000);
+      setTimeout(() => {
+        this.newAchievement = null;
+      }, 4000);
     }
   }
 
   private setMotivationalQuote() {
     const quotes = [
-      { text: 'The best among you are those who learn the Quran and teach it.', source: 'Bukhari' },
-      { text: 'Read the Quran, for it will come as an intercessor on the Day of Judgement.', source: 'Muslim' },
-      { text: 'The one who recites the Quran fluently will be with the noble angels.', source: 'Bukhari & Muslim' },
-      { text: 'Whoever reads a letter from the Book of Allah gets a reward, and each reward is multiplied tenfold.', source: 'Tirmidhi' },
-      { text: 'The Quran is a proof for you or against you.', source: 'Muslim' },
-      { text: 'Indeed this Quran guides to that which is most right.', source: 'Quran 17:9' },
-      { text: 'And We have made the Quran easy for remembrance, so is there anyone who will remember?', source: 'Quran 54:17' },
-      { text: 'Verily, in the remembrance of Allah do hearts find rest.', source: 'Quran 13:28' },
+      {
+        text: "The best among you are those who learn the Quran and teach it.",
+        source: "Bukhari",
+      },
+      {
+        text: "Read the Quran, for it will come as an intercessor on the Day of Judgement.",
+        source: "Muslim",
+      },
+      {
+        text: "The one who recites the Quran fluently will be with the noble angels.",
+        source: "Bukhari & Muslim",
+      },
+      {
+        text: "Whoever reads a letter from the Book of Allah gets a reward, and each reward is multiplied tenfold.",
+        source: "Tirmidhi",
+      },
+      {
+        text: "The Quran is a proof for you or against you.",
+        source: "Muslim",
+      },
+      {
+        text: "Indeed this Quran guides to that which is most right.",
+        source: "Quran 17:9",
+      },
+      {
+        text: "And We have made the Quran easy for remembrance, so is there anyone who will remember?",
+        source: "Quran 54:17",
+      },
+      {
+        text: "Verily, in the remembrance of Allah do hearts find rest.",
+        source: "Quran 13:28",
+      },
     ];
     const dayIdx = new Date().getDate() % quotes.length;
     const q = quotes[dayIdx];
@@ -716,19 +866,24 @@ export class HomePage implements OnDestroy {
   }
 
   get unlockedCount(): number {
-    return this.achievements.filter(a => a.unlocked).length;
+    return this.achievements.filter((a) => a.unlocked).length;
   }
 
   get visibleAchievements(): Achievement[] {
     // Show unlocked ones and non-hidden locked ones (hidden ones appear only after unlock)
-    return this.achievements.filter(a => a.unlocked || !a.hidden);
+    return this.achievements.filter((a) => a.unlocked || !a.hidden);
   }
 
   // ═════════════════════════════════════════════
   // CHANGELOG (from GitHub commits)
   // ═════════════════════════════════════════════
 
-  changelogItems: { date: string; message: string; author: string; sha: string }[] = [];
+  changelogItems: {
+    date: string;
+    message: string;
+    author: string;
+    sha: string;
+  }[] = [];
   changelogLoading = false;
   changelogOpen = false;
 
@@ -742,25 +897,29 @@ export class HomePage implements OnDestroy {
       const allCommits: any[] = [];
       for (let page = 1; page <= 5; page++) {
         const url = `https://api.github.com/repos/ShakesVision/quran/commits?per_page=100&page=${page}`;
-        const commits: any[] = await this.httpClient.get<any[]>(url).toPromise();
+        const commits: any[] = await this.httpClient
+          .get<any[]>(url)
+          .toPromise();
         if (!commits || commits.length === 0) break;
         allCommits.push(...commits);
         if (commits.length < 100) break; // Last page
       }
-      this.changelogItems = allCommits.map(c => ({
-        date: c.commit?.author?.date || '',
-        message: c.commit?.message || '',
-        author: c.commit?.author?.name || c.author?.login || 'Unknown',
-        sha: (c.sha || '').substring(0, 7),
+      this.changelogItems = allCommits.map((c) => ({
+        date: c.commit?.author?.date || "",
+        message: c.commit?.message || "",
+        author: c.commit?.author?.name || c.author?.login || "Unknown",
+        sha: (c.sha || "").substring(0, 7),
       }));
     } catch (e) {
-      console.warn('Failed to fetch changelog from GitHub', e);
-      this.changelogItems = [{
-        date: new Date().toISOString(),
-        message: 'Could not load changelog. Check your internet connection.',
-        author: '',
-        sha: '',
-      }];
+      console.warn("Failed to fetch changelog from GitHub", e);
+      this.changelogItems = [
+        {
+          date: new Date().toISOString(),
+          message: "Could not load changelog. Check your internet connection.",
+          author: "",
+          sha: "",
+        },
+      ];
     }
 
     this.changelogLoading = false;
@@ -773,19 +932,27 @@ export class HomePage implements OnDestroy {
   /**
    * Group changelog items by date (YYYY-MM-DD) for display.
    */
-  get groupedChangelog(): { date: string; displayDate: string; items: typeof this.changelogItems }[] {
+  get groupedChangelog(): {
+    date: string;
+    displayDate: string;
+    items: typeof this.changelogItems;
+  }[] {
     const groups = new Map<string, typeof this.changelogItems>();
     for (const item of this.changelogItems) {
       const d = item.date ? new Date(item.date) : new Date();
-      const key = d.toISOString().split('T')[0];
+      const key = d.toISOString().split("T")[0];
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(item);
     }
     return Array.from(groups.entries()).map(([date, items]) => ({
       date,
-      displayDate: new Date(date).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }),
+      displayDate: new Date(date).toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
       items,
     }));
   }
-
 }

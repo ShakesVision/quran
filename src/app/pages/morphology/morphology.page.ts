@@ -53,8 +53,9 @@ export class MorphologyPage implements OnInit {
 
     this.isLoading = true;
     try {
+      console.log(this.selectedSurah, this.selectedAyah);
       this.morphologyService
-        .getAyahMorphology(this.selectedSurah, this.selectedAyah)
+        .getAyahMorphology(Number(this.selectedSurah), this.selectedAyah)
         .subscribe(
           (data: WordMorphology[]) => {
             this.morphologyData = data;
@@ -88,7 +89,7 @@ export class MorphologyPage implements OnInit {
       (s) => s.index === this.selectedSurah,
     );
     if (selectedSurah) {
-      this.ayahCount = selectedSurah.ayahs;
+      this.ayahCount = selectedSurah.count;
       this.selectedAyah = 1; // Reset to first ayah
       this.loadMorphology();
     }
@@ -179,5 +180,48 @@ export class MorphologyPage implements OnInit {
         position: "bottom",
       })
       .then((toast) => toast.present());
+  }
+
+  // Returns all fields with label + value, only if present
+  getWordFields(word: any) {
+    const fields = [];
+
+    if (word.posLabel) fields.push({ label: "POS", value: word.posLabel });
+    if (word.root) fields.push({ label: "Root", value: word.root });
+    if (word.rootBw) fields.push({ label: "Root BW", value: word.rootBw });
+    if (word.lemmaBw) fields.push({ label: "Lemma BW", value: word.lemmaBw });
+    if (word.verbForm) fields.push({ label: "Form", value: word.verbForm });
+    if (word.aspectLabel)
+      fields.push({ label: "Aspect", value: word.aspectLabel });
+    if (word.voiceLabel)
+      fields.push({ label: "Voice", value: word.voiceLabel });
+    if (word.features)
+      fields.push({
+        label: "Features",
+        value: this.formatFeatures(word.features),
+      });
+
+    // Optional: gender, number, derivation, prefix, suffix
+    if (word.genderLabel)
+      fields.push({ label: "Gender", value: word.genderLabel });
+    if (word.numberLabel)
+      fields.push({ label: "Number", value: word.numberLabel });
+    if (word.derivationLabel)
+      fields.push({ label: "Derivation", value: word.derivationLabel });
+    if (word.prefix) fields.push({ label: "Prefix", value: word.prefix });
+    if (word.suffix) fields.push({ label: "Suffix", value: word.suffix });
+
+    return fields;
+  }
+
+  // Expand/collapse all helper
+  expandAll() {
+    const acc = document.querySelectorAll("ion-accordion");
+    acc.forEach((a: any) => (a.value = "expanded"));
+  }
+
+  collapseAll() {
+    const acc = document.querySelectorAll("ion-accordion");
+    acc.forEach((a: any) => (a.value = ""));
   }
 }

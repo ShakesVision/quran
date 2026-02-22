@@ -1,10 +1,27 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
-import { AlertController, GestureController, Gesture, ModalController, Platform } from "@ionic/angular";
+import {
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+} from "@angular/core";
+import {
+  AlertController,
+  GestureController,
+  Gesture,
+  ModalController,
+  Platform,
+} from "@ionic/angular";
 import { Subscription } from "rxjs";
 import { finalize, map, take } from "rxjs/operators";
 import { SurahService } from "../services/surah.service";
-import { MorphologyService, WordMorphology } from "../services/morphology.service";
+import {
+  MorphologyService,
+  WordMorphology,
+} from "../services/morphology.service";
 import { QuranData } from "src/assets/data/quran-data";
 import { Storage } from "@ionic/storage-angular";
 
@@ -30,40 +47,56 @@ interface TranslationOrder {
 
 /** Supported WBW translation languages (Quran.com API) */
 const WBW_LANGUAGES: { code: string; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'ur', label: 'اردو' },
-  { code: 'bn', label: 'বাংলা' },
-  { code: 'tr', label: 'Türkçe' },
-  { code: 'id', label: 'Bahasa' },
-  { code: 'fa', label: 'فارسی' },
-  { code: 'hi', label: 'हिन्दी' },
-  { code: 'fr', label: 'Français' },
-  { code: 'ru', label: 'Русский' },
-  { code: 'de', label: 'Deutsch' },
+  { code: "en", label: "English" },
+  { code: "ur", label: "اردو" },
+  { code: "bn", label: "বাংলা" },
+  { code: "tr", label: "Türkçe" },
+  { code: "id", label: "Bahasa" },
+  { code: "fa", label: "فارسی" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "fr", label: "Français" },
+  { code: "ru", label: "Русский" },
+  { code: "de", label: "Deutsch" },
 ];
 
 // Color palette for translation blocks (deterministic by language + index)
 const TRANSLATION_COLORS: Record<string, string[]> = {
-  urdu: ['#1B5E20', '#006064', '#4E342E', '#1A237E', '#BF360C', '#33691E', '#880E4F'],
-  english: ['#0D47A1', '#4A148C', '#E65100', '#1B5E20', '#880E4F', '#004D40', '#263238'],
-  default: ['#37474F', '#455A64', '#546E7A', '#607D8B'],
+  urdu: [
+    "#1B5E20",
+    "#006064",
+    "#4E342E",
+    "#1A237E",
+    "#BF360C",
+    "#33691E",
+    "#880E4F",
+  ],
+  english: [
+    "#0D47A1",
+    "#4A148C",
+    "#E65100",
+    "#1B5E20",
+    "#880E4F",
+    "#004D40",
+    "#263238",
+  ],
+  default: ["#37474F", "#455A64", "#546E7A", "#607D8B"],
 };
 
 // Icons for known translations
 const TRANSLATION_ICONS: Record<number, string> = {
-  20: 'shield-checkmark-outline',    // Saheeh International
-  85: 'book-outline',                // Abdel Haleem
-  84: 'school-outline',              // Mufti Taqi Usmani
-  95: 'library-outline',             // Maududi English
-  22: 'earth-outline',               // Yusuf Ali
-  203: 'ribbon-outline',             // Al-Hilali & Khan
-  97: 'library-outline',             // Maududi Urdu
-  54: 'document-text-outline',       // Junagarhi
-  234: 'bookmark-outline',           // Jalandhari
-  151: 'layers-outline',             // Tafsir E Usmani
-  158: 'bulb-outline',               // Bayan-ul-Quran (Israr Ahmad)
-  156: 'leaf-outline',               // Fe Zilal al-Qur'an
-  819: 'heart-outline',              // Wahiduddin Khan
+  20: "shield-checkmark-outline", // Saheeh International
+  85: "book-outline", // Abdel Haleem
+  84: "school-outline", // Mufti Taqi Usmani
+  95: "library-outline", // Maududi English
+  22: "earth-outline", // Yusuf Ali
+  203: "ribbon-outline", // Al-Hilali & Khan
+  97: "library-outline", // Maududi Urdu
+  54: "document-text-outline", // Junagarhi
+  234: "bookmark-outline", // Jalandhari
+  151: "layers-outline", // Tafsir E Usmani
+  158: "bulb-outline", // Bayan-ul-Quran (Israr Ahmad)
+  156: "leaf-outline", // Fe Zilal al-Qur'an
+  819: "heart-outline", // Wahiduddin Khan
 };
 
 @Component({
@@ -73,7 +106,7 @@ const TRANSLATION_ICONS: Record<number, string> = {
 })
 export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() verseKey: string;
-  @ViewChild('swipeArea', { read: ElementRef }) swipeArea: ElementRef;
+  @ViewChild("swipeArea", { read: ElementRef }) swipeArea: ElementRef;
 
   verse: any;
   audioSrc: string;
@@ -91,14 +124,14 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // WBW language switcher
   wbwLanguages = WBW_LANGUAGES;
-  wbwTransLang = 'en';
+  wbwTransLang = "en";
   wbwLangLoading = false;
 
   // Organized translation blocks
   translations: TranslationDisplay[] = [];
 
   // User's ordering/visibility preference
-  private readonly STORAGE_KEY_TRANS_ORDER = 'ReaderTranslationOrder';
+  private readonly STORAGE_KEY_TRANS_ORDER = "ReaderTranslationOrder";
   translationOrder: TranslationOrder[] = [];
 
   // Swipe gesture for navigating between ayahs
@@ -115,7 +148,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     private storage: Storage,
     private gestureCtrl: GestureController,
     private platform: Platform,
-    private morphologyService: MorphologyService
+    private morphologyService: MorphologyService,
   ) {}
 
   async ngOnInit() {
@@ -123,10 +156,15 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fetchTrans(this.verseKey);
 
     // Intercept hardware/browser back button to dismiss modal instead of closing app
-    this.backButtonSub = this.platform.backButton.subscribeWithPriority(200, () => {
-      console.log('[TafseerModal] Back button intercepted → dismissing modal');
-      this.dismissModal();
-    });
+    this.backButtonSub = this.platform.backButton.subscribeWithPriority(
+      200,
+      () => {
+        console.log(
+          "[TafseerModal] Back button intercepted → dismissing modal",
+        );
+        this.dismissModal();
+      },
+    );
   }
 
   ngAfterViewInit() {
@@ -151,37 +189,46 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   private setupSwipeGesture() {
     const el = this.swipeArea?.nativeElement;
     if (!el) {
-      console.warn('[TafseerModal] swipeArea element not found, retrying in 500ms...');
+      console.warn(
+        "[TafseerModal] swipeArea element not found, retrying in 500ms...",
+      );
       setTimeout(() => this.setupSwipeGesture(), 500);
       return;
     }
 
-    console.log('[TafseerModal] Setting up swipe gesture on', el.tagName, el.className);
+    console.log(
+      "[TafseerModal] Setting up swipe gesture on",
+      el.tagName,
+      el.className,
+    );
 
-    this.swipeGesture = this.gestureCtrl.create({
-      el,
-      gestureName: 'tafseer-swipe',
-      threshold: 15,
-      onStart: () => {
-        console.log('[TafseerModal] Swipe started');
+    this.swipeGesture = this.gestureCtrl.create(
+      {
+        el,
+        gestureName: "tafseer-swipe",
+        threshold: 15,
+        onStart: () => {
+          console.log("[TafseerModal] Swipe started");
+        },
+        onEnd: (ev) => {
+          console.log("[TafseerModal] Swipe ended, deltaX:", ev.deltaX);
+          const SWIPE_THRESHOLD = 50;
+          if (ev.deltaX > SWIPE_THRESHOLD) {
+            // Swipe right → next ayah (RTL: right = forward in Arabic)
+            console.log("[TafseerModal] Swipe RIGHT → next ayah");
+            this.loadNextAyah(1);
+          } else if (ev.deltaX < -SWIPE_THRESHOLD) {
+            // Swipe left → previous ayah
+            console.log("[TafseerModal] Swipe LEFT → prev ayah");
+            this.loadNextAyah(-1);
+          }
+        },
       },
-      onEnd: (ev) => {
-        console.log('[TafseerModal] Swipe ended, deltaX:', ev.deltaX);
-        const SWIPE_THRESHOLD = 50;
-        if (ev.deltaX > SWIPE_THRESHOLD) {
-          // Swipe right → next ayah (RTL: right = forward in Arabic)
-          console.log('[TafseerModal] Swipe RIGHT → next ayah');
-          this.loadNextAyah(1);
-        } else if (ev.deltaX < -SWIPE_THRESHOLD) {
-          // Swipe left → previous ayah
-          console.log('[TafseerModal] Swipe LEFT → prev ayah');
-          this.loadNextAyah(-1);
-        }
-      },
-    }, true); // runInsideAngularZone = true
+      true,
+    ); // runInsideAngularZone = true
 
     this.swipeGesture.enable(true);
-    console.log('[TafseerModal] Swipe gesture enabled');
+    console.log("[TafseerModal] Swipe gesture enabled");
   }
 
   dismissModal() {
@@ -216,10 +263,12 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     this.morphologyLoading = true;
 
     // Extract surah:ayah:word from word position
-    const [surah, ayah] = this.verse.verse_key.split(':').map(Number);
-    const wordPosition = word.position || (index + 1);
+    const [surah, ayah] = this.verse.verse_key.split(":").map(Number);
+    console.log(surah);
+    const wordPosition = word.position || index + 1;
 
-    this.morphologyService.getWordMorphology(surah, ayah, wordPosition)
+    this.morphologyService
+      .getWordMorphology(surah, ayah, wordPosition)
       .pipe(take(1))
       .subscribe(
         (morph) => {
@@ -228,7 +277,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         () => {
           this.morphologyLoading = false;
-        }
+        },
       );
   }
 
@@ -241,26 +290,29 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     this.wbwLangLoading = true;
 
     const url = `https://api.quran.com/api/v4/verses/by_key/${this.verse.verse_key}?language=${langCode}&words=true&word_fields=text_indopak,text_uthmani&word_translation_language=${langCode}`;
-    this.httpClient.get<any>(url).pipe(take(1)).subscribe(
-      (res) => {
-        if (res?.verse?.words) {
-          // Update word translations while keeping existing word objects structure
-          const newWords = res.verse.words;
-          if (this.verse.words) {
-            this.verse.words.forEach((w: any, i: number) => {
-              if (newWords[i]) {
-                w.translation = newWords[i].translation;
-                w.transliteration = newWords[i].transliteration;
-              }
-            });
+    this.httpClient
+      .get<any>(url)
+      .pipe(take(1))
+      .subscribe(
+        (res) => {
+          if (res?.verse?.words) {
+            // Update word translations while keeping existing word objects structure
+            const newWords = res.verse.words;
+            if (this.verse.words) {
+              this.verse.words.forEach((w: any, i: number) => {
+                if (newWords[i]) {
+                  w.translation = newWords[i].translation;
+                  w.transliteration = newWords[i].transliteration;
+                }
+              });
+            }
           }
-        }
-        this.wbwLangLoading = false;
-      },
-      () => {
-        this.wbwLangLoading = false;
-      }
-    );
+          this.wbwLangLoading = false;
+        },
+        () => {
+          this.wbwLangLoading = false;
+        },
+      );
   }
 
   /**
@@ -305,7 +357,12 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   moveToPosition(currentIndex: number, targetPosStr: string) {
     const targetPos = parseInt(targetPosStr, 10);
-    if (isNaN(targetPos) || targetPos < 1 || targetPos > this.translations.length) return;
+    if (
+      isNaN(targetPos) ||
+      targetPos < 1 ||
+      targetPos > this.translations.length
+    )
+      return;
     const targetIndex = targetPos - 1;
     if (targetIndex === currentIndex) return;
 
@@ -318,11 +375,15 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
    * Toggle visibility of a translation
    */
   toggleVisibility(tr: TranslationDisplay) {
-    const order = this.translationOrder.find(o => o.id === tr.id);
+    const order = this.translationOrder.find((o) => o.id === tr.id);
     if (order) {
       order.visible = !order.visible;
     } else {
-      this.translationOrder.push({ id: tr.id, visible: false, position: this.translationOrder.length });
+      this.translationOrder.push({
+        id: tr.id,
+        visible: false,
+        position: this.translationOrder.length,
+      });
     }
     this.saveTranslationOrder();
   }
@@ -331,7 +392,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
    * Check if translation is visible according to saved order
    */
   isVisible(tr: TranslationDisplay): boolean {
-    const order = this.translationOrder.find(o => o.id === tr.id);
+    const order = this.translationOrder.find((o) => o.id === tr.id);
     return order ? order.visible : true; // visible by default
   }
 
@@ -341,17 +402,25 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     const base_url = "https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir";
     let slug = "";
     switch (lang) {
-      case "ar": slug = "ar-tafsir-ibn-kathir"; break;
-      case "ur": slug = "ur-tafseer-ibn-e-kaseer"; break;
-      case "en": slug = "en-tafsir-maarif-ul-quran"; break;
-      default: slug = "ur-tafseer-ibn-e-kaseer"; break;
+      case "ar":
+        slug = "ar-tafsir-ibn-kathir";
+        break;
+      case "ur":
+        slug = "ur-tafseer-ibn-e-kaseer";
+        break;
+      case "en":
+        slug = "en-tafsir-maarif-ul-quran";
+        break;
+      default:
+        slug = "ur-tafseer-ibn-e-kaseer";
+        break;
     }
     const url = `${base_url}/${slug}/${s}/${a}.json`;
     return this.httpClient
       .get<any>(url)
       .pipe(
         map((res) => res.text),
-        finalize(() => (this.loading = false))
+        finalize(() => (this.loading = false)),
       )
       .subscribe((res) => (this.tafsir[lang] = res));
   }
@@ -363,7 +432,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
       this.surahService.presentToastWithOptions(
         `Invalid Ayah: ${nextAyahNumber}`,
         "danger",
-        "middle"
+        "middle",
       );
       return;
     }
@@ -377,7 +446,12 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
       inputs: [{ name: "ayahKey", type: "text", placeholder: "e.g. 2:255" }],
       buttons: [
         { text: "Cancel", role: "cancel" },
-        { text: "Go", handler: (data) => { if (data.ayahKey) this.fetchTrans(data.ayahKey); } },
+        {
+          text: "Go",
+          handler: (data) => {
+            if (data.ayahKey) this.fetchTrans(data.ayahKey);
+          },
+        },
       ],
     });
     await alert.present();
@@ -400,11 +474,11 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
         (err) => {
           console.error(err);
           this.surahService.presentToastWithOptions(
-            `${err.error?.status || 'Error'}: ${err.error?.error || 'Failed to load'}`,
+            `${err.error?.status || "Error"}: ${err.error?.error || "Failed to load"}`,
             "danger",
-            "middle"
+            "middle",
           );
-        }
+        },
       );
   }
 
@@ -416,10 +490,10 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     const englishCounters: Record<string, number> = {};
 
     let blocks: TranslationDisplay[] = rawTranslations.map((t) => {
-      const lang = (t.language_name || '').toLowerCase();
-      const isUrdu = lang === 'urdu';
-      const isEnglish = lang === 'english';
-      const langKey = isUrdu ? 'urdu' : isEnglish ? 'english' : 'default';
+      const lang = (t.language_name || "").toLowerCase();
+      const isUrdu = lang === "urdu";
+      const isEnglish = lang === "english";
+      const langKey = isUrdu ? "urdu" : isEnglish ? "english" : "default";
 
       // Track per-language index for color assignment
       if (!urduCounters[langKey]) urduCounters[langKey] = 0;
@@ -427,27 +501,27 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
       const colors = TRANSLATION_COLORS[langKey] || TRANSLATION_COLORS.default;
       const color = colors[colorIdx % colors.length];
 
-      const cleanText = (t.text || '')
-        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
-        .replace(/<[^>]+>/g, '')
+      const cleanText = (t.text || "")
+        .replace(/<sup[^>]*>.*?<\/sup>/gi, "")
+        .replace(/<[^>]+>/g, "")
         .trim();
 
       return {
         id: t.resource_id,
         resourceName: t.resource_name || `Translation #${t.resource_id}`,
-        languageName: t.language_name || 'Unknown',
+        languageName: t.language_name || "Unknown",
         text: cleanText,
         expanded: true, // Start expanded by default
         color,
-        icon: TRANSLATION_ICONS[t.resource_id] || 'document-text-outline',
+        icon: TRANSLATION_ICONS[t.resource_id] || "document-text-outline",
       };
     });
 
     // Apply saved ordering
     if (this.translationOrder.length > 0) {
       blocks.sort((a, b) => {
-        const orderA = this.translationOrder.find(o => o.id === a.id);
-        const orderB = this.translationOrder.find(o => o.id === b.id);
+        const orderA = this.translationOrder.find((o) => o.id === a.id);
+        const orderB = this.translationOrder.find((o) => o.id === b.id);
         const posA = orderA ? orderA.position : 999;
         const posB = orderB ? orderB.position : 999;
         return posA - posB;
@@ -465,7 +539,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   checkIfAyahHasSajdah() {
     const [s, a] = this.verse.verse_key.split(":");
     const sajdaRef = QuranData.Sajda.find(
-      (sajdah) => sajdah[0] === parseInt(s) && sajdah[1] === parseInt(a)
+      (sajdah) => sajdah[0] === parseInt(s) && sajdah[1] === parseInt(a),
     );
     if (sajdaRef)
       this.sajdahMessage = `A sajdah is ${sajdaRef[2]} on this verse`;
@@ -476,7 +550,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private async saveTranslationOrder() {
     const order: TranslationOrder[] = this.translations.map((t, i) => {
-      const existing = this.translationOrder.find(o => o.id === t.id);
+      const existing = this.translationOrder.find((o) => o.id === t.id);
       return {
         id: t.id,
         visible: existing ? existing.visible : true,
@@ -486,7 +560,9 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     this.translationOrder = order;
     try {
       await this.storage.set(this.STORAGE_KEY_TRANS_ORDER, order);
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   /**
@@ -498,6 +574,8 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
       if (saved && Array.isArray(saved)) {
         this.translationOrder = saved;
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
   }
 }

@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable, of } from "rxjs";
+import { map, tap, catchError } from "rxjs/operators";
 
 /**
  * Compact morphology data format:
@@ -23,21 +23,21 @@ import { map, tap, catchError } from 'rxjs/operators';
  */
 
 export interface WordMorphology {
-  pos: string;        // Part of speech
-  posLabel: string;   // Human-readable POS label
-  lemma?: string;     // Arabic lemma
-  root?: string;      // Arabic root
-  rootBw?: string;    // Buckwalter root
-  lemmaBw?: string;   // Buckwalter lemma
-  features?: string;  // Gender/number features
-  prefix?: string;    // Prefix tags
-  suffix?: string;    // Suffix info
-  verbForm?: string;  // Verb form
-  aspect?: string;    // Verb aspect
+  pos: string; // Part of speech
+  posLabel: string; // Human-readable POS label
+  lemma?: string; // Arabic lemma
+  root?: string; // Arabic root
+  rootBw?: string; // Buckwalter root
+  lemmaBw?: string; // Buckwalter lemma
+  features?: string; // Gender/number features
+  prefix?: string; // Prefix tags
+  suffix?: string; // Suffix info
+  verbForm?: string; // Verb form
+  aspect?: string; // Verb aspect
   aspectLabel?: string;
-  voice?: string;     // Verb voice
+  voice?: string; // Verb voice
   voiceLabel?: string;
-  state?: string;     // Grammatical case
+  state?: string; // Grammatical case
   stateLabel?: string;
   derivation?: string;
   derivationLabel?: string;
@@ -46,119 +46,119 @@ export interface WordMorphology {
 
 // POS tag to human-readable labels
 const POS_LABELS: Record<string, string> = {
-  'n': 'Noun',
-  'pn': 'Proper Noun',
-  'adj': 'Adjective',
-  'v': 'Verb',
-  'pro': 'Pronoun',
-  'dem': 'Demonstrative',
-  'rel': 'Relative Pronoun',
-  't': 'Time Adverb',
-  'loc': 'Location Adverb',
-  'p': 'Preposition',
-  'conj': 'Conjunction',
-  'sub': 'Subordinating Conj.',
-  'acc': 'Accusative Particle',
-  'neg': 'Negative Particle',
-  'det': 'Determiner',
-  'emp': 'Emphatic Particle',
-  'cond': 'Conditional',
-  'intg': 'Interrogative',
-  'res': 'Restriction',
-  'cert': 'Certainty Particle',
-  'voc': 'Vocative',
-  'rslt': 'Result',
-  'prp': 'Purpose',
-  'circ': 'Circumstantial',
-  'sup': 'Supplemental',
-  'prev': 'Preventive',
-  'fut': 'Future',
-  'ret': 'Retraction',
-  'exp': 'Exceptive',
-  'inc': 'Inceptive',
-  'caus': 'Cause',
-  'impv': 'Imperative Particle',
-  'exl': 'Exclamation',
-  'amd': 'Amendment',
-  'int': 'Interpretation',
-  'exh': 'Exhortation',
-  'ans': 'Answer',
-  'sur': 'Surprise',
-  'avr': 'Aversion',
-  'inl': 'Quranic Initials',
-  'rem': 'Resumption',
-  'eq': 'Equalization',
-  'com': 'Comitative',
-  'impn': 'Impersonal',
+  n: "Noun",
+  pn: "Proper Noun",
+  adj: "Adjective",
+  v: "Verb",
+  pro: "Pronoun",
+  dem: "Demonstrative",
+  rel: "Relative Pronoun",
+  t: "Time Adverb",
+  loc: "Location Adverb",
+  p: "Preposition",
+  conj: "Conjunction",
+  sub: "Subordinating Conj.",
+  acc: "Accusative Particle",
+  neg: "Negative Particle",
+  det: "Determiner",
+  emp: "Emphatic Particle",
+  cond: "Conditional",
+  intg: "Interrogative",
+  res: "Restriction",
+  cert: "Certainty Particle",
+  voc: "Vocative",
+  rslt: "Result",
+  prp: "Purpose",
+  circ: "Circumstantial",
+  sup: "Supplemental",
+  prev: "Preventive",
+  fut: "Future",
+  ret: "Retraction",
+  exp: "Exceptive",
+  inc: "Inceptive",
+  caus: "Cause",
+  impv: "Imperative Particle",
+  exl: "Exclamation",
+  amd: "Amendment",
+  int: "Interpretation",
+  exh: "Exhortation",
+  ans: "Answer",
+  sur: "Surprise",
+  avr: "Aversion",
+  inl: "Quranic Initials",
+  rem: "Resumption",
+  eq: "Equalization",
+  com: "Comitative",
+  impn: "Impersonal",
 };
 
 const ASPECT_LABELS: Record<string, string> = {
-  'pf': 'Perfect (Past)',
-  'im': 'Imperfect (Present/Future)',
-  'iv': 'Imperative',
+  pf: "Perfect (Past)",
+  im: "Imperfect (Present/Future)",
+  iv: "Imperative",
 };
 
 const VOICE_LABELS: Record<string, string> = {
-  'act': 'Active',
-  'pas': 'Passive',
+  act: "Active",
+  pas: "Passive",
 };
 
 const STATE_LABELS: Record<string, string> = {
-  'nom': 'Nominative (مرفوع)',
-  'acc': 'Accusative (منصوب)',
-  'gen': 'Genitive (مجرور)',
-  'jus': 'Jussive (مجزوم)',
-  'sub': 'Subjunctive (منصوب)',
+  nom: "Nominative (مرفوع)",
+  acc: "Accusative (منصوب)",
+  gen: "Genitive (مجرور)",
+  jus: "Jussive (مجزوم)",
+  sub: "Subjunctive (منصوب)",
 };
 
 const DERIVATION_LABELS: Record<string, string> = {
-  'pcpl': 'Active Participle',
-  'vn': 'Verbal Noun',
+  pcpl: "Active Participle",
+  vn: "Verbal Noun",
 };
 
 const FEATURE_LABELS: Record<string, string> = {
-  'm': 'Masculine',
-  'f': 'Feminine',
-  's': 'Singular',
-  'd': 'Dual',
-  'p': 'Plural',
-  'ms': 'Masc. Sing.',
-  'fs': 'Fem. Sing.',
-  'md': 'Masc. Dual',
-  'fd': 'Fem. Dual',
-  'mp': 'Masc. Plural',
-  'fp': 'Fem. Plural',
-  '1s': '1st Person Sing.',
-  '1p': '1st Person Plural',
-  '2ms': '2nd Person Masc. Sing.',
-  '2fs': '2nd Person Fem. Sing.',
-  '2d': '2nd Person Dual',
-  '2mp': '2nd Person Masc. Plural',
-  '2fp': '2nd Person Fem. Plural',
-  '3ms': '3rd Person Masc. Sing.',
-  '3fs': '3rd Person Fem. Sing.',
-  '3d': '3rd Person Dual',
-  '3md': '3rd Person Masc. Dual',
-  '3fd': '3rd Person Fem. Dual',
-  '3mp': '3rd Person Masc. Plural',
-  '3fp': '3rd Person Fem. Plural',
+  m: "Masculine",
+  f: "Feminine",
+  s: "Singular",
+  d: "Dual",
+  p: "Plural",
+  ms: "Masc. Sing.",
+  fs: "Fem. Sing.",
+  md: "Masc. Dual",
+  fd: "Fem. Dual",
+  mp: "Masc. Plural",
+  fp: "Fem. Plural",
+  "1s": "1st Person Sing.",
+  "1p": "1st Person Plural",
+  "2ms": "2nd Person Masc. Sing.",
+  "2fs": "2nd Person Fem. Sing.",
+  "2d": "2nd Person Dual",
+  "2mp": "2nd Person Masc. Plural",
+  "2fp": "2nd Person Fem. Plural",
+  "3ms": "3rd Person Masc. Sing.",
+  "3fs": "3rd Person Fem. Sing.",
+  "3d": "3rd Person Dual",
+  "3md": "3rd Person Masc. Dual",
+  "3fd": "3rd Person Fem. Dual",
+  "3mp": "3rd Person Masc. Plural",
+  "3fp": "3rd Person Fem. Plural",
 };
 
 const VERB_FORM_LABELS: Record<string, string> = {
-  '1': 'Form I (فَعَلَ)',
-  '2': 'Form II (فَعَّلَ)',
-  '3': 'Form III (فَاعَلَ)',
-  '4': 'Form IV (أَفْعَلَ)',
-  '5': 'Form V (تَفَعَّلَ)',
-  '6': 'Form VI (تَفَاعَلَ)',
-  '7': 'Form VII (اِنْفَعَلَ)',
-  '8': 'Form VIII (اِفْتَعَلَ)',
-  '9': 'Form IX (اِفْعَلَّ)',
-  '10': 'Form X (اِسْتَفْعَلَ)',
+  "1": "Form I (فَعَلَ)",
+  "2": "Form II (فَعَّلَ)",
+  "3": "Form III (فَاعَلَ)",
+  "4": "Form IV (أَفْعَلَ)",
+  "5": "Form V (تَفَعَّلَ)",
+  "6": "Form VI (تَفَاعَلَ)",
+  "7": "Form VII (اِنْفَعَلَ)",
+  "8": "Form VIII (اِفْتَعَلَ)",
+  "9": "Form IX (اِفْعَلَّ)",
+  "10": "Form X (اِسْتَفْعَلَ)",
 };
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class MorphologyService {
   // Cache loaded surah data: Map<surahNumber, Map<"surah:ayah", word[]>>
@@ -173,9 +173,13 @@ export class MorphologyService {
    * @param wordIndex Word index (1-based)
    * @returns Observable of WordMorphology or null
    */
-  getWordMorphology(surah: number, ayah: number, wordIndex: number): Observable<WordMorphology | null> {
+  getWordMorphology(
+    surah: number,
+    ayah: number,
+    wordIndex: number,
+  ): Observable<WordMorphology | null> {
     return this.loadSurahData(surah).pipe(
-      map(data => {
+      map((data) => {
         if (!data) return null;
         const ayahKey = `${surah}:${ayah}`;
         const ayahData = data[ayahKey];
@@ -184,7 +188,7 @@ export class MorphologyService {
         const wordArr = ayahData[wordIndex - 1];
         if (!wordArr) return null;
         return this.parseCompactWord(wordArr);
-      })
+      }),
     );
   }
 
@@ -196,7 +200,7 @@ export class MorphologyService {
    */
   getAyahMorphology(surah: number, ayah: number): Observable<WordMorphology[]> {
     return this.loadSurahData(surah).pipe(
-      map(data => {
+      map((data) => {
         if (!data) return [];
         const ayahKey = `${surah}:${ayah}`;
         const ayahData = data[ayahKey];
@@ -204,7 +208,7 @@ export class MorphologyService {
         return ayahData
           .filter((w: any) => w !== null)
           .map((w: any) => this.parseCompactWord(w));
-      })
+      }),
     );
   }
 
@@ -229,15 +233,14 @@ export class MorphologyService {
     if (this.cache.has(surah)) {
       return of(this.cache.get(surah));
     }
-
-    return this.http.get(`assets/data/morphology/${surah}.json`).pipe(
-      tap(data => {
+    return this.http.get(`assets/data/morphology/${Number(surah)}.json`).pipe(
+      tap((data) => {
         this.cache.set(surah, data);
       }),
-      catchError(err => {
+      catchError((err) => {
         console.warn(`Morphology data not available for surah ${surah}:`, err);
         return of(null);
-      })
+      }),
     );
   }
 
@@ -246,7 +249,7 @@ export class MorphologyService {
    * Array fields: [pos, lem, root, arRoot, arLem, f, pre, suf, vf, asp, voi, st, der, sc]
    */
   private parseCompactWord(arr: any[]): WordMorphology {
-    const pos = arr[0] || '';
+    const pos = arr[0] || "";
     const lem = arr[1] || undefined;
     const root = arr[2] || undefined;
     const arRoot = arr[3] || undefined;
@@ -271,15 +274,19 @@ export class MorphologyService {
       features: features ? this.expandFeatures(features) : undefined,
       prefix: prefix ? this.expandPrefixes(prefix) : undefined,
       suffix,
-      verbForm: verbForm ? (VERB_FORM_LABELS[verbForm] || `Form ${verbForm}`) : undefined,
+      verbForm: verbForm
+        ? VERB_FORM_LABELS[verbForm] || `Form ${verbForm}`
+        : undefined,
       aspect,
-      aspectLabel: aspect ? (ASPECT_LABELS[aspect] || aspect) : undefined,
+      aspectLabel: aspect ? ASPECT_LABELS[aspect] || aspect : undefined,
       voice,
-      voiceLabel: voice ? (VOICE_LABELS[voice] || voice) : undefined,
+      voiceLabel: voice ? VOICE_LABELS[voice] || voice : undefined,
       state,
-      stateLabel: state ? (STATE_LABELS[state] || state) : undefined,
+      stateLabel: state ? STATE_LABELS[state] || state : undefined,
       derivation,
-      derivationLabel: derivation ? (DERIVATION_LABELS[derivation] || derivation) : undefined,
+      derivationLabel: derivation
+        ? DERIVATION_LABELS[derivation] || derivation
+        : undefined,
       segmentCount,
     };
   }
@@ -289,20 +296,21 @@ export class MorphologyService {
    * e.g. "ms" -> "Masc. Sing.", "3mp" -> "3rd Person Masc. Plural"
    */
   private expandFeatures(features: string): string {
-    return features.split(',')
-      .map(f => FEATURE_LABELS[f.trim()] || f.trim())
-      .filter(f => f)
-      .join(', ');
+    return features
+      .split(",")
+      .map((f) => FEATURE_LABELS[f.trim()] || f.trim())
+      .filter((f) => f)
+      .join(", ");
   }
 
   /**
    * Expand prefix tags to human-readable.
    */
   private expandPrefixes(prefix: string): string {
-    return prefix.split('+')
-      .map(p => POS_LABELS[p.trim()] || p.trim())
-      .filter(p => p)
-      .join(' + ');
+    return prefix
+      .split("+")
+      .map((p) => POS_LABELS[p.trim()] || p.trim())
+      .filter((p) => p)
+      .join(" + ");
   }
 }
-

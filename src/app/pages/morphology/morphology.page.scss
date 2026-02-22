@@ -230,6 +230,105 @@
     margin: 0;
   }
 }
+.words-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.word-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.word-row .lemma {
+  font-weight: 600;
+  color: #1e3c72; /* vivid primary color */
+}
+
+.morph-field {
+  background: #e0f2f1;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.word-row ion-button {
+  margin-left: 4px;
+  --padding-start: 2px;
+  --padding-end: 2px;
+  height: 22px;
+  min-width: 22px;
+}
+
+// Morphology Data Section - Compact Layout
+.morphology-data-section {
+  margin-top: 20px;
+
+  ion-accordion-group {
+    --background: transparent;
+    --border-color: var(--ion-border-color);
+  }
+
+  ion-accordion {
+    --background: var(--ion-color-light);
+    --border-color: var(--ion-border-color);
+    margin-bottom: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+
+    ion-item {
+      --background: var(--ion-color-light);
+      --color: var(--ion-text-color);
+    }
+
+    .word-lemma {
+      color: var(--ion-color-primary);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+  }
+
+  .word-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: var(--ion-card-background);
+  }
+
+  .detail-row {
+    display: flex;
+    gap: 12px;
+    font-size: 0.9rem;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--ion-border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      min-width: 100px;
+      color: var(--ion-color-primary);
+    }
+
+    .detail-value {
+      flex: 1;
+      color: var(--ion-text-color);
+      word-break: break-word;
+
+      &.ar-text2 {
+        font-size: 1rem;
+      }
+    }
+  }
+}
 
 // Dark mode support
 @media (prefers-color-scheme: dark) {

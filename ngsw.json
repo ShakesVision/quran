@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1771654334765,
+  "timestamp": 1771750463086,
   "index": "/quran/index.html",
   "assetGroups": [
     {
@@ -47,7 +47,7 @@
         "/quran/4753.6916cf5ff5a85e7a.js",
         "/quran/4760.69ba875cb362f327.js",
         "/quran/4887.a45f88b361fe82b4.js",
-        "/quran/4902.12b90a410bb0893d.js",
+        "/quran/4902.4d8eb8a6d613d842.js",
         "/quran/4908.2477a206c54592d5.js",
         "/quran/4959.5cf64e771af400fa.js",
         "/quran/5038.ec5493ec60a5d3da.js",
@@ -88,7 +88,7 @@
         "/quran/polyfills-core-js.fa7d9f97271e576e.js",
         "/quran/polyfills-dom.5c5f23fb57b03028.js",
         "/quran/polyfills.3125ff98b2c776cf.js",
-        "/quran/runtime.47468a0802e23f81.js",
+        "/quran/runtime.5225fc6dc4f07cff.js",
         "/quran/styles.586c523d33650bca.css"
       ],
       "patterns": []
@@ -429,7 +429,7 @@
     "/quran/4753.6916cf5ff5a85e7a.js": "819ddfb29d6b49c407b05d245fea85520316abd7",
     "/quran/4760.69ba875cb362f327.js": "7a19b91a307376347708ca11e8bf097a6ce36844",
     "/quran/4887.a45f88b361fe82b4.js": "af85835f31a20fa233a2d6ab221cd2a92bce7297",
-    "/quran/4902.12b90a410bb0893d.js": "aed96108d3e2af3feecf8cee1dc2d8da4500cc2c",
+    "/quran/4902.4d8eb8a6d613d842.js": "077e30e527ab3df8f0dc149aead9d0c5ca508e49",
     "/quran/4908.2477a206c54592d5.js": "bcd9b458f7122a39c7e92cfda46c4eeefa633512",
     "/quran/4959.5cf64e771af400fa.js": "d72759e3459d83bebb67618a900fd5ee49558aa2",
     "/quran/5038.ec5493ec60a5d3da.js": "49c401d1379e5da6475cccad40cc74d24ea33b0a",
@@ -652,17 +652,17 @@
     "/quran/assets/quran.png": "f426d56a5aad0acf61b7ea653aca02d59124b289",
     "/quran/assets/shapes.svg": "5413e95adabcb2cb639970051f55e0ddb64ace53",
     "/quran/common.fb74b1eeacbf51ba.js": "e70c50337d6239088b4381564adb9e8be1b99001",
-    "/quran/index.html": "aa81f02d9e4fb20ac88da9e0fa6f903a8a969906",
+    "/quran/index.html": "ce70583bd5c00acec08779619f34dfe049d51207",
     "/quran/indopak-nastaleeq-waqf-lazim-v4.2.1.5171e9bac4850034.woff2": "c393af38ca5e9d3c6d880fd7398bca14541c96c6",
     "/quran/main.87b4cd591551e279.js": "3b258078ee93956635d57febcbf47f203b040420",
-    "/quran/manifest.webmanifest": "136464e730c1ea82131a4666de3fe6115c9746c6",
+    "/quran/manifest.webmanifest": "207d2579fbc03094dc44e8b2b526c3dcb2fbd900",
     "/quran/muhammadi.caa330870633446c.ttf": "4c51a4317c328fe68859a632f69c84c729d2a363",
     "/quran/paper-texture-dark.5661b5099b74f788.svg": "3146f21075bc7f89fe44401726760906b6b57641",
     "/quran/paper-texture-light.8bc336479c941e99.svg": "2114bb630d7208eca979f232e80f016db2d1b763",
     "/quran/polyfills-core-js.fa7d9f97271e576e.js": "93578782b94d62db0633e8748685487206753ab3",
     "/quran/polyfills-dom.5c5f23fb57b03028.js": "06f5dc30f55bf9a3d9c6f9bca07c0041a6bbdaa0",
     "/quran/polyfills.3125ff98b2c776cf.js": "943773b2bc4a168282cf552a5e8b515958e5f9a6",
-    "/quran/runtime.47468a0802e23f81.js": "34bf232d6b2f258f14f3d62b436744eebdecf90f",
+    "/quran/runtime.5225fc6dc4f07cff.js": "a2b2aaa921b19cad964732934628d566c1763963",
     "/quran/styles.586c523d33650bca.css": "8e80338a1d3f9415ef2607d9ffd8b01c54419e6f"
   },
   "navigationUrls": [

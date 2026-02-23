@@ -21,8 +21,8 @@
     "path": "C:\\Shakeeb\\Home\\Ionic\\quran15line\\sarbakaf.keystore",
     "alias": "sarbakaf"
   },
-  "appVersionName": "3",
-  "appVersionCode": 3,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [
     {
       "name": "Full Quran",
@@ -69,5 +69,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "3"
+  "appVersion": "4"
 }

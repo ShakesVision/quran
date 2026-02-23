@@ -3,19 +3,6 @@
     "target": "hifz-helper",
     "public": "www",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "redirects": [
-      {
-        "source": "**",
-        "has": [
-          {
-            "type": "host",
-            "value": "quran.shakeeb.in."
-          }
-        ],
-        "destination": "https://quran.shakeeb.in",
-        "type": 301
-      }
-    ],
     "rewrites": [
       {
         "source": "**",

@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1771821850749,
+  "timestamp": 1772087939763,
   "index": "/quran/index.html",
   "assetGroups": [
     {
@@ -466,7 +466,7 @@
     "/quran/AlQuran-IndoPak-by-QuranWBW.v.4.0-WL.beac0f3629fc7f3c.woff2": "e9d17f0d70d40eafe070a89d050be8413d84db49",
     "/quran/Mehr.f631471b16d738bf.ttf": "3378c936e5caa1e0be9712a807d3b5df5593ff2c",
     "/quran/UthmanicHafs1Ver18.067e8392da938dc1.woff2": "ee508d863de52a74016d3eac37f53d8529ab658b",
-    "/quran/assets/.well-known/assetlinks.json": "76c8bb4126f8293b3fa38ddbbc420de20712f6c5",
+    "/quran/assets/.well-known/assetlinks.json": "65caa66cba0cc4b0e7aec2c3d60479d07ac00352",
     "/quran/assets/audio-playing.gif": "fdfd60d6cae7f42c4050de8c172a794df03c9782",
     "/quran/assets/border.svg": "8d0fcbd799ca5f3b8a4a6babd1a4b85996d94aa5",
     "/quran/assets/data/morphology/1.json": "acb6f6d9b1975c23a2c40eb8fb4e1f9d02602d5e",

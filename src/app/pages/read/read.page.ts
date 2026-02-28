@@ -735,14 +735,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     // Add copy ayah option if we can identify the verse
     if (verseKey) {
       buttons.push({
-        text: `📜 Copy Ayah (${verseKey})`,
+        text: `Copy Ayah (${verseKey})`,
         icon: "document-text-outline",
         handler: () => {
           this.copyAyahText(verseKey);
         },
       });
       buttons.push({
-        text: `📜 Copy Translation (${verseKey})`,
+        text: `Copy Translation (${verseKey})`,
         icon: "language-outline",
         handler: () => {
           this.copyAyahTranslation(verseKey);

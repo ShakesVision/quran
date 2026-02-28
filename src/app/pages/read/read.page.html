@@ -13,7 +13,7 @@
             <ion-img src="assets/audio-playing.gif" class="gif"></ion-img>
             <ion-text class="verse-num">{{playingVerseNum}}</ion-text>
           </div>
-          <ion-select interface="popover" style="font-size: small" placeholder="Speed" value="1"
+          <ion-select interface="action-sheet" style="font-size: small" placeholder="Speed" value="1"
             [(ngModel)]="audioSpeed" (ionChange)="setAudioSpeed($event.target.value)">
             <ion-select-option value="3">3x</ion-select-option>
             <ion-select-option value="2.5">2.5x</ion-select-option>
@@ -31,8 +31,10 @@
         </div>
         <div *ngIf="!audioPlaying" class="qari-wrapper">
           <ion-select *ngIf="reciters" interface="action-sheet" (ionChange)="qariChanged($event.target.value)"
-            [placeholder]="selectedQari ? selectedQari?.name + ' (id: ' + selectedQari?.id + ')' : 'Qaari'" [(ngModel)]="qariId">
-            <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.name}} (id: {{r.id}})</ion-select-option>
+            [placeholder]="selectedQari ? selectedQari?.name + ' (id: ' + selectedQari?.id + ')' : 'Qaari'"
+            [(ngModel)]="qariId">
+            <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.name}} (id:
+              {{r.id}})</ion-select-option>
           </ion-select>
         </div>
         <ion-button (click)="playAudio()">
@@ -51,9 +53,9 @@
       <ion-button (click)="isSearchOpen = true" slot="end" size="small">
         <ion-icon slot="icon-only" name="search-outline" style="font-size:20px"></ion-icon>
       </ion-button>
-      <ion-button (click)="toggleImmersiveMode()" slot="end" size="small"
-        [color]="isImmersive ? 'warning' : ''">
-        <ion-icon slot="icon-only" [name]="isImmersive ? 'contract-outline' : 'expand-outline'" style="font-size:20px"></ion-icon>
+      <ion-button (click)="toggleImmersiveMode()" slot="end" size="small" [color]="isImmersive ? 'warning' : ''">
+        <ion-icon slot="icon-only" [name]="isImmersive ? 'contract-outline' : 'expand-outline'"
+          style="font-size:20px"></ion-icon>
       </ion-button>
       <ion-button id="popover-trigger-btn" slot="end" size="small">
         <ion-icon slot="icon-only" name="menu-outline" style="font-size:20px"></ion-icon>
@@ -103,7 +105,8 @@
       </div>
     </div>
     <div class="sbs-page-range">
-      {{ surahService.e2a(currentPage.toString()) }}-{{ surahService.e2a(getSecondPageNumber().toString()) }} / {{ surahService.e2a(pages.length.toString()) }}
+      {{ surahService.e2a(currentPage.toString()) }}-{{ surahService.e2a(getSecondPageNumber().toString()) }} / {{
+      surahService.e2a(pages.length.toString()) }}
     </div>
   </div>
 
@@ -115,34 +118,35 @@
       </div>
     </pinch-zoom>
   </div>
-  <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass" [hidden]="scanView || sideBySideMode !== 'off'">
+  <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass"
+    [hidden]="scanView || sideBySideMode !== 'off'">
     <div class="page-top-info" *ngIf="isDataLoaded">
       <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
         <span class="juz-number"> {{ getJuzNumber() }} </span>
         <span class="page-number">
           {{
-            isCompleteMushaf
-              ? surahService.e2a((currentPage ?? 0).toString())
-              : (currentPageCalculated ? surahService.e2a(currentPageCalculated.toString()) : '')
+          isCompleteMushaf
+          ? surahService.e2a((currentPage ?? 0).toString())
+          : (currentPageCalculated ? surahService.e2a(currentPageCalculated.toString()) : '')
           }}
         </span>
         <span class="surah-number">
           {{
-            isCompleteMushaf
-              ? (surahCalculated
-                  ? (surahService.surahNames[surahCalculated - 1] + ' ' +
-                    surahService.e2a(surahCalculated.toString()))
-                  : '')
-              : (surahCalculatedForJuz
-                  ? (surahService.surahNames[surahCalculatedForJuz - 1] + ' ' +
-                    surahService.e2a(surahCalculatedForJuz.toString()))
-                  : '')
+          isCompleteMushaf
+          ? (surahCalculated
+          ? (surahService.surahNames[surahCalculated - 1] + ' ' +
+          surahService.e2a(surahCalculated.toString()))
+          : '')
+          : (surahCalculatedForJuz
+          ? (surahService.surahNames[surahCalculatedForJuz - 1] + ' ' +
+          surahService.e2a(surahCalculatedForJuz.toString()))
+          : '')
           }}
         </span>
       </ng-container>
     </div>
-    <div class="content-wrapper" [class.inline-trans-active]="inlineTransMode"
-      [class.text-preparing]="preparingText" [class.text-ready]="!preparingText">
+    <div class="content-wrapper" [class.inline-trans-active]="inlineTransMode" [class.text-preparing]="preparingText"
+      [class.text-ready]="!preparingText">
       <ng-container class="ion-text-center" *ngIf="currentPage==1 && lines?.length<15 && !juzmode">
         <div class="filler-lines line" *ngFor="let line of [].constructor(15 - (lines?.length+2))"></div>
         <div class="surah-name line centered-table-text">
@@ -157,16 +161,11 @@
         'juz-start-line': ![2,3].includes(currentPageCalculated) && surahService.juzPageNumbers.includes(currentPageCalculated) && (lines[1].trim()==='﷽' ? i===2 : i===0),
         'surah-start-line':lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && currentPageCalculated==188 && i==0), 
         'surah-end-line':i===lines.length-1&&pages[currentPage]?.split('\n')[1]?.trim()==='﷽'||lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && currentPage === pages.length && (i==lines.length-1 || i==9))|| (currentPage===pages.length && i===lines.length-1 && !juzmode)}"
-        (click)="onLineClick($event,i)"
-        (dblclick)="onLineDblClick($event,i)"
-        (touchstart)="onLineTouchStart($event,i)"
-        (touchend)="onLineTouchEnd($event,i)"
-        (touchmove)="onLineTouchCancel()"
+        (click)="onLineClick($event,i)" (dblclick)="onLineDblClick($event,i)" (touchstart)="onLineTouchStart($event,i)"
+        (touchend)="onLineTouchEnd($event,i)" (touchmove)="onLineTouchCancel()"
         (contextmenu)="onLineContextMenu($event,i)">
-        <div *ngIf="hasIndicator(line, i)" class="ruku-wrapper"
-          [innerHTML]="addIndicators(line,i)"></div>
-        <span class="arabic-line-text" [class.tajweed-text]="tajweedMode"
-              [attr.data-raw-text]="line">{{line}}</span>
+        <div *ngIf="hasIndicator(line, i)" class="ruku-wrapper" [innerHTML]="addIndicators(line,i)"></div>
+        <span class="arabic-line-text" [class.tajweed-text]="tajweedMode" [attr.data-raw-text]="line">{{line}}</span>
         <span *ngIf="inlineTransMode && inlineTranslations[i]" class="inline-translation"
           [ngClass]="{'ur': inlineTransLang==='ur'}">
           {{inlineTranslations[i]}}
@@ -212,7 +211,8 @@
                 <ion-icon [name]="tMode?'language':'language-outline'"></ion-icon>
                 <span>Translate</span>
               </button>
-              <button class="qt-btn" [class.active]="inlineTransMode" (click)="toggleInlineTranslation(!inlineTransMode)">
+              <button class="qt-btn" [class.active]="inlineTransMode"
+                (click)="toggleInlineTranslation(!inlineTransMode)">
                 <ion-icon name="text-outline"></ion-icon>
                 <span>Inline</span>
               </button>
@@ -223,7 +223,7 @@
             </div>
             <div *ngIf="tajweedMode" class="tajweed-legend">
               <span class="legend-item" *ngFor="let item of tajweedLegend"
-                    (click)="tajweedEditMode && openTajweedColorPicker(item)">
+                (click)="tajweedEditMode && openTajweedColorPicker(item)">
                 <span class="color-dot" [style.background]="item.color"></span>{{item.label}}
               </span>
               <button class="tj-customize-btn" (click)="tajweedEditMode = !tajweedEditMode">
@@ -233,8 +233,8 @@
             <div *ngIf="tajweedMode && tajweedEditMode" class="tajweed-color-editor">
               <div class="tj-color-row" *ngFor="let item of tajweedLegend">
                 <span class="tj-color-label">{{item.label}}</span>
-                <input type="color" [value]="item.color"
-                       (change)="updateTajweedColor(item, $event.target.value)" class="tj-color-input">
+                <input type="color" [value]="item.color" (change)="updateTajweedColor(item, $event.target.value)"
+                  class="tj-color-input">
               </div>
               <ion-button size="small" fill="clear" color="medium" (click)="resetTajweedColors()">
                 <ion-icon name="refresh-outline" slot="start"></ion-icon>Reset to defaults
@@ -267,7 +267,8 @@
             </ion-item>
             <ion-item *ngIf="inlineTransMode">
               <ion-label>Language</ion-label>
-              <ion-select [(ngModel)]="inlineTransLang" (ionChange)="reloadInlineTranslations()" interface="action-sheet">
+              <ion-select [(ngModel)]="inlineTransLang" (ionChange)="reloadInlineTranslations()"
+                interface="action-sheet">
                 <ion-select-option value="en">English</ion-select-option>
                 <ion-select-option value="ur">Urdu</ion-select-option>
               </ion-select>
@@ -283,9 +284,8 @@
                 <ion-input placeholder="Surah" type="number" maxlength="3"
                   (ionChange)="gotoJuzSurah($event.target.value,'surah')" [debounce]="500"
                   class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-                <ion-input placeholder="s:a" type="text" maxlength="7"
-                  (ionChange)="gotoAyah($event.target.value)" [debounce]="800"
-                  class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
+                <ion-input placeholder="s:a" type="text" maxlength="7" (ionChange)="gotoAyah($event.target.value)"
+                  [debounce]="800" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
               </ng-container>
             </ion-item>
 
@@ -316,20 +316,16 @@
               <ion-label>Translation</ion-label>
               <ion-input #verseIdInput placeholder="2:125" (ionChange)="readTrans($event.target.value)"
                 [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-              <ion-select value="en" placeholder="Lang"
-                (ionChange)="readTrans(verseIdInput.value,$event.target.value)">
+              <ion-select value="en" placeholder="Lang" (ionChange)="readTrans(verseIdInput.value,$event.target.value)">
                 <ion-select-option value="en">EN</ion-select-option>
                 <ion-select-option value="ur">UR</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item-divider class="settings-section">Themes</ion-item-divider>
             <div class="theme-grid">
-              <button *ngFor="let t of readerThemes" class="theme-btn"
-                      [class.active]="activeTheme === t.id"
-                      [style.background]="t.bg"
-                      [style.color]="t.text"
-                      [style.borderColor]="activeTheme === t.id ? t.accent : 'transparent'"
-                      (click)="applyTheme(t)">
+              <button *ngFor="let t of readerThemes" class="theme-btn" [class.active]="activeTheme === t.id"
+                [style.background]="t.bg" [style.color]="t.text"
+                [style.borderColor]="activeTheme === t.id ? t.accent : 'transparent'" (click)="applyTheme(t)">
                 <span class="theme-sample">بسم</span>
                 <span class="theme-name">{{ t.name }}</span>
               </button>
@@ -352,13 +348,14 @@
             <ion-item button (click)="scanView ? scanView=false : loadImg(currentPageCalculated)">
               <ion-icon slot="start" name="image-outline"></ion-icon>
               <ion-label>Scan View</ion-label>
-              <ion-toggle slot="end" [checked]="scanView" (ionChange)="$event.detail.checked ? loadImg(currentPageCalculated) : scanView=false"></ion-toggle>
+              <ion-toggle slot="end" [checked]="scanView"
+                (ionChange)="$event.detail.checked ? loadImg(currentPageCalculated) : scanView=false"></ion-toggle>
             </ion-item>
             <ion-item>
               <ion-icon slot="start" name="tablet-landscape-outline"></ion-icon>
               <ion-label>Side-by-Side</ion-label>
               <ion-select slot="end" [(ngModel)]="sideBySideMode" interface="action-sheet"
-                          (ionChange)="toggleSideBySide($event.detail.value)">
+                (ionChange)="toggleSideBySide($event.detail.value)">
                 <ion-select-option value="off">Off</ion-select-option>
                 <ion-select-option value="scan-unicode">Scan + Text</ion-select-option>
                 <ion-select-option value="two-pages">Two Pages</ion-select-option>
@@ -379,12 +376,10 @@
       </ion-content>
     </ng-template>
   </ion-popover>
-  
+
   <!-- Search Modal (sheet-style) -->
-  <ion-modal [isOpen]="isSearchOpen" (didDismiss)="isSearchOpen = false"
-    [breakpoints]="[0, 0.4, 0.75, 1]" [initialBreakpoint]="0.75"
-    [backdropDismiss]="true" [showBackdrop]="true"
-    cssClass="search-sheet-modal">
+  <ion-modal [isOpen]="isSearchOpen" (didDismiss)="isSearchOpen = false" [breakpoints]="[0, 0.4, 0.75, 1]"
+    [initialBreakpoint]="0.75" [backdropDismiss]="true" [showBackdrop]="true" cssClass="search-sheet-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -445,10 +440,8 @@
   </ion-modal>
 
   <!-- Word Detail Modal -->
-  <ion-modal [isOpen]="isWordDetailOpen" (didDismiss)="closeWordDetail()"
-    [breakpoints]="[0, 0.4, 0.7, 1]" [initialBreakpoint]="0.7"
-    [backdropDismiss]="true" [showBackdrop]="true"
-    cssClass="word-detail-modal">
+  <ion-modal [isOpen]="isWordDetailOpen" (didDismiss)="closeWordDetail()" [breakpoints]="[0, 0.4, 0.7, 1]"
+    [initialBreakpoint]="0.7" [backdropDismiss]="true" [showBackdrop]="true" cssClass="word-detail-modal">
     <ng-template>
       <ion-content class="word-detail-content" *ngIf="selectedWord">
         <div class="word-detail-wrapper">
@@ -459,7 +452,8 @@
           <div class="word-detail-translation">{{ selectedWord.translation }}</div>
           <div class="word-detail-info" *ngIf="selectedWord.verseKey">
             <ion-badge color="primary">{{ selectedWord.verseKey }}</ion-badge>
-            <span *ngIf="selectedWord.location" class="word-location">Word {{ selectedWord.location.split(':')[2] }}</span>
+            <span *ngIf="selectedWord.location" class="word-location">Word {{ selectedWord.location.split(':')[2]
+              }}</span>
           </div>
 
           <!-- Morphology Section -->
@@ -517,8 +511,8 @@
               <ion-icon slot="start" name="volume-high-outline"></ion-icon>
               Listen
             </ion-button>
-            <a *ngIf="getCorpusUrl(selectedWord)"
-              [href]="getCorpusUrl(selectedWord)" target="_blank" rel="noopener" style="text-decoration:none">
+            <a *ngIf="getCorpusUrl(selectedWord)" [href]="getCorpusUrl(selectedWord)" target="_blank" rel="noopener"
+              style="text-decoration:none">
               <ion-button fill="outline" size="small">
                 <ion-icon slot="start" name="library-outline"></ion-icon>
                 Corpus
@@ -535,10 +529,8 @@
   </ion-modal>
 
   <!-- Bookmarks Viewer Modal (sheet-style) -->
-  <ion-modal [isOpen]="isBookmarksOpen" (didDismiss)="isBookmarksOpen = false"
-    [breakpoints]="[0, 0.5, 0.85, 1]" [initialBreakpoint]="0.85"
-    [backdropDismiss]="true" [showBackdrop]="true"
-    cssClass="bookmarks-sheet-modal">
+  <ion-modal [isOpen]="isBookmarksOpen" (didDismiss)="isBookmarksOpen = false" [breakpoints]="[0, 0.5, 0.85, 1]"
+    [initialBreakpoint]="0.85" [backdropDismiss]="true" [showBackdrop]="true" cssClass="bookmarks-sheet-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar>

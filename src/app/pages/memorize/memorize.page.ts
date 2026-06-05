@@ -331,6 +331,10 @@ export class MemorizePage implements OnInit {
         initialNumber: item?.juz ?? null,
         initialCompleted: item?.completed ?? null,
       },
+      breakpoints: [0, 0.45],
+      initialBreakpoint: 0.45,
+      cssClass: "memorize-add-sheet",
+      backdropDismiss: true,
     });
     await modal.present();
     const { data } = await modal.onDidDismiss<MemorizeAddResult>();
@@ -418,6 +422,10 @@ export class MemorizePage implements OnInit {
         initialNumber: item?.surahNumber ?? null,
         initialCompleted: item?.completed ?? null,
       },
+      breakpoints: [0, 0.45],
+      initialBreakpoint: 0.45,
+      cssClass: "memorize-add-sheet",
+      backdropDismiss: true,
     });
     await modal.present();
     const { data } = await modal.onDidDismiss<MemorizeAddResult>();

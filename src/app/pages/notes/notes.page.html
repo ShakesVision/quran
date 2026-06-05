@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>My Notes</ion-title>
+    <ion-title>{{ 'notes.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -11,7 +11,7 @@
   <div class="notes-container">
     <!-- Search Bar -->
     <div class="search-container">
-      <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterNotes()" placeholder="Search notes..."
+      <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterNotes()" [placeholder]="'notes.search' | translate"
         class="search-bar">
       </ion-searchbar>
     </div>
@@ -19,7 +19,7 @@
     <!-- Loading State -->
     <div *ngIf="isLoading" class="loading-state">
       <ion-spinner name="dots" color="primary"></ion-spinner>
-      <p>Loading notes...</p>
+      <p>{{ 'notes.loading' | translate }}</p>
     </div>
 
     <!-- Notes List -->
@@ -37,9 +37,9 @@
         <div class="note-context" *ngIf="note.context">
           <small>
             <ion-icon name="location-outline" size="small"></ion-icon>
-            <span *ngIf="note.context.surah">Surah {{ note.context.surah }}</span>
-            <span *ngIf="note.context.juz">Juz {{ note.context.juz }}</span>
-            <span *ngIf="note.context.page">Page {{ note.context.page }}</span>
+            <span *ngIf="note.context.surah">{{ 'notes.contextSurah' | translate:{ num: note.context.surah } }}</span>
+            <span *ngIf="note.context.juz">{{ 'notes.contextJuz' | translate:{ num: note.context.juz } }}</span>
+            <span *ngIf="note.context.page">{{ 'notes.contextPage' | translate:{ num: note.context.page } }}</span>
           </small>
         </div>
 
@@ -54,12 +54,12 @@
     <!-- Empty State -->
     <div *ngIf="!isLoading && filteredNotes.length === 0" class="empty-state">
       <ion-icon name="create-outline" class="empty-icon"></ion-icon>
-      <h3>{{ searchQuery ? 'No notes found' : 'No notes yet' }}</h3>
+      <h3>{{ searchQuery ? ('notes.noResults' | translate) : ('notes.empty' | translate) }}</h3>
       <p *ngIf="!searchQuery">
-        Notes you create while reading will appear here. Add notes from the reader to get started.
+        {{ 'notes.emptyHint' | translate }}
       </p>
       <p *ngIf="searchQuery">
-        Try a different search term
+        {{ 'notes.trySearch' | translate }}
       </p>
     </div>
   </div>
@@ -70,11 +70,11 @@
       <ion-header>
         <ion-toolbar>
           <ion-buttons slot="start">
-            <ion-button (click)="editModal.dismiss()">Cancel</ion-button>
+            <ion-button (click)="editModal.dismiss()">{{ 'common.cancel' | translate }}</ion-button>
           </ion-buttons>
-          <ion-title>Edit Note</ion-title>
+          <ion-title>{{ 'notes.editNote' | translate }}</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="saveNote()" color="primary" [strong]="true">Save</ion-button>
+            <ion-button (click)="saveNote()" color="primary" [strong]="true">{{ 'common.save' | translate }}</ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
@@ -82,31 +82,31 @@
       <ion-content *ngIf="selectedNote">
         <ion-list>
           <ion-item>
-            <ion-label position="stacked">Title</ion-label>
-            <ion-input [(ngModel)]="editingTitle" placeholder="Note title">
+            <ion-label position="stacked">{{ 'common.title' | translate }}</ion-label>
+            <ion-input [(ngModel)]="editingTitle" [placeholder]="'notes.noteTitle' | translate">
             </ion-input>
           </ion-item>
 
           <ion-item>
-            <ion-label position="stacked">Content</ion-label>
-            <ion-textarea [(ngModel)]="editingContent" placeholder="Write your note..." rows="10">
+            <ion-label position="stacked">{{ 'common.content' | translate }}</ion-label>
+            <ion-textarea [(ngModel)]="editingContent" [placeholder]="'notes.writeNote' | translate" rows="10">
             </ion-textarea>
           </ion-item>
 
           <ion-item *ngIf="selectedNote.context" lines="none">
             <ion-label>
-              <strong>Context:</strong>
-              <p *ngIf="selectedNote.context.surah">Surah {{ selectedNote.context.surah }}</p>
-              <p *ngIf="selectedNote.context.juz">Juz {{ selectedNote.context.juz }}</p>
-              <p *ngIf="selectedNote.context.page">Page {{ selectedNote.context.page }}</p>
+              <strong>{{ 'common.context' | translate }}:</strong>
+              <p *ngIf="selectedNote.context.surah">{{ 'notes.contextSurah' | translate:{ num: selectedNote.context.surah } }}</p>
+              <p *ngIf="selectedNote.context.juz">{{ 'notes.contextJuz' | translate:{ num: selectedNote.context.juz } }}</p>
+              <p *ngIf="selectedNote.context.page">{{ 'notes.contextPage' | translate:{ num: selectedNote.context.page } }}</p>
             </ion-label>
           </ion-item>
 
           <ion-item lines="none">
             <ion-label>
-              <strong>Created:</strong>
+              <strong>{{ 'common.created' | translate }}:</strong>
               <p>{{ formatDate(selectedNote.createdAt) }}</p>
-              <strong>Updated:</strong>
+              <strong>{{ 'common.updated' | translate }}:</strong>
               <p>{{ formatDate(selectedNote.updatedAt) }}</p>
             </ion-label>
           </ion-item>

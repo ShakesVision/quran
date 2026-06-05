@@ -77,7 +77,9 @@ export class PlaygroundPage implements OnInit {
         this.loadFromCustomInput();
       }
 
-      if (this.textSource === 'custom' && this.inputFormat !== 'archive') {
+      if (this.inputFormat === 'archive' && this.textSource === 'custom') {
+        this.buildPreview();
+      } else if (this.lastParsedAyahs.length > 0) {
         await this.applyArchiveTemplateAdapter();
       } else {
         this.buildPreview();
@@ -96,8 +98,7 @@ export class PlaygroundPage implements OnInit {
    * Load from Quran.com API (IndoPak text, all 114 surahs)
    */
   private async loadFromQuranCom() {
-    const allAyahs: string[] = [];
-    let ayahCount = 0;
+    const parsed: ParsedAyah[] = [];
 
     for (let surah = 1; surah <= 114; surah++) {
       this.statusMessage = `Loading surah ${surah}/114...`;
@@ -108,22 +109,24 @@ export class PlaygroundPage implements OnInit {
         const res: any = await this.http.get(url).pipe(take(1)).toPromise();
         const verses = res?.verses || [];
         for (const verse of verses) {
-          allAyahs.push(verse.text_indopak || '');
-          ayahCount++;
+          parsed.push({
+            surah,
+            ayah: verse.verse_number,
+            text: verse.text_indopak || '',
+          });
         }
       } catch (e) {
         console.warn(`[Playground] Failed to load surah ${surah}:`, e);
       }
 
-      // Small delay every 10 surahs
       if (surah % 10 === 0) {
         await new Promise(r => setTimeout(r, 100));
       }
     }
 
-    this.totalAyahs = ayahCount;
-    // Each ayah becomes a line in the playground view
-    this.allLines = allAyahs;
+    this.lastParsedAyahs = parsed;
+    this.totalAyahs = parsed.length;
+    this.allLines = [];
   }
 
   /**

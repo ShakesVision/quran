@@ -799,6 +799,41 @@ export class QuranDataService {
     return word.text || word.text_indopak || word.text_uthmani || "";
   }
 
+  /** Quran.com prepends a title page at index 0; archive text does not. */
+  private getPageIndexOffset(pages: string[]): number {
+    return pages.length > 611 ? 1 : 0;
+  }
+
+  private slicePagesForJuz(pages: string[], juzNumber: number): string[] {
+    const o = this.getPageIndexOffset(pages);
+    const startPage = this.surahService.juzPageNumbers[juzNumber - 1];
+    const endPage = this.surahService.juzPageNumbers[juzNumber];
+    const startIdx = startPage - 1 + o;
+    const endIdxExclusive = endPage ? endPage - 1 + o : pages.length;
+    return pages.filter((_, i) => i >= startIdx && i < endIdxExclusive);
+  }
+
+  private slicePagesForSurah(pages: string[], surahNumber: number): string[] {
+    const o = this.getPageIndexOffset(pages);
+    const startPage = this.surahService.surahPageNumbers[surahNumber - 1];
+    const endPage = this.surahService.surahPageNumbers[surahNumber];
+    const startIdx = startPage - 1 + o;
+
+    if (!endPage) {
+      return pages.filter((_, i) => i >= startIdx);
+    }
+    if (startPage === endPage) {
+      const page = pages[startIdx];
+      return page ? [page] : [];
+    }
+
+    const nextStartIdx = endPage - 1 + o;
+    const secondLine = pages[nextStartIdx]?.split("\n")[1]?.trim() || "";
+    const bismOnNext = secondLine.includes(this.surahService.diacritics.BISM);
+    const endIdxExclusive = bismOnNext ? endPage - 1 + o : endPage + o;
+    return pages.filter((_, i) => i >= startIdx && i < endIdxExclusive);
+  }
+
   /**
    * Get a specific Juz
    */
@@ -806,31 +841,12 @@ export class QuranDataService {
     return this.loadFullQuran().pipe(
       map((quranText) => {
         const pages = quranText.split("\n\n");
-        const source = this.currentSource$.getValue();
-        let juzPages: string[] = [];
-
-        if (source.type === "qurancom" && this.quranComPageNumbers.length > 0) {
-          const pageNumbers = this.quranComPageNumbers.filter((pageNumber) => {
-            const meta = this.quranComPageMeta.get(pageNumber);
-            return meta?.juzs.has(juzNumber);
-          });
-          juzPages = pageNumbers
-            .map((pageNumber) => {
-              const idx = this.quranComPageIndexByNumber.get(pageNumber);
-              return idx !== undefined ? pages[idx] : "";
-            })
-            .filter((p) => p);
-        } else {
-          const startPage = this.surahService.juzPageNumbers[juzNumber - 1];
-          const endPage =
-            this.surahService.juzPageNumbers[juzNumber] || pages.length + 1;
-          juzPages = pages.slice(startPage - 1, endPage - 1);
-        }
+        const juzPages = this.slicePagesForJuz(pages, juzNumber);
 
         return {
           juzNumber,
           pages: juzPages.join("\n\n"),
-          rukuArray: [], // Will be populated by the component
+          rukuArray: [],
           title: juzNumber.toString(),
           mode: "juz" as const,
         };
@@ -845,46 +861,9 @@ export class QuranDataService {
     return this.loadFullQuran().pipe(
       map((quranText) => {
         const pages = quranText.split("\n\n");
-        const source = this.currentSource$.getValue();
-        let surahPages: string[] = [];
-        let juzNumberForSurah = 0;
-
-        if (source.type === "qurancom" && this.quranComPageNumbers.length > 0) {
-          const pageNumbers = this.quranComPageNumbers.filter((pageNumber) => {
-            const meta = this.quranComPageMeta.get(pageNumber);
-            return meta?.surahs.has(surahNumber);
-          });
-
-          if (pageNumbers.length) {
-            const minPage = Math.min(...pageNumbers);
-            const maxPage = Math.max(...pageNumbers);
-            const pageRange = this.quranComPageNumbers.filter(
-              (p) => p >= minPage && p <= maxPage,
-            );
-            surahPages = pageRange
-              .map((pageNumber) => {
-                const idx = this.quranComPageIndexByNumber.get(pageNumber);
-                return idx !== undefined ? pages[idx] : "";
-              })
-              .filter((p) => p);
-
-            const meta = this.quranComPageMeta.get(minPage);
-            const juzList = meta?.juzs ? Array.from(meta.juzs) : [];
-            const firstJuz = juzList.length ? Math.min(...juzList) : 0;
-            juzNumberForSurah = firstJuz || 0;
-          }
-        } else {
-          const startPage = this.surahService.surahPageNumbers[surahNumber - 1];
-          const endPage =
-            this.surahService.surahPageNumbers[surahNumber] || pages.length + 1;
-
-          // Handle surahs that share a page
-          surahPages = pages.filter((_, i) => {
-            const pageNum = i + 1;
-            return pageNum >= startPage && pageNum < endPage;
-          });
-          juzNumberForSurah = this.surahService.juzCalculated(startPage);
-        }
+        const surahPages = this.slicePagesForSurah(pages, surahNumber);
+        const startPage = this.surahService.surahPageNumbers[surahNumber - 1];
+        const juzNumberForSurah = this.surahService.juzCalculated(startPage);
 
         return {
           juzNumber: juzNumberForSurah,

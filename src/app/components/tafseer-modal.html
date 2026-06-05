@@ -54,12 +54,32 @@
         </div>
       </div>
 
+      <!-- Config Mode Banner -->
+      <div *ngIf="isConfigMode" class="config-banner">
+        <ion-icon name="reorder-four-outline"></ion-icon>
+        <span>Reorder or hide sections. Use arrows and eye icons on each block.</span>
+      </div>
+
+      <ng-container *ngFor="let sec of modalSections; let si = index">
       <!-- Morphology SVG Section (collapsed by default) -->
-      <div class="morphology-svg-section" *ngIf="svgContent">
-        <div class="section-header" (click)="svgExpanded = !svgExpanded">
+      <div class="morphology-svg-section" *ngIf="sec.id === 'morphology' && svgContent && (isSectionVisible('morphology') || isConfigMode)"
+        [class.hidden-trans]="!isSectionVisible('morphology') && isConfigMode">
+        <div class="section-header" (click)="!isConfigMode && (svgExpanded = !svgExpanded)">
           <ion-icon name="finger-print-outline"></ion-icon>
           <span>Morphology</span> <span class="ar-text2">ترکیب</span>
-          <ion-icon [name]="svgExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+          <div class="section-header-right" *ngIf="isConfigMode" (click)="$event.stopPropagation()">
+            <button class="config-btn" (click)="moveSectionUp(si)" [disabled]="si === 0">
+              <ion-icon name="chevron-up-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="moveSectionDown(si)" [disabled]="si === modalSections.length - 1">
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="toggleSectionVisibility(si)">
+              <ion-icon [name]="sec.visible ? 'eye-outline' : 'eye-off-outline'"
+                [style.color]="sec.visible ? '#4caf50' : '#ef5350'"></ion-icon>
+            </button>
+          </div>
+          <ion-icon *ngIf="!isConfigMode" [name]="svgExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
         </div>
         <div *ngIf="svgExpanded" class="morphology-svg-content">
           <pinch-zoom [properties]="zoomProperties">
@@ -87,11 +107,24 @@
       </div>
 
       <!-- Word by Word Section (collapsed by default, right after Morphology) -->
-      <div class="wbw-section">
-        <div class="section-header" (click)="wbwExpanded = !wbwExpanded">
+      <div class="wbw-section" *ngIf="sec.id === 'wbw' && (isSectionVisible('wbw') || isConfigMode)"
+        [class.hidden-trans]="!isSectionVisible('wbw') && isConfigMode">
+        <div class="section-header" (click)="!isConfigMode && (wbwExpanded = !wbwExpanded)">
           <ion-icon name="grid-outline"></ion-icon>
           <span>Word by Word</span>
-          <ion-icon [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+          <div class="section-header-right" *ngIf="isConfigMode" (click)="$event.stopPropagation()">
+            <button class="config-btn" (click)="moveSectionUp(si)" [disabled]="si === 0">
+              <ion-icon name="chevron-up-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="moveSectionDown(si)" [disabled]="si === modalSections.length - 1">
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="toggleSectionVisibility(si)">
+              <ion-icon [name]="sec.visible ? 'eye-outline' : 'eye-off-outline'"
+                [style.color]="sec.visible ? '#4caf50' : '#ef5350'"></ion-icon>
+            </button>
+          </div>
+          <ion-icon *ngIf="!isConfigMode" [name]="wbwExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
         </div>
         <div *ngIf="wbwExpanded" class="wbw-table-wrapper">
           <!-- WBW Language Switcher -->
@@ -123,14 +156,25 @@
         </div>
       </div>
 
-      <!-- Config Mode Banner -->
-      <div *ngIf="isConfigMode" class="config-banner">
-        <ion-icon name="reorder-four-outline"></ion-icon>
-        <span>Reorder or hide translations. Tap arrows to move, eye to toggle.</span>
-      </div>
-
       <!-- Translation Blocks -->
-      <div class="translations-container">
+      <div class="translations-container" *ngIf="sec.id === 'translations' && (isSectionVisible('translations') || isConfigMode)"
+        [class.hidden-trans]="!isSectionVisible('translations') && isConfigMode">
+        <div class="section-header section-header-static" *ngIf="isConfigMode">
+          <ion-icon name="language-outline"></ion-icon>
+          <span>Translations</span>
+          <div class="section-header-right">
+            <button class="config-btn" (click)="moveSectionUp(si)" [disabled]="si === 0">
+              <ion-icon name="chevron-up-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="moveSectionDown(si)" [disabled]="si === modalSections.length - 1">
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="toggleSectionVisibility(si)">
+              <ion-icon [name]="sec.visible ? 'eye-outline' : 'eye-off-outline'"
+                [style.color]="sec.visible ? '#4caf50' : '#ef5350'"></ion-icon>
+            </button>
+          </div>
+        </div>
         <div *ngFor="let tr of translations; let i = index" class="translation-block"
           [class.collapsed]="!tr.expanded && !isConfigMode" [class.hidden-trans]="!isVisible(tr) && !isConfigMode"
           [style.--accent-color]="tr.color">
@@ -180,10 +224,23 @@
       </div>
 
       <!-- Tafsir Section -->
-      <div class="tafsir-section">
-        <div class="section-header">
+      <div class="tafsir-section" *ngIf="sec.id === 'tafsir' && (isSectionVisible('tafsir') || isConfigMode)"
+        [class.hidden-trans]="!isSectionVisible('tafsir') && isConfigMode">
+        <div class="section-header section-header-static">
           <ion-icon name="book-outline"></ion-icon>
           <span>Tafsir / Commentary</span>
+          <div class="section-header-right" *ngIf="isConfigMode">
+            <button class="config-btn" (click)="moveSectionUp(si)" [disabled]="si === 0">
+              <ion-icon name="chevron-up-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="moveSectionDown(si)" [disabled]="si === modalSections.length - 1">
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </button>
+            <button class="config-btn" (click)="toggleSectionVisibility(si)">
+              <ion-icon [name]="sec.visible ? 'eye-outline' : 'eye-off-outline'"
+                [style.color]="sec.visible ? '#4caf50' : '#ef5350'"></ion-icon>
+            </button>
+          </div>
         </div>
         <div class="tafsir-buttons">
           <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" size="small" fill="outline" color="medium"
@@ -224,6 +281,7 @@
           <p>{{ tafsir.en }}</p>
         </div>
       </div>
+      </ng-container>
 
     </div>
   </div>

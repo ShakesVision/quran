@@ -46,6 +46,13 @@ interface TranslationOrder {
   position: number;
 }
 
+/** Modal section ordering (morphology, wbw, translations, tafsir) */
+interface ModalSectionOrder {
+  id: "morphology" | "wbw" | "translations" | "tafsir";
+  label: string;
+  visible: boolean;
+}
+
 /** Supported WBW translation languages (Quran.com API) */
 const WBW_LANGUAGES: { code: string; label: string }[] = [
   { code: "en", label: "English" },
@@ -133,7 +140,9 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // User's ordering/visibility preference
   private readonly STORAGE_KEY_TRANS_ORDER = "ReaderTranslationOrder";
+  private readonly STORAGE_KEY_SECTION_ORDER = "TafseerModalSectionOrder";
   translationOrder: TranslationOrder[] = [];
+  modalSections: ModalSectionOrder[] = [];
 
   // Swipe gesture for navigating between ayahs
   private swipeGesture: Gesture | null = null;
@@ -164,7 +173,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    await this.loadTranslationOrder();
+    await Promise.all([this.loadTranslationOrder(), this.loadSectionOrder()]);
     this.fetchTrans(this.verseKey);
 
     this.getSvgContent(this.verseKey);
@@ -340,6 +349,68 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   toggleConfigMode() {
     this.isConfigMode = !this.isConfigMode;
+    if (!this.isConfigMode) {
+      this.saveSectionOrder();
+    }
+  }
+
+  isSectionVisible(id: ModalSectionOrder["id"]): boolean {
+    const sec = this.modalSections.find((s) => s.id === id);
+    return sec ? sec.visible : true;
+  }
+
+  moveSectionUp(index: number) {
+    if (index <= 0) return;
+    const temp = this.modalSections[index];
+    this.modalSections[index] = this.modalSections[index - 1];
+    this.modalSections[index - 1] = temp;
+    this.saveSectionOrder();
+  }
+
+  moveSectionDown(index: number) {
+    if (index >= this.modalSections.length - 1) return;
+    const temp = this.modalSections[index];
+    this.modalSections[index] = this.modalSections[index + 1];
+    this.modalSections[index + 1] = temp;
+    this.saveSectionOrder();
+  }
+
+  toggleSectionVisibility(index: number) {
+    this.modalSections[index].visible = !this.modalSections[index].visible;
+    this.saveSectionOrder();
+  }
+
+  sectionIndex(id: ModalSectionOrder["id"]): number {
+    return this.modalSections.findIndex((s) => s.id === id);
+  }
+
+  private defaultSections(): ModalSectionOrder[] {
+    return [
+      { id: "morphology", label: "Morphology", visible: true },
+      { id: "wbw", label: "Word by Word", visible: true },
+      { id: "translations", label: "Translations", visible: true },
+      { id: "tafsir", label: "Tafsir", visible: true },
+    ];
+  }
+
+  private async loadSectionOrder() {
+    try {
+      const saved = await this.storage.get(this.STORAGE_KEY_SECTION_ORDER);
+      this.modalSections =
+        saved && Array.isArray(saved) && saved.length
+          ? saved
+          : this.defaultSections();
+    } catch {
+      this.modalSections = this.defaultSections();
+    }
+  }
+
+  private async saveSectionOrder() {
+    try {
+      await this.storage.set(this.STORAGE_KEY_SECTION_ORDER, this.modalSections);
+    } catch {
+      /* ignore */
+    }
   }
 
   /**

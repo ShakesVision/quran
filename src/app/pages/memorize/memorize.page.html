@@ -36,11 +36,11 @@
         </div>
         <div class="hero-stat">
           <span class="hs-value">{{getStreak()}} 🔥</span>
-          <span class="hs-label">Day Streak</span>
+          <span class="hs-label">{{ 'memorize.dayStreak' | translate }}</span>
         </div>
         <div class="hero-stat">
           <span class="hs-value">{{getTotalMemorized()}}</span>
-          <span class="hs-label">{{trackingMode === 'juz' ? 'Pages' : 'Ayahs'}}</span>
+          <span class="hs-label">{{ (trackingMode === 'juz' ? 'memorize.pagesLabel' : 'memorize.ayahsLabel') | translate }}</span>
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@
       <ion-icon name="alarm-outline" class="review-icon"></ion-icon>
       <div>
         <h3 class="review-title">{{ 'memorize.dueForReview' | translate }}</h3>
-        <p class="review-subtitle">Spaced repetition keeps knowledge fresh</p>
+        <p class="review-subtitle">{{ 'memorize.reviewSubtitle' | translate }}</p>
       </div>
     </div>
     <div class="review-chips">
@@ -89,8 +89,8 @@
   <!-- Weekly Activity Heatmap                     -->
   <!-- ═══════════════════════════════════════════ -->
   <div class="heatmap-section" *ngIf="items.length > 0 || surahItems.length > 0">
-    <h3 class="heatmap-title">This Week's Activity</h3>
-    <p class="heatmap-subtitle">Updates, reviews &amp; progress tracked here</p>
+    <h3 class="heatmap-title">{{ 'memorize.thisWeek' | translate }}</h3>
+    <p class="heatmap-subtitle">{{ 'memorize.heatmapSubtitle' | translate }}</p>
     <div class="heatmap-grid">
       <div class="heatmap-cell" *ngFor="let day of reviewHeatmap"
            [class.active]="day.count > 0"
@@ -106,10 +106,10 @@
   <!-- Mastery Levels Legend                       -->
   <!-- ═══════════════════════════════════════════ -->
   <div class="mastery-legend" *ngIf="items.length > 0 || surahItems.length > 0">
-    <span class="mastery-item"><span class="mastery-dot new"></span>New <span class="mastery-count">{{ getMasteryCount('new') }}</span></span>
-    <span class="mastery-item"><span class="mastery-dot learning"></span>Learning <span class="mastery-count">{{ getMasteryCount('learning') }}</span></span>
-    <span class="mastery-item"><span class="mastery-dot reviewing"></span>Reviewing <span class="mastery-count">{{ getMasteryCount('reviewing') }}</span></span>
-    <span class="mastery-item"><span class="mastery-dot mastered"></span>Mastered <span class="mastery-count">{{ getMasteryCount('mastered') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot new"></span>{{ 'memorize.mastery.new' | translate }} <span class="mastery-count">{{ getMasteryCount('new') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot learning"></span>{{ 'memorize.mastery.learning' | translate }} <span class="mastery-count">{{ getMasteryCount('learning') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot reviewing"></span>{{ 'memorize.mastery.reviewing' | translate }} <span class="mastery-count">{{ getMasteryCount('reviewing') }}</span></span>
+    <span class="mastery-item"><span class="mastery-dot mastered"></span>{{ 'memorize.mastery.mastered' | translate }} <span class="mastery-count">{{ getMasteryCount('mastered') }}</span></span>
   </div>
   </div>
 
@@ -118,10 +118,10 @@
   <!-- ═══════════════════════════════════════════ -->
   <ion-segment [(ngModel)]="trackingMode" (ionChange)="onModeChange($event)" class="mode-segment">
     <ion-segment-button value="juz">
-      <ion-label>By Juz</ion-label>
+      <ion-label>{{ 'memorize.juzMode' | translate }}</ion-label>
     </ion-segment-button>
     <ion-segment-button value="surah">
-      <ion-label>By Surah</ion-label>
+      <ion-label>{{ 'memorize.surahMode' | translate }}</ion-label>
     </ion-segment-button>
   </ion-segment>
 
@@ -139,11 +139,11 @@
     </div>
     <div class="qs-item">
       <span class="qs-num">{{getCompletedCount()}}</span>
-      <span class="qs-label">Completed</span>
+      <span class="qs-label">{{ 'common.completed' | translate }}</span>
     </div>
     <div class="qs-item">
       <span class="qs-num">{{getInProgressCount()}}</span>
-      <span class="qs-label">In Progress</span>
+      <span class="qs-label">{{ 'common.inProgress' | translate }}</span>
     </div>
   </div>
 
@@ -154,19 +154,19 @@
     <div class="recommended-header">
       <div class="rec-left">
         <ion-icon name="star"></ion-icon>
-        <span>Recommended Surahs</span>
+        <span>{{ 'memorize.recommended' | translate }}</span>
       </div>
       <ion-icon [name]="recommendedExpanded ? 'chevron-up' : 'chevron-down'" class="expand-chevron"></ion-icon>
     </div>
     <div class="recommended-body" *ngIf="recommendedExpanded">
       <p class="recommended-text">
-        The Prophet ﷺ has mentioned fazaail for many surahs and ayahs.
+        {{ 'memorize.recommendedText' | translate }}
       </p>
       <div class="recommended-surahs">
         <span class="ar-tag" *ngFor="let chapter of recommendedChapters">{{chapter}}</span>
       </div>
       <ion-button (click)="open('recommended'); $event.stopPropagation()" size="small" fill="clear" class="see-more-btn">
-        See supporting ahadith
+        {{ 'memorize.seeAhadith' | translate }}
         <ion-icon name="arrow-forward" slot="end"></ion-icon>
       </ion-button>
     </div>
@@ -177,7 +177,7 @@
   <!-- ═══════════════════════════════════════════ -->
   <div class="tracking-section" *ngIf="trackingMode === 'juz'">
     <div class="section-header">
-      <h2>Juz Progress</h2>
+      <h2>{{ 'memorize.juzProgress' | translate }}</h2>
       <ion-button routerLink="/quran" fill="clear" size="small">
         <ion-icon name="book-outline" slot="start"></ion-icon>
         Open Quran
@@ -223,8 +223,8 @@
 
       <div class="empty-state" *ngIf="items.length === 0">
         <ion-icon name="book-outline"></ion-icon>
-        <p>Start your memorization journey!</p>
-        <p class="empty-hint">Tap + to add your first juz</p>
+        <p>{{ 'memorize.startJourney' | translate }}</p>
+        <p class="empty-hint">{{ 'memorize.tapAddJuz' | translate }}</p>
         <ion-button (click)="add()" fill="outline" size="small">
           <ion-icon name="add" slot="start"></ion-icon>
           Add first juz
@@ -238,10 +238,10 @@
   <!-- ═══════════════════════════════════════════ -->
   <div class="tracking-section" *ngIf="trackingMode === 'surah'">
     <div class="section-header">
-      <h2>Surah Progress</h2>
+      <h2>{{ 'memorize.surahProgress' | translate }}</h2>
       <ion-button [routerLink]="['/browse']" [queryParams]="{tab: 'surah'}" fill="clear" size="small">
         <ion-icon name="grid-outline" slot="start"></ion-icon>
-        Browse Surahs
+        {{ 'memorize.browseSurahs' | translate }}
       </ion-button>
     </div>
 
@@ -280,8 +280,8 @@
 
       <div class="empty-state" *ngIf="surahItems.length === 0">
         <ion-icon name="document-text-outline"></ion-icon>
-        <p>Start memorizing surahs!</p>
-        <p class="empty-hint">Tap + to add your first surah</p>
+        <p>{{ 'memorize.startSurahs' | translate }}</p>
+        <p class="empty-hint">{{ 'memorize.tapAddSurah' | translate }}</p>
         <ion-button (click)="addSurah()" fill="outline" size="small">
           <ion-icon name="add" slot="start"></ion-icon>
           Add first surah
@@ -307,19 +307,19 @@
       <ion-content>
         <ion-item button (click)="import()">
           <ion-icon slot="start" name="enter-outline"></ion-icon>
-          <ion-label>Import data</ion-label>
+          <ion-label>{{ 'common.import' | translate }}</ion-label>
         </ion-item>
         <ion-item button (click)="export()">
           <ion-icon slot="start" name="copy-outline"></ion-icon>
-          <ion-label>Export data</ion-label>
+          <ion-label>{{ 'common.export' | translate }}</ion-label>
         </ion-item>
         <ion-item button (click)="resetStreak()">
           <ion-icon slot="start" name="refresh-outline"></ion-icon>
-          <ion-label>Reset Streak</ion-label>
+          <ion-label>{{ 'memorize.resetStreak' | translate }}</ion-label>
         </ion-item>
         <ion-item button [routerLink]="['/']">
           <ion-icon slot="start" name="home-outline"></ion-icon>
-          <ion-label>Back to Home</ion-label>
+          <ion-label>{{ 'memorize.backHome' | translate }}</ion-label>
         </ion-item>
       </ion-content>
     </ng-template>

@@ -3,10 +3,10 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Quran Text Studio</ion-title>
+    <ion-title>{{ 'playground.title' | translate }}</ion-title>
     <ion-chip slot="end" color="warning" outline>
       <ion-icon name="flask-outline"></ion-icon>
-      <ion-label>Experimental</ion-label>
+      <ion-label>{{ 'playground.experimental' | translate }}</ion-label>
     </ion-chip>
   </ion-toolbar>
 </ion-header>
@@ -18,48 +18,48 @@
     <div class="controls-panel">
       <div class="panel-header">
         <ion-icon name="settings-outline"></ion-icon>
-        <span>Controls</span>
+        <span>{{ 'playground.controls' | translate }}</span>
       </div>
 
       <!-- Text Source -->
       <div class="control-group">
-        <label>Text Source</label>
+        <label>{{ 'playground.textSource' | translate }}</label>
         <ion-segment [(ngModel)]="textSource" mode="ios">
           <ion-segment-button value="qurancom">
-            <ion-label>Quran.com</ion-label>
+            <ion-label>{{ 'playground.qurancom' | translate }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="tanzil">
-            <ion-label>Tanzil</ion-label>
+            <ion-label>{{ 'playground.tanzil' | translate }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="custom">
-            <ion-label>Custom</ion-label>
+            <ion-label>{{ 'playground.custom' | translate }}</ion-label>
           </ion-segment-button>
         </ion-segment>
       </div>
 
       <!-- Custom Text Input (shown when custom is selected) -->
       <div class="control-group" *ngIf="textSource === 'custom'">
-        <label>Input Format</label>
+        <label>{{ 'playground.inputFormat' | translate }}</label>
         <ion-select [(ngModel)]="inputFormat" interface="action-sheet">
-          <ion-select-option value="archive">Archive (page/line split)</ion-select-option>
-          <ion-select-option value="ayah-per-line">Ayah per line (surah:ayah|text)</ion-select-option>
-          <ion-select-option value="json-ayahs">JSON array</ion-select-option>
+          <ion-select-option value="archive">{{ 'playground.formatArchive' | translate }}</ion-select-option>
+          <ion-select-option value="ayah-per-line">{{ 'playground.formatAyahPerLine' | translate }}</ion-select-option>
+          <ion-select-option value="json-ayahs">{{ 'playground.formatJson' | translate }}</ion-select-option>
         </ion-select>
         <textarea class="custom-input" [(ngModel)]="customText"
-                  placeholder="Paste your Quran text here...&#10;&#10;Format: 1:1|بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ&#10;1:2|الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"
+                  [placeholder]="'playground.customPlaceholder' | translate"
                   rows="8"></textarea>
       </div>
 
       <!-- Font Settings -->
       <div class="control-group">
-        <label>Font</label>
+        <label>{{ 'playground.font' | translate }}</label>
         <ion-select [(ngModel)]="fontFamily" interface="action-sheet">
           <ion-select-option *ngFor="let f of fonts" [value]="f.value">{{ f.label }}</ion-select-option>
         </ion-select>
       </div>
 
       <div class="control-group">
-        <label>Font Size: {{ fontSize }}px</label>
+        <label>{{ 'playground.fontSize' | translate:{ size: fontSize } }}</label>
         <ion-range [(ngModel)]="fontSize" [min]="14" [max]="40" [step]="1" color="primary"
                    (ionChange)="buildPreview()">
           <ion-label slot="start">14</ion-label>
@@ -69,7 +69,7 @@
 
       <!-- Page Settings -->
       <div class="control-group">
-        <label>Lines per Page</label>
+        <label>{{ 'playground.linesPerPage' | translate }}</label>
         <ion-segment [(ngModel)]="linesPerPage" mode="ios" (ionChange)="buildPreview()">
           <ion-segment-button [value]="13"><ion-label>13</ion-label></ion-segment-button>
           <ion-segment-button [value]="15"><ion-label>15</ion-label></ion-segment-button>
@@ -78,7 +78,7 @@
       </div>
 
       <div class="control-group">
-        <label>Preview Width: {{ pageWidth }}px</label>
+        <label>{{ 'playground.previewWidth' | translate:{ width: pageWidth } }}</label>
         <ion-range [(ngModel)]="pageWidth" [min]="250" [max]="700" [step]="10" color="primary">
           <ion-label slot="start">250</ion-label>
           <ion-label slot="end">700</ion-label>
@@ -89,24 +89,24 @@
       <div class="control-group">
         <ion-button expand="block" (click)="loadText()" [disabled]="loading" color="primary">
           <ion-icon slot="start" name="cloud-download-outline"></ion-icon>
-          {{ loading ? 'Loading...' : 'Load Text' }}
+          {{ loading ? ('common.loading' | translate) : ('playground.loadText' | translate) }}
         </ion-button>
       </div>
 
       <div class="control-group" *ngIf="allLines.length > 0">
         <ion-button expand="block" fill="outline" (click)="autoMarkPages()" color="secondary">
           <ion-icon slot="start" name="grid-outline"></ion-icon>
-          Auto-Mark Pages ({{ linesPerPage }}/page)
+          {{ 'playground.autoMarkPages' | translate:{ lines: linesPerPage } }}
         </ion-button>
         <ion-button expand="block" fill="outline" (click)="clearPageBreaks()" color="medium" class="mt-4">
           <ion-icon slot="start" name="close-circle-outline"></ion-icon>
-          Clear Page Breaks
+          {{ 'playground.clearPageBreaks' | translate }}
         </ion-button>
       </div>
 
       <!-- Export -->
       <div class="control-group" *ngIf="previewPages.length > 0">
-        <label>Export</label>
+        <label>{{ 'common.export' | translate }}</label>
         <div class="export-buttons">
           <ion-button fill="outline" size="small" (click)="exportData('json')">
             <ion-icon slot="start" name="code-slash-outline"></ion-icon> JSON
@@ -120,7 +120,7 @@
         </div>
         <ion-button expand="block" fill="solid" color="success" class="mt-4" (click)="saveAsCustomSource()">
           <ion-icon slot="start" name="save-outline"></ion-icon>
-          Save as Custom Source
+          {{ 'playground.saveCustomSource' | translate }}
         </ion-button>
       </div>
 
@@ -142,16 +142,16 @@
     <div class="preview-panel">
       <div class="panel-header">
         <ion-icon name="eye-outline"></ion-icon>
-        <span>Preview</span>
+        <span>{{ 'playground.preview' | translate }}</span>
         <span class="page-info" *ngIf="previewPages.length > 0">
-          Page {{ currentPreviewPage + 1 }} / {{ previewPages.length }}
+          {{ 'playground.pageNav' | translate:{ current: currentPreviewPage + 1, total: previewPages.length } }}
         </span>
       </div>
 
       <div class="preview-empty" *ngIf="previewPages.length === 0">
         <ion-icon name="book-outline" size="large" color="medium"></ion-icon>
-        <p>Load text to see preview</p>
-        <p class="hint">Click between lines to mark page breaks</p>
+        <p>{{ 'playground.loadPreview' | translate }}</p>
+        <p class="hint">{{ 'playground.clickPageBreaks' | translate }}</p>
       </div>
 
       <div class="preview-content" *ngIf="previewPages.length > 0">
@@ -179,7 +179,7 @@
             <span class="line-number">{{ i + 1 }}</span>
             <span class="line-text ar-text rtl">{{ line }}</span>
             <div class="page-break-marker" *ngIf="hasPageBreak(getGlobalLineIndex(i))">
-              <span>── page break ──</span>
+              <span>{{ 'playground.pageBreak' | translate }}</span>
             </div>
           </div>
         </div>
@@ -188,4 +188,3 @@
 
   </div>
 </ion-content>
-

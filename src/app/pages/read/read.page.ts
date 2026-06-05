@@ -40,6 +40,7 @@ import {
   LanguageService,
   SUPPORTED_LANGUAGES,
 } from "src/app/services/language.service";
+import { getInlineTranslationResourceId } from "src/app/config/translation-sources";
 import {
   HizbNavigationService,
   JuzQuarter,
@@ -209,6 +210,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   scanView: boolean = false;
   fullImageUrl: string;
   sideBySideMode: "off" | "scan-unicode" | "two-pages" = "off";
+  secondaryPageIndex: number | null = null;
+  secondaryLines: string[] = [];
+  secondaryPageCalculated = 0;
   identifier;
   incompleteUrl;
   zoomProperties = {
@@ -573,6 +577,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     this.getFirstAndLastAyahNumberOnPage();
     if (this.inlineTransMode) this.loadInlineTranslations();
     if (this.wbwMode) this.loadWbwTranslations();
+    this.updateSecondaryPage();
     // Tajweed is now handled inside applyTatweelToLines() called from adjustFontsize()
     setTimeout(() => {
       this.adjustFontsize();
@@ -1142,7 +1147,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
       const firstKey = firstAndLast.first.verseId;
       const lastKey = firstAndLast.last.verseId;
-      const transId = this.inlineTransLang === "ur" ? "151" : "131";
+      const transId = getInlineTranslationResourceId(this.inlineTransLang);
       const [fSurah, fAyah] = firstKey.split(":").map(Number);
       const [lSurah, lAyah] = lastKey.split(":").map(Number);
 
@@ -2380,17 +2385,33 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   applyTheme(theme: any) {
     this.activeTheme = theme.id;
-    const el: HTMLElement = document.querySelector(".content-wrapper");
-    if (!el) return;
-    el.style.background = theme.bg;
-    el.style.color = theme.text;
-    el.style.setProperty("--mushaf-gold-dark", theme.accent);
-    el.style.setProperty("--mushaf-gold", theme.accent);
-    el.style.setProperty("--mushaf-border-outer", theme.border);
-    el.style.setProperty("--mushaf-border-inner", theme.accent);
-    el.style.setProperty("--mushaf-corner", theme.accent);
-    // Save preference
+    this.applyReaderThemeVars(theme);
     this.storage.set("readerTheme", theme.id);
+  }
+
+  private applyReaderThemeVars(theme: {
+    bg: string;
+    text: string;
+    accent: string;
+    border: string;
+  }): void {
+    document.querySelectorAll(".page-wrapper").forEach((node) => {
+      const el = node as HTMLElement;
+      el.style.setProperty("--reader-theme-bg", theme.bg);
+      el.style.setProperty("--reader-theme-text", theme.text);
+      el.style.setProperty("--mushaf-gold-dark", theme.accent);
+      el.style.setProperty("--mushaf-gold", theme.accent);
+      el.style.setProperty("--mushaf-border-outer", theme.border);
+      el.style.setProperty("--mushaf-border-inner", theme.accent);
+      el.style.setProperty("--mushaf-corner", theme.accent);
+    });
+    document
+      .querySelectorAll(".page-wrapper .content-wrapper, .page-wrapper .page-top-info")
+      .forEach((node) => {
+        const el = node as HTMLElement;
+        el.style.background = theme.bg;
+        el.style.color = theme.text;
+      });
   }
 
   async loadSavedTheme() {
@@ -2402,9 +2423,25 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   changeColors(val, field = "bg") {
-    var el: HTMLElement = document.querySelector(".content-wrapper");
-    if (field === "bg") el.style.background = val;
-    if (field === "color") el.style.color = val;
+    document
+      .querySelectorAll(".page-wrapper .content-wrapper, .page-wrapper .page-top-info")
+      .forEach((node) => {
+        const el = node as HTMLElement;
+        if (field === "bg") {
+          el.style.background = val;
+          (el.closest(".page-wrapper") as HTMLElement | null)?.style.setProperty(
+            "--reader-theme-bg",
+            val,
+          );
+        }
+        if (field === "color") {
+          el.style.color = val;
+          (el.closest(".page-wrapper") as HTMLElement | null)?.style.setProperty(
+            "--reader-theme-text",
+            val,
+          );
+        }
+      });
   }
   gotoJuzSurah(val, field = "juz") {
     if (!val || val == "" || val < 1 || typeof parseInt(val) != "number")
@@ -2573,26 +2610,28 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Used by the template guard to decide whether to render the ruku-wrapper div.
    * For qurancom: also checks metadata for ruku positions.
    */
-  hasIndicator(line: string, lineIndex: number): boolean {
+  hasIndicator(line: string, lineIndex: number, pageNumOverride?: number): boolean {
     // Archive text checks
     if (line.includes(this.surahService.diacritics.RUKU_MARK)) return true;
     if (line.includes(this.surahService.diacritics.SAJDAH_MARK)) return true;
     if (line.includes("\u06D8")) return true;
     // Qurancom metadata check for ruku
     if (this._quranComRukuLineSet) {
-      const pageNum = this.currentPageCalculated || this.currentPage;
+      const pageNum =
+        pageNumOverride ?? this.currentPageCalculated ?? this.currentPage;
       if (this._quranComRukuLineSet.has(`${pageNum}:${lineIndex}`)) return true;
     }
     return false;
   }
 
-  addIndicators(line: string, i: number): string {
+  addIndicators(line: string, i: number, pageNumOverride?: number): string {
     const indicators: string[] = [];
 
     // ── 1) RUKU indicator ──
     // For qurancom: ۧ is NOT in the text, check metadata set instead.
     // For archive: ۧ IS in the text, check with includes().
-    const pageNum = this.currentPageCalculated || this.currentPage;
+    const pageNum =
+      pageNumOverride ?? this.currentPageCalculated ?? this.currentPage;
     const hasRuku = this._quranComRukuLineSet
       ? this._quranComRukuLineSet.has(`${pageNum}:${i}`)
       : line.includes(this.surahService.diacritics.RUKU_MARK);
@@ -3475,22 +3514,64 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       this.scanView = false; // Don't use the old full-scan mode
     }
     this.sideBySideMode = mode;
+    this.updateSecondaryPage();
     this.changeDetectorRef.detectChanges();
   }
 
-  /** Get lines for the second page when in two-pages mode */
-  getSecondPageLines(): string[] {
-    if (this.sideBySideMode !== "two-pages" || !this.pages?.length) return [];
-    const nextPageIdx = this.currentPage; // currentPage is 1-based, so index for next page = currentPage
-    if (nextPageIdx < this.pages.length) {
-      return this.pages[nextPageIdx]?.split("\n") || [];
+  /** Second panel state for two-pages side-by-side */
+  updateSecondaryPage(): void {
+    if (this.sideBySideMode !== "two-pages" || !this.pages?.length) {
+      this.secondaryPageIndex = null;
+      this.secondaryLines = [];
+      this.secondaryPageCalculated = 0;
+      return;
     }
-    return [];
+    const next = this.currentPage + 1;
+    if (next <= this.pages.length) {
+      this.secondaryPageIndex = next;
+      this.secondaryLines = this.pages[next - 1]?.split("\n") || [];
+      this.secondaryPageCalculated = this.resolvePageCalculated(next);
+    } else {
+      this.secondaryPageIndex = null;
+      this.secondaryLines = [];
+      this.secondaryPageCalculated = 0;
+    }
   }
 
-  /** Get page number for the second page in two-pages mode */
-  getSecondPageNumber(): number {
-    return this.currentPage + 1;
+  resolvePageCalculated(pageIndex1Based: number): number {
+    if (this.isCompleteMushaf) {
+      return pageIndex1Based;
+    }
+    if (this.juzmode && !this.juzsurahmode) {
+      const juzStart = this.surahService.juzPageNumbers[this.juzNumber - 1] || 1;
+      return juzStart + pageIndex1Based - 1;
+    }
+    if (this.juzsurahmode) {
+      const surahStart =
+        this.surahService.surahPageNumbers[parseInt(this.title, 10) - 1] || 1;
+      return surahStart + pageIndex1Based - 1;
+    }
+    return pageIndex1Based;
+  }
+
+  getSurahsOnPageFor(pageCalc: number, pageLines: string[]): number[] {
+    if (!pageLines?.length) return [];
+    const qcSurahs = this.quranDataService.getQuranComSurahsForPage(pageCalc);
+    if (qcSurahs.length > 0) return qcSurahs;
+    const startSurah = this.surahService.surahCalculated(pageCalc);
+    if (!startSurah) return [];
+    const surahs = [startSurah];
+    for (let i = 0; i < pageLines.length; i++) {
+      if (pageLines[i]?.includes(this.surahService.diacritics.BISM)) {
+        const next = startSurah + surahs.length;
+        if (next <= 114 && !surahs.includes(next)) surahs.push(next);
+      }
+    }
+    return surahs;
+  }
+
+  getJuzNumberFor(pageCalc: number): string {
+    return String(this.surahService.juzCalculated(pageCalc));
   }
 
   async loadImg(p: number, quality: ImageQuality = ImageQuality.High) {

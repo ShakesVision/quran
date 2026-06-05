@@ -3,13 +3,13 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Scanned Pages</ion-title>
+    <ion-title>{{ 'scanned.title' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-select [(ngModel)]="imgQuality" (ionChange)="loadImg(page, imgQuality)"
         interface="popover" class="quality-select">
-        <ion-select-option [value]="ImageQuality.Low">Low</ion-select-option>
-        <ion-select-option [value]="ImageQuality.High">High</ion-select-option>
-        <ion-select-option [value]="ImageQuality.HD">HD</ion-select-option>
+        <ion-select-option [value]="ImageQuality.Low">{{ 'common.low' | translate }}</ion-select-option>
+        <ion-select-option [value]="ImageQuality.High">{{ 'common.high' | translate }}</ion-select-option>
+        <ion-select-option [value]="ImageQuality.HD">{{ 'common.hd' | translate }}</ion-select-option>
       </ion-select>
     </ion-buttons>
   </ion-toolbar>
@@ -17,7 +17,7 @@
   <!-- Source Selector -->
   <ion-toolbar class="source-toolbar">
     <ion-select [(ngModel)]="selectedSourceId" (ionChange)="onSourceChange($event.target.value)"
-      interface="action-sheet" class="source-select" placeholder="Select Mushaf">
+      interface="action-sheet" class="source-select" [placeholder]="'scanned.selectMushaf' | translate">
       <ion-select-option *ngFor="let s of sources" [value]="s.id">{{s.label}}</ion-select-option>
     </ion-select>
   </ion-toolbar>
@@ -28,24 +28,24 @@
       <div class="control-group">
         <ion-input type="number" [min]="1" [max]="114"
           (keyup.enter)="jumpToSurah($event.target.value)"
-          placeholder="Surah" [(ngModel)]="surahNumberField"
+          [placeholder]="'scanned.surahLabel' | translate" [(ngModel)]="surahNumberField"
           class="compact-input"></ion-input>
-        <span class="control-label">Surah</span>
+        <span class="control-label">{{ 'scanned.surahLabel' | translate }}</span>
       </div>
 
       <div class="control-group juz-group">
         <ion-input #juzInput type="number" [(ngModel)]="juzNumberField"
           (keyup.enter)="jumpToSection(juzSection.value)" [min]="1" [max]="30"
-          placeholder="Juz" class="compact-input" style="max-width: 50px"></ion-input>
+          [placeholder]="'scanned.juzLabel' | translate" class="compact-input" style="max-width: 50px"></ion-input>
         <ion-select #juzSection [value]="0" (ionChange)="jumpToSection($event.target.value)"
-          placeholder="Sec" class="section-select" interface="popover">
-          <ion-select-option [value]="0">Start</ion-select-option>
-          <ion-select-option [value]="0.25">¼</ion-select-option>
-          <ion-select-option [value]="0.5">½</ion-select-option>
-          <ion-select-option [value]="0.75">¾</ion-select-option>
-          <ion-select-option [value]="1">End</ion-select-option>
+          [placeholder]="'scanned.section' | translate" class="section-select" interface="popover">
+          <ion-select-option [value]="0">{{ 'common.start' | translate }}</ion-select-option>
+          <ion-select-option [value]="0.25">{{ 'scanned.quarter' | translate }}</ion-select-option>
+          <ion-select-option [value]="0.5">{{ 'scanned.half' | translate }}</ion-select-option>
+          <ion-select-option [value]="0.75">{{ 'scanned.threeQuarter' | translate }}</ion-select-option>
+          <ion-select-option [value]="1">{{ 'common.end' | translate }}</ion-select-option>
         </ion-select>
-        <span class="control-label">Juz</span>
+        <span class="control-label">{{ 'scanned.juzLabel' | translate }}</span>
       </div>
     </div>
   </ion-toolbar>
@@ -57,11 +57,11 @@
   <!-- Error State -->
   <div class="error-state" *ngIf="errorLoading">
     <ion-icon name="cloud-offline-outline" class="error-icon"></ion-icon>
-    <h3>Could not load scanned pages</h3>
-    <p>Please check your connection and try again.</p>
+    <h3>{{ 'scanned.errorTitle' | translate }}</h3>
+    <p>{{ 'scanned.errorSub' | translate }}</p>
     <ion-button fill="outline" (click)="setupLinks()">
       <ion-icon name="refresh-outline" slot="start"></ion-icon>
-      Retry
+      {{ 'common.retry' | translate }}
     </ion-button>
   </div>
 
@@ -77,7 +77,7 @@
   <!-- Empty state -->
   <div class="empty-state" *ngIf="!errorLoading && urls.length === 0 && !loading">
     <ion-icon name="image-outline" class="empty-icon"></ion-icon>
-    <p>Select a mushaf source to view scanned pages</p>
+    <p>{{ 'scanned.empty' | translate }}</p>
   </div>
 </ion-content>
 
@@ -91,7 +91,7 @@
       </ion-button>
       <div class="page-info">
         <ion-input (keyup.enter)="loadImg(page, imgQuality)" type="number"
-          placeholder="Page" [(ngModel)]="page" class="page-input"></ion-input>
+          [placeholder]="'scanned.pagePlaceholder' | translate" [(ngModel)]="page" class="page-input"></ion-input>
         <span class="page-total" *ngIf="selectedSource.totalPages">
           / {{selectedSource.totalPages}}
         </span>

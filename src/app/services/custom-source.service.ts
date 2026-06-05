@@ -431,7 +431,9 @@ export class CustomSourceService {
       if (ayahs.length === 0) {
         return { source, result: null, error: 'No valid ayahs parsed from input.' };
       }
-      result = await this.adaptToPageLines(ayahs, input.linesPerPage, useReference);
+      result = useReference
+        ? await this.adaptUsingArchiveLineTemplate(ayahs, input.linesPerPage)
+        : await this.adaptToPageLines(ayahs, input.linesPerPage, false);
       fullText = result.fullText;
     }
 
@@ -447,8 +449,8 @@ export class CustomSourceService {
   }
 
   /**
-   * Convert ayah-segmented text using archive mushaf line word-counts as the template.
-   * Falls back to quran.com reference adapter when archive text is unavailable.
+   * Convert ayah-segmented text using archive-15/16 Quran.txt line breaks as the template.
+   * Each archive line's word count defines how many words to take from the input stream.
    */
   async adaptUsingArchiveLineTemplate(
     ayahs: ParsedAyah[],
@@ -470,84 +472,54 @@ export class CustomSourceService {
         return this.adaptToPageLines(ayahs, linesPerPage, true);
       }
 
+      const sortedAyahs = [...ayahs].sort(
+        (a, b) => a.surah - b.surah || a.ayah - b.ayah,
+      );
+      const wordStream = sortedAyahs.flatMap((a) =>
+        a.text.split(/\s+/).filter(Boolean),
+      );
+      let streamIdx = 0;
+
       const archivePages = archiveText.split("\n\n");
-      const lineWordCounts: number[] = [];
-      archivePages.forEach((page) => {
-        page.split("\n").forEach((line) => {
-          const count = line.trim()
-            ? line.trim().split(/\s+/).filter(Boolean).length
-            : 0;
-          lineWordCounts.push(count);
-        });
-      });
+      const outputPages: string[] = [];
 
-      const ayahQueues = new Map<string, string[]>();
-      ayahs.forEach((a) => {
-        ayahQueues.set(
-          `${a.surah}:${a.ayah}`,
-          a.text.split(/\s+/).filter(Boolean),
-        );
-      });
-
-      const refData = await this.fetchReferenceData(linesPerPage);
-      const lineRefs: {
-        page: number;
-        line: number;
-        surah: number;
-        ayah: number;
-      }[] = [];
-      const seen = new Set<string>();
-      refData
-        .sort(
-          (a, b) =>
-            a.pageNumber - b.pageNumber ||
-            a.lineNumber - b.lineNumber ||
-            a.wordIndex - b.wordIndex,
-        )
-        .forEach((ref) => {
-          const k = `${ref.pageNumber}:${ref.lineNumber}`;
-          if (!seen.has(k)) {
-            seen.add(k);
-            lineRefs.push({
-              page: ref.pageNumber,
-              line: ref.lineNumber,
-              surah: ref.surah,
-              ayah: ref.ayah,
-            });
+      for (const page of archivePages) {
+        const outputLines: string[] = [];
+        for (const line of page.split("\n")) {
+          if (this.isStructuralArchiveLine(line)) {
+            outputLines.push(line);
+            continue;
           }
-        });
-
-      const pageMap = new Map<number, Map<number, string[]>>();
-      const limit = Math.min(lineWordCounts.length, lineRefs.length);
-      for (let i = 0; i < limit; i++) {
-        const count = lineWordCounts[i];
-        if (count <= 0) continue;
-        const ref = lineRefs[i];
-        const key = `${ref.surah}:${ref.ayah}`;
-        const queue = ayahQueues.get(key);
-        if (!queue?.length) {
-          warnings.push(`Missing words for ${key} at template line ${i + 1}`);
-          continue;
+          const wordCount = line.trim().split(/\s+/).filter(Boolean).length;
+          if (wordCount === 0) {
+            outputLines.push(line);
+            continue;
+          }
+          if (streamIdx + wordCount > wordStream.length) {
+            warnings.push(
+              `Ran out of input words at archive line ${outputLines.length + 1} (page ${outputPages.length + 1})`,
+            );
+            const remaining = wordStream.slice(streamIdx);
+            outputLines.push(remaining.join(" "));
+            streamIdx = wordStream.length;
+            continue;
+          }
+          const chunk = wordStream.slice(streamIdx, streamIdx + wordCount);
+          streamIdx += wordCount;
+          outputLines.push(chunk.join(" "));
         }
-        const words = queue.splice(0, count);
-        if (!pageMap.has(ref.page)) pageMap.set(ref.page, new Map());
-        const lines = pageMap.get(ref.page)!;
-        if (!lines.has(ref.line)) lines.set(ref.line, []);
-        lines.get(ref.line)!.push(...words);
+        outputPages.push(outputLines.join("\n"));
       }
 
-      const sortedPages = Array.from(pageMap.keys()).sort((a, b) => a - b);
-      const pageTexts = sortedPages.map((pageNum) => {
-        const linesMap = pageMap.get(pageNum)!;
-        const lineNums = Array.from(linesMap.keys()).sort((a, b) => a - b);
-        const lines = lineNums.map((ln) => (linesMap.get(ln) || []).join(" "));
-        while (lines.length < linesPerPage) lines.push("");
-        return lines.join("\n");
-      });
+      if (streamIdx < wordStream.length) {
+        warnings.push(
+          `${wordStream.length - streamIdx} input words unused after archive template`,
+        );
+      }
 
       return {
-        fullText: pageTexts.join("\n\n"),
-        totalPages: pageTexts.length,
+        fullText: outputPages.join("\n\n"),
+        totalPages: outputPages.length,
         linesPerPage,
         warnings,
       };
@@ -555,6 +527,24 @@ export class CustomSourceService {
       warnings.push("Archive template load failed; using reference adapter.");
       return this.adaptToPageLines(ayahs, linesPerPage, true);
     }
+  }
+
+  /** Lines that are not part of the ayah word stream (headers, bism, blanks). */
+  private isStructuralArchiveLine(line: string): boolean {
+    const t = line.trim();
+    if (!t) return true;
+    if (t === "﷽") return true;
+    if (
+      !/[۝][۰-۹0-9]/.test(t) &&
+      (t.includes("سُوْرَۃ") ||
+        t.includes("سورة") ||
+        t.includes("مَکِّیَّۃ") ||
+        t.includes("مَدَنِیَّۃ") ||
+        t.includes("رُکُوْع"))
+    ) {
+      return true;
+    }
+    return false;
   }
 }
 

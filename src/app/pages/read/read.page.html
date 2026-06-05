@@ -34,7 +34,7 @@
         </div>
         <div *ngIf="!audioPlaying" class="qari-wrapper">
           <ion-select *ngIf="reciters" interface="action-sheet" (ionChange)="qariChanged($event.target.value)"
-            [placeholder]="selectedQari ? selectedQari?.name + ' (id: ' + selectedQari?.id + ')' : 'Qaari'"
+            [placeholder]="selectedQari ? selectedQari?.name + ' (id: ' + selectedQari?.id + ')' : ('listen.qari' | translate)"
             [(ngModel)]="qariId">
             <ion-select-option style="font-size: small" *ngFor="let r of reciters" [value]="r.id">{{r.name}} (id:
               {{r.id}})</ion-select-option>
@@ -67,50 +67,26 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content #swipeContainer>
+<ion-content #swipeContainer class="read-page-content">
   <div class="qurancom-progress" *ngIf="showQuranComProgress">
     <div class="progress-card">
       <ion-progress-bar [value]="quranComProgress.loaded / quranComProgress.total"></ion-progress-bar>
       <div class="progress-text">
-        Loading Quran.com data
+        {{ 'reader.loadingQuranCom' | translate }}
         <span>{{quranComProgress.loaded}} / {{quranComProgress.total}}</span>
       </div>
     </div>
   </div>
-  <!-- Side-by-side: Scan + Unicode -->
-  <div class="side-by-side-container" *ngIf="sideBySideMode === 'scan-unicode'" [ngClass]="currentFontClass">
-    <div class="sbs-panel sbs-scan">
-      <pinch-zoom [properties]="zoomProperties">
-        <div class="scan-image-wrapper">
-          <ion-img [src]="fullImageUrl"></ion-img>
-        </div>
-      </pinch-zoom>
-    </div>
-    <div class="sbs-panel sbs-unicode page-wrapper ar">
-      <div *ngFor="let line of lines;let i = index" class="line">
-        <span class="arabic-line-text">{{line}}</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Side-by-side: Two Pages -->
+  <!-- Side-by-side: Two full unicode pages -->
   <div class="side-by-side-container two-pages" *ngIf="sideBySideMode === 'two-pages'" [ngClass]="currentFontClass">
-    <div class="sbs-panel sbs-page page-wrapper ar">
-      <div class="sbs-page-num">{{ surahService.e2a(currentPage.toString()) }}</div>
-      <div *ngFor="let line of lines;let i = index" class="line">
-        <span class="arabic-line-text">{{line}}</span>
-      </div>
-    </div>
-    <div class="sbs-panel sbs-page page-wrapper ar" *ngIf="getSecondPageLines().length > 0">
-      <div class="sbs-page-num">{{ surahService.e2a(getSecondPageNumber().toString()) }}</div>
-      <div *ngFor="let line of getSecondPageLines();let i = index" class="line">
-        <span class="arabic-line-text">{{line}}</span>
-      </div>
-    </div>
-    <div class="sbs-page-range">
-      {{ surahService.e2a(currentPage.toString()) }}-{{ surahService.e2a(getSecondPageNumber().toString()) }} / {{
-      surahService.e2a(pages.length.toString()) }}
-    </div>
+    <ng-container *ngTemplateOutlet="readerPagePanel; context: {
+      $implicit: { lines: lines, pageCalc: currentPageCalculated || currentPage, pageIndex: currentPage, interactive: true }
+    }"></ng-container>
+    <ng-container *ngIf="secondaryLines.length">
+      <ng-container *ngTemplateOutlet="readerPagePanel; context: {
+        $implicit: { lines: secondaryLines, pageCalc: secondaryPageCalculated, pageIndex: secondaryPageIndex, interactive: false }
+      }"></ng-container>
+    </ng-container>
   </div>
 
   <!-- Normal single views -->
@@ -121,8 +97,18 @@
       </div>
     </pinch-zoom>
   </div>
+  <div [class.side-by-side-container]="sideBySideMode === 'scan-unicode'" [ngClass]="sideBySideMode === 'scan-unicode' ? currentFontClass : null">
+    <div class="sbs-panel sbs-scan" *ngIf="sideBySideMode === 'scan-unicode'">
+      <pinch-zoom [properties]="zoomProperties">
+        <div class="scan-image-wrapper">
+          <ion-img [src]="fullImageUrl"></ion-img>
+        </div>
+      </pinch-zoom>
+    </div>
   <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass"
-    [hidden]="scanView || sideBySideMode !== 'off'">
+    [class.sbs-panel]="sideBySideMode === 'scan-unicode'"
+    [class.sbs-unicode]="sideBySideMode === 'scan-unicode'"
+    [hidden]="scanView || sideBySideMode === 'two-pages'">
     <div class="page-top-info" *ngIf="isDataLoaded">
       <ng-container *ngIf="(currentPage>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
         <span class="juz-number"> {{ getJuzNumber() }} </span>
@@ -176,6 +162,63 @@
       </ng-container>
     </div>
   </div>
+  </div>
+
+  <ng-template #readerPagePanel let-ctx>
+    <div class="page-wrapper ar ion-margin-top unicode-view" [ngClass]="currentFontClass"
+      [class.sbs-panel]="sideBySideMode !== 'off'"
+      [class.sbs-unicode]="sideBySideMode !== 'off'">
+      <div class="page-top-info" *ngIf="isDataLoaded">
+        <ng-container *ngIf="(ctx.pageIndex>1 && isCompleteMushaf) || (juzmode && !isCompleteMushaf)">
+          <span class="juz-number">{{ getJuzNumberFor(ctx.pageCalc) }}</span>
+          <span class="page-number">{{ surahService.e2a(ctx.pageCalc.toString()) }}</span>
+          <span class="surah-number" *ngFor="let s of (ctx.interactive ? getSurahsOnPage() : getSurahsOnPageFor(ctx.pageCalc, ctx.lines)); let last = last">
+            {{ getSurahDisplayName(s) }}<span *ngIf="!last"> · </span>
+          </span>
+        </ng-container>
+      </div>
+      <div class="content-wrapper" [class.inline-trans-active]="inlineTransMode && ctx.interactive"
+        [class.text-preparing]="preparingText && ctx.interactive" [class.text-ready]="!preparingText || !ctx.interactive">
+        <ng-container *ngIf="ctx.pageIndex==1 && ctx.lines?.length<15 && !juzmode">
+          <div class="filler-lines line" *ngFor="let line of [].constructor(15 - (ctx.lines?.length+2))"></div>
+          <div class="surah-name line centered-table-text">{{title?.split(' ')[1]}}</div>
+          <div class="line bism centered-table-text">﷽</div>
+        </ng-container>
+        <div *ngFor="let line of ctx.lines;let i = index" [id]="ctx.interactive ? 'line_' + i : null" class="line"
+          style="position: relative"
+          [ngClass]="{
+            'quran-kareem-text':juzmode && isCompleteMushaf && ctx.pageIndex==1,
+            'bism-line': line?.trim()==='﷽' || (isCompleteMushaf && ctx.pageIndex === pages.length && i==10),
+            'juz-start-line': ![2,3].includes(ctx.pageCalc) && surahService.juzPageNumbers.includes(ctx.pageCalc) && (ctx.lines[1]?.trim()==='﷽' ? i===2 : i===0),
+            'surah-start-line':ctx.lines[i+1]?.trim()==='﷽' || (surahCalculated===9 && ctx.pageCalc==188 && i==0),
+            'surah-end-line':i===ctx.lines.length-1&&pages[ctx.pageIndex]?.split('\n')[1]?.trim()==='﷽'||ctx.lines[i+2]?.trim()==='﷽' || (isCompleteMushaf && ctx.pageIndex === pages.length && (i==ctx.lines.length-1 || i==9))|| (ctx.pageIndex===pages.length && i===ctx.lines.length-1 && !juzmode)}"
+          (click)="ctx.interactive && onLineClick($event,i)"
+          (dblclick)="ctx.interactive && onLineDblClick($event,i)"
+          (touchstart)="ctx.interactive && onLineTouchStart($event,i)"
+          (touchend)="ctx.interactive && onLineTouchEnd($event,i)"
+          (touchmove)="ctx.interactive && onLineTouchCancel()"
+          (contextmenu)="ctx.interactive && onLineContextMenu($event,i)">
+          <div *ngIf="hasIndicator(line, i, ctx.pageCalc)" class="ruku-wrapper"
+            [innerHTML]="addIndicators(line,i, ctx.pageCalc)"></div>
+          <span class="arabic-line-text" [class.tajweed-text]="tajweedMode && ctx.interactive"
+            [attr.data-raw-text]="line">{{line}}</span>
+          <span *ngIf="ctx.interactive && inlineTransMode && inlineTranslations[i]" class="inline-translation"
+            [ngClass]="{'ur': inlineTransLang==='ur'}">{{inlineTranslations[i]}}</span>
+          <div *ngIf="ctx.interactive && wbwMode && wbwData[i]?.length" class="wbw-row">
+            <div *ngFor="let w of wbwData[i]" class="wbw-word" (click)="showWordDetail(w); $event.stopPropagation()">
+              <span class="wbw-arabic">{{w.arabic}}</span>
+              <span class="wbw-transliteration" *ngIf="w.transliteration">{{w.transliteration}}</span>
+              <span class="wbw-meaning">{{w.translation}}</span>
+            </div>
+          </div>
+        </div>
+        <ng-container *ngIf="ctx.pageIndex==pages?.length && pages?.length!=1 && ctx.lines.length<15">
+          <div class="filler-lines line" *ngFor="let line of [].constructor(15 - ctx.lines.length)"></div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+
   <!-- <div class="next-words ar ar2 ion-text-end">
     {{pages[currentPage]?.split("\n")[0].split(" ")[0]}}
   </div> -->
@@ -198,11 +241,11 @@
             <div class="quick-toggles">
               <button class="qt-btn" [class.active]="isImmersive" (click)="toggleImmersiveMode()">
                 <ion-icon [name]="isImmersive?'contract-outline':'expand-outline'"></ion-icon>
-                <span>Immersive</span>
+                <span>{{ 'reader.settings.immersive' | translate }}</span>
               </button>
               <button class="qt-btn" [class.active]="tMode" (click)="translationMode(true)" *ngIf="translationExists">
                 <ion-icon [name]="tMode?'language':'language-outline'"></ion-icon>
-                <span>Translate</span>
+                <span>{{ 'reader.settings.translate' | translate }}</span>
               </button>
               <button class="qt-btn badge-host" [class.active]="inlineTransMode"
                 (click)="toggleInlineTranslation(!inlineTransMode)">
@@ -232,14 +275,14 @@
                   class="tj-color-input">
               </div>
               <ion-button size="small" fill="clear" color="medium" (click)="resetTajweedColors()">
-                <ion-icon name="refresh-outline" slot="start"></ion-icon>Reset to defaults
+                <ion-icon name="refresh-outline" slot="start"></ion-icon>{{ 'reader.settings.resetDefaults' | translate }}
               </ion-button>
             </div>
 
             <!-- ── Reading settings ── -->
-            <ion-item-divider class="settings-section">Reading</ion-item-divider>
+            <ion-item-divider class="settings-section">{{ 'reader.settings.reading' | translate }}</ion-item-divider>
             <ion-item>
-              <ion-label>Font Size</ion-label>
+              <ion-label>{{ 'reader.settings.fontSize' | translate }}</ion-label>
               <ion-buttons slot="end" class="ion-no-margin">
                 <ion-button (click)="changeFontSize(-1)" size="small">
                   <ion-icon name="remove-circle-outline"></ion-icon>
@@ -251,26 +294,26 @@
               </ion-buttons>
             </ion-item>
             <ion-item>
-              <ion-label>Tatweel</ion-label>
+              <ion-label>{{ 'reader.settings.tatweel' | translate }}</ion-label>
               <ion-toggle slot="end" [checked]="enableTatweel"
                 (ionChange)="toggleTatweel($event.detail.checked)"></ion-toggle>
             </ion-item>
             <ion-item>
-              <ion-label>Word-by-Word</ion-label>
+              <ion-label>{{ 'reader.settings.wordByWord' | translate }}</ion-label>
               <ion-toggle slot="end" [checked]="wbwMode"
                 (ionChange)="toggleWbwMode($event.detail.checked)"></ion-toggle>
             </ion-item>
             <ion-item *ngIf="inlineTransMode">
-              <ion-label>Language</ion-label>
+              <ion-label>{{ 'reader.settings.language' | translate }}</ion-label>
               <ion-select [(ngModel)]="inlineTransLang" (ionChange)="reloadInlineTranslations()"
                 interface="action-sheet">
-                <ion-select-option value="en">English</ion-select-option>
-                <ion-select-option value="ur">Urdu</ion-select-option>
+                <ion-select-option value="en">{{ 'common.english' | translate }}</ion-select-option>
+                <ion-select-option value="ur">{{ 'common.urdu' | translate }}</ion-select-option>
               </ion-select>
             </ion-item>
 
             <!-- ── Navigation ── -->
-            <ion-item-divider class="settings-section" *ngIf="isCompleteMushaf">Navigate</ion-item-divider>
+            <ion-item-divider class="settings-section" *ngIf="isCompleteMushaf">{{ 'reader.settings.navigate' | translate }}</ion-item-divider>
             <ion-item *ngIf="isCompleteMushaf">
               <ng-container slot="end" style="display:flex;gap:4px;flex-wrap:wrap">
                 <ion-input [placeholder]="'reader.settings.navJuz' | translate" type="number" maxlength="2"
@@ -287,7 +330,7 @@
               <ng-container slot="end" style="display:flex;gap:4px;align-items:center">
                 <ion-input [placeholder]="'reader.settings.navHizb' | translate" type="number" maxlength="2"
                   [(ngModel)]="navHizbJuz" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-                <ion-select [(ngModel)]="navHizbQuarter" interface="popover" class="nav-quarter-select">
+                <ion-select [(ngModel)]="navHizbQuarter" interface="action-sheet" class="nav-quarter-select">
                   <ion-select-option value="begin">{{ 'reader.settings.quarterBegin' | translate }}</ion-select-option>
                   <ion-select-option value="rub">{{ 'reader.settings.quarterRub' | translate }}</ion-select-option>
                   <ion-select-option value="nisf">{{ 'reader.settings.quarterNisf' | translate }}</ion-select-option>
@@ -304,38 +347,38 @@
             </ion-item>
 
             <!-- ── Quick actions grid ── -->
-            <ion-item-divider class="settings-section">Actions</ion-item-divider>
+            <ion-item-divider class="settings-section">{{ 'reader.settings.actions' | translate }}</ion-item-divider>
             <div class="action-grid">
               <button class="action-btn" (click)="addManualBookmark()">
                 <ion-icon name="bookmark-outline"></ion-icon>
-                <span>Bookmark</span>
+                <span>{{ 'common.bookmark' | translate }}</span>
               </button>
               <button class="action-btn" (click)="openBookmarksViewer()">
                 <ion-icon name="bookmarks-outline"></ion-icon>
-                <span>Bookmarks</span>
+                <span>{{ 'common.bookmarks' | translate }}</span>
               </button>
               <button class="action-btn" (click)="addNoteEntry()">
                 <ion-icon name="create-outline"></ion-icon>
-                <span>Note</span>
+                <span>{{ 'common.note' | translate }}</span>
               </button>
               <button class="action-btn" (click)="exportText()">
                 <ion-icon name="copy-outline"></ion-icon>
-                <span>Export</span>
+                <span>{{ 'common.export' | translate }}</span>
               </button>
             </div>
 
             <!-- ── More tools ── -->
-            <ion-item-divider class="settings-section">More</ion-item-divider>
+            <ion-item-divider class="settings-section">{{ 'reader.settings.more' | translate }}</ion-item-divider>
             <ion-item>
-              <ion-label>Translation</ion-label>
+              <ion-label>{{ 'reader.settings.translation' | translate }}</ion-label>
               <ion-input #verseIdInput placeholder="2:125" (ionChange)="readTrans($event.target.value)"
                 [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-              <ion-select value="en" placeholder="Lang" (ionChange)="readTrans(verseIdInput.value,$event.target.value)">
-                <ion-select-option value="en">EN</ion-select-option>
-                <ion-select-option value="ur">UR</ion-select-option>
+              <ion-select value="en" [placeholder]="'reader.settings.language' | translate" (ionChange)="readTrans(verseIdInput.value,$event.target.value)">
+                <ion-select-option value="en">{{ 'reader.settings.langShortEn' | translate }}</ion-select-option>
+                <ion-select-option value="ur">{{ 'reader.settings.langShortUr' | translate }}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-item-divider class="settings-section">Themes</ion-item-divider>
+            <ion-item-divider class="settings-section">{{ 'common.themes' | translate }}</ion-item-divider>
             <div class="theme-grid">
               <button *ngFor="let t of readerThemes" class="theme-btn" [class.active]="activeTheme === t.id"
                 [style.background]="t.bg" [style.color]="t.text"
@@ -345,19 +388,19 @@
               </button>
             </div>
             <ion-item>
-              <ion-label>Colors</ion-label>
-              <ion-input placeholder="css color" (ionChange)="changeColors($event.target.value,'color')"
+              <ion-label>{{ 'common.colors' | translate }}</ion-label>
+              <ion-input [placeholder]="'reader.settings.cssColor' | translate" (ionChange)="changeColors($event.target.value,'color')"
                 [debounce]="1000" class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
-              <ion-input placeholder="bg" (ionChange)="changeColors($event.target.value,'bg')" [debounce]="1000"
+              <ion-input [placeholder]="'reader.settings.bg' | translate" (ionChange)="changeColors($event.target.value,'bg')" [debounce]="1000"
                 class="ion-no-padding ion-no-margin ion-text-center"></ion-input>
             </ion-item>
             <ion-item button *ngIf="!juzmode" (click)="showSurahInfo()">
               <ion-icon slot="start" name="information-circle-outline"></ion-icon>
-              <ion-label>About Surah</ion-label>
+              <ion-label>{{ 'reader.settings.aboutSurah' | translate }}</ion-label>
             </ion-item>
             <ion-item button (click)="showPageInfo()">
               <ion-icon slot="start" name="analytics-outline"></ion-icon>
-              <ion-label>Page Info</ion-label>
+              <ion-label>{{ 'reader.settings.pageInfo' | translate }}</ion-label>
             </ion-item>
             <ion-item button class="badge-host-item" (click)="scanView ? scanView=false : loadImg(currentPageCalculated)">
               <ion-icon slot="start" name="image-outline"></ion-icon>
@@ -372,19 +415,19 @@
               <ion-badge color="warning" class="feature-badge-item">{{ 'common.alpha' | translate }}</ion-badge>
               <ion-select slot="end" [(ngModel)]="sideBySideMode" interface="action-sheet"
                 (ionChange)="toggleSideBySide($event.detail.value)">
-                <ion-select-option value="off">Off</ion-select-option>
-                <ion-select-option value="scan-unicode">Scan + Text</ion-select-option>
-                <ion-select-option value="two-pages">Two Pages</ion-select-option>
+                <ion-select-option value="off">{{ 'common.off' | translate }}</ion-select-option>
+                <ion-select-option value="scan-unicode">{{ 'reader.settings.scanPlusText' | translate }}</ion-select-option>
+                <ion-select-option value="two-pages">{{ 'reader.settings.twoPages' | translate }}</ion-select-option>
               </ion-select>
             </ion-item>
             <div class="action-grid" style="padding-top:4px">
               <button class="action-btn" (click)="exportAppData()">
                 <ion-icon name="download-outline"></ion-icon>
-                <span>Backup</span>
+                <span>{{ 'common.backup' | translate }}</span>
               </button>
               <button class="action-btn" (click)="importAppData()">
                 <ion-icon name="cloud-upload-outline"></ion-icon>
-                <span>Restore</span>
+                <span>{{ 'common.restore' | translate }}</span>
               </button>
             </div>
           </ion-list>
@@ -399,7 +442,7 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title size="small">Search</ion-title>
+          <ion-title size="small">{{ 'reader.search.title' | translate }}</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="isSearchOpen = false">
               <ion-icon slot="icon-only" name="close"></ion-icon>
@@ -412,12 +455,12 @@
           <ion-card class="search-card">
             <ion-item color="light">
               <ion-icon slot="start" name="search-outline" color="medium"></ion-icon>
-              <ion-input #searchInput placeholder="بحث / SEARCH / تلاش" [value]="queryString"
+              <ion-input #searchInput [placeholder]="'reader.search.placeholder' | translate" [value]="queryString"
                 (ionChange)="onSearchChange($event.target.value)" [debounce]="500" clearInput
                 class="ion-no-padding ion-text-center ar2"></ion-input>
             </ion-item>
             <ion-item style="font-size: small">
-              <ion-label>Ignore Tashkeel</ion-label>
+              <ion-label>{{ 'reader.search.ignoreTashkeel' | translate }}</ion-label>
               <ion-toggle slot="end" [checked]="ignoreTashkeel"
                 (ionChange)="toggleIgnoreTashkeel(searchInput.value)"></ion-toggle>
             </ion-item>
@@ -425,16 +468,16 @@
           <div *ngIf="searchResults" class="ion-text-center result-heading">
             <ion-item button (click)="copyResults($event.target)" [color]="copyResultsBG">
               <ion-label><span
-                  [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}">Results:</span>
+                  [ngClass]="{'small-results-text': searchResults.total!==searchResults.results.length}">{{ 'reader.search.results' | translate }}</span>
                 {{searchResults.results.length}}
                 <span *ngIf="searchResults.total!==searchResults.results.length">({{searchResults.total}})</span>
-                <small> ⏲ {{searchResults.searchTimeSecs}} sec</small>
+                <small> ⏲ {{searchResults.searchTimeSecs}} {{ 'common.sec' | translate }}</small>
               </ion-label>
               <ion-icon color="light" slot="end" name="copy-outline"></ion-icon>
             </ion-item>
             <ion-label *ngIf="!isCompleteMushaf" color="warning" style="font-style: italic">
-              <small>(searched only in {{juzsurahmode?'Surah':'Juz'}} {{title}})
-              </small>
+              <small *ngIf="juzsurahmode">{{ 'reader.search.scopedSurah' | translate:{ title: title } }}</small>
+              <small *ngIf="!juzsurahmode">{{ 'reader.search.scopedJuz' | translate:{ title: title } }}</small>
             </ion-label>
           </div>
           <virtual-scroller *ngIf="searchResults" #scroll [items]="searchResults.results"
@@ -468,7 +511,7 @@
           <div class="word-detail-translation">{{ selectedWord.translation }}</div>
           <div class="word-detail-info" *ngIf="selectedWord.verseKey">
             <ion-badge color="primary">{{ selectedWord.verseKey }}</ion-badge>
-            <span *ngIf="selectedWord.location" class="word-location">Word {{ selectedWord.location.split(':')[2]
+            <span *ngIf="selectedWord.location" class="word-location">{{ 'common.word' | translate }} {{ selectedWord.location.split(':')[2]
               }}</span>
           </div>
 
@@ -476,47 +519,47 @@
           <div class="word-morphology" *ngIf="selectedWordMorphology">
             <div class="morphology-header">
               <ion-icon name="school-outline"></ion-icon>
-              <span>Morphology</span>
+              <span>{{ 'reader.wordDetail.morphology' | translate }}</span>
             </div>
             <div class="morphology-grid">
               <div class="morph-item" *ngIf="selectedWordMorphology.posLabel">
-                <span class="morph-label">Part of Speech</span>
+                <span class="morph-label">{{ 'reader.wordDetail.partOfSpeech' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.posLabel }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.root">
-                <span class="morph-label">Root</span>
+                <span class="morph-label">{{ 'reader.wordDetail.root' | translate }}</span>
                 <span class="morph-value ar">{{ selectedWordMorphology.root }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.lemma">
-                <span class="morph-label">Lemma</span>
+                <span class="morph-label">{{ 'reader.wordDetail.lemma' | translate }}</span>
                 <span class="morph-value ar">{{ selectedWordMorphology.lemma }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.verbForm">
-                <span class="morph-label">Verb Form</span>
+                <span class="morph-label">{{ 'reader.wordDetail.verbForm' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.verbForm }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.aspectLabel">
-                <span class="morph-label">Aspect</span>
+                <span class="morph-label">{{ 'reader.wordDetail.aspect' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.aspectLabel }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.voiceLabel">
-                <span class="morph-label">Voice</span>
+                <span class="morph-label">{{ 'reader.wordDetail.voice' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.voiceLabel }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.stateLabel">
-                <span class="morph-label">Case</span>
+                <span class="morph-label">{{ 'reader.wordDetail.case' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.stateLabel }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.features">
-                <span class="morph-label">Features</span>
+                <span class="morph-label">{{ 'reader.wordDetail.features' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.features }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.derivationLabel">
-                <span class="morph-label">Derivation</span>
+                <span class="morph-label">{{ 'reader.wordDetail.derivation' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.derivationLabel }}</span>
               </div>
               <div class="morph-item" *ngIf="selectedWordMorphology.prefix">
-                <span class="morph-label">Prefix</span>
+                <span class="morph-label">{{ 'reader.wordDetail.prefix' | translate }}</span>
                 <span class="morph-value">{{ selectedWordMorphology.prefix }}</span>
               </div>
             </div>
@@ -525,18 +568,18 @@
           <div class="word-detail-actions">
             <ion-button fill="outline" size="small" (click)="playWordAudio(selectedWord)" *ngIf="selectedWord.audioUrl">
               <ion-icon slot="start" name="volume-high-outline"></ion-icon>
-              Listen
+              {{ 'common.listen' | translate }}
             </ion-button>
             <a *ngIf="getCorpusUrl(selectedWord)" [href]="getCorpusUrl(selectedWord)" target="_blank" rel="noopener"
               style="text-decoration:none">
               <ion-button fill="outline" size="small">
                 <ion-icon slot="start" name="library-outline"></ion-icon>
-                Corpus
+                {{ 'common.corpus' | translate }}
               </ion-button>
             </a>
             <ion-button fill="outline" size="small" (click)="copyAnything(selectedWord.arabic)">
               <ion-icon slot="start" name="copy-outline"></ion-icon>
-              Copy
+              {{ 'reader.contextMenu.copy' | translate }}
             </ion-button>
           </div>
         </div>
@@ -550,7 +593,7 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title size="small">Bookmarks</ion-title>
+          <ion-title size="small">{{ 'reader.bookmarks.title' | translate }}</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="isBookmarksOpen = false">
               <ion-icon slot="icon-only" name="close"></ion-icon>
@@ -578,8 +621,8 @@
                     <ion-label>
                       <h3>{{ bm.name }}</h3>
                       <p>
-                        Page {{ bm.page }}
-                        <span *ngIf="bm.lineNumber != null"> · Line {{ bm.lineNumber + 1 }}</span>
+                        {{ 'common.page' | translate }} {{ bm.page }}
+                        <span *ngIf="bm.lineNumber != null"> · {{ 'common.line' | translate }} {{ bm.lineNumber + 1 }}</span>
                         <span *ngIf="bm.verseKey"> · {{ bm.verseKey }}</span>
                       </p>
                     </ion-label>
@@ -594,14 +637,14 @@
                   </ion-item-options>
                 </ion-item-sliding>
               </ion-list>
-              <p *ngIf="!folder.bookmarks?.length" class="empty-folder-text">No bookmarks in this folder</p>
+              <p *ngIf="!folder.bookmarks?.length" class="empty-folder-text">{{ 'reader.bookmarks.emptyFolder' | translate }}</p>
             </div>
           </ng-container>
           <ng-template #noBookmarks>
             <div class="empty-bookmarks">
               <ion-icon name="bookmarks-outline" style="font-size: 48px; opacity: 0.3"></ion-icon>
-              <p>No bookmarks yet</p>
-              <p style="font-size: 0.8rem; opacity: 0.6">Long-press a line or use the settings menu to add bookmarks</p>
+              <p>{{ 'reader.bookmarks.empty' | translate }}</p>
+              <p style="font-size: 0.8rem; opacity: 0.6">{{ 'reader.bookmarks.emptyHint' | translate }}</p>
             </div>
           </ng-template>
         </div>
@@ -634,10 +677,10 @@
       <ion-icon name="chevron-back-outline"></ion-icon>
     </ion-button>
     <div style="font-size: x-small">
-      <ion-label color="dark">Page </ion-label>
+      <ion-label color="dark">{{ 'reader.pageLabel' | translate }} </ion-label>
       <ion-input color="dark" class="page-num-input" type="number" [ngModel]="currentPage"
         (keyup.enter)="gotoPageNum($event.target.value)"></ion-input>
-      <ion-label color="dark"> of {{pages?.length}}</ion-label>
+      <ion-label color="dark"> {{ 'reader.pageOf' | translate }} {{pages?.length}}</ion-label>
     </div>
     <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==1" (click)="goToPage(-1)">
       <ion-icon name="chevron-forward-outline"></ion-icon>

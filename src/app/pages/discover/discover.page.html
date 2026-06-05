@@ -20,7 +20,7 @@
       <p>{{ 'discover.noDataSub' | translate }}</p>
       <ion-button fill="outline" color="light" (click)="goBack()">
         <ion-icon name="arrow-back" slot="start"></ion-icon>
-        Go Home
+        {{ 'common.goHome' | translate }}
       </ion-button>
     </div>
   </div>
@@ -79,13 +79,13 @@
 
       <!-- Side Action Bar -->
       <div class="action-bar" [class.text-light]="card.design.textColor === 'light'" [class.text-dark]="card.design.textColor === 'dark'">
-        <button class="action-btn" (click)="shareAyah()" title="Share">
+        <button class="action-btn" (click)="shareAyah()" [title]="'discover.share' | translate">
           <ion-icon name="share-social-outline"></ion-icon>
         </button>
-        <button class="action-btn" (click)="openInReader()" title="Read in context">
+        <button class="action-btn" (click)="openInReader()" [title]="'discover.readInContext' | translate">
           <ion-icon name="book-outline"></ion-icon>
         </button>
-        <button class="action-btn" (click)="toggleSettings()" title="Translation settings">
+        <button class="action-btn" (click)="toggleSettings()" [title]="'discover.translationSettings' | translate">
           <ion-icon name="language-outline"></ion-icon>
         </button>
       </div>
@@ -93,7 +93,7 @@
       <!-- Scroll Hint (only on first card) -->
       <div class="scroll-hint" *ngIf="i === 0 && currentIndex === 0">
         <ion-icon name="chevron-up"></ion-icon>
-        <span>Swipe up</span>
+        <span>{{ 'discover.swipeHint' | translate }}</span>
       </div>
     </div>
   </ng-container>
@@ -113,14 +113,14 @@
     <div class="settings-backdrop" (click)="toggleSettings()"></div>
     <div class="settings-sheet">
       <div class="settings-handle"></div>
-      <h3 class="settings-title">Translation Settings</h3>
-      <p class="settings-subtitle">Choose your preferred translations for Discover</p>
+      <h3 class="settings-title">{{ 'discover.translationSettings' | translate }}</h3>
+      <p class="settings-subtitle">{{ 'discover.settingsSubtitle' | translate }}</p>
 
       <div class="settings-option" (click)="pickEnglishTranslation()">
         <div class="option-label">
           <ion-icon name="language-outline"></ion-icon>
           <div>
-            <span class="option-title">English Translation</span>
+            <span class="option-title">{{ 'discover.englishTranslation' | translate }}</span>
             <span class="option-value">{{ currentEnName }}</span>
           </div>
         </div>
@@ -131,7 +131,7 @@
         <div class="option-label">
           <ion-icon name="language-outline"></ion-icon>
           <div>
-            <span class="option-title">Urdu Translation</span>
+            <span class="option-title">{{ 'discover.urduTranslation' | translate }}</span>
             <span class="option-value urdu-label">{{ currentUrName }}</span>
           </div>
         </div>
@@ -140,7 +140,7 @@
 
       <p class="settings-note">
         <ion-icon name="information-circle-outline"></ion-icon>
-        Changes apply to all cards. Some translations may need network to load.
+        {{ 'discover.settingsNote' | translate }}
       </p>
     </div>
   </div>
@@ -148,7 +148,7 @@
   <!-- Share Toast -->
   <div class="share-toast" [class.visible]="showShareToast">
     <ion-icon name="checkmark-circle"></ion-icon>
-    <span>Copied to clipboard</span>
+    <span>{{ 'discover.copied' | translate }}</span>
   </div>
 </div>
 

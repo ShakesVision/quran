@@ -101,14 +101,43 @@ body.rtl-ui {
   font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif;
 }
 
-body.lang-ur ion-title,
-body.lang-ur ion-label,
-body.lang-ur h1,
-body.lang-ur h2,
-body.lang-ur h3,
-body.lang-ur p,
-body.lang-ur span:not(.ar-text):not(.ar-text2):not(.ar2):not(.ar-qurancom):not(.wbw-arabic) {
-  font-family: inherit;
+// UI chrome (not Quranic Arabic glyphs)
+body.lang-ur {
+  ion-app,
+  ion-content,
+  ion-header,
+  ion-footer,
+  ion-toolbar,
+  ion-title,
+  ion-label,
+  ion-button,
+  ion-item,
+  ion-segment,
+  ion-segment-button,
+  ion-chip,
+  ion-searchbar,
+  ion-select,
+  ion-alert,
+  ion-toast,
+  ion-popover,
+  ion-modal,
+  h1,
+  h2,
+  h3,
+  p,
+  small,
+  .section-title,
+  .feature-card,
+  .tool-card,
+  span:not(.ar-text):not(.ar-text2):not(.ar2):not(.ar-qurancom):not(.wbw-arabic):not(.arabic-line-text):not(.tajweed-text):not(.ayah-word) {
+    font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif;
+  }
+}
+
+body.dark app-read ion-content,
+body.dark ion-content.read-page-content {
+  --background: url("assets/paper-texture-dark.svg") repeat center center;
+  --background-size: 200px 200px;
 }
 
 body.rtl-ui ion-app {
@@ -516,6 +545,20 @@ body.dark {
   --tj-maad-connected:    #FF7043;
   --tj-maad-sukoon:       #FFB74D;
   --tj-maad-sila:         #FFA726;
+}
+
+ion-modal.memorize-add-sheet {
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-width: 0;
+  }
+
+  ion-content {
+    --background: var(--ion-background-color);
+  }
 }
 
 ion-modal.search-sheet-modal {

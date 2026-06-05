@@ -98,6 +98,9 @@ src/app/
 - Page index mapping: `quranComPageIndexByNumber` Map<mushafPageNum, arrayIndex>
 - Caching: IndexedDB via `@ionic/storage-angular`, keyed by source ID
 
+### Translation sources (Quran.com resource IDs)
+Add or enable translations in `src/app/config/translation-sources.ts`. See [docs/TRANSLATION_SOURCES.md](docs/TRANSLATION_SOURCES.md).
+
 ### Font Pairing (CRITICAL)
 | Source | Font | CSS Class |
 |--------|------|-----------|

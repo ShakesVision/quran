@@ -63,8 +63,8 @@
           <ion-icon name="grid"></ion-icon>
         </div>
         <div class="card-content">
-          <h3>Browse</h3>
-          <p>Juz & Surah selection</p>
+          <h3>{{ 'home.browse' | translate }}</h3>
+          <p>{{ 'home.browseDesc' | translate }}</p>
         </div>
         <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
       </div>
@@ -75,8 +75,8 @@
           <ion-icon name="images"></ion-icon>
         </div>
         <div class="card-content">
-          <h3>Scanned</h3>
-          <p>Original mushaf images</p>
+          <h3>{{ 'home.scanned' | translate }}</h3>
+          <p>{{ 'home.scannedDesc' | translate }}</p>
         </div>
         <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
       </div>
@@ -87,8 +87,8 @@
           <ion-icon name="headset"></ion-icon>
         </div>
         <div class="card-content">
-          <h3>Listen</h3>
-          <p>Audio recitation</p>
+          <h3>{{ 'home.listen' | translate }}</h3>
+          <p>{{ 'home.listenDesc' | translate }}</p>
         </div>
         <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
       </div>
@@ -99,8 +99,8 @@
           <ion-icon name="bulb"></ion-icon>
         </div>
         <div class="card-content">
-          <h3>Memorize</h3>
-          <p>Hifz tracking & review</p>
+          <h3>{{ 'home.memorize' | translate }}</h3>
+          <p>{{ 'home.memorizeDesc' | translate }}</p>
         </div>
         <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
       </div>
@@ -116,8 +116,8 @@
           <ion-icon name="sparkles"></ion-icon>
         </div>
         <div class="discover-text">
-          <h3>Discover</h3>
-          <p>Random ayahs, beautiful designs. Swipe to explore.</p>
+          <h3>{{ 'home.discover' | translate }}</h3>
+          <p>{{ 'home.discoverDescLong' | translate }}</p>
         </div>
         <ion-icon name="chevron-forward" class="discover-arrow"></ion-icon>
       </div>
@@ -133,8 +133,8 @@
     <div class="targets-header">
       <div class="targets-title-row">
         <ion-icon name="flame" class="streak-flame" [class.active]="streakCount > 0"></ion-icon>
-        <h2 class="section-title">Daily Target</h2>
-        <span class="streak-badge" *ngIf="streakCount > 0">{{ streakCount }} day streak</span>
+        <h2 class="section-title">{{ 'home.dailyTarget' | translate }}</h2>
+        <span class="streak-badge" *ngIf="streakCount > 0">{{ 'home.dayStreak' | translate:{ count: streakCount } }}</span>
       </div>
       <ion-button fill="clear" size="small" (click)="editTargets()">
         <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
@@ -151,15 +151,15 @@
         </svg>
         <div class="ring-text">
           <span class="ring-value">{{ todayPages }}</span>
-          <span class="ring-label">pages</span>
+          <span class="ring-label">{{ 'home.pages' | translate }}</span>
         </div>
       </div>
       <div class="target-info">
-        <div class="target-name">Tilawat</div>
-        <div class="target-detail">{{ todayPages }} / {{ dailyPageTarget }} pages today</div>
+        <div class="target-name">{{ 'home.tilawat' | translate }}</div>
+        <div class="target-detail">{{ 'home.pagesToday' | translate:{ done: todayPages, target: dailyPageTarget } }}</div>
         <div class="target-sub">
-          <span *ngIf="tilawatProgress < 100">{{ dailyPageTarget - todayPages }} more to go</span>
-          <span *ngIf="tilawatProgress >= 100" class="target-done">Target complete!</span>
+          <span *ngIf="tilawatProgress < 100">{{ 'home.moreToGo' | translate:{ count: dailyPageTarget - todayPages } }}</span>
+          <span *ngIf="tilawatProgress >= 100" class="target-done">{{ 'home.targetComplete' | translate }}</span>
         </div>
       </div>
       <ion-icon name="add-circle" class="log-btn"></ion-icon>
@@ -175,15 +175,15 @@
         </svg>
         <div class="ring-text">
           <span class="ring-value">{{ todayAyahs }}</span>
-          <span class="ring-label">ayahs</span>
+          <span class="ring-label">{{ 'home.ayahs' | translate }}</span>
         </div>
       </div>
       <div class="target-info">
-        <div class="target-name">Hifz</div>
-        <div class="target-detail">{{ todayAyahs }} / {{ dailyAyahTarget }} ayahs today</div>
+        <div class="target-name">{{ 'home.hifz' | translate }}</div>
+        <div class="target-detail">{{ 'home.ayahsToday' | translate:{ done: todayAyahs, target: dailyAyahTarget } }}</div>
         <div class="target-sub">
-          <span *ngIf="hifzProgress < 100">{{ dailyAyahTarget - todayAyahs }} more to go</span>
-          <span *ngIf="hifzProgress >= 100" class="target-done">Target complete!</span>
+          <span *ngIf="hifzProgress < 100">{{ 'home.moreToGo' | translate:{ count: dailyAyahTarget - todayAyahs } }}</span>
+          <span *ngIf="hifzProgress >= 100" class="target-done">{{ 'home.targetComplete' | translate }}</span>
         </div>
       </div>
       <ion-icon name="add-circle" class="log-btn"></ion-icon>
@@ -193,7 +193,7 @@
     <div class="khatm-projection" *ngIf="khatmTarget > 0">
       <div class="khatm-row">
         <ion-icon name="book-outline"></ion-icon>
-        <span>{{ khatmTarget }} khatm in {{ targetDays }} days · {{ dailyPageTarget }} pages/day</span>
+        <span>{{ 'home.khatmProjection' | translate:{ khatm: khatmTarget, days: targetDays, pages: dailyPageTarget } }}</span>
       </div>
     </div>
 
@@ -215,9 +215,9 @@
         <span class="level-icon">{{ currentLevel.icon }}</span>
         <div class="level-info">
           <span class="level-title">{{ currentLevel.title }}</span>
-          <span class="level-subtitle">Level {{ currentLevel.level }} · {{ allTimePagesRead }} total pages</span>
+          <span class="level-subtitle">{{ 'home.levelSubtitle' | translate:{ level: currentLevel.level, total: allTimePagesRead } }}</span>
         </div>
-        <span class="level-next" *ngIf="currentLevel.level < 10">Next: {{ nextLevel.icon }} {{ nextLevel.title }}</span>
+        <span class="level-next" *ngIf="currentLevel.level < 10">{{ 'home.levelNext' | translate:{ icon: nextLevel.icon, title: nextLevel.title } }}</span>
       </div>
       <div class="level-bar-wrapper">
         <div class="level-bar">
@@ -231,8 +231,8 @@
     <div class="achievements-card" *ngIf="achievements.length > 0">
       <div class="achievements-header">
         <ion-icon name="trophy-outline"></ion-icon>
-        <span>Achievements</span>
-        <span class="achievements-count">{{ unlockedCount }} / {{ visibleAchievements.length }}</span>
+        <span>{{ 'home.achievements' | translate }}</span>
+        <span class="achievements-count">{{ 'home.achievementsCount' | translate:{ unlocked: unlockedCount, total: visibleAchievements.length } }}</span>
       </div>
       <div class="achievements-grid">
         <div *ngFor="let a of visibleAchievements" class="achievement-badge" [class.unlocked]="a.unlocked"
@@ -284,7 +284,7 @@
       <div class="tool-card" routerLink="/playground">
         <ion-icon name="flask-outline"></ion-icon>
         <span>{{ 'home.textStudio' | translate }}</span>
-        <ion-badge color="tertiary" style="font-size:0.55rem">{{ 'common.beta' | translate }}</ion-badge>
+        <ion-badge color="tertiary" style="font-size:0.55rem">{{ 'common.alpha' | translate }}</ion-badge>
       </div>
       <div class="tool-card" routerLink="/camera">
         <ion-icon name="camera-outline"></ion-icon>
@@ -312,22 +312,21 @@
   <div *ngIf="changelogOpen" class="changelog-overlay" (click)="closeChangelog()">
     <div class="changelog-panel" (click)="$event.stopPropagation()">
       <div class="changelog-header">
-        <h2><ion-icon name="git-branch-outline"></ion-icon> Changelog</h2>
+        <h2><ion-icon name="git-branch-outline"></ion-icon> {{ 'home.changelog' | translate }}</h2>
         <ion-button fill="clear" size="small" (click)="closeChangelog()">
           <ion-icon name="close-outline" slot="icon-only"></ion-icon>
         </ion-button>
       </div>
       <!-- App Icon -->
       <div class="changelog-app-icon">
-        <img src="assets/icon/hifz-helper-logo.svg" alt="Quran Hifz Helper">
-        <span class="changelog-app-name">Quran Hifz Helper</span>
+        <img src="assets/icon/hifz-helper-logo.svg" [alt]="'app.name' | translate">
+        <span class="changelog-app-name">{{ 'app.name' | translate }}</span>
       </div>
-      <div class="changelog-subtitle">A project by <a href="https://www.sarbakaf.com" target="_blank">Sarbakaf Group</a>
-      </div>
+      <div class="changelog-subtitle">{{ 'home.changelogSubtitle' | translate }}</div>
 
       <div *ngIf="changelogLoading" class="changelog-loading">
         <ion-spinner name="crescent"></ion-spinner>
-        <span>Loading commits...</span>
+        <span>{{ 'home.loadingCommits' | translate }}</span>
       </div>
 
       <div *ngIf="!changelogLoading" class="changelog-body">
@@ -352,21 +351,20 @@
     <div class="footer-links">
       <ion-button fill="clear" size="small" (click)="open('help')">
         <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-        Help
+        {{ 'home.help' | translate }}
       </ion-button>
       <ion-button fill="clear" size="small" (click)="open('about')">
         <ion-icon name="information-circle-outline" slot="start"></ion-icon>
-        About
+        {{ 'home.about' | translate }}
       </ion-button>
       <ion-button fill="clear" size="small" href="https://t.me/ShakesVision" target="_blank">
         <ion-icon name="paper-plane-outline" slot="start"></ion-icon>
-        Feedback
+        {{ 'home.feedback' | translate }}
       </ion-button>
     </div>
-    <p class="footer-text">Made with ❤️ for the Ummah</p>
+    <p class="footer-text">{{ 'home.madeForUmmah' | translate }}</p>
     <p class="footer-attribution">
-      by <a href="https://quran.shakeeb.in" target="_blank">Shakeeb Ahmad</a>
-      · <a href="https://quran.shakeeb.in" target="_blank">quran.shakeeb.in</a>
+      {{ 'home.footerBy' | translate }} · <a href="https://quran.shakeeb.in" target="_blank">quran.shakeeb.in</a>
     </p>
   </div>
 </ion-content>

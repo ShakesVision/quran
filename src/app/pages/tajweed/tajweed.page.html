@@ -3,7 +3,7 @@
         <ion-buttons slot="start">
             <ion-back-button defaultHref="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Tajweed Tool</ion-title>
+        <ion-title>{{ 'tajweed.title' | translate }}</ion-title>
     </ion-toolbar>
 </ion-header>
 
@@ -11,14 +11,13 @@
     <div class="tajweed-container">
         <!-- Header Section -->
         <div class="header-section">
-            <h2>Tajweed Rules Analyzer</h2>
-            <p class="subtitle">Enter any Arabic text with tashkeel to see tajweed rules applied with color
-                highlighting.</p>
+            <h2>{{ 'tajweed.analyzer' | translate }}</h2>
+            <p class="subtitle">{{ 'tajweed.subtitle' | translate }}</p>
         </div>
 
         <!-- Font Selector -->
         <div class="font-selector-section">
-            <label class="font-label">Font Style</label>
+            <label class="font-label">{{ 'tajweed.fontStyle' | translate }}</label>
             <div class="font-chips">
                 <ion-chip *ngFor="let font of fontOptions" [outline]="selectedFont.name !== font.name"
                     [color]="selectedFont.name === font.name ? 'primary' : 'medium'" (click)="changeFont(font)"
@@ -31,11 +30,11 @@
         <!-- Input Section -->
         <div class="input-section">
             <div class="input-group">
-                <label class="input-label">Arabic Text (with Tashkeel)</label>
+                <label class="input-label">{{ 'tajweed.arabicInput' | translate }}</label>
                 <textarea [(ngModel)]="arabicText" placeholder="اَلْحَمْدُ لِلَّـهِ رَبِّ ٱلْعَـٰلَمِينَ"
                     class="arabic-input" [ngClass]="textareaFontClass" rows="5">
         </textarea>
-                <p class="hint">*Paste any Arabic text with diacritics (tashkeel)</p>
+                <p class="hint">{{ 'tajweed.pasteHint' | translate }}</p>
             </div>
 
             <!-- Action Buttons -->
@@ -54,44 +53,44 @@
         <!-- Preview Section -->
         <div class="preview-section" *ngIf="showPreview">
             <div class="preview-header">
-                <h3>Tajweed Preview</h3>
-                <p class="preview-hint">Colors represent different tajweed rules</p>
+                <h3>{{ 'tajweed.preview' | translate }}</h3>
+                <p class="preview-hint">{{ 'tajweed.previewHint' | translate }}</p>
             </div>
 
             <div class="tajweed-preview tajweed-text" [ngClass]="previewFontClass" [innerHTML]="tajweedPreview"></div>
 
             <!-- Legend -->
             <div class="tajweed-legend">
-                <div class="legend-title">Tajweed Rules Legend</div>
+                <div class="legend-title">{{ 'tajweed.legend' | translate }}</div>
 
                 <div class="legend-grid">
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #FFB74D;"></span>
-                        <span>Ghunna</span>
+                        <span>{{ 'tajweed.ghunna' | translate }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #4CAF50;"></span>
-                        <span>Idgham</span>
+                        <span>{{ 'tajweed.idgham' | translate }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #2196F3;"></span>
-                        <span>Ikhfa</span>
+                        <span>{{ 'tajweed.ikhfa' | translate }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #9C27B0;"></span>
-                        <span>Iqlab</span>
+                        <span>{{ 'tajweed.iqlab' | translate }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #F44336;"></span>
-                        <span>Qalqalah</span>
+                        <span>{{ 'tajweed.qalqalah' | translate }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #FF5722;"></span>
-                        <span>Meem Rules</span>
+                        <span>{{ 'tajweed.meemRules' | translate }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #B71C1C;"></span>
-                        <span>Maad</span>
+                        <span>{{ 'tajweed.maad' | translate }}</span>
                     </div>
                 </div>
             </div>
@@ -100,7 +99,7 @@
         <!-- Empty State -->
         <div class="empty-state" *ngIf="!showPreview && arabicText && arabicText.trim().length === 0">
             <ion-icon name="text-outline" class="empty-icon"></ion-icon>
-            <p>Enter Arabic text with tashkeel to see tajweed rules</p>
+            <p>{{ 'tajweed.emptyHint' | translate }}</p>
         </div>
     </div>
 </ion-content>

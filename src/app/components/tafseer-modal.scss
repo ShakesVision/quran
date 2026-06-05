@@ -579,6 +579,17 @@
 }
 
 // ── Tafsir Section ──
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.section-header-static {
+  cursor: default;
+}
+
 .tafsir-section {
   border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
   border-radius: 10px;

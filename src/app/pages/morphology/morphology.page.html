@@ -4,14 +4,14 @@
       <ion-back-button defaultHref="/home"></ion-back-button>
       <ion-button (click)="expandAll()">
         <ion-icon name="chevron-down-outline"></ion-icon>
-        Expand All
+        {{ 'common.expandAll' | translate }}
       </ion-button>
       <ion-button (click)="collapseAll()">
         <ion-icon name="chevron-up-outline"></ion-icon>
-        Collapse All
+        {{ 'common.collapseAll' | translate }}
       </ion-button>
     </ion-buttons>
-    <ion-title>Morphology</ion-title>
+    <ion-title>{{ 'morphology.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -19,14 +19,14 @@
   <div class="morphology-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h2>Word Morphology Explorer</h2>
-      <p class="subtitle">Analyze the grammatical structure of any Quranic verse</p>
+      <h2>{{ 'morphology.explorer' | translate }}</h2>
+      <p class="subtitle">{{ 'morphology.subtitle' | translate }}</p>
     </div>
 
     <!-- Search Section -->
     <div class="search-section">
       <div class="search-input-group">
-        <ion-searchbar [(ngModel)]="searchQuery" placeholder="Verse key (e.g., 2:255)" class="search-bar">
+        <ion-searchbar [(ngModel)]="searchQuery" [placeholder]="'morphology.searchPlaceholder' | translate" class="search-bar">
         </ion-searchbar>
         <ion-button (click)="searchByVerseKey()" color="primary">
           <ion-icon name="search-outline" slot="icon-only"></ion-icon>
@@ -38,7 +38,7 @@
     <div class="selection-section">
       <div class="selector-group">
         <div class="selector-item">
-          <label>Surah:</label>
+          <label>{{ 'morphology.surahLabel' | translate }}</label>
           <ion-select class="ar-text2" [(ngModel)]="selectedSurah" (ionChange)="onSurahChange()" class="select-input">
             <ion-select-option *ngFor="let surah of surahList" [value]="surah.index">
               {{ surah.index }}. {{ surah.titleAr }} ({{ surah.title }})
@@ -47,7 +47,7 @@
         </div>
 
         <div class="selector-item">
-          <label>Ayah:</label>
+          <label>{{ 'morphology.ayahLabel' | translate }}</label>
           <ion-select [(ngModel)]="selectedAyah" (ionChange)="onAyahChange()" class="select-input">
             <ion-select-option *ngFor="let i of [].constructor(ayahCount); let idx = index" [value]="idx + 1">
               {{ idx + 1 }}
@@ -60,7 +60,7 @@
     <!-- Loading State -->
     <div *ngIf="isLoading" class="loading-state">
       <ion-spinner name="dots" color="primary"></ion-spinner>
-      <p>Loading morphology data...</p>
+      <p>{{ 'morphology.loading' | translate }}</p>
     </div>
 
     <!-- Morphology Data -->
@@ -69,7 +69,7 @@
         <ion-accordion *ngFor="let word of morphologyData; let idx = index" [value]="idx === 0 ? 'expanded' : ''">
           <ion-item slot="header" lines="full">
             <ion-label>
-              <strong>Word {{ idx + 1 }}</strong>
+              <strong>{{ 'morphology.wordN' | translate:{ n: idx + 1 } }}</strong>
               <p *ngIf="word.lemma" class="word-lemma">{{ word.lemma }}</p>
             </ion-label>
           </ion-item>
@@ -77,73 +77,73 @@
           <div class="word-details" slot="content">
             <!-- POS -->
             <div class="detail-row" *ngIf="word.posLabel">
-              <span class="detail-label">POS:</span>
+              <span class="detail-label">{{ 'morphology.pos' | translate }}</span>
               <span class="detail-value">{{ word.posLabel }}</span>
             </div>
 
             <!-- Root -->
             <div class="detail-row" *ngIf="word.root">
-              <span class="detail-label">Root:</span>
+              <span class="detail-label">{{ 'morphology.root' | translate }}</span>
               <span class="detail-value ar-text2">{{ word.root }}</span>
             </div>
 
             <!-- Lemma Buckwalter -->
             <div class="detail-row" *ngIf="word.lemmaBw">
-              <span class="detail-label">Lemma (BW):</span>
+              <span class="detail-label">{{ 'morphology.lemmaBw' | translate }}</span>
               <span class="detail-value">{{ word.lemmaBw }}</span>
             </div>
 
             <!-- Verb Form -->
             <div class="detail-row" *ngIf="word.verbForm">
-              <span class="detail-label">Form:</span>
+              <span class="detail-label">{{ 'morphology.form' | translate }}</span>
               <span class="detail-value">{{ word.verbForm }}</span>
             </div>
 
             <!-- Aspect -->
             <div class="detail-row" *ngIf="word.aspectLabel">
-              <span class="detail-label">Aspect:</span>
+              <span class="detail-label">{{ 'morphology.aspect' | translate }}</span>
               <span class="detail-value">{{ word.aspectLabel }}</span>
             </div>
 
             <!-- Voice -->
             <div class="detail-row" *ngIf="word.voiceLabel">
-              <span class="detail-label">Voice:</span>
+              <span class="detail-label">{{ 'morphology.voice' | translate }}</span>
               <span class="detail-value">{{ word.voiceLabel }}</span>
             </div>
 
             <!-- State -->
             <div class="detail-row" *ngIf="word.stateLabel">
-              <span class="detail-label">Case:</span>
+              <span class="detail-label">{{ 'morphology.case' | translate }}</span>
               <span class="detail-value">{{ word.stateLabel }}</span>
             </div>
 
             <!-- Gender -->
             <div class="detail-row" *ngIf="word.genderLabel">
-              <span class="detail-label">Gender:</span>
+              <span class="detail-label">{{ 'morphology.gender' | translate }}</span>
               <span class="detail-value">{{ word.genderLabel }}</span>
             </div>
 
             <!-- Number -->
             <div class="detail-row" *ngIf="word.numberLabel">
-              <span class="detail-label">Number:</span>
+              <span class="detail-label">{{ 'morphology.number' | translate }}</span>
               <span class="detail-value">{{ word.numberLabel }}</span>
             </div>
 
             <!-- Prefix -->
             <div class="detail-row" *ngIf="word.prefix">
-              <span class="detail-label">Prefix:</span>
+              <span class="detail-label">{{ 'morphology.prefix' | translate }}</span>
               <span class="detail-value">{{ word.prefix }}</span>
             </div>
 
             <!-- Suffix -->
             <div class="detail-row" *ngIf="word.suffix">
-              <span class="detail-label">Suffix:</span>
+              <span class="detail-label">{{ 'morphology.suffix' | translate }}</span>
               <span class="detail-value">{{ word.suffix }}</span>
             </div>
 
             <!-- Features -->
             <div class="detail-row" *ngIf="word.features">
-              <span class="detail-label">Features:</span>
+              <span class="detail-label">{{ 'morphology.features' | translate }}</span>
               <span class="detail-value">{{ formatFeatures(word.features) }}</span>
             </div>
 
@@ -151,7 +151,7 @@
             <div class="detail-row" *ngIf="getCorpusUrl(idx + 1)">
               <ion-button fill="clear" size="small" [href]="getCorpusUrl(idx + 1)" target="_blank" color="primary">
                 <ion-icon name="open-outline" slot="start"></ion-icon>
-                View on Corpus
+                {{ 'morphology.viewCorpus' | translate }}
               </ion-button>
             </div>
           </div>
@@ -162,8 +162,8 @@
     <!-- Empty State -->
     <div *ngIf="!isLoading && morphologyData?.length === 0" class="empty-state">
       <ion-icon name="school-outline" class="empty-icon"></ion-icon>
-      <h3>No Data Available</h3>
-      <p>Select a verse to view its morphological analysis</p>
+      <h3>{{ 'morphology.noData' | translate }}</h3>
+      <p>{{ 'morphology.selectVerse' | translate }}</p>
     </div>
   </div>
 </ion-content>

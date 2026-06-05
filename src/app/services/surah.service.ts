@@ -10,6 +10,7 @@ import { HttpClient } from "@angular/common/http";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { ToastController, ToastOptions } from "@ionic/angular";
 import { Subject } from "rxjs/internal/Subject";
+import { getDefaultTranslationIds } from "../config/translation-sources";
 
 @Injectable({
   providedIn: "root",
@@ -431,9 +432,7 @@ export class SurahService {
   }
 
   fetchTrans(verseKey, lang = "en", translationIds?: number[]) {
-    // Default: comprehensive set of English + Urdu translations
-    const defaultIds = [20, 85, 84, 95, 22, 203, 97, 54, 234, 151, 158, 156, 819];
-    const ids = translationIds || defaultIds;
+    const ids = translationIds || getDefaultTranslationIds();
     let url = `https://api.quran.com/api/v4/verses/by_key/${verseKey}?language=${lang}&fields=text_indopak,text&words=true&word_fields=text_indopak,text&translations=${ids.join(',')}&translation_fields=resource_name,language_name&audio=2`;
     return this.httpClient.get(url);
   }

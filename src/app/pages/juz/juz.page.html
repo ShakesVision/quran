@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Browse</ion-title>
+    <ion-title>{{ 'browse.title' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="fetchAndSaveInDeviceStorage('Quran')" fill="clear" color="medium" size="small">
         <ion-icon *ngIf="!syncing && !hasSaved" slot="icon-only" name="cloud-download-outline"></ion-icon>
@@ -24,11 +24,11 @@
         <ion-icon name="book"></ion-icon>
       </div>
       <div class="card-text">
-        <h2>Complete Quran</h2>
+        <h2>{{ 'browse.completeQuran' | translate }}</h2>
         <p class="ar-text">مکمل قرآن پڑھیے</p>
         <div class="card-meta">
-          <span><ion-icon name="layers-outline"></ion-icon> 30 Juz</span>
-          <span><ion-icon name="document-outline"></ion-icon> {{pages?.length || 611}} Pages</span>
+          <span><ion-icon name="layers-outline"></ion-icon> {{ 'browse.juzCount' | translate }}</span>
+          <span><ion-icon name="document-outline"></ion-icon> {{ 'browse.pageCount' | translate:{ count: pages?.length || 611 } }}</span>
         </div>
         <div class="source-badge" *ngIf="currentSourceName">
           <ion-icon name="library-outline"></ion-icon> {{currentSourceName}}
@@ -38,7 +38,7 @@
     </div>
     <div class="bookmark-indicator" *ngIf="unicodeBookmarkPageNum > 0">
       <ion-icon name="bookmark"></ion-icon>
-      Page {{unicodeBookmarkPageNum}} ({{((unicodeBookmarkPageNum/ 611) * 100).toFixed(0)}}%)
+      {{ 'browse.bookmarkAt' | translate:{ page: unicodeBookmarkPageNum, percent: ((unicodeBookmarkPageNum/ 611) * 100).toFixed(0) } }}
     </div>
   </div>
 
@@ -46,10 +46,10 @@
   <div class="segment-wrapper">
     <ion-segment [(ngModel)]="segment" mode="ios" class="browse-segment">
       <ion-segment-button value="juz">
-        <ion-label>Juz</ion-label>
+        <ion-label>{{ 'browse.segmentJuz' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="surah">
-        <ion-label>Surah</ion-label>
+        <ion-label>{{ 'browse.segmentSurah' | translate }}</ion-label>
       </ion-segment-button>
     </ion-segment>
   </div>
@@ -59,7 +59,7 @@
     <ion-searchbar
       type="text"
       class="custom-searchbar"
-      [placeholder]="segment==='juz' ? 'Search juz...' : 'Search surah...'"
+      [placeholder]="(segment==='juz' ? 'browse.searchJuz' : 'browse.searchSurah') | translate"
       (ionChange)="queryChanged($event.target.value)"
       mode="ios">
     </ion-searchbar>
@@ -70,8 +70,8 @@
 
   <!-- Results Count -->
   <div class="results-count">
-    <span *ngIf="segment==='juz'">{{juzPages.length}} of {{juzPagesCopy.length}} Juz</span>
-    <span *ngIf="segment==='surah'">{{surahPages.length}} of {{surahPagesCopy.length}} Surahs</span>
+    <span *ngIf="segment==='juz'">{{ 'browse.juzResults' | translate:{ shown: juzPages.length, total: juzPagesCopy.length } }}</span>
+    <span *ngIf="segment==='surah'">{{ 'browse.surahResults' | translate:{ shown: surahPages.length, total: surahPagesCopy.length } }}</span>
   </div>
 
   <!-- Juz Grid -->
@@ -83,7 +83,7 @@
       <div class="item-content">
         <span class="item-number">{{j.id}}</span>
         <span class="item-name ar-text">{{j.name}}</span>
-        <span class="item-pages">{{j.length}} pages</span>
+        <span class="item-pages">{{ 'browse.pagesLabel' | translate:{ count: j.length } }}</span>
       </div>
       <ion-icon name="bookmark" class="bookmark-icon" *ngIf="returnBookmarkCalc(j)"></ion-icon>
     </div>
@@ -96,7 +96,7 @@
       <div class="item-content">
         <span class="item-number">{{j.id}}</span>
         <span class="item-name ar-text">{{j.name}}</span>
-        <span class="item-pages">{{j.length}} pages</span>
+        <span class="item-pages">{{ 'browse.pagesLabel' | translate:{ count: j.length } }}</span>
       </div>
       <ion-icon name="bookmark" class="bookmark-icon" *ngIf="returnBookmarkCalc(j)"></ion-icon>
     </div>
@@ -108,23 +108,23 @@
       <ion-content>
         <ion-list lines="none">
           <ion-list-header>
-            <ion-label>Sort & Filter</ion-label>
+            <ion-label>{{ 'browse.sortFilter' | translate }}</ion-label>
           </ion-list-header>
           <ion-item button (click)="sortBy('direction')">
             <ion-icon name="swap-vertical" slot="start" color="medium"></ion-icon>
-            <ion-label>Reverse Order</ion-label>
+            <ion-label>{{ 'browse.reverseOrder' | translate }}</ion-label>
           </ion-item>
           <ion-item button (click)="sortBy('pageCount')">
             <ion-icon name="document-outline" slot="start" color="medium"></ion-icon>
-            <ion-label>By Page Count</ion-label>
+            <ion-label>{{ 'browse.byPageCount' | translate }}</ion-label>
           </ion-item>
           <ion-item button (click)="sortBy('name')">
             <ion-icon name="text-outline" slot="start" color="medium"></ion-icon>
-            <ion-label>By Name (A-Z)</ion-label>
+            <ion-label>{{ 'browse.byName' | translate }}</ion-label>
           </ion-item>
           <ion-item button (click)="resetLists()">
             <ion-icon name="refresh-outline" slot="start" color="medium"></ion-icon>
-            <ion-label>Reset</ion-label>
+            <ion-label>{{ 'common.reset' | translate }}</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>

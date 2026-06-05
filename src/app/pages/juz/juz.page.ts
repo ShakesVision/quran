@@ -282,19 +282,54 @@ export class JuzPage implements OnInit, OnDestroy {
       this.router.navigate(["/quran"], { state: { juzData: data } });
     }
   }
+  /** Quran.com prepends a title page at index 0; archive text does not. */
+  private getPageIndexOffset(): number {
+    return this.pages.length > 611 ? 1 : 0;
+  }
+
+  private pageRangeFilter(
+    startPage: number,
+    endPage: number | undefined,
+  ): (p: string, i: number) => boolean {
+    const o = this.getPageIndexOffset();
+    const startIdx = startPage - 1 + o;
+    const endIdxExclusive = endPage
+      ? endPage - 1 + o
+      : this.pages.length;
+    return (_p, i) => i >= startIdx && i < endIdxExclusive;
+  }
+
+  private surahPageRangeFilter(
+    startPage: number,
+    endPage: number | undefined,
+  ): (p: string, i: number) => boolean {
+    const o = this.getPageIndexOffset();
+    const startIdx = startPage - 1 + o;
+    if (!endPage) {
+      return (_p, i) => i >= startIdx && i < this.pages.length;
+    }
+    if (startPage === endPage) {
+      return (_p, i) => i === startIdx;
+    }
+    const nextStartIdx = endPage - 1 + o;
+    const secondLine =
+      this.pages[nextStartIdx]?.split("\n")[1]?.trim() || "";
+    const bismOnNext = secondLine.includes(this.surahService.diacritics.BISM);
+    const endIdxExclusive = bismOnNext ? endPage - 1 + o : endPage + o;
+    return (_p, i) => i >= startIdx && i < endIdxExclusive;
+  }
+
   calculateJuzData(juzData) {
     this.pages = juzData.split("\n\n");
     const juzPageNumbers = this.surahService.juzPageNumbers;
     juzPageNumbers.forEach((pageNumber, juzIndex) => {
       let juzRukuArray: RukuLocationItem[] = [];
-      const singleJuzPages = this.pages.filter((p, i) => {
-        const isJuzPage: boolean =
-          i >= pageNumber - 1 &&
-          (!!juzPageNumbers[juzIndex + 1]
-            ? i < juzPageNumbers[juzIndex + 1] - 1
-            : i < this.pages.length);
-        return isJuzPage;
-      });
+      const singleJuzPages = this.pages.filter(
+        this.pageRangeFilter(
+          pageNumber,
+          juzPageNumbers[juzIndex + 1],
+        ),
+      );
       const juzPagesData: SurahOrJuzListItem = {
         id: juzIndex + 1,
         name: this.getJuzName(juzIndex),
@@ -322,25 +357,10 @@ export class JuzPage implements OnInit, OnDestroy {
     // try for surahs similarly
     const surahPageNumbers = this.surahService.surahPageNumbers;
     surahPageNumbers.forEach((pageNumber, surahIndex) => {
-      const singleSurahPages = this.pages.filter((p, i) => {
-        let isSurahPage: boolean;
-        const a = i >= pageNumber - 1; // start pages index should be >= surah's starting page number
-        let b: boolean; // and this for the end page number
-        // the next index doesn't exist in surahPageNumbers (meaning surah 114)
-        if (!!surahPageNumbers[surahIndex + 1]) {
-          if (pageNumber === surahPageNumbers[surahIndex + 1]) {
-            b = i <= surahPageNumbers[surahIndex + 1] - 1;
-          } else if (
-            !this.pages[surahPageNumbers[surahIndex + 1] - 1]
-              .split("\n")[1]
-              .includes(this.surahService.diacritics.BISM)
-          ) {
-            b = i < surahPageNumbers[surahIndex + 1];
-          } else b = i < surahPageNumbers[surahIndex + 1] - 1; // agli jo bhi surah hai, uske page number se 1 kam (coz i is index)
-        } else b = i < this.pages.length; // For surah 114 only
-        isSurahPage = a && b;
-        return isSurahPage;
-      });
+      const nextPage = surahPageNumbers[surahIndex + 1];
+      const singleSurahPages = this.pages.filter(
+        this.surahPageRangeFilter(pageNumber, nextPage),
+      );
       const surahPagesData: SurahOrJuzListItem = {
         id: surahIndex + 1,
         name: this.getSurahName(surahIndex),

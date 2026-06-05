@@ -3,11 +3,11 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Listen</ion-title>
+    <ion-title>{{ 'listen.title' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="qariSelect()" class="qari-btn">
         <ion-icon slot="start" name="person-circle-outline"></ion-icon>
-        <span>{{selectedQariName || 'Qaari'}}</span>
+        <span>{{selectedQariName || ('listen.qari' | translate)}}</span>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -34,14 +34,14 @@
       #mySelect
       value="3"
       (ionChange)="qariChanged(mySelect.value)"
-      placeholder="Select Qaari"
+      [placeholder]="'listen.selectQari' | translate"
       interface="action-sheet"
       class="qari-select">
       <ion-select-option *ngFor="let r of reciters" [value]="r.id">
         {{r.name}} (id: {{r.id}})
       </ion-select-option>
     </ion-select>
-    <span class="qari-count">{{reciters.length}} reciters</span>
+    <span class="qari-count">{{ 'listen.reciters' | translate:{ count: reciters.length } }}</span>
   </div>
 
   <!-- Search Bar -->
@@ -49,7 +49,7 @@
     <ion-searchbar
       type="text"
       class="custom-searchbar"
-      placeholder="Search surah..."
+      [placeholder]="'listen.searchSurah' | translate"
       (ionChange)="queryChanged($event.target.value)"
       mode="ios">
     </ion-searchbar>
@@ -57,7 +57,7 @@
 
   <!-- Surah Count -->
   <div class="surah-count" *ngIf="surahInfo">
-    {{surahInfo.length}} Surahs
+    {{ 'listen.surahCount' | translate:{ count: surahInfo.length } }}
   </div>
 
   <!-- Loading -->
@@ -72,7 +72,7 @@
       <div class="surah-number">{{s.index}}</div>
       <div class="surah-info">
         <span class="surah-title">{{s.title}}</span>
-        <span class="surah-meta">{{s.count}} Ayahs • {{s.type}}</span>
+        <span class="surah-meta">{{ 'listen.ayahsType' | translate:{ count: s.count, type: s.type } }}</span>
       </div>
       <span class="surah-title-ar ar-text">{{s.titleAr}}</span>
       <ion-icon name="play-circle" class="play-icon" *ngIf="nowPlaying?.index !== s.index"></ion-icon>

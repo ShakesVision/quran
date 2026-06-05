@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ (isEdit ? 'memorize.update' : 'memorize.add') | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="name-preview" *ngIf="nameHint">
+    <h2>{{ nameHint }}</h2>
+    <p *ngIf="totalHint">{{ totalHint }}</p>
+  </div>
+  <p class="hint" *ngIf="!nameHint">
+    {{ (mode === 'juz' ? 'memorize.enterJuzHint' : 'memorize.enterSurahHint') | translate }}
+  </p>
+
+  <ion-item>
+    <ion-label position="stacked">
+      {{ (mode === 'juz' ? 'memorize.juzNumber' : 'memorize.surahNumber') | translate }}
+    </ion-label>
+    <ion-input type="number" [(ngModel)]="number" (ngModelChange)="onNumberChange()"
+      [min]="1" [max]="mode === 'juz' ? 30 : 114"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">
+      {{ (mode === 'juz' ? 'memorize.pagesMemorized' : 'memorize.ayahsMemorized') | translate }}
+    </ion-label>
+    <ion-input type="number" [(ngModel)]="completed" [min]="0"></ion-input>
+  </ion-item>
+
+  <div class="actions">
+    <ion-button expand="block" (click)="submit()" [disabled]="!number || completed === null">
+      {{ (isEdit ? 'memorize.update' : 'memorize.add') | translate }}
+    </ion-button>
+    <ion-button *ngIf="isEdit" expand="block" color="danger" fill="outline" (click)="deleteEntry()">
+      {{ 'common.delete' | translate }}
+    </ion-button>
+    <ion-button expand="block" fill="clear" (click)="dismiss()">
+      {{ 'common.cancel' | translate }}
+    </ion-button>
+  </div>
+</ion-content>

@@ -7,8 +7,8 @@
       <div class="loading-spinner">
         <ion-spinner name="crescent" color="light"></ion-spinner>
       </div>
-      <p class="loading-text">Preparing your journey...</p>
-      <p class="loading-subtext">Loading ayah data for the first time</p>
+      <p class="loading-text">{{ 'discover.loading' | translate }}</p>
+      <p class="loading-subtext">{{ 'discover.loadingSub' | translate }}</p>
     </div>
   </div>
 
@@ -16,8 +16,8 @@
   <div class="empty-screen" *ngIf="!isLoading && cards.length === 0">
     <div class="empty-content">
       <ion-icon name="cloud-download-outline" class="empty-icon"></ion-icon>
-      <h2>Data Not Available</h2>
-      <p>Quran data needs to be downloaded first. Go back to the home page and wait for the download to complete.</p>
+      <h2>{{ 'discover.noData' | translate }}</h2>
+      <p>{{ 'discover.noDataSub' | translate }}</p>
       <ion-button fill="outline" color="light" (click)="goBack()">
         <ion-icon name="arrow-back" slot="start"></ion-icon>
         Go Home

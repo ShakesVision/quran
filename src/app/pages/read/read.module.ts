@@ -10,6 +10,7 @@ import { ReadPage } from "./read.page";
 import { VirtualScrollerModule } from "ngx-virtual-scroller";
 import { PinchZoomModule } from "ngx-pinch-zoom";
 import { TafseerModalComponent } from "src/app/components/tafseer-modal";
+import { TranslateModule } from "@ngx-translate/core";
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import { TafseerModalComponent } from "src/app/components/tafseer-modal";
     ReadPageRoutingModule,
     VirtualScrollerModule,
     PinchZoomModule,
+    TranslateModule,
   ],
   declarations: [ReadPage, TafseerModalComponent],
 })

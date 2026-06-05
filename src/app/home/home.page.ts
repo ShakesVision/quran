@@ -12,6 +12,12 @@ import { Storage } from "@ionic/storage-angular";
 import { HomePageBanner } from "../models/common";
 import { ProgressPage } from "../pages/progress/progress.page";
 import { QuranDataService } from "../services/quran-data.service";
+import { TranslateService } from "@ngx-translate/core";
+import {
+  AppLanguage,
+  LanguageService,
+  SUPPORTED_LANGUAGES,
+} from "../services/language.service";
 
 interface MushafOption {
   id: string;
@@ -259,6 +265,8 @@ export class HomePage implements OnDestroy {
     private router: Router,
     private storage: Storage,
     private quranDataService: QuranDataService,
+    private languageService: LanguageService,
+    private translate: TranslateService,
   ) {
     this.initStorage();
   }
@@ -400,6 +408,29 @@ export class HomePage implements OnDestroy {
   }
   darkModeToggle() {
     document.body.classList.toggle("dark");
+  }
+
+  async openLanguagePicker(): Promise<void> {
+    const current = this.languageService.getCurrentLanguage();
+    const alert = await this.alertController.create({
+      header: this.translate.instant("common.selectLanguage"),
+      inputs: SUPPORTED_LANGUAGES.map((l) => ({
+        type: "radio" as const,
+        label: l.nativeLabel,
+        value: l.code,
+        checked: l.code === current,
+      })),
+      buttons: [
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
+        {
+          text: this.translate.instant("common.ok"),
+          handler: async (selected: AppLanguage) => {
+            if (selected) await this.languageService.setLanguage(selected);
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   // ═════════════════════════════════════════════

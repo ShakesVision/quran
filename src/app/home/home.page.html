@@ -4,10 +4,13 @@
       class="ion-padding-start app-logo">
     </ion-icon>
     <ion-title class="ion-no-padding">
-      <span class="app-title">Quran</span>
-      <span class="app-subtitle">Hifz Helper</span>
+      <span class="app-title">{{ 'app.title' | translate }}</span>
+      <span class="app-subtitle">{{ 'app.subtitle' | translate }}</span>
     </ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="openLanguagePicker()" class="theme-toggle">
+        <ion-icon slot="icon-only" name="language-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="darkModeToggle()" class="theme-toggle">
         <ion-icon slot="icon-only" name="contrast-outline"></ion-icon>
       </ion-button>
@@ -34,7 +37,7 @@
 
   <!-- Main Feature Grid -->
   <div class="features-section">
-    <h2 class="section-title">Read & Learn</h2>
+    <h2 class="section-title">{{ 'home.readLearn' | translate }}</h2>
     <div class="feature-grid">
       <!-- Full Quran - Primary Card: tap opens last-used mushaf, caret opens selector -->
       <div class="feature-card primary-card">
@@ -43,14 +46,14 @@
             <ion-icon name="book"></ion-icon>
           </div>
           <div class="card-content">
-            <h3>Full Quran</h3>
+            <h3>{{ 'home.fullQuran' | translate }}</h3>
             <p>{{currentMushaf?.name || '15-Line Indopak'}}</p>
           </div>
           <ion-icon name="chevron-forward" class="card-arrow"></ion-icon>
         </div>
         <div class="card-caret" (click)="openMushafSelector(); $event.stopPropagation()">
           <ion-icon name="caret-down-outline"></ion-icon>
-          <span class="caret-label">More</span>
+          <span class="caret-label">{{ 'common.more' | translate }}</span>
         </div>
       </div>
 
@@ -258,41 +261,49 @@
 
   <!-- Tools Section -->
   <div class="tools-section">
-    <h2 class="section-title">Tools</h2>
+    <h2 class="section-title">{{ 'home.tools' | translate }}</h2>
     <div class="tools-grid">
       <div class="tool-card" (click)="open('download')">
         <ion-icon name="download"></ion-icon>
-        <span>Download</span>
+        <span>{{ 'home.download' | translate }}</span>
+        <ion-badge color="warning">{{ 'common.alpha' | translate }}</ion-badge>
       </div>
       <div class="tool-card" routerLink="/surahs">
         <ion-icon name="list"></ion-icon>
-        <span>Translation</span>
-        <ion-badge color="warning">WIP</ion-badge>
+        <span>{{ 'home.translation' | translate }}</span>
+        <ion-badge color="warning">{{ 'common.wip' | translate }}</ion-badge>
       </div>
       <div class="tool-card" (click)="open('progress')">
         <ion-icon name="stats-chart"></ion-icon>
-        <span>Progress</span>
+        <span>{{ 'home.progress' | translate }}</span>
       </div>
       <div class="tool-card" (click)="showChangelog()">
         <ion-icon name="git-commit-outline"></ion-icon>
-        <span>Changelog</span>
+        <span>{{ 'home.changelog' | translate }}</span>
       </div>
       <div class="tool-card" routerLink="/playground">
         <ion-icon name="flask-outline"></ion-icon>
-        <span>Text Studio</span>
-        <ion-badge color="tertiary" style="font-size:0.55rem">Beta</ion-badge>
+        <span>{{ 'home.textStudio' | translate }}</span>
+        <ion-badge color="tertiary" style="font-size:0.55rem">{{ 'common.beta' | translate }}</ion-badge>
+      </div>
+      <div class="tool-card" routerLink="/camera">
+        <ion-icon name="camera-outline"></ion-icon>
+        <span>{{ 'home.cameraToAyah' | translate }}</span>
+        <ion-badge color="warning">{{ 'common.alpha' | translate }}</ion-badge>
       </div>
       <div class="tool-card" routerLink="/notes">
         <ion-icon name="book-outline"></ion-icon>
-        <span>Notes</span>
+        <span>{{ 'home.notes' | translate }}</span>
       </div>
       <div class="tool-card" routerLink="/morphology">
         <ion-icon name="grid-outline"></ion-icon>
-        <span>Morphology</span>
+        <span>{{ 'home.morphology' | translate }}</span>
+        <ion-badge color="warning">{{ 'common.alpha' | translate }}</ion-badge>
       </div>
       <div class="tool-card" routerLink="/tajweed">
         <ion-icon name="text-outline"></ion-icon>
-        <span>Tajweed</span>
+        <span>{{ 'home.tajweed' | translate }}</span>
+        <ion-badge color="warning">{{ 'common.alpha' | translate }}</ion-badge>
       </div>
     </div>
   </div>

@@ -16,6 +16,10 @@ import { Storage } from "@ionic/storage-angular";
 import { Observable, Subject } from "rxjs";
 import { SurahService } from "src/app/services/surah.service";
 import { ProgressPage } from "../progress/progress.page";
+import {
+  MemorizeAddModalComponent,
+  MemorizeAddResult,
+} from "src/app/components/memorize-add-modal/memorize-add-modal.component";
 
 interface JuzItem {
   juz: number;
@@ -86,6 +90,7 @@ export class MemorizePage implements OnInit {
   // Spaced Repetition & Review
   dueForReview: ReviewItem[] = [];
   reviewHeatmap: ReviewHeatmapDay[] = [];
+  statsExpanded = false;
   Math = Math; // Expose for template
 
   // Progress ring
@@ -318,112 +323,64 @@ export class MemorizePage implements OnInit {
   // ═══════════════════════════════════════════
 
   async add(item?) {
-    const juzNameHint = item ? `${this.getJuzNameByNumber(item.juz)}` : '';
-    const alert = await this.alertController.create({
-      subHeader: item ? "Update" : "Add",
-      message: juzNameHint || 'Enter juz number to see its name',
-      cssClass: "custom-alert",
-      inputs: [
-        {
-          name: "juz",
-          id: "juz",
-          type: "number",
-          placeholder: "Juz number...",
-          value: item ? item.juz : null,
-        },
-        {
-          name: "completed",
-          id: "completed",
-          type: "number",
-          placeholder: "Pages memorized...",
-          value: item ? item.completed : null,
-        },
-      ],
-      buttons: [
-        { text: "Cancel", role: "cancel" },
-        {
-          ...(item
-            ? {
-                text: "Delete",
-                handler: (data) => {
-                  this.items.splice(
-                    this.items.findIndex((i: any) => i.juz === item.juz), 1
-                  );
-                  this.saveItems();
-                  this.updateBadges();
-                },
-                cssClass: "delete-btn",
-              }
-            : null),
-        },
-        {
-          text: item ? "Update" : "Add",
-          cssClass: "add-btn",
-          handler: (data) => {
-            if (data.juz < 0 || data.juz > 30) {
-              this.toast("Invalid juz number: " + data.juz, "danger");
-              return;
-            }
-            if (!data.juz || !data.completed) {
-              this.toast("Invalid entries! Both fields are required.", "danger");
-              return;
-            }
-
-            data.juz = parseInt(data.juz);
-            data.completed = parseFloat(data.completed);
-            data.started = item ? item.started : new Date();
-            data.updated = new Date();
-
-            if (!item && this.items.some((i: any) => i.juz === data.juz)) {
-              this.toast("Entry for Juz " + data.juz + " already exists.", "danger");
-              return;
-            }
-
-            const totalPages = this.getJuzInfo(data.juz, "count");
-            data.total = totalPages;
-            if (data.completed > totalPages) {
-              this.toast(`Juz ${data.juz} only has ${totalPages} pages.`, "danger");
-              return;
-            }
-
-            const wasComplete = item && item.completed === item.total;
-
-            item
-              ? (this.items[this.items.findIndex((n: any) => n.juz === item.juz)] = data)
-              : this.items.push(data);
-
-            this.items = this.items.sort((a: any, b: any) => a.juz - b.juz);
-            this.saveItems();
-            this.updateStreak();
-            this.updateBadges();
-
-            // Check if just completed
-            if (data.completed === data.total && !wasComplete) {
-              this.justCompleted = data.juz;
-              this.triggerConfetti();
-              this.toast("🎉 MashaAllah! Juz " + data.juz + " completed!", "success");
-              setTimeout(() => this.justCompleted = null, 3000);
-            }
-          },
-        },
-      ],
+    const modal = await this.modalController.create({
+      component: MemorizeAddModalComponent,
+      componentProps: {
+        mode: "juz",
+        isEdit: !!item,
+        initialNumber: item?.juz ?? null,
+        initialCompleted: item?.completed ?? null,
+      },
     });
-    await alert.present();
+    await modal.present();
+    const { data } = await modal.onDidDismiss<MemorizeAddResult>();
+    if (!data) return;
+    if (data.delete && item) {
+      this.items.splice(this.items.findIndex((i: any) => i.juz === item.juz), 1);
+      this.saveItems();
+      this.updateBadges();
+      return;
+    }
+    if (!data.number || data.completed === undefined) return;
+    this.saveJuzEntry(data.number, data.completed, item);
+  }
 
-    // Dynamically update the alert message to show juz name as user types
-    const juzInput = document.querySelector('ion-alert input[name="juz"]') as HTMLInputElement;
-    if (juzInput) {
-      juzInput.addEventListener('input', () => {
-        const num = parseInt(juzInput.value);
-        const msgEl = document.querySelector('ion-alert .alert-message') as HTMLElement;
-        if (msgEl && num >= 1 && num <= 30) {
-          const name = this.getJuzNameByNumber(num);
-          const pages = this.getJuzInfo(num, 'count');
-          msgEl.textContent = `${name} — ${pages} pages`;
-        } else if (msgEl) {
-          msgEl.textContent = 'Enter juz number to see its name';
-        }
-      });
+  private saveJuzEntry(juz: number, completed: number, item?: JuzItem): void {
+    if (juz < 1 || juz > 30) {
+      this.toast("Invalid juz number: " + juz, "danger");
+      return;
+    }
+    if (!item && this.items.some((i: any) => i.juz === juz)) {
+      this.toast("Entry for Juz " + juz + " already exists.", "danger");
+      return;
+    }
+    const totalPages = Number(this.getJuzInfo(juz, "count")) || 0;
+    if (completed > totalPages) {
+      this.toast(`Juz ${juz} only has ${totalPages} pages.`, "danger");
+      return;
+    }
+    const wasComplete = item && item.completed === item.total;
+    const entry: JuzItem = {
+      juz,
+      completed: parseFloat(completed.toString()),
+      total: totalPages,
+      started: item ? item.started : new Date(),
+      updated: new Date(),
+    };
+    if (item) {
+      this.items[this.items.findIndex((n: any) => n.juz === item.juz)] = entry;
+    } else {
+      this.items.push(entry);
+    }
+    this.items = this.items.sort((a: any, b: any) => a.juz - b.juz);
+    this.saveItems();
+    this.updateStreak();
+    this.updateBadges();
+    if (entry.completed === entry.total && !wasComplete) {
+      this.justCompleted = juz;
+      this.triggerConfetti();
+      this.toast("🎉 MashaAllah! Juz " + juz + " completed!", "success");
+      setTimeout(() => (this.justCompleted = null), 3000);
     }
   }
 
@@ -453,119 +410,82 @@ export class MemorizePage implements OnInit {
   }
 
   async addSurah(item?: SurahItem) {
-    const surahNameHint = item ? `${this.getSurahNameByNumber(item.surahNumber)}` : '';
-    const alert = await this.alertController.create({
-      header: item ? "Update Surah" : "Add Surah",
-      message: surahNameHint || 'Enter surah number to see its name',
-      cssClass: "custom-alert",
-      inputs: [
-        {
-          name: "surahNumber",
-          type: "number",
-          placeholder: "Surah number (1-114)",
-          value: item ? item.surahNumber : null,
-          min: 1,
-          max: 114
-        },
-        {
-          name: "completed",
-          type: "number",
-          placeholder: "Ayahs memorized...",
-          value: item ? item.completed : null,
-          min: 0
-        }
-      ],
-      buttons: [
-        { text: "Cancel", role: "cancel" },
-        ...(item ? [{
-          text: "Delete",
-          handler: () => {
-            this.surahItems = this.surahItems.filter(
-              (i) => i.surahNumber !== item.surahNumber
-            );
-            this.saveSurahItems();
-            this.updateBadges();
-          },
-          cssClass: "delete-btn"
-        }] : []),
-        {
-          text: item ? "Update" : "Add",
-          cssClass: "add-btn",
-          handler: (data) => {
-            const surahNum = parseInt(data.surahNumber);
-            const completed = parseInt(data.completed);
-
-            if (surahNum < 1 || surahNum > 114) {
-              this.toast("Invalid surah number (1-114)", "danger");
-              return false;
-            }
-            if (!data.surahNumber || completed === undefined || completed < 0) {
-              this.toast("Both fields are required!", "danger");
-              return false;
-            }
-
-            const surahData = this.surahInfo[surahNum - 1];
-            const totalAyahs = surahData?.totalAyah || this.surahService.surahAyahCounts?.[surahNum - 1] || 0;
-            const surahName = surahData?.name || `Surah ${surahNum}`;
-
-            if (completed > totalAyahs) {
-              this.toast(`Surah ${surahNum} only has ${totalAyahs} ayahs.`, "danger");
-              return false;
-            }
-            if (!item && this.surahItems.some((i) => i.surahNumber === surahNum)) {
-              this.toast(`Surah ${surahNum} already exists.`, "danger");
-              return false;
-            }
-
-            const wasComplete = item && item.completed === item.total;
-            const newItem: SurahItem = {
-              surahNumber: surahNum,
-              surahName: surahName,
-              completed: completed,
-              total: totalAyahs,
-              started: item?.started || new Date(),
-              updated: new Date()
-            };
-
-            if (item) {
-              const index = this.surahItems.findIndex((i) => i.surahNumber === item.surahNumber);
-              this.surahItems[index] = newItem;
-            } else {
-              this.surahItems.push(newItem);
-            }
-
-            this.surahItems.sort((a, b) => a.surahNumber - b.surahNumber);
-            this.saveSurahItems();
-            this.updateStreak();
-            this.updateBadges();
-
-            if (completed === totalAyahs && !wasComplete) {
-              this.justCompletedSurah = surahNum;
-              this.triggerConfetti();
-              this.toast("🎉 MashaAllah! Surah " + surahName + " completed!", "success");
-              setTimeout(() => this.justCompletedSurah = null, 3000);
-            }
-            return true;
-          }
-        }
-      ]
+    const modal = await this.modalController.create({
+      component: MemorizeAddModalComponent,
+      componentProps: {
+        mode: "surah",
+        isEdit: !!item,
+        initialNumber: item?.surahNumber ?? null,
+        initialCompleted: item?.completed ?? null,
+      },
     });
-    await alert.present();
+    await modal.present();
+    const { data } = await modal.onDidDismiss<MemorizeAddResult>();
+    if (!data) return;
+    if (data.delete && item) {
+      this.surahItems = this.surahItems.filter(
+        (i) => i.surahNumber !== item.surahNumber,
+      );
+      this.saveSurahItems();
+      this.updateBadges();
+      return;
+    }
+    if (!data.number || data.completed === undefined) return;
+    this.saveSurahEntry(data.number, data.completed, item);
+  }
 
-    // Dynamically update the alert message to show surah name as user types
-    const surahInput = document.querySelector('ion-alert input[name="surahNumber"]') as HTMLInputElement;
-    if (surahInput) {
-      surahInput.addEventListener('input', () => {
-        const num = parseInt(surahInput.value);
-        const msgEl = document.querySelector('ion-alert .alert-message') as HTMLElement;
-        if (msgEl && num >= 1 && num <= 114) {
-          const name = this.getSurahNameByNumber(num);
-          const totalAyahs = this.surahInfo[num - 1]?.totalAyah || this.surahService.surahAyahCounts?.[num - 1] || '?';
-          msgEl.textContent = `${name} — ${totalAyahs} ayahs`;
-        } else if (msgEl) {
-          msgEl.textContent = 'Enter surah number to see its name';
-        }
-      });
+  private saveSurahEntry(
+    surahNum: number,
+    completed: number,
+    item?: SurahItem,
+  ): void {
+    if (surahNum < 1 || surahNum > 114) {
+      this.toast("Invalid surah number (1-114)", "danger");
+      return;
+    }
+    const surahData = this.surahInfo[surahNum - 1];
+    const totalAyahs =
+      surahData?.count ||
+      this.surahService.surahAyahCounts?.[surahNum - 1] ||
+      0;
+    const surahName =
+      surahData?.titleAr ||
+      this.surahService.surahNames?.[surahNum - 1] ||
+      `Surah ${surahNum}`;
+    if (completed > totalAyahs) {
+      this.toast(`Surah ${surahNum} only has ${totalAyahs} ayahs.`, "danger");
+      return;
+    }
+    if (!item && this.surahItems.some((i) => i.surahNumber === surahNum)) {
+      this.toast(`Surah ${surahNum} already exists.`, "danger");
+      return;
+    }
+    const wasComplete = item && item.completed === item.total;
+    const newItem: SurahItem = {
+      surahNumber: surahNum,
+      surahName,
+      completed,
+      total: totalAyahs,
+      started: item?.started || new Date(),
+      updated: new Date(),
+    };
+    if (item) {
+      const index = this.surahItems.findIndex(
+        (i) => i.surahNumber === item.surahNumber,
+      );
+      this.surahItems[index] = newItem;
+    } else {
+      this.surahItems.push(newItem);
+    }
+    this.surahItems.sort((a, b) => a.surahNumber - b.surahNumber);
+    this.saveSurahItems();
+    this.updateStreak();
+    this.updateBadges();
+    if (completed === totalAyahs && !wasComplete) {
+      this.justCompletedSurah = surahNum;
+      this.triggerConfetti();
+      this.toast("🎉 MashaAllah! Surah " + surahName + " completed!", "success");
+      setTimeout(() => (this.justCompletedSurah = null), 3000);
     }
   }
 

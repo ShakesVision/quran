@@ -337,6 +337,18 @@ export class QuranDataService {
     return this.quranComAyahMap.get(pageIndex) || [];
   }
 
+  /** Surah numbers present on a qurancom page (1-based pages array index). */
+  getQuranComSurahsForPage(pageIndex: number): number[] {
+    if (this.quranComPageMeta.size === 0) return [];
+    const mushafPage = Array.from(this.quranComPageIndexByNumber.entries()).find(
+      ([, idx]) => idx === pageIndex,
+    )?.[0];
+    if (!mushafPage) return [];
+    const meta = this.quranComPageMeta.get(mushafPage);
+    if (!meta?.surahs?.size) return [];
+    return Array.from(meta.surahs).sort((a, b) => a - b);
+  }
+
   /**
    * Count ayahs between two page:line positions (inclusive of start page, inclusive of end).
    * Used by the reader for ruku ayah counts when text doesn't contain ۝+digits.

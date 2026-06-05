@@ -610,6 +610,13 @@ ion-footer {
   width: 30px;
   text-align: center;
 
+  .ruku-surah-number {
+    font-size: clamp(10px, 2vw, 12px);
+    line-height: 1;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
   .ruku-ain-group {
     position: relative;
     display: flex;
@@ -1523,7 +1530,32 @@ virtual-scroller {
     &:active {
       transform: scale(0.92);
     }
+
+    &.badge-host {
+      position: relative;
+    }
   }
+}
+
+.badge-host .feature-badge,
+.badge-host-item .feature-badge-item {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.45rem;
+  padding: 1px 3px;
+  z-index: 2;
+}
+
+.badge-host-item {
+  position: relative;
+}
+
+.repeat-input {
+  max-width: 42px;
+  font-size: 0.75rem;
+  --padding-start: 4px;
+  --padding-end: 4px;
 }
 
 // Font size display

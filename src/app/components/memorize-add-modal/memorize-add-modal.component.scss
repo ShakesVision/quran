@@ -1,0 +1,33 @@
+.name-preview {
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--ion-color-light);
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    direction: rtl;
+    font-family: "Mehr", serif;
+  }
+
+  p {
+    margin: 4px 0 0;
+    opacity: 0.7;
+    font-size: 0.9rem;
+  }
+}
+
+.hint {
+  text-align: center;
+  opacity: 0.65;
+  margin-bottom: 16px;
+}
+
+.actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

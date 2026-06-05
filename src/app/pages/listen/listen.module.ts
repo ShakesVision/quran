@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { ListenPageRoutingModule } from './listen-routing.module';
 
@@ -13,6 +14,7 @@ import { ListenPage } from './listen.page';
     CommonModule,
     FormsModule,
     IonicModule,
+    TranslateModule,
     ListenPageRoutingModule
   ],
   declarations: [ListenPage]

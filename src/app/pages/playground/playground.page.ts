@@ -36,6 +36,7 @@ export class PlaygroundPage implements OnInit {
   loading = false;
   statusMessage = '';
   warnings: string[] = [];
+  private lastParsedAyahs: ParsedAyah[] = [];
 
   // ── Available fonts ──
   fonts = [
@@ -76,7 +77,11 @@ export class PlaygroundPage implements OnInit {
         this.loadFromCustomInput();
       }
 
-      this.buildPreview();
+      if (this.textSource === 'custom' && this.inputFormat !== 'archive') {
+        await this.applyArchiveTemplateAdapter();
+      } else {
+        this.buildPreview();
+      }
       this.statusMessage = `Loaded ${this.allLines.length} lines (${this.totalAyahs} ayahs)`;
     } catch (e) {
       console.error('[Playground] Load failed:', e);
@@ -160,9 +165,31 @@ export class PlaygroundPage implements OnInit {
       this.totalAyahs = 0; // Unknown
     } else {
       const parsed = this.customSourceService.parseInput(this.customText, this.inputFormat);
+      this.lastParsedAyahs = parsed;
       this.allLines = parsed.map(a => a.text);
       this.totalAyahs = parsed.length;
     }
+  }
+
+  private async applyArchiveTemplateAdapter() {
+    if (!this.lastParsedAyahs.length) {
+      this.buildPreview();
+      return;
+    }
+    const result = await this.customSourceService.adaptUsingArchiveLineTemplate(
+      this.lastParsedAyahs,
+      this.linesPerPage,
+    );
+    this.warnings.push(...result.warnings);
+    this.previewPages = result.fullText.split('\n\n').map((page) => page.split('\n'));
+    this.allLines = this.previewPages.flat();
+    this.pageBreaks = [];
+    let idx = -1;
+    this.previewPages.forEach((pageLines) => {
+      idx += pageLines.length;
+      this.pageBreaks.push({ afterLineIndex: idx });
+    });
+    this.currentPreviewPage = 0;
   }
 
   /**

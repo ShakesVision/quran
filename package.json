@@ -35,6 +35,8 @@
     "@ionic-native/status-bar": "^5.0.0",
     "@ionic/angular": "^6.0.11",
     "@ionic/storage-angular": "^3.0.6",
+    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/http-loader": "^7.0.0",
     "@schematics/angular": "^9.1.0",
     "cordova-plugin-ionic": "5.4.7",
     "core-js": "^2.5.4",
@@ -43,6 +45,7 @@
     "ngx-pinch-zoom": "^2.6.2",
     "ngx-virtual-scroller": "^4.0.3",
     "rxjs": "^6.5.3",
+    "tesseract.js": "^5.1.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.4"
   },

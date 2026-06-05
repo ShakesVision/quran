@@ -10,6 +10,12 @@ import {
 } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { TranslateService } from '@ngx-translate/core';
+import {
+  AppLanguage,
+  LanguageService,
+  SUPPORTED_LANGUAGES,
+} from './services/language.service';
 
 @Component({
   selector: 'app-root',
@@ -25,15 +31,18 @@ export class AppComponent {
     private popoverCtrl: PopoverController,
     private alertCtrl: AlertController,
     private actionSheetCtrl: ActionSheetController,
-    private location: Location
+    private location: Location,
+    private languageService: LanguageService,
+    private translate: TranslateService,
   ) {
     this.initializeApp();
   }
 
   initializeApp() {
-    this.platform.ready().then(() => {
+    this.platform.ready().then(async () => {
       this.statusBar.styleLightContent();
       this.splashScreen.hide();
+      await this.promptLanguageIfNeeded();
     });
 
     // Universal back button handler:
@@ -60,5 +69,35 @@ export class AppComponent {
       // No overlay open — do normal back navigation
       processNext();
     });
+  }
+
+  private async promptLanguageIfNeeded(): Promise<void> {
+    const hasSaved = await this.languageService.hasSavedLanguage();
+    if (hasSaved) {
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('common.selectLanguage'),
+      message: this.translate.instant('common.selectLanguageMessage'),
+      backdropDismiss: false,
+      inputs: SUPPORTED_LANGUAGES.map((lang) => ({
+        type: 'radio' as const,
+        label: lang.nativeLabel,
+        value: lang.code,
+        checked: lang.code === 'en',
+      })),
+      buttons: [
+        {
+          text: this.translate.instant('common.ok'),
+          handler: async (selected: AppLanguage) => {
+            if (selected) {
+              await this.languageService.setLanguage(selected);
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

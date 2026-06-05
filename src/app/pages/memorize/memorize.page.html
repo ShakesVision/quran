@@ -1,7 +1,7 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-back-button slot="start" defaultHref="/"></ion-back-button>
-    <ion-title>Memorization</ion-title>
+    <ion-title>{{ 'memorize.title' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button id="popover-trigger-button" slot="end">
         <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
@@ -50,25 +50,16 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- Milestone Badges                            -->
-  <!-- ═══════════════════════════════════════════ -->
-  <div class="badges-row" *ngIf="earnedBadges.length > 0">
-    <div class="badge-chip" *ngFor="let badge of earnedBadges"
-      [class.earned]="badge.earned">
-      <span class="badge-emoji">{{badge.emoji}}</span>
-      <span class="badge-name">{{badge.name}}</span>
-    </div>
-  </div>
+  <ion-button expand="block" class="primary-add-cta" (click)="trackingMode === 'juz' ? add() : addSurah()">
+    <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+    {{ 'memorize.addProgress' | translate }}
+  </ion-button>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- Due for Review (Spaced Repetition)          -->
-  <!-- ═══════════════════════════════════════════ -->
   <div class="review-section" *ngIf="dueForReview.length > 0">
     <div class="review-header">
       <ion-icon name="alarm-outline" class="review-icon"></ion-icon>
       <div>
-        <h3 class="review-title">Due for Review</h3>
+        <h3 class="review-title">{{ 'memorize.dueForReview' | translate }}</h3>
         <p class="review-subtitle">Spaced repetition keeps knowledge fresh</p>
       </div>
     </div>
@@ -78,6 +69,19 @@
         <span class="review-chip-interval">{{ item.intervalLabel }}</span>
         <ion-icon name="checkmark-circle-outline" class="review-check"></ion-icon>
       </div>
+    </div>
+  </div>
+
+  <ion-item button (click)="statsExpanded = !statsExpanded" class="stats-toggle" lines="none">
+    <ion-label>{{ 'memorize.stats' | translate }}</ion-label>
+    <ion-icon slot="end" [name]="statsExpanded ? 'chevron-up' : 'chevron-down'"></ion-icon>
+  </ion-item>
+  <div *ngIf="statsExpanded">
+  <div class="badges-row" *ngIf="earnedBadges.length > 0">
+    <div class="badge-chip" *ngFor="let badge of earnedBadges"
+      [class.earned]="badge.earned">
+      <span class="badge-emoji">{{badge.emoji}}</span>
+      <span class="badge-name">{{badge.name}}</span>
     </div>
   </div>
 
@@ -106,6 +110,7 @@
     <span class="mastery-item"><span class="mastery-dot learning"></span>Learning <span class="mastery-count">{{ getMasteryCount('learning') }}</span></span>
     <span class="mastery-item"><span class="mastery-dot reviewing"></span>Reviewing <span class="mastery-count">{{ getMasteryCount('reviewing') }}</span></span>
     <span class="mastery-item"><span class="mastery-dot mastered"></span>Mastered <span class="mastery-count">{{ getMasteryCount('mastered') }}</span></span>
+  </div>
   </div>
 
   <!-- ═══════════════════════════════════════════ -->

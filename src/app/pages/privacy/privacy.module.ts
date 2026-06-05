@@ -5,9 +5,10 @@ import { PrivacyPageRoutingModule } from "./privacy-routing.module";
 
 import { PrivacyPage } from "./privacy.page";
 import { IonicModule } from "@ionic/angular";
+import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
-  imports: [CommonModule, IonicModule, PrivacyPageRoutingModule],
+  imports: [CommonModule, IonicModule, TranslateModule, PrivacyPageRoutingModule],
   declarations: [PrivacyPage],
 })
 export class PrivacyPageModule {}

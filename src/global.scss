@@ -59,7 +59,8 @@
 // Urdu/Translation font
 @font-face {
   font-family: "Mehr";
-  src: url("assets/fonts/Mehr.ttf") format("truetype");
+  src: url("assets/fonts/MehrNastaliqWeb.woff") format("woff"),
+    url("assets/fonts/Mehr.ttf") format("truetype");
   font-display: swap;
 }
 
@@ -92,6 +93,25 @@ ion-title.title-large {
 }
 
 .rtl {
+  direction: rtl;
+}
+
+body.lang-ur,
+body.rtl-ui {
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif;
+}
+
+body.lang-ur ion-title,
+body.lang-ur ion-label,
+body.lang-ur h1,
+body.lang-ur h2,
+body.lang-ur h3,
+body.lang-ur p,
+body.lang-ur span:not(.ar-text):not(.ar-text2):not(.ar2):not(.ar-qurancom):not(.wbw-arabic) {
+  font-family: inherit;
+}
+
+body.rtl-ui ion-app {
   direction: rtl;
 }
 

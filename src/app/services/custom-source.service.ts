@@ -445,5 +445,116 @@ export class CustomSourceService {
     await this.saveSource(saved);
     return { source, result };
   }
+
+  /**
+   * Convert ayah-segmented text using archive mushaf line word-counts as the template.
+   * Falls back to quran.com reference adapter when archive text is unavailable.
+   */
+  async adaptUsingArchiveLineTemplate(
+    ayahs: ParsedAyah[],
+    linesPerPage: MushafLines,
+  ): Promise<AdapterResult> {
+    const warnings: string[] = [];
+    const archivePath =
+      linesPerPage === 16
+        ? "https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/16Lines/Quran.txt"
+        : "https://raw.githubusercontent.com/ShakesVision/Quran_archive/master/15Lines/Quran.txt";
+
+    try {
+      const archiveText = await this.http
+        .get(archivePath, { responseType: "text" })
+        .pipe(take(1))
+        .toPromise();
+      if (!archiveText?.trim()) {
+        warnings.push("Archive template empty; using reference adapter.");
+        return this.adaptToPageLines(ayahs, linesPerPage, true);
+      }
+
+      const archivePages = archiveText.split("\n\n");
+      const lineWordCounts: number[] = [];
+      archivePages.forEach((page) => {
+        page.split("\n").forEach((line) => {
+          const count = line.trim()
+            ? line.trim().split(/\s+/).filter(Boolean).length
+            : 0;
+          lineWordCounts.push(count);
+        });
+      });
+
+      const ayahQueues = new Map<string, string[]>();
+      ayahs.forEach((a) => {
+        ayahQueues.set(
+          `${a.surah}:${a.ayah}`,
+          a.text.split(/\s+/).filter(Boolean),
+        );
+      });
+
+      const refData = await this.fetchReferenceData(linesPerPage);
+      const lineRefs: {
+        page: number;
+        line: number;
+        surah: number;
+        ayah: number;
+      }[] = [];
+      const seen = new Set<string>();
+      refData
+        .sort(
+          (a, b) =>
+            a.pageNumber - b.pageNumber ||
+            a.lineNumber - b.lineNumber ||
+            a.wordIndex - b.wordIndex,
+        )
+        .forEach((ref) => {
+          const k = `${ref.pageNumber}:${ref.lineNumber}`;
+          if (!seen.has(k)) {
+            seen.add(k);
+            lineRefs.push({
+              page: ref.pageNumber,
+              line: ref.lineNumber,
+              surah: ref.surah,
+              ayah: ref.ayah,
+            });
+          }
+        });
+
+      const pageMap = new Map<number, Map<number, string[]>>();
+      const limit = Math.min(lineWordCounts.length, lineRefs.length);
+      for (let i = 0; i < limit; i++) {
+        const count = lineWordCounts[i];
+        if (count <= 0) continue;
+        const ref = lineRefs[i];
+        const key = `${ref.surah}:${ref.ayah}`;
+        const queue = ayahQueues.get(key);
+        if (!queue?.length) {
+          warnings.push(`Missing words for ${key} at template line ${i + 1}`);
+          continue;
+        }
+        const words = queue.splice(0, count);
+        if (!pageMap.has(ref.page)) pageMap.set(ref.page, new Map());
+        const lines = pageMap.get(ref.page)!;
+        if (!lines.has(ref.line)) lines.set(ref.line, []);
+        lines.get(ref.line)!.push(...words);
+      }
+
+      const sortedPages = Array.from(pageMap.keys()).sort((a, b) => a - b);
+      const pageTexts = sortedPages.map((pageNum) => {
+        const linesMap = pageMap.get(pageNum)!;
+        const lineNums = Array.from(linesMap.keys()).sort((a, b) => a - b);
+        const lines = lineNums.map((ln) => (linesMap.get(ln) || []).join(" "));
+        while (lines.length < linesPerPage) lines.push("");
+        return lines.join("\n");
+      });
+
+      return {
+        fullText: pageTexts.join("\n\n"),
+        totalPages: pageTexts.length,
+        linesPerPage,
+        warnings,
+      };
+    } catch (e) {
+      warnings.push("Archive template load failed; using reference adapter.");
+      return this.adaptToPageLines(ayahs, linesPerPage, true);
+    }
+  }
 }
 

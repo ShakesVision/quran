@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { JuzPageRoutingModule } from './juz-routing.module';
 
@@ -13,6 +14,7 @@ import { JuzPage } from './juz.page';
     CommonModule,
     FormsModule,
     IonicModule,
+    TranslateModule,
     JuzPageRoutingModule
   ],
   declarations: [JuzPage]

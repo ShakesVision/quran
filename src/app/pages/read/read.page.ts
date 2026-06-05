@@ -34,6 +34,17 @@ import { ImageQuality } from "../scanned/scanned.page";
 import { Bookmarks } from "src/app/models/bookmarks";
 import { TafseerModalComponent } from "src/app/components/tafseer-modal";
 import { QuranDataService } from "src/app/services/quran-data.service";
+import { TranslateService } from "@ngx-translate/core";
+import {
+  AppLanguage,
+  LanguageService,
+  SUPPORTED_LANGUAGES,
+} from "src/app/services/language.service";
+import {
+  HizbNavigationService,
+  JuzQuarter,
+} from "src/app/services/hizb-navigation.service";
+import { QuranData } from "src/assets/data/quran-data";
 import { AppDataService } from "src/app/services/app-data.service";
 import { applyTajweed, TAJWEED_LEGEND, ResultType } from "src/app/lib/tajweed";
 import {
@@ -80,7 +91,12 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   audioPlaying = false;
   audioPlayIndex = 1;
   audioSpeed = "1";
+  verseRepeatCount = 1;
+  private currentVerseRepeatRemaining = 1;
   playingVerseNum: string;
+  navHizbJuz: number | null = null;
+  navHizbQuarter: JuzQuarter = "begin";
+  currentLang: AppLanguage = "en";
   reciters = [
     { id: 1, name: "Abdul Basit (Murattal)" },
     { id: 2, name: "Abdul Rahman Al-Sudais" },
@@ -254,6 +270,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     private appDataService: AppDataService,
     private actionSheetController: ActionSheetController,
     private morphologyService: MorphologyService,
+    private translate: TranslateService,
+    private languageService: LanguageService,
+    private hizbNav: HizbNavigationService,
   ) {}
 
   ngOnInit() {
@@ -385,7 +404,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    */
   private async loadSavedToggleSettings() {
     try {
-      const [tajweed, tatweel, inline, wbw, inlineLang, fontSize, immersive] =
+      const [tajweed, tatweel, inline, wbw, inlineLang, fontSize, immersive, verseRepeat] =
         await Promise.all([
           this.storage.get("readerTajweedMode"),
           this.storage.get("readerEnableTatweel"),
@@ -394,6 +413,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           this.storage.get("readerInlineLang"),
           this.storage.get("readerFontSize"),
           this.storage.get("readerImmersive"),
+          this.storage.get("readerVerseRepeat"),
         ]);
       // Tajweed: default true if never set
       this.tajweedMode = tajweed !== null ? tajweed : true;
@@ -418,6 +438,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         this.isImmersive = true;
         document.body.classList.add("immersive-mode");
       }
+      if (verseRepeat !== null && !isNaN(verseRepeat) && verseRepeat >= 1) {
+        this.verseRepeatCount = Math.floor(verseRepeat);
+      }
+      this.currentLang = this.languageService.getCurrentLanguage();
 
       // Trigger re-render if needed
       if (this.tajweedMode || this.enableTatweel) {
@@ -1342,7 +1366,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               completedRequests++;
               if (completedRequests >= totalRequests) {
                 // All surahs fetched → map verse words to lines using robust fallback
-                const result = this.mapWbwToLines(verseWords);
+                const result = this.mapWbwToLines(verseWords, true);
                 this.wbwData = result;
                 const nonEmpty = result.filter((r) => r?.length > 0).length;
                 console.log(
@@ -1381,35 +1405,20 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    * Map verse WBW data to lines with robust fallback.
    * First tries getVerseKeyForLine, then fills gaps using nearest known verse key.
    */
-  private mapWbwToLines(verseWords: Map<string, WbwWord[]>): WbwWord[][] {
-    const lineKeys: (string | null)[] = [];
-
-    // Step 1: try to determine verse key for each line
-    for (let i = 0; i < this.lines.length; i++) {
-      const vk = this.getVerseKeyForLine(i);
-      lineKeys.push(vk);
+  private mapWbwToLines(
+    verseWords: Map<string, WbwWord[]>,
+    preferArchiveAlignment = false,
+  ): WbwWord[][] {
+    const lineKeys = this.fillLineVerseKeys();
+    const useArchive =
+      preferArchiveAlignment &&
+      this.quranDataService.getCurrentSourceValue().type === "archive";
+    if (useArchive) {
+      return this.mapWbwToArchiveLines(verseWords, lineKeys);
     }
-    console.log("[WBW] Line keys (raw):", lineKeys);
 
-    // Step 2: fill null gaps — forward pass (use the same key as the next non-null)
-    for (let i = lineKeys.length - 2; i >= 0; i--) {
-      if (!lineKeys[i] && lineKeys[i + 1]) {
-        lineKeys[i] = lineKeys[i + 1];
-      }
-    }
-    // Backward pass — fill any remaining nulls at the end using previous non-null
-    for (let i = 1; i < lineKeys.length; i++) {
-      if (!lineKeys[i] && lineKeys[i - 1]) {
-        lineKeys[i] = lineKeys[i - 1];
-      }
-    }
-    console.log("[WBW] Line keys (filled):", lineKeys);
-
-    // Step 3: map to WBW data — show words for the verse each line belongs to
-    // Track which verse keys we've already shown to avoid repeating WBW under every line of the same ayah
     const shownVerseKeys = new Set<string>();
     const result: WbwWord[][] = [];
-
     for (let i = 0; i < this.lines.length; i++) {
       const vk = lineKeys[i];
       if (vk && verseWords.has(vk) && !shownVerseKeys.has(vk)) {
@@ -1419,8 +1428,149 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         result.push([]);
       }
     }
-
     return result;
+  }
+
+  private fillLineVerseKeys(): (string | null)[] {
+    const lineKeys: (string | null)[] = [];
+    for (let i = 0; i < this.lines.length; i++) {
+      lineKeys.push(this.getVerseKeyForLine(i));
+    }
+    for (let i = lineKeys.length - 2; i >= 0; i--) {
+      if (!lineKeys[i] && lineKeys[i + 1]) lineKeys[i] = lineKeys[i + 1];
+    }
+    for (let i = 1; i < lineKeys.length; i++) {
+      if (!lineKeys[i] && lineKeys[i - 1]) lineKeys[i] = lineKeys[i - 1];
+    }
+    return lineKeys;
+  }
+
+  /** Align API glosses under each archive line word (Hafiz Nazar Ahmad style). */
+  private mapWbwToArchiveLines(
+    verseWords: Map<string, WbwWord[]>,
+    lineKeys: (string | null)[],
+  ): WbwWord[][] {
+    const verseWordCursor = new Map<string, number>();
+    const result: WbwWord[][] = [];
+    const bism = this.surahService.diacritics.BISM;
+
+    for (let i = 0; i < this.lines.length; i++) {
+      const vk = lineKeys[i];
+      const lineText = (this.lines[i] || "").trim();
+      if (!vk || !verseWords.has(vk) || !lineText || lineText === bism) {
+        result.push([]);
+        continue;
+      }
+
+      const lineWords = lineText.split(/\s+/).filter((w) => w && w !== bism);
+      const apiWords = verseWords.get(vk)!;
+      const cursor = verseWordCursor.get(vk) || 0;
+      const row: WbwWord[] = [];
+
+      for (let wi = 0; wi < lineWords.length; wi++) {
+        const apiWord = apiWords[cursor + wi];
+        row.push(
+          apiWord
+            ? { ...apiWord, arabic: lineWords[wi] }
+            : {
+                arabic: lineWords[wi],
+                translation: "",
+                transliteration: "",
+                audioUrl: "",
+                location: "",
+                verseKey: vk,
+              },
+        );
+      }
+
+      verseWordCursor.set(vk, cursor + lineWords.length);
+      result.push(row);
+    }
+    return result;
+  }
+
+  getSurahsOnPage(): number[] {
+    if (!this.lines?.length) return [];
+
+    const qcSurahs = this.quranDataService.getQuranComSurahsForPage(
+      this.getQuranComPageIndex(),
+    );
+    if (qcSurahs.length > 0) return qcSurahs;
+
+    const startSurah = this.isCompleteMushaf
+      ? this.surahCalculated
+      : this.surahCalculatedForJuz;
+    if (!startSurah) return [];
+
+    const surahs = [startSurah];
+    for (let i = 0; i < this.lines.length; i++) {
+      if (this.lines[i]?.includes(this.surahService.diacritics.BISM)) {
+        const next = this.getCorrectedSurahNumberWithRespectTo(i + 1);
+        if (next && !surahs.includes(next)) surahs.push(next);
+      }
+    }
+    return surahs.filter(Boolean);
+  }
+
+  getSurahDisplayName(num: number): string {
+    return `${this.surahService.surahNames[num - 1] || ""} ${this.surahService.e2a(num.toString())}`;
+  }
+
+  private getRukuNumberInSurah(lineIndex: number): number {
+    const vk = this.getVerseKeyForLine(lineIndex);
+    if (!vk) return 0;
+    const [surah, ayah] = vk.split(":").map(Number);
+    let n = 0;
+    for (let i = 1; i < QuranData.Ruku.length; i++) {
+      const r = QuranData.Ruku[i];
+      if (!r?.length) continue;
+      if (r[0] === surah && r[1] <= ayah) n++;
+      if (r[0] > surah) break;
+    }
+    return n;
+  }
+
+  async changeAppLanguage(lang: AppLanguage): Promise<void> {
+    await this.languageService.setLanguage(lang);
+    this.currentLang = lang;
+  }
+
+  async openLanguagePicker(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: this.translate.instant("common.selectLanguage"),
+      inputs: SUPPORTED_LANGUAGES.map((l) => ({
+        type: "radio" as const,
+        label: l.nativeLabel,
+        value: l.code,
+        checked: l.code === this.currentLang,
+      })),
+      buttons: [
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
+        {
+          text: this.translate.instant("common.ok"),
+          handler: (selected: AppLanguage) => {
+            if (selected) this.changeAppLanguage(selected);
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  onVerseRepeatChange(value: number): void {
+    const n = Math.max(1, Math.floor(Number(value) || 1));
+    this.verseRepeatCount = n;
+    this.storage.set("readerVerseRepeat", n);
+  }
+
+  gotoHizbQuarter(): void {
+    if (!this.navHizbJuz || this.navHizbJuz < 1 || this.navHizbJuz > 30) return;
+    const ref = this.hizbNav.getJuzQuarterAyah(
+      this.navHizbJuz,
+      this.navHizbQuarter,
+    );
+    if (!ref) return;
+    this.gotoAyah(this.hizbNav.formatAyahKey(ref));
   }
 
   // ===========================================
@@ -2502,9 +2652,17 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         ayahCount > 0 ? this.surahService.e2a(ayahCount.toString()) : "";
       const rukuNumberAr =
         rukuNumber > 0 ? this.surahService.e2a(rukuNumber.toString()) : "";
+      const surahRukuNum = this.getRukuNumberInSurah(i);
+      const surahRukuAr =
+        surahRukuNum > 0
+          ? this.surahService.e2a(surahRukuNum.toString())
+          : "";
 
       indicators.push(
-        `<div class="ruku-ain-group">` +
+        (surahRukuAr
+          ? `<div class="ruku-surah-number">${surahRukuAr}</div>`
+          : "") +
+          `<div class="ruku-ain-group">` +
           `<span class="ruku-ain">ع</span>` +
           (ayahCountAr
             ? `<span class="ruku-ayah-count">${ayahCountAr}</span>`
@@ -3048,28 +3206,33 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     console.log(verseIdListForAudio);
     this.setAudioSpeed(this.audioSpeed);
     this.audioPlaying = true;
+    this.currentVerseRepeatRemaining = this.verseRepeatCount;
     this.audio.play();
-    // this.audioPlayIndex = verseIdList.indexOf(parseInt(key.split(":")));
     this.playingVerseNum = verseIdList[this.audioPlayIndex - 1];
 
     let pageFlipping = true;
-    this.audio.onended = (ev) => {
-      console.log("PLAY ENDED event");
-      //firstAndLast.first.firstSurahNum == firstAndLast.last.lastSurahNum
-      // Finished playing last ayah on page
+    this.audio.onended = () => {
+      if (this.currentVerseRepeatRemaining > 1) {
+        this.currentVerseRepeatRemaining--;
+        this.audio.currentTime = 0;
+        this.audio.play();
+        return;
+      }
+      this.currentVerseRepeatRemaining = this.verseRepeatCount;
+
       if (this.audioPlayIndex == verseIdListForAudio.length) {
         if (pageFlipping) {
-          console.log("IF part pageflip");
           this.audio.src = "assets/page-flip.mp3";
           this.audio.play();
           pageFlipping = false;
         } else {
-          console.log("ELSE part pageflip");
           this.stopAudio();
           this.gotoPageNum(this.currentPage + 1);
           this.playAudio();
         }
+        return;
       }
+
       if (this.audioPlayIndex < verseIdListForAudio.length) {
         const re = "mp3/" + verseIdListForAudio[this.audioPlayIndex] + ".mp3";
         this.audio.src = this.audioSrc.replace(/mp3\/(.*?)\.mp3/, re);
@@ -3093,7 +3256,6 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
             }`,
           });
         }
-        console.log(this.audio.src);
         this.audioPlayIndex++;
       }
     };
@@ -3260,30 +3422,41 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     }
     return result;
   }
+  private getScanArchiveIdentifier(): string {
+    const source = this.quranDataService.getCurrentSourceValue();
+    const is16 =
+      source.id.includes("16") || source.linesPerPage === MushafLines.Sixteen;
+    return is16
+      ? "16-line-quran-with-large-font-size"
+      : "15-lined-saudi";
+  }
+
   setupLinks() {
+    const archiveId = this.getScanArchiveIdentifier();
     this.httpClient
-      .get("https://archive.org/metadata/15-lined-saudi")
+      .get(`https://archive.org/metadata/${archiveId}`)
       .subscribe((res: any) => {
-        if (res.files.filter((f) => f.size == "43240062")[0]) {
-          const fileNameIdentifier = res.files
-            .filter((f) => f.size == "43240062")[0]
-            ?.name?.replace(".pdf", "")
-            .trim();
+        const pdfFile =
+          res.files?.find((f: any) => f.size == "43240062") ||
+          res.files?.find((f: any) => f.name?.endsWith(".pdf"));
+        if (pdfFile) {
+          const fileNameIdentifier = pdfFile.name?.replace(".pdf", "").trim();
           this.identifier = res.metadata.identifier;
           this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${fileNameIdentifier}_jp2.zip&file=${fileNameIdentifier}_jp2/${fileNameIdentifier}_`;
-        } else {
+        } else if (archiveId === "15-lined-saudi") {
           this.httpClient
             .get("https://archive.org/metadata/QuranMajeed-15Lines-SaudiPrint")
-            .subscribe((res: any) => {
-              this.identifier = res.metadata.identifier;
-              this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${this.identifier}_jp2.zip&file=${res.metadata.identifier}_jp2/${this.identifier}_`;
-              const fullUrl = `${
-                this.incompleteUrl
-              }${this.surahService.getPaddedNumber(
-                this.currentPageCalculated,
-              )}.jp2&id=${this.identifier}&scale=${ImageQuality.High}&rotate=0`;
-              this.fullImageUrl = fullUrl;
+            .subscribe((fallback: any) => {
+              this.identifier = fallback.metadata.identifier;
+              this.incompleteUrl = `https://${fallback.server}/BookReader/BookReaderImages.php?zip=${fallback.dir}/${this.identifier}_jp2.zip&file=${fallback.metadata.identifier}_jp2/${this.identifier}_`;
             });
+        } else {
+          this.identifier = res.metadata.identifier;
+          const jp2 = res.files?.find((f: any) => f.name?.includes("_jp2.zip"));
+          if (jp2) {
+            const base = jp2.name.replace("_jp2.zip", "");
+            this.incompleteUrl = `https://${res.server}/BookReader/BookReaderImages.php?zip=${res.dir}/${jp2.name}&file=${base}_jp2/${base}_`;
+          }
         }
       });
   }

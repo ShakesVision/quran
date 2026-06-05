@@ -158,6 +158,11 @@ const routes: Routes = [
     loadChildren: () =>
       import("./pages/privacy/privacy.module").then((m) => m.PrivacyPageModule),
   },
+  {
+    path: "camera",
+    loadChildren: () =>
+      import("./pages/camera/camera.module").then((m) => m.CameraPageModule),
+  },
 
   // Wildcard - redirect to home
   {

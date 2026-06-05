@@ -13,6 +13,9 @@
             <ion-img src="assets/audio-playing.gif" class="gif"></ion-img>
             <ion-text class="verse-num">{{playingVerseNum}}</ion-text>
           </div>
+          <ion-input type="number" class="repeat-input" min="1" max="99"
+            [value]="verseRepeatCount" (ionChange)="onVerseRepeatChange($event.target.value)"
+            [title]="'reader.settings.repeat' | translate"></ion-input>
           <ion-select interface="action-sheet" style="font-size: small" placeholder="Speed" value="1"
             [(ngModel)]="audioSpeed" (ionChange)="setAudioSpeed($event.target.value)">
             <ion-select-option value="3">3x</ion-select-option>
@@ -130,18 +133,8 @@
           : (currentPageCalculated ? surahService.e2a(currentPageCalculated.toString()) : '')
           }}
         </span>
-        <span class="surah-number">
-          {{
-          isCompleteMushaf
-          ? (surahCalculated
-          ? (surahService.surahNames[surahCalculated - 1] + ' ' +
-          surahService.e2a(surahCalculated.toString()))
-          : '')
-          : (surahCalculatedForJuz
-          ? (surahService.surahNames[surahCalculatedForJuz - 1] + ' ' +
-          surahService.e2a(surahCalculatedForJuz.toString()))
-          : '')
-          }}
+        <span class="surah-number" *ngFor="let s of getSurahsOnPage(); let last = last">
+          {{ getSurahDisplayName(s) }}<span *ngIf="!last"> · </span>
         </span>
       </ng-container>
     </div>
@@ -211,14 +204,16 @@
                 <ion-icon [name]="tMode?'language':'language-outline'"></ion-icon>
                 <span>Translate</span>
               </button>
-              <button class="qt-btn" [class.active]="inlineTransMode"
+              <button class="qt-btn badge-host" [class.active]="inlineTransMode"
                 (click)="toggleInlineTranslation(!inlineTransMode)">
                 <ion-icon name="text-outline"></ion-icon>
-                <span>Inline</span>
+                <span>{{ 'reader.settings.inline' | translate }}</span>
+                <ion-badge color="warning" class="feature-badge">{{ 'common.alpha' | translate }}</ion-badge>
               </button>
-              <button class="qt-btn" [class.active]="tajweedMode" (click)="toggleTajweedMode(!tajweedMode)">
+              <button class="qt-btn badge-host" [class.active]="tajweedMode" (click)="toggleTajweedMode(!tajweedMode)">
                 <ion-icon name="color-palette-outline"></ion-icon>
-                <span>Tajweed</span>
+                <span>{{ 'reader.settings.tajweed' | translate }}</span>
+                <ion-badge color="tertiary" class="feature-badge">{{ 'common.beta' | translate }}</ion-badge>
               </button>
             </div>
             <div *ngIf="tajweedMode" class="tajweed-legend">
@@ -277,16 +272,35 @@
             <!-- ── Navigation ── -->
             <ion-item-divider class="settings-section" *ngIf="isCompleteMushaf">Navigate</ion-item-divider>
             <ion-item *ngIf="isCompleteMushaf">
-              <ng-container slot="end" style="display:flex;gap:4px">
-                <ion-input placeholder="Juz" type="number" maxlength="2"
+              <ng-container slot="end" style="display:flex;gap:4px;flex-wrap:wrap">
+                <ion-input [placeholder]="'reader.settings.navJuz' | translate" type="number" maxlength="2"
                   (ionChange)="gotoJuzSurah($event.target.value,'juz')" [debounce]="500"
                   class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-                <ion-input placeholder="Surah" type="number" maxlength="3"
+                <ion-input [placeholder]="'reader.settings.navSurah' | translate" type="number" maxlength="3"
                   (ionChange)="gotoJuzSurah($event.target.value,'surah')" [debounce]="500"
                   class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
-                <ion-input placeholder="s:a" type="text" maxlength="7" (ionChange)="gotoAyah($event.target.value)"
+                <ion-input [placeholder]="'reader.settings.navAyah' | translate" type="text" maxlength="7" (ionChange)="gotoAyah($event.target.value)"
                   [debounce]="800" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
               </ng-container>
+            </ion-item>
+            <ion-item *ngIf="isCompleteMushaf">
+              <ng-container slot="end" style="display:flex;gap:4px;align-items:center">
+                <ion-input [placeholder]="'reader.settings.navHizb' | translate" type="number" maxlength="2"
+                  [(ngModel)]="navHizbJuz" class="ion-no-padding ion-no-margin ion-text-center nav-input"></ion-input>
+                <ion-select [(ngModel)]="navHizbQuarter" interface="popover" class="nav-quarter-select">
+                  <ion-select-option value="begin">{{ 'reader.settings.quarterBegin' | translate }}</ion-select-option>
+                  <ion-select-option value="rub">{{ 'reader.settings.quarterRub' | translate }}</ion-select-option>
+                  <ion-select-option value="nisf">{{ 'reader.settings.quarterNisf' | translate }}</ion-select-option>
+                  <ion-select-option value="thalatha">{{ 'reader.settings.quarterThalatha' | translate }}</ion-select-option>
+                </ion-select>
+                <ion-button size="small" (click)="gotoHizbQuarter()">
+                  <ion-icon name="navigate-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </ng-container>
+            </ion-item>
+            <ion-item button (click)="openLanguagePicker()">
+              <ion-icon slot="start" name="language-outline"></ion-icon>
+              <ion-label>{{ 'common.language' | translate }}</ion-label>
             </ion-item>
 
             <!-- ── Quick actions grid ── -->
@@ -345,15 +359,17 @@
               <ion-icon slot="start" name="analytics-outline"></ion-icon>
               <ion-label>Page Info</ion-label>
             </ion-item>
-            <ion-item button (click)="scanView ? scanView=false : loadImg(currentPageCalculated)">
+            <ion-item button class="badge-host-item" (click)="scanView ? scanView=false : loadImg(currentPageCalculated)">
               <ion-icon slot="start" name="image-outline"></ion-icon>
-              <ion-label>Scan View</ion-label>
+              <ion-label>{{ 'reader.settings.scan' | translate }}</ion-label>
+              <ion-badge color="tertiary" class="feature-badge-item">{{ 'common.beta' | translate }}</ion-badge>
               <ion-toggle slot="end" [checked]="scanView"
                 (ionChange)="$event.detail.checked ? loadImg(currentPageCalculated) : scanView=false"></ion-toggle>
             </ion-item>
-            <ion-item>
+            <ion-item class="badge-host-item">
               <ion-icon slot="start" name="tablet-landscape-outline"></ion-icon>
-              <ion-label>Side-by-Side</ion-label>
+              <ion-label>{{ 'reader.settings.sideBySide' | translate }}</ion-label>
+              <ion-badge color="warning" class="feature-badge-item">{{ 'common.alpha' | translate }}</ion-badge>
               <ion-select slot="end" [(ngModel)]="sideBySideMode" interface="action-sheet"
                 (ionChange)="toggleSideBySide($event.detail.value)">
                 <ion-select-option value="off">Off</ion-select-option>

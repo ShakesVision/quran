@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, of } from "rxjs";
-import { map, tap, catchError } from "rxjs/operators";
+import { from, Observable, of } from "rxjs";
+import { map, tap, catchError, switchMap } from "rxjs/operators";
 
 /**
  * Compact morphology data format:
@@ -25,23 +25,47 @@ import { map, tap, catchError } from "rxjs/operators";
 export interface WordMorphology {
   pos: string; // Part of speech
   posLabel: string; // Human-readable POS label
+  posLabelAr?: string;
   lemma?: string; // Arabic lemma
   root?: string; // Arabic root
   rootBw?: string; // Buckwalter root
   lemmaBw?: string; // Buckwalter lemma
   features?: string; // Gender/number features
+  featuresAr?: string;
   prefix?: string; // Prefix tags
+  prefixAr?: string;
   suffix?: string; // Suffix info
   verbForm?: string; // Verb form
+  verbFormAr?: string;
   aspect?: string; // Verb aspect
   aspectLabel?: string;
+  aspectLabelAr?: string;
   voice?: string; // Verb voice
   voiceLabel?: string;
+  voiceLabelAr?: string;
   state?: string; // Grammatical case
   stateLabel?: string;
+  stateLabelAr?: string;
   derivation?: string;
   derivationLabel?: string;
+  derivationLabelAr?: string;
   segmentCount?: number;
+}
+
+interface MorphologyTermsAr {
+  types?: Record<string, string>;
+  particles?: Record<string, string>;
+  noun_forms?: Record<string, string>;
+  noun_grammar?: Record<string, string>;
+  attrs?: Record<string, string>;
+  verb_forms_tri?: string[];
+  verb_forms_quad?: string[];
+  verb_tenses?: Record<string, string>;
+  verb_grammar?: Record<string, string>;
+  pronoun_attrs?: Record<string, string>;
+  labels?: Record<string, string>;
+  other?: Record<string, string>;
+  FAM?: Record<string, string>;
 }
 
 // POS tag to human-readable labels
@@ -163,8 +187,130 @@ const VERB_FORM_LABELS: Record<string, string> = {
 export class MorphologyService {
   // Cache loaded surah data: Map<surahNumber, Map<"surah:ayah", word[]>>
   private cache: Map<number, any> = new Map();
+  private termsAr: MorphologyTermsAr | null = null;
+  private termsLoading: Promise<void> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.ensureTermsLoaded();
+  }
+
+  /** English + Arabic label for UI (e.g. "Noun · اسم"). */
+  formatBilingual(en?: string, ar?: string): string {
+    if (!en) {
+      return ar || "";
+    }
+    if (!ar || ar === en) {
+      return en;
+    }
+    return `${en} · ${ar}`;
+  }
+
+  private ensureTermsLoaded(): Promise<void> {
+    if (!this.termsLoading) {
+      this.termsLoading = this.http
+        .get<MorphologyTermsAr>("assets/data/morphology-terms-ar.json")
+        .pipe(
+          tap((t) => {
+            this.termsAr = t;
+          }),
+          catchError(() => {
+            this.termsAr = {};
+            return of(null);
+          }),
+          map(() => undefined),
+        )
+        .toPromise()
+        .then(() => undefined);
+    }
+    return this.termsLoading;
+  }
+
+  private lookupAr(code: string, voice?: string): string | undefined {
+    if (!this.termsAr || !code) {
+      return undefined;
+    }
+    const c = code.toUpperCase();
+    const t = this.termsAr;
+    return (
+      t.types?.[c] ||
+      t.particles?.[c] ||
+      t.noun_forms?.[c] ||
+      t.noun_grammar?.[c] ||
+      t.attrs?.[c] ||
+      t.verb_tenses?.[c] ||
+      t.verb_grammar?.[c] ||
+      t.pronoun_attrs?.[c] ||
+      t.other?.[c] ||
+      t.FAM?.[c] ||
+      (c === "PCPL" && voice === "pas"
+        ? t.noun_forms?.PASS_PCPL
+        : c === "PCPL"
+          ? t.noun_forms?.ACT_PCPL
+          : undefined) ||
+      (c === "VN" ? t.noun_forms?.VN : undefined)
+    );
+  }
+
+  private lookupPosAr(pos: string): string | undefined {
+    const map: Record<string, string> = {
+      n: "N",
+      pn: "PN",
+      pro: "PRON",
+      dem: "DEM",
+      rel: "REL",
+      t: "T",
+      loc: "LOC",
+      v: "V",
+      cond: "COND",
+      intg: "INTG",
+      adj: "ADJ",
+      p: "P",
+      conj: "CONJ",
+      sub: "SUB",
+      acc: "ACC",
+      neg: "NEG",
+      det: "DET",
+      emp: "EMPH",
+      impv: "IMPV",
+      res: "RES",
+      cert: "CERT",
+      voc: "VOC",
+      rslt: "RSLT",
+      prp: "PRP",
+      circ: "CIRC",
+      sup: "SUP",
+      prev: "PREV",
+      fut: "FUT",
+      ret: "RET",
+      exp: "EXP",
+      inc: "INC",
+      caus: "CAUS",
+      exl: "EXL",
+      amd: "AMD",
+      int: "INT",
+      exh: "EXH",
+      ans: "ANS",
+      sur: "SUR",
+      avr: "AVR",
+      inl: "INL",
+      rem: "REM",
+      eq: "EQ",
+      com: "COM",
+      impn: "NV",
+    };
+    return this.lookupAr(map[pos] || pos.toUpperCase());
+  }
+
+  private verbFormAr(formNum?: string): string | undefined {
+    if (!formNum || !this.termsAr?.verb_forms_tri) {
+      return undefined;
+    }
+    const idx = parseInt(formNum, 10) - 1;
+    if (idx >= 0 && idx < this.termsAr.verb_forms_tri.length) {
+      return this.termsAr.verb_forms_tri[idx];
+    }
+    return undefined;
+  }
 
   /**
    * Get morphology data for a specific word.
@@ -178,7 +324,8 @@ export class MorphologyService {
     ayah: number,
     wordIndex: number,
   ): Observable<WordMorphology | null> {
-    return this.loadSurahData(surah).pipe(
+    return from(this.ensureTermsLoaded()).pipe(
+      switchMap(() => this.loadSurahData(surah)),
       map((data) => {
         if (!data) return null;
         const ayahKey = `${surah}:${ayah}`;
@@ -199,7 +346,8 @@ export class MorphologyService {
    * @returns Observable of WordMorphology[] or empty array
    */
   getAyahMorphology(surah: number, ayah: number): Observable<WordMorphology[]> {
-    return this.loadSurahData(surah).pipe(
+    return from(this.ensureTermsLoaded()).pipe(
+      switchMap(() => this.loadSurahData(surah)),
       map((data) => {
         if (!data) return [];
         const ayahKey = `${surah}:${ayah}`;
@@ -264,29 +412,72 @@ export class MorphologyService {
     const derivation = arr[12] || undefined;
     const segmentCount = arr[13] || undefined;
 
+    const posLabel = POS_LABELS[pos] || pos;
+    const posLabelAr = this.lookupPosAr(pos);
+    const aspectLabel = aspect ? ASPECT_LABELS[aspect] || aspect : undefined;
+    const aspectTermKey: Record<string, string> = {
+      pf: "PERF",
+      im: "IMPF",
+      iv: "IMPV",
+    };
+    const aspectLabelAr = aspect
+      ? this.lookupAr(aspectTermKey[aspect] || aspect.toUpperCase())
+      : undefined;
+    const voiceLabel = voice ? VOICE_LABELS[voice] || voice : undefined;
+    const stateLabel = state ? STATE_LABELS[state] || state : undefined;
+    const stateTermKey: Record<string, string> = {
+      nom: "NOM",
+      acc: "ACC",
+      gen: "GEN",
+      jus: "JUS",
+      sub: "SUBJ",
+      subj: "SUBJ",
+      ind: "IND",
+    };
+    const stateLabelAr = state
+      ? this.lookupAr(stateTermKey[state] || state.toUpperCase())
+      : undefined;
+    const derivationLabel = derivation
+      ? DERIVATION_LABELS[derivation] || derivation
+      : undefined;
+    const derivationLabelAr = derivation
+      ? this.lookupAr(derivation.toUpperCase(), voice)
+      : undefined;
+    const expandedFeatures = features ? this.expandFeatures(features) : undefined;
+    const featuresAr = features ? this.expandFeaturesAr(features) : undefined;
+    const expandedPrefix = prefix ? this.expandPrefixes(prefix) : undefined;
+    const prefixAr = prefix ? this.expandPrefixesAr(prefix) : undefined;
+    const verbFormEn = verbForm
+      ? VERB_FORM_LABELS[verbForm] || `Form ${verbForm}`
+      : undefined;
+    const verbFormAr = this.verbFormAr(verbForm);
+
     return {
       pos,
-      posLabel: POS_LABELS[pos] || pos,
+      posLabel,
+      posLabelAr,
       lemma: arLem,
       root: arRoot,
       rootBw: root,
       lemmaBw: lem,
-      features: features ? this.expandFeatures(features) : undefined,
-      prefix: prefix ? this.expandPrefixes(prefix) : undefined,
+      features: expandedFeatures,
+      featuresAr,
+      prefix: expandedPrefix,
+      prefixAr,
       suffix,
-      verbForm: verbForm
-        ? VERB_FORM_LABELS[verbForm] || `Form ${verbForm}`
-        : undefined,
+      verbForm: verbFormEn,
+      verbFormAr,
       aspect,
-      aspectLabel: aspect ? ASPECT_LABELS[aspect] || aspect : undefined,
+      aspectLabel,
+      aspectLabelAr,
       voice,
-      voiceLabel: voice ? VOICE_LABELS[voice] || voice : undefined,
+      voiceLabel,
       state,
-      stateLabel: state ? STATE_LABELS[state] || state : undefined,
+      stateLabel,
+      stateLabelAr,
       derivation,
-      derivationLabel: derivation
-        ? DERIVATION_LABELS[derivation] || derivation
-        : undefined,
+      derivationLabel,
+      derivationLabelAr,
       segmentCount,
     };
   }
@@ -310,6 +501,29 @@ export class MorphologyService {
     return prefix
       .split("+")
       .map((p) => POS_LABELS[p.trim()] || p.trim())
+      .filter((p) => p)
+      .join(" + ");
+  }
+
+  private expandFeaturesAr(features: string): string {
+    return features
+      .split(",")
+      .map((f) => {
+        const code = f.trim();
+        return (
+          this.lookupAr(code.toUpperCase()) ||
+          this.lookupAr(code) ||
+          code
+        );
+      })
+      .filter((f) => f)
+      .join("، ");
+  }
+
+  private expandPrefixesAr(prefix: string): string {
+    return prefix
+      .split("+")
+      .map((p) => this.lookupPosAr(p.trim()) || this.lookupAr(p.trim().toUpperCase()) || p.trim())
       .filter((p) => p)
       .join(" + ");
   }

@@ -510,8 +510,9 @@
     "loading": "Loading notes...",
     "noResults": "No notes found",
     "empty": "No notes yet",
-    "emptyHint": "Notes you create while reading will appear here. Add notes from the reader to get started.",
+    "emptyHint": "Create notes here or while reading the Quran.",
     "trySearch": "Try a different search term",
+    "newNote": "New Note",
     "editNote": "Edit Note",
     "noteTitle": "Note title",
     "writeNote": "Write your note...",
@@ -521,6 +522,7 @@
     "toasts": {
       "loadError": "Error loading notes",
       "emptyFields": "Title and content cannot be empty",
+      "created": "Note created",
       "updated": "Note updated successfully",
       "saveError": "Error saving note",
       "deleteHeader": "Delete Note",
@@ -550,6 +552,7 @@
     "prefix": "Prefix:",
     "suffix": "Suffix:",
     "features": "Features:",
+    "derivation": "Derivation:",
     "viewCorpus": "View on Corpus",
     "noData": "No Data Available",
     "selectVerse": "Select a verse to view its morphological analysis"

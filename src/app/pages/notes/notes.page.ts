@@ -16,6 +16,7 @@ export class NotesPage implements OnInit {
   searchQuery: string = "";
   filteredNotes: NoteEntry[] = [];
   selectedNote: NoteEntry | null = null;
+  isCreating = false;
   editingTitle: string = "";
   editingContent: string = "";
   isLoading: boolean = false;
@@ -79,18 +80,25 @@ export class NotesPage implements OnInit {
    * Open note for editing
    */
   openNote(note: NoteEntry) {
+    this.isCreating = false;
     this.selectedNote = note;
     this.editingTitle = note.title;
     this.editingContent = note.content;
     this.editModal.present();
   }
 
+  createNote() {
+    this.isCreating = true;
+    this.selectedNote = null;
+    this.editingTitle = "";
+    this.editingContent = "";
+    this.editModal.present();
+  }
+
   /**
-   * Save edited note
+   * Save edited or new note
    */
   async saveNote() {
-    if (!this.selectedNote) return;
-
     const title = this.editingTitle.trim();
     const content = this.editingContent.trim();
 
@@ -100,20 +108,27 @@ export class NotesPage implements OnInit {
     }
 
     try {
-      const appData = await this.appDataService.getAppData();
-      const noteIndex = appData.notes.findIndex(
-        (n) => n.id === this.selectedNote!.id,
-      );
+      if (this.isCreating) {
+        await this.appDataService.createNote(title, content);
+        await this.showToast(this.translate.instant("notes.toasts.created"), "success");
+      } else if (this.selectedNote) {
+        const appData = await this.appDataService.getAppData();
+        const noteIndex = appData.notes.findIndex(
+          (n) => n.id === this.selectedNote!.id,
+        );
 
-      if (noteIndex >= 0) {
-        appData.notes[noteIndex].title = title;
-        appData.notes[noteIndex].content = content;
-        appData.notes[noteIndex].updatedAt = new Date().toISOString();
-        await this.appDataService.saveAppData(appData);
-        await this.showToast(this.translate.instant("notes.toasts.updated"), "success");
-        await this.editModal.dismiss();
-        await this.loadNotes();
+        if (noteIndex >= 0) {
+          appData.notes[noteIndex].title = title;
+          appData.notes[noteIndex].content = content;
+          appData.notes[noteIndex].updatedAt = new Date().toISOString();
+          await this.appDataService.saveAppData(appData);
+          await this.showToast(this.translate.instant("notes.toasts.updated"), "success");
+        }
       }
+
+      this.isCreating = false;
+      await this.editModal.dismiss();
+      await this.loadNotes();
     } catch (error) {
       console.error("Error saving note:", error);
       await this.showToast(this.translate.instant("notes.toasts.saveError"), "danger");

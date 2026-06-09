@@ -78,7 +78,7 @@
             <!-- POS -->
             <div class="detail-row" *ngIf="word.posLabel">
               <span class="detail-label">{{ 'morphology.pos' | translate }}</span>
-              <span class="detail-value">{{ word.posLabel }}</span>
+              <span class="detail-value">{{ bilingual(word.posLabel, word.posLabelAr) }}</span>
             </div>
 
             <!-- Root -->
@@ -96,13 +96,13 @@
             <!-- Verb Form -->
             <div class="detail-row" *ngIf="word.verbForm">
               <span class="detail-label">{{ 'morphology.form' | translate }}</span>
-              <span class="detail-value">{{ word.verbForm }}</span>
+              <span class="detail-value">{{ bilingual(word.verbForm, word.verbFormAr) }}</span>
             </div>
 
             <!-- Aspect -->
             <div class="detail-row" *ngIf="word.aspectLabel">
               <span class="detail-label">{{ 'morphology.aspect' | translate }}</span>
-              <span class="detail-value">{{ word.aspectLabel }}</span>
+              <span class="detail-value">{{ bilingual(word.aspectLabel, word.aspectLabelAr) }}</span>
             </div>
 
             <!-- Voice -->
@@ -114,7 +114,7 @@
             <!-- State -->
             <div class="detail-row" *ngIf="word.stateLabel">
               <span class="detail-label">{{ 'morphology.case' | translate }}</span>
-              <span class="detail-value">{{ word.stateLabel }}</span>
+              <span class="detail-value">{{ bilingual(word.stateLabel, word.stateLabelAr) }}</span>
             </div>
 
             <!-- Gender -->
@@ -132,7 +132,7 @@
             <!-- Prefix -->
             <div class="detail-row" *ngIf="word.prefix">
               <span class="detail-label">{{ 'morphology.prefix' | translate }}</span>
-              <span class="detail-value">{{ word.prefix }}</span>
+              <span class="detail-value">{{ bilingual(word.prefix, word.prefixAr) }}</span>
             </div>
 
             <!-- Suffix -->
@@ -144,7 +144,12 @@
             <!-- Features -->
             <div class="detail-row" *ngIf="word.features">
               <span class="detail-label">{{ 'morphology.features' | translate }}</span>
-              <span class="detail-value">{{ formatFeatures(word.features) }}</span>
+              <span class="detail-value">{{ bilingual(formatFeatures(word.features), word.featuresAr) }}</span>
+            </div>
+
+            <div class="detail-row" *ngIf="word.derivationLabel">
+              <span class="detail-label">{{ 'morphology.derivation' | translate }}</span>
+              <span class="detail-value">{{ bilingual(word.derivationLabel, word.derivationLabelAr) }}</span>
             </div>
 
             <!-- Corpus Link -->

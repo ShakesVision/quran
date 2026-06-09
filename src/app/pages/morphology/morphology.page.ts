@@ -126,6 +126,10 @@ export class MorphologyPage implements OnInit {
     this.loadMorphology();
   }
 
+  bilingual(en?: string, ar?: string): string {
+    return this.morphologyService.formatBilingual(en, ar);
+  }
+
   /**
    * Get human-readable label for POS (Part of Speech)
    */

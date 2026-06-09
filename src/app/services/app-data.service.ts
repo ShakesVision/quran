@@ -181,6 +181,26 @@ export class AppDataService {
     await this.saveAppData(data);
   }
 
+  async createNote(
+    title: string,
+    content: string,
+    context?: NoteContext,
+  ): Promise<NoteEntry> {
+    const data = await this.getAppData();
+    const now = new Date().toISOString();
+    const entry: NoteEntry = {
+      id: this.createId(),
+      title,
+      content,
+      createdAt: now,
+      updatedAt: now,
+      context,
+    };
+    data.notes.push(entry);
+    await this.saveAppData(data);
+    return entry;
+  }
+
   async addOrAppendNote(
     title: string,
     content: string,

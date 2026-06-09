@@ -492,6 +492,10 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  morphBilingual(en?: string, ar?: string): string {
+    return this.morphologyService.formatBilingual(en, ar);
+  }
+
   changeTafsirFontSize(delta: number) {
     this.tafsirFontSize = this.clampTafsirFontSize(
       this.tafsirFontSize + delta,

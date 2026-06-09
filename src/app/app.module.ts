@@ -14,7 +14,9 @@ import { AngularFirestoreModule } from "@angular/fire/compat/firestore";
 import { AngularFireAuthModule } from "@angular/fire/compat/auth";
 import { AngularFireStorageModule } from "@angular/fire/compat/storage";
 import { AngularFireAuthGuardModule } from "@angular/fire/compat/auth-guard";
+import { Drivers } from "@ionic/storage";
 import { IonicStorageModule, Storage } from "@ionic/storage-angular";
+import { PersistentStorageService } from "./services/persistent-storage.service";
 import { OneSignal } from "@ionic-native/onesignal/ngx";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { ServiceWorkerModule } from "@angular/service-worker";
@@ -31,6 +33,10 @@ export function initLanguage(langService: LanguageService) {
   return () => langService.init();
 }
 
+export function initPersistentStorage(storage: PersistentStorageService) {
+  return () => storage.create();
+}
+
 @NgModule({
   declarations: [AppComponent, StaticContentModalComponent],
   imports: [
@@ -42,7 +48,11 @@ export function initLanguage(langService: LanguageService) {
     AngularFireAuthModule,
     AngularFireStorageModule,
     AngularFireAuthGuardModule,
-    IonicStorageModule.forRoot(),
+    IonicStorageModule.forRoot({
+      name: "_ionicstorage",
+      storeName: "_ionickv",
+      driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage],
+    }),
     HttpClientModule,
     TranslateModule.forRoot({
       defaultLanguage: "en",
@@ -63,8 +73,15 @@ export function initLanguage(langService: LanguageService) {
     StatusBar,
     SplashScreen,
     OneSignal,
-    Storage,
+    PersistentStorageService,
+    { provide: Storage, useExisting: PersistentStorageService },
     LanguageService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initPersistentStorage,
+      deps: [PersistentStorageService],
+      multi: true,
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: initLanguage,

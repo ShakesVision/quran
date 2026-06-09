@@ -61,7 +61,14 @@
     "expandAll": "توسيع الكل",
     "collapseAll": "طي الكل",
     "completed": "مكتمل",
-    "inProgress": "قيد التقدم"
+    "inProgress": "قيد التقدم",
+    "copy": "نسخ",
+    "next": "التالي",
+    "previous": "السابق",
+    "go": "انتقال",
+    "log": "تسجيل",
+    "disable": "تعطيل",
+    "defaultFolder": "افتراضي"
   },
   "browse": {
     "title": "تصفح",
@@ -137,6 +144,22 @@
     "loadingCommits": "جارٍ تحميل التحديثات...",
     "madeForUmmah": "صُنع بـ ❤️ للأمة",
     "footerBy": "شكيب أحمد",
+    "setTargets": "تعيين الأهداف",
+    "setTargetsMessage": "① صفحات/يوم ② آيات/يوم (حفظ) ③ عدد الختم ④ المدة (أيام)",
+    "pagesPerDay": "صفحات/يوم",
+    "ayahsPerDayLabel": "آيات/يوم",
+    "khatmTarget": "هدف الختم",
+    "periodDays": "المدة (أيام)",
+    "pagesRead": "الصفحات المقروءة",
+    "ayahsMemorizedInput": "الآيات المحفوظة",
+    "mashaAllah": "ما شاء الله!",
+    "tilawatCompleteToast": "اكتمل هدف التلاوة! ما شاء الله!",
+    "hifzCompleteToast": "اكتمل هدف الحفظ! ممتاز!",
+    "preparingQuranData": "جارٍ تحضير بيانات القرآن...",
+    "changelogLoadError": "تعذّر تحميل سجل التغييرات. تحقق من الاتصال.",
+    "bannerDigitizing": "نحن نُرقّم مصحف 15 سطرًا وترجمته بيونيكود، وهو عمل قيد التقدم. يمكنك المساهمة.",
+    "contribute": "ساهم",
+    "mushafPages": "{{name}} ({{pages}} صفحة)",
     "level": {
       "beginner": "مبتدئ",
       "seeker": "طالب",
@@ -225,7 +248,118 @@
       "playFromHere": "تشغيل من هنا",
       "bookmark": "إضافة إشارة",
       "selectText": "تحديد النص",
-      "copy": "نسخ"
+      "copy": "نسخ",
+      "showTranslation": "عرض الترجمة",
+      "copyLine": "نسخ السطر",
+      "copyPage": "نسخ الصفحة",
+      "copyAyah": "نسخ الآية ({{key}})",
+      "copyTranslation": "نسخ الترجمة ({{key}})",
+      "exitSelection": "إنهاء وضع التحديد",
+      "enterSelection": "تحديد النص (للنسخ)",
+      "bookmarkLine": "إشارة مرجعية لهذا السطر",
+      "lineHeader": "سطر {{line}} · آية {{key}}",
+      "linePageHeader": "سطر {{line}} · صفحة {{page}}"
+    },
+    "toasts": {
+      "translationNotAvailable": "ترجمة {{title}} غير متوفرة!",
+      "couldNotDetermineAyah": "تعذّر تحديد الآية لهذا السطر.",
+      "lineCopied": "تم نسخ السطر!",
+      "pageCopied": "تم نسخ الصفحة!",
+      "textSelectionDisabled": "تم تعطيل تحديد النص",
+      "textSelectionEnabled": "تحديد النص مفعّل — اضغط مطولًا للإنهاء",
+      "couldNotDetermineAyahShort": "تعذّر تحديد الآية",
+      "audioNotAvailable": "الصوت غير متوفر للآية {{key}}",
+      "audioNotAvailableShort": "الصوت غير متوفر لـ {{key}}",
+      "ayahCopied": "تم نسخ الآية {{key}}!",
+      "failedFetchAyah": "تعذّر جلب نص الآية",
+      "translationCopied": "تم نسخ الترجمة!",
+      "failedFetchTranslation": "تعذّر جلب الترجمة",
+      "bookmarkSaved": "تم حفظ الإشارة!",
+      "surahCopied": "تم نسخ سورة {{name}}!",
+      "juzCopied": "تم نسخ جزء {{num}}!",
+      "pagesCopied": "تم نسخ الصفحات {{from}}–{{to}}!",
+      "rukuCopied": "تم نسخ ركوع {{num}}!",
+      "savedAsFile": "تم الحفظ كـ {{filename}}",
+      "copiedSuccess": "تم النسخ بنجاح!",
+      "couldNotDetermineAyahs": "تعذّر تحديد آيات هذه الصفحة للتشغيل.",
+      "qariAudioMissing": "قد لا يتوفر صوت الآية {{key}} للقارئ المختار. جرّب قارئًا آخر.",
+      "bookmarkSavedShort": "تم حفظ الإشارة",
+      "bookmarkDeleted": "تم حذف الإشارة",
+      "cannotDeleteDefaultFolder": "لا يمكن حذف المجلد الافتراضي",
+      "folderDeleted": "تم حذف المجلد",
+      "noteSaved": "تم حفظ الملاحظة",
+      "appDataCopied": "تم نسخ البيانات إلى الحافظة",
+      "appDataImported": "تم استيراد البيانات"
+    },
+    "export": {
+      "header": "تصدير / نسخ النص",
+      "copyCurrentPage": "نسخ الصفحة الحالية",
+      "copyCurrentSurah": "نسخ السورة الحالية ({{name}})",
+      "copyCurrentJuz": "نسخ الجزء الحالي ({{num}})",
+      "copyCurrentRuku": "نسخ الركوع الحالي",
+      "copyPageRange": "نسخ نطاق صفحات...",
+      "saveAsFile": "حفظ كملف...",
+      "pageRangeHeader": "نسخ نطاق صفحات",
+      "fromPage": "من صفحة",
+      "toPage": "إلى صفحة",
+      "saveFileHeader": "حفظ كملف",
+      "saveFileMessage": "اختر ما تريد حفظه:",
+      "currentPage": "الصفحة الحالية",
+      "allPages": "كل الصفحات"
+    },
+    "bookmarksDialog": {
+      "addHeader": "إضافة إشارة",
+      "bookmarkName": "اسم الإشارة",
+      "folderOptional": "المجلد (اختياري)",
+      "deleteFolderHeader": "حذف المجلد",
+      "deleteFolderMessage": "حذف \"{{name}}\" وجميع إشاراته؟",
+      "readingFolder": "القراءة",
+      "bookmarkNameAyah": "آية {{key}} (صفحة {{page}}، سطر {{line}})",
+      "bookmarkNamePage": "صفحة {{page}}، سطر {{line}}"
+    },
+    "notesDialog": {
+      "addHeader": "إضافة ملاحظة",
+      "noteTitle": "عنوان الملاحظة",
+      "writeNote": "اكتب ملاحظتك..."
+    },
+    "dataTransfer": {
+      "exportHeader": "تصدير البيانات",
+      "exportMessage": "انسخ JSON أدناه",
+      "importHeader": "استيراد البيانات",
+      "pasteJson": "الصق JSON هنا"
+    },
+    "pageNav": {
+      "header": "التنقل بين الصفحات",
+      "jumpFirst": "الانتقال للصفحة الأولى",
+      "jumpLast": "الانتقال للصفحة الأخيرة"
+    },
+    "pageInfo": {
+      "header": "في هذه الصفحة (#{{page}})",
+      "subHeader": "تحليل مفصّل...",
+      "words": "الكلمات: {{count}}",
+      "uniqueWords": "كلمات فريدة: {{count}}",
+      "uniqueWordsNoDiacritics": "فريدة بلا تشكيل: {{count}}",
+      "ayahs": "الآيات: {{count}}",
+      "surahBeginnings": "بدايات السور: {{count}}",
+      "rukuEnds": "نهايات الركوع: {{count}}",
+      "lines": "الأسطر: {{count}}",
+      "mushafPageNo": "رقم صفحة المصحف: {{num}}"
+    },
+    "surahInfoAlert": {
+      "message": "سورة {{title}} ({{titleAr}}) فيها {{count}} آية، نزلت في {{place}} وتنتشر على {{juzCount}} أجزاء، أي {{juzRange}}.",
+      "juzDistribution": "الآيات {{start}}-{{end}} في جزء {{index}}."
+    },
+    "themes": {
+      "golden": "ذهبي",
+      "paper": "ورقي",
+      "ivory": "عاجي",
+      "sage": "مريم",
+      "ocean": "محيط",
+      "lavender": "لافندر",
+      "rose": "وردي",
+      "midnight": "منتصف الليل",
+      "charcoal": "فحمي",
+      "sepia": "بني داكن"
     }
   },
   "memorize": {
@@ -267,6 +401,41 @@
       "learning": "تعلم",
       "reviewing": "مراجعة",
       "mastered": "متقن"
+    },
+    "toasts": {
+      "streakReset": "تم إعادة تعيين السلسلة",
+      "invalidJuz": "رقم جزء غير صالح: {{juz}}",
+      "juzExists": "الجزء {{juz}} موجود مسبقًا.",
+      "juzPageLimit": "الجزء {{juz}} فيه {{count}} صفحة فقط.",
+      "juzCompleted": "🎉 ما شاء الله! اكتمل الجزء {{juz}}!",
+      "invalidSurah": "رقم سورة غير صالح (1-114)",
+      "surahAyahLimit": "سورة {{surah}} فيها {{count}} آية فقط.",
+      "surahExists": "سورة {{surah}} موجودة مسبقًا.",
+      "surahCompleted": "🎉 ما شاء الله! اكتملت سورة {{name}}!",
+      "dataCopied": "تم نسخ كل بيانات الحفظ!",
+      "importHeader": "استيراد",
+      "importMessage": "الصق JSON المُصدَّر. سيستبدل البيانات الحالية.",
+      "importPlaceholder": "الصق JSON هنا...",
+      "dataImported": "تم الاستيراد بنجاح!",
+      "invalidJson": "JSON غير صالح",
+      "reviewed": "تمت مراجعة {{label}}! التالية خلال {{interval}}"
+    },
+    "levels": {
+      "beginner": "مبتدئ",
+      "learner": "متعلّم",
+      "seeker": "طالب",
+      "reciter": "قارئ",
+      "memorizer": "حافظ",
+      "scholar": "عالم",
+      "hafizInTraining": "متدرب حفظ",
+      "advanced": "متقدّم",
+      "master": "خبير",
+      "hafiz": "حافظ"
+    },
+    "badges": {
+      "firstJuz": "أول جزء",
+      "halfQuran": "نصف القرآن",
+      "firstSurah": "أول سورة"
     }
   },
   "discover": {
@@ -282,7 +451,10 @@
     "englishTranslation": "الترجمة الإنجليزية",
     "urduTranslation": "الترجمة الأردية",
     "settingsNote": "تنطبق التغييرات على جميع البطاقات. قد تحتاج بعض الترجمات للشبكة.",
-    "copied": "نُسخ إلى الحافظة"
+    "copied": "نُسخ إلى الحافظة",
+    "enPickerHeader": "الترجمة الإنجليزية",
+    "enPickerSub": "اختر ترجمتك الإنجليزية المفضلة",
+    "urPickerSub": "اردو ترجمہ منتخب کریں"
   },
   "listen": {
     "title": "استمع",
@@ -318,7 +490,19 @@
     "loadPreview": "حمّل النص لمعاينته",
     "clickPageBreaks": "انقر بين الأسطر لتحديد فواصل الصفحات",
     "pageBreak": "── فاصل صفحة ──",
-    "pageNav": "صفحة {{current}} / {{total}}"
+    "pageNav": "صفحة {{current}} / {{total}}",
+    "toasts": {
+      "pageBreaksCleared": "تم مسح كل فواصل الصفحات",
+      "noDataToExport": "لا بيانات للتصدير. حمّل النص أولًا.",
+      "exportedAs": "تم التصدير كـ {{filename}}",
+      "savedCustomSource": "تم الحفظ كمصدر مخصص! متاح في القارئ.",
+      "autoMarkedPages": "تم وضع {{count}} فاصل ({{lines}}/صفحة)"
+    },
+    "saveSource": {
+      "header": "حفظ كمصدر مخصص",
+      "namePlaceholder": "اسم المصدر (مثلاً مصحفي 15 سطرًا)",
+      "descPlaceholder": "الوصف (اختياري)"
+    }
   },
   "notes": {
     "title": "ملاحظاتي",
@@ -333,7 +517,17 @@
     "writeNote": "اكتب ملاحظتك...",
     "contextSurah": "سورة {{num}}",
     "contextJuz": "جزء {{num}}",
-    "contextPage": "صفحة {{num}}"
+    "contextPage": "صفحة {{num}}",
+    "toasts": {
+      "loadError": "خطأ في تحميل الملاحظات",
+      "emptyFields": "العنوان والمحتوى مطلوبان",
+      "updated": "تم تحديث الملاحظة",
+      "saveError": "خطأ في حفظ الملاحظة",
+      "deleteHeader": "حذف الملاحظة",
+      "deleteMessage": "هل تريد حذف \"{{title}}\"؟",
+      "deleted": "تم حذف الملاحظة",
+      "deleteError": "خطأ في حذف الملاحظة"
+    }
   },
   "morphology": {
     "title": "الصرف",
@@ -416,5 +610,31 @@
   },
   "privacy": {
     "title": "سياسة الخصوصية"
+  },
+  "tafseer": {
+    "sections": {
+      "morphology": "الصرف",
+      "wbw": "كلمة بكلمة",
+      "translations": "الترجمات",
+      "tafsir": "التفسير"
+    },
+    "enterAyahKey": "أدخل مفتاح الآية",
+    "ayahKeyPlaceholder": "مثلاً 2:255",
+    "invalidAyah": "آية غير صالحة: {{num}}",
+    "loadFailed": "فشل التحميل"
+  },
+  "juzPage": {
+    "fetchFailedStored": "فشل الجلب، لكن وُجد في التخزين المحلي."
+  },
+  "surahAuth": {
+    "loginSignup": "تسجيل / دخول",
+    "emailPlaceholder": "البريد...",
+    "passwordPlaceholder": "كلمة المرور...",
+    "logout": "خروج",
+    "signup": "تسجيل",
+    "login": "دخول",
+    "loggedOut": "تم تسجيل الخروج!",
+    "surahNotFound": "بيانات السورة غير موجودة",
+    "loadFailed": "فشل تحميل بيانات السورة"
   }
 }

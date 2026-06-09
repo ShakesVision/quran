@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1780996784126,
+  "timestamp": 1781008547561,
   "index": "/quran/index.html",
   "assetGroups": [
     {
@@ -85,7 +85,7 @@
         "/quran/9958.f35eb323bfb154ed.js",
         "/quran/common.8dd2f545a6e439b0.js",
         "/quran/index.html",
-        "/quran/main.05885637dc6a3ffd.js",
+        "/quran/main.c3a5e6881371a4b7.js",
         "/quran/manifest.webmanifest",
         "/quran/polyfills-core-js.fa7d9f97271e576e.js",
         "/quran/polyfills-dom.5c5f23fb57b03028.js",
@@ -668,9 +668,9 @@
     "/quran/assets/quran.png": "f426d56a5aad0acf61b7ea653aca02d59124b289",
     "/quran/assets/shapes.svg": "5413e95adabcb2cb639970051f55e0ddb64ace53",
     "/quran/common.8dd2f545a6e439b0.js": "3652fba398f40e6bb0ec415c1333f516c347caff",
-    "/quran/index.html": "95938f1281d4e6d5387784fb8ebe4cece3117322",
+    "/quran/index.html": "a922303ca5e04ef90a1b87687189380b9ad1ce4a",
     "/quran/indopak-nastaleeq-waqf-lazim-v4.2.1.5171e9bac4850034.woff2": "c393af38ca5e9d3c6d880fd7398bca14541c96c6",
-    "/quran/main.05885637dc6a3ffd.js": "6e91b8142dcd348878cd2328e0ce669ff47ddbf6",
+    "/quran/main.c3a5e6881371a4b7.js": "d2d7d63c1417d36bf866d5575728331deae33c8d",
     "/quran/manifest.webmanifest": "89ea1c67521aae61c01b6b8ffdc56fbac76ee7ba",
     "/quran/muhammadi.caa330870633446c.ttf": "4c51a4317c328fe68859a632f69c84c729d2a363",
     "/quran/paper-texture-dark.5661b5099b74f788.svg": "3146f21075bc7f89fe44401726760906b6b57641",

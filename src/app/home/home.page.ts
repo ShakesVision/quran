@@ -308,7 +308,10 @@ export class HomePage implements OnDestroy {
   async openMushafSelector() {
     const buttons: ActionSheetButton[] = this.mushafOptions.map(
       (mushaf): ActionSheetButton => ({
-        text: `${mushaf.name} (${mushaf.pages} pages)`,
+        text: this.translate.instant("home.mushafPages", {
+          name: mushaf.name,
+          pages: mushaf.pages,
+        }),
         cssClass: this.currentMushaf?.id === mushaf.id ? "selected-mushaf" : "",
         handler: () => {
           this.selectMushaf(mushaf);
@@ -316,13 +319,13 @@ export class HomePage implements OnDestroy {
       }),
     );
     buttons.push({
-      text: "Cancel",
+      text: this.translate.instant("common.cancel"),
       role: "cancel",
       cssClass: "",
     });
 
     const actionSheet = await this.actionSheetController.create({
-      header: "Choose Mushaf",
+      header: this.translate.instant("home.chooseMushaf"),
       buttons: buttons,
     });
     await actionSheet.present();
@@ -387,7 +390,7 @@ export class HomePage implements OnDestroy {
       return;
     }
 
-    this.preCacheProgress = "Preparing Quran data...";
+    this.preCacheProgress = this.translate.instant("home.preparingQuranData");
     try {
       await this.quranDataService.preCacheQuranData();
       this.discoverReady = true;
@@ -495,21 +498,23 @@ export class HomePage implements OnDestroy {
 
   async logReading() {
     const alert = await this.alertController.create({
-      header: "Log Tilawat",
-      message: `How many pages did you read? (Target: ${this.dailyPageTarget})`,
+      header: this.translate.instant("home.logTilawat"),
+      message: this.translate.instant("home.logTilawatMessage", {
+        target: this.dailyPageTarget,
+      }),
       inputs: [
         {
           name: "pages",
           type: "number",
-          placeholder: "Pages read",
+          placeholder: this.translate.instant("home.pagesRead"),
           min: 1,
           max: 100,
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
         {
-          text: "Log",
+          text: this.translate.instant("common.log"),
           handler: async (data) => {
             const pages = parseInt(data.pages);
             if (pages > 0) {
@@ -524,7 +529,7 @@ export class HomePage implements OnDestroy {
               this.calculateRamadan();
               if (this.tilawatProgress >= 100) {
                 this.showCompletionToast(
-                  "Tilawat target complete! MashaAllah!",
+                  this.translate.instant("home.tilawatCompleteToast"),
                 );
               }
             }
@@ -537,21 +542,23 @@ export class HomePage implements OnDestroy {
 
   async logMemorization() {
     const alert = await this.alertController.create({
-      header: "Log Hifz",
-      message: `How many ayahs did you memorize? (Target: ${this.dailyAyahTarget})`,
+      header: this.translate.instant("home.logHifz"),
+      message: this.translate.instant("home.logHifzMessage", {
+        target: this.dailyAyahTarget,
+      }),
       inputs: [
         {
           name: "ayahs",
           type: "number",
-          placeholder: "Ayahs memorized",
+          placeholder: this.translate.instant("home.ayahsMemorizedInput"),
           min: 1,
           max: 50,
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
         {
-          text: "Log",
+          text: this.translate.instant("common.log"),
           handler: async (data) => {
             const ayahs = parseInt(data.ayahs);
             if (ayahs > 0) {
@@ -560,7 +567,9 @@ export class HomePage implements OnDestroy {
               await this.buildWeeklyData();
               await this.updateStreak();
               if (this.hifzProgress >= 100) {
-                this.showCompletionToast("Hifz target complete! Excellent!");
+                this.showCompletionToast(
+                  this.translate.instant("home.hifzCompleteToast"),
+                );
               }
             }
           },
@@ -572,52 +581,51 @@ export class HomePage implements OnDestroy {
 
   async editTargets() {
     const alert = await this.alertController.create({
-      header: "Set Targets",
-      message:
-        "Fields: ① Pages/day ② Ayahs/day (hifz) ③ Khatm count ④ Period (days)",
+      header: this.translate.instant("home.setTargets"),
+      message: this.translate.instant("home.setTargetsMessage"),
       cssClass: "target-alert-labeled",
       inputs: [
         {
           name: "pages",
           type: "number",
-          placeholder: "📖 Pages/day",
+          placeholder: "📖 " + this.translate.instant("home.pagesPerDay"),
           value: this.dailyPageTarget,
           min: 1,
-          label: "Pages/day",
+          label: this.translate.instant("home.pagesPerDay"),
           attributes: { inputmode: "numeric" },
         },
         {
           name: "ayahs",
           type: "number",
-          placeholder: "🕌 Ayahs/day (hifz)",
+          placeholder: "🕌 " + this.translate.instant("home.ayahsPerDayLabel"),
           value: this.dailyAyahTarget,
           min: 1,
-          label: "Ayahs/day",
+          label: this.translate.instant("home.ayahsPerDayLabel"),
           attributes: { inputmode: "numeric" },
         },
         {
           name: "khatm",
           type: "number",
-          placeholder: "📚 Khatm target",
+          placeholder: "📚 " + this.translate.instant("home.khatmTarget"),
           value: this.khatmTarget,
           min: 1,
-          label: "Khatm target",
+          label: this.translate.instant("home.khatmTarget"),
           attributes: { inputmode: "numeric" },
         },
         {
           name: "days",
           type: "number",
-          placeholder: "📅 Period (days)",
+          placeholder: "📅 " + this.translate.instant("home.periodDays"),
           value: this.targetDays,
           min: 1,
-          label: "Period (days)",
+          label: this.translate.instant("home.periodDays"),
           attributes: { inputmode: "numeric" },
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
         {
-          text: "Disable",
+          text: this.translate.instant("common.disable"),
           cssClass: "alert-button-danger",
           handler: async () => {
             this.targetsEnabled = false;
@@ -631,7 +639,7 @@ export class HomePage implements OnDestroy {
           },
         },
         {
-          text: "Save",
+          text: this.translate.instant("common.save"),
           handler: async (data) => {
             this.khatmTarget = parseInt(data.khatm) || 1;
             this.targetDays = parseInt(data.days) || 30;
@@ -740,7 +748,7 @@ export class HomePage implements OnDestroy {
 
   private async showCompletionToast(message: string) {
     const alert = await this.alertController.create({
-      header: "MashaAllah!",
+      header: this.translate.instant("home.mashaAllah"),
       message,
       buttons: ["Alhamdulillah"],
       cssClass: "completion-alert",
@@ -946,7 +954,7 @@ export class HomePage implements OnDestroy {
       this.changelogItems = [
         {
           date: new Date().toISOString(),
-          message: "Could not load changelog. Check your internet connection.",
+          message: this.translate.instant("home.changelogLoadError"),
           author: "",
           sha: "",
         },

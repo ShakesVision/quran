@@ -61,7 +61,14 @@
     "expandAll": "Expand All",
     "collapseAll": "Collapse All",
     "completed": "Completed",
-    "inProgress": "In Progress"
+    "inProgress": "In Progress",
+    "copy": "Copy",
+    "next": "Next",
+    "previous": "Previous",
+    "go": "Go",
+    "log": "Log",
+    "disable": "Disable",
+    "defaultFolder": "Default"
   },
   "browse": {
     "title": "Browse",
@@ -137,6 +144,22 @@
     "loadingCommits": "Loading commits...",
     "madeForUmmah": "Made with ❤️ for the Ummah",
     "footerBy": "by Shakeeb Ahmad",
+    "setTargets": "Set Targets",
+    "setTargetsMessage": "Fields: ① Pages/day ② Ayahs/day (hifz) ③ Khatm count ④ Period (days)",
+    "pagesPerDay": "Pages/day",
+    "ayahsPerDayLabel": "Ayahs/day",
+    "khatmTarget": "Khatm target",
+    "periodDays": "Period (days)",
+    "pagesRead": "Pages read",
+    "ayahsMemorizedInput": "Ayahs memorized",
+    "mashaAllah": "MashaAllah!",
+    "tilawatCompleteToast": "Tilawat target complete! MashaAllah!",
+    "hifzCompleteToast": "Hifz target complete! Excellent!",
+    "preparingQuranData": "Preparing Quran data...",
+    "changelogLoadError": "Could not load changelog. Check your internet connection.",
+    "bannerDigitizing": "We are digitizing the 15 Lines Quran & translation in Unicode, which is a work in progress. You can also help us complete this project.",
+    "contribute": "Contribute",
+    "mushafPages": "{{name}} ({{pages}} pages)",
     "level": {
       "beginner": "Beginner",
       "seeker": "Seeker",
@@ -225,7 +248,118 @@
       "playFromHere": "Play from here",
       "bookmark": "Add Bookmark",
       "selectText": "Select Text",
-      "copy": "Copy"
+      "copy": "Copy",
+      "showTranslation": "Show Translation",
+      "copyLine": "Copy Line",
+      "copyPage": "Copy Page",
+      "copyAyah": "Copy Ayah ({{key}})",
+      "copyTranslation": "Copy Translation ({{key}})",
+      "exitSelection": "Exit Text Selection Mode",
+      "enterSelection": "Select Text (copy mode)",
+      "bookmarkLine": "Bookmark this line",
+      "lineHeader": "Line {{line}} · Ayah {{key}}",
+      "linePageHeader": "Line {{line}} · Page {{page}}"
+    },
+    "toasts": {
+      "translationNotAvailable": "Translation for {{title}} is not available!",
+      "couldNotDetermineAyah": "Could not determine the ayah for this line.",
+      "lineCopied": "Line copied!",
+      "pageCopied": "Page copied!",
+      "textSelectionDisabled": "Text selection disabled",
+      "textSelectionEnabled": "Text selection enabled — long-press again to exit",
+      "couldNotDetermineAyahShort": "Could not determine ayah for this line",
+      "audioNotAvailable": "Audio not available for verse {{key}}",
+      "audioNotAvailableShort": "Audio not available for {{key}}",
+      "ayahCopied": "Ayah {{key}} copied!",
+      "failedFetchAyah": "Failed to fetch ayah text",
+      "translationCopied": "Translation copied!",
+      "failedFetchTranslation": "Failed to fetch translation",
+      "bookmarkSaved": "Bookmark saved!",
+      "surahCopied": "Surah {{name}} copied!",
+      "juzCopied": "Juz {{num}} copied!",
+      "pagesCopied": "Pages {{from}}–{{to}} copied!",
+      "rukuCopied": "Ruku {{num}} copied!",
+      "savedAsFile": "Saved as {{filename}}",
+      "copiedSuccess": "Copied successfully!",
+      "couldNotDetermineAyahs": "Could not determine ayahs on this page for audio playback.",
+      "qariAudioMissing": "The selected Qari might not have the audio for the verse {{key}}. Try another Qaris from the list.",
+      "bookmarkSavedShort": "Bookmark saved",
+      "bookmarkDeleted": "Bookmark deleted",
+      "cannotDeleteDefaultFolder": "Cannot delete default folder",
+      "folderDeleted": "Folder deleted",
+      "noteSaved": "Note saved",
+      "appDataCopied": "App data copied to clipboard",
+      "appDataImported": "App data imported"
+    },
+    "export": {
+      "header": "Export / Copy Text",
+      "copyCurrentPage": "Copy Current Page",
+      "copyCurrentSurah": "Copy Current Surah ({{name}})",
+      "copyCurrentJuz": "Copy Current Juz ({{num}})",
+      "copyCurrentRuku": "Copy Current Ruku",
+      "copyPageRange": "Copy Page Range...",
+      "saveAsFile": "Save as Text File...",
+      "pageRangeHeader": "Copy Page Range",
+      "fromPage": "From page",
+      "toPage": "To page",
+      "saveFileHeader": "Save as Text File",
+      "saveFileMessage": "Choose what to save:",
+      "currentPage": "Current Page",
+      "allPages": "All Pages"
+    },
+    "bookmarksDialog": {
+      "addHeader": "Add Bookmark",
+      "bookmarkName": "Bookmark name",
+      "folderOptional": "Folder (optional)",
+      "deleteFolderHeader": "Delete Folder",
+      "deleteFolderMessage": "Delete \"{{name}}\" and all its bookmarks?",
+      "readingFolder": "Reading",
+      "bookmarkNameAyah": "Ayah {{key}} (Page {{page}}, Line {{line}})",
+      "bookmarkNamePage": "Page {{page}}, Line {{line}}"
+    },
+    "notesDialog": {
+      "addHeader": "Add Note",
+      "noteTitle": "Note title",
+      "writeNote": "Write your note..."
+    },
+    "dataTransfer": {
+      "exportHeader": "Export Data",
+      "exportMessage": "Copy the JSON below",
+      "importHeader": "Import Data",
+      "pasteJson": "Paste JSON here"
+    },
+    "pageNav": {
+      "header": "Page Navigation",
+      "jumpFirst": "Jump to First Page",
+      "jumpLast": "Jump to Last Page"
+    },
+    "pageInfo": {
+      "header": "On this page (#{{page}})",
+      "subHeader": "Detailed analysis...",
+      "words": "Words: {{count}}",
+      "uniqueWords": "Unique Words: {{count}}",
+      "uniqueWordsNoDiacritics": "Unique Words w/o Diacritics: {{count}}",
+      "ayahs": "Ayahs: {{count}}",
+      "surahBeginnings": "Surah Beginnings: {{count}}",
+      "rukuEnds": "Ruku Ends: {{count}}",
+      "lines": "Lines: {{count}}",
+      "mushafPageNo": "Mushaf Page No.: {{num}}"
+    },
+    "surahInfoAlert": {
+      "message": "Surah {{title}} ({{titleAr}}) has {{count}} Ayahs, was revealed in {{place}} and is spanned over {{juzCount}} juz, i.e. {{juzRange}}.",
+      "juzDistribution": "Verses {{start}}-{{end}} in juz {{index}}."
+    },
+    "themes": {
+      "golden": "Golden",
+      "paper": "Paper",
+      "ivory": "Ivory",
+      "sage": "Sage",
+      "ocean": "Ocean",
+      "lavender": "Lavender",
+      "rose": "Rose",
+      "midnight": "Midnight",
+      "charcoal": "Charcoal",
+      "sepia": "Sepia"
     }
   },
   "memorize": {
@@ -267,6 +401,41 @@
       "learning": "Learning",
       "reviewing": "Reviewing",
       "mastered": "Mastered"
+    },
+    "toasts": {
+      "streakReset": "Streak reset",
+      "invalidJuz": "Invalid juz number: {{juz}}",
+      "juzExists": "Entry for Juz {{juz}} already exists.",
+      "juzPageLimit": "Juz {{juz}} only has {{count}} pages.",
+      "juzCompleted": "🎉 MashaAllah! Juz {{juz}} completed!",
+      "invalidSurah": "Invalid surah number (1-114)",
+      "surahAyahLimit": "Surah {{surah}} only has {{count}} ayahs.",
+      "surahExists": "Surah {{surah}} already exists.",
+      "surahCompleted": "🎉 MashaAllah! Surah {{name}} completed!",
+      "dataCopied": "Copied all memorization data!",
+      "importHeader": "Import",
+      "importMessage": "Paste the exported JSON data. This will replace existing data.",
+      "importPlaceholder": "Paste the exported JSON data here...",
+      "dataImported": "Data imported successfully!",
+      "invalidJson": "Invalid JSON data",
+      "reviewed": "{{label}} reviewed! Next in {{interval}}"
+    },
+    "levels": {
+      "beginner": "Beginner",
+      "learner": "Learner",
+      "seeker": "Seeker",
+      "reciter": "Reciter",
+      "memorizer": "Memorizer",
+      "scholar": "Scholar",
+      "hafizInTraining": "Hafiz-in-training",
+      "advanced": "Advanced",
+      "master": "Master",
+      "hafiz": "Hafiz"
+    },
+    "badges": {
+      "firstJuz": "First Juz",
+      "halfQuran": "Half Quran",
+      "firstSurah": "First Surah"
     }
   },
   "discover": {
@@ -282,7 +451,10 @@
     "englishTranslation": "English Translation",
     "urduTranslation": "Urdu Translation",
     "settingsNote": "Changes apply to all cards. Some translations may need network to load.",
-    "copied": "Copied to clipboard"
+    "copied": "Copied to clipboard",
+    "enPickerHeader": "English Translation",
+    "enPickerSub": "Select your preferred English translation",
+    "urPickerSub": "اردو ترجمہ منتخب کریں"
   },
   "listen": {
     "title": "Listen",
@@ -318,7 +490,19 @@
     "loadPreview": "Load text to see preview",
     "clickPageBreaks": "Click between lines to mark page breaks",
     "pageBreak": "── page break ──",
-    "pageNav": "Page {{current}} / {{total}}"
+    "pageNav": "Page {{current}} / {{total}}",
+    "toasts": {
+      "pageBreaksCleared": "All page breaks cleared",
+      "noDataToExport": "No data to export. Load text first.",
+      "exportedAs": "Exported as {{filename}}",
+      "savedCustomSource": "Saved as custom source! Available in reader source selector.",
+      "autoMarkedPages": "Auto-marked {{count}} page breaks ({{lines}}/page)"
+    },
+    "saveSource": {
+      "header": "Save as Custom Source",
+      "namePlaceholder": "Source name (e.g., My 15-Line Quran)",
+      "descPlaceholder": "Description (optional)"
+    }
   },
   "notes": {
     "title": "My Notes",
@@ -333,7 +517,17 @@
     "writeNote": "Write your note...",
     "contextSurah": "Surah {{num}}",
     "contextJuz": "Juz {{num}}",
-    "contextPage": "Page {{num}}"
+    "contextPage": "Page {{num}}",
+    "toasts": {
+      "loadError": "Error loading notes",
+      "emptyFields": "Title and content cannot be empty",
+      "updated": "Note updated successfully",
+      "saveError": "Error saving note",
+      "deleteHeader": "Delete Note",
+      "deleteMessage": "Are you sure you want to delete \"{{title}}\"?",
+      "deleted": "Note deleted",
+      "deleteError": "Error deleting note"
+    }
   },
   "morphology": {
     "title": "Morphology",
@@ -416,5 +610,31 @@
   },
   "privacy": {
     "title": "Privacy Policy"
+  },
+  "tafseer": {
+    "sections": {
+      "morphology": "Morphology",
+      "wbw": "Word by Word",
+      "translations": "Translations",
+      "tafsir": "Tafsir"
+    },
+    "enterAyahKey": "Enter Ayah Key",
+    "ayahKeyPlaceholder": "e.g. 2:255",
+    "invalidAyah": "Invalid Ayah: {{num}}",
+    "loadFailed": "Failed to load"
+  },
+  "juzPage": {
+    "fetchFailedStored": "Fetch failed, but found in device storage."
+  },
+  "surahAuth": {
+    "loginSignup": "Login / Signup",
+    "emailPlaceholder": "Email...",
+    "passwordPlaceholder": "Password...",
+    "logout": "Logout",
+    "signup": "Signup",
+    "login": "Login",
+    "loggedOut": "Logged out successfully!",
+    "surahNotFound": "Surah data not found",
+    "loadFailed": "Failed to load surah data"
   }
 }

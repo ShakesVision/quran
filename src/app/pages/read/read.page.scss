@@ -245,7 +245,6 @@ ion-content {
           direction: rtl;
           text-align: right;
           text-align-last: right;
-          font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
           font-size: clamp(7px, 2vw, 11px);
           line-height: 1.5;
         }
@@ -397,9 +396,21 @@ ion-content {
 }
 
 .ur {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
   font-size: var(--reader-font-size, clamp(11px, 3vw, 14px));
+}
+
+// ===========================================
+// READER CHROME — always LTR (nav arrows, toolbar slots)
+// ===========================================
+.reader-chrome-ltr,
+ion-header.reader-chrome-ltr ion-toolbar,
+ion-footer.reader-chrome-ltr {
+  direction: ltr !important;
+}
+
+.reader-chrome-ltr ion-icon.flip-rtl .icon-inner {
+  transform: none !important;
 }
 
 // ===========================================
@@ -416,11 +427,13 @@ ion-footer {
 
 .btmNav {
   display: flex;
+  flex-direction: row !important;
   align-items: center;
   width: 100%;
   justify-content: center;
   gap: 2px;
   padding: 4px 0;
+  direction: ltr !important;
   
   .nav-btns {
     --padding-start: 6px;
@@ -468,7 +481,6 @@ ion-footer {
 // ===========================================
 .popup,
 .trans {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana, sans-serif;
   direction: rtl;
 }
 
@@ -670,7 +682,7 @@ ion-footer {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   font-size: clamp(7px, 1.8vw, 10px);
-  font-family: "Traditional Arabic", "Mehr", serif;
+  font-family: "Traditional Arabic", Indopak, serif;
   letter-spacing: 1px;
   line-height: 1;
   margin-top: 2px;

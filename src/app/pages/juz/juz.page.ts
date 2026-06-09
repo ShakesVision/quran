@@ -13,6 +13,7 @@ import {
 } from "src/app/models/common";
 import { QuranDataService } from "src/app/services/quran-data.service";
 import { SurahService } from "src/app/services/surah.service";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: "app-juz",
@@ -116,7 +117,8 @@ export class JuzPage implements OnInit, OnDestroy {
     private httpClient: HttpClient,
     private surahService: SurahService,
     private popoverController: PopoverController,
-    private quranDataService: QuranDataService
+    private quranDataService: QuranDataService,
+    private translate: TranslateService,
   ) {
     this.storage.create().then((_) => console.log("storage created"));
   }
@@ -254,7 +256,7 @@ export class JuzPage implements OnInit, OnDestroy {
               this.quranData = res;
               this.calculateJuzData(res.data);
               this.surahService.presentToastWithOptions(
-                `Fetch failed, but found in device storage.`,
+                this.translate.instant("juzPage.fetchFailedStored"),
                 "warning",
                 "bottom"
               );

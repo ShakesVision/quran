@@ -279,6 +279,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     private hizbNav: HizbNavigationService,
   ) {}
 
+  private t(key: string, params?: Record<string, unknown>): string {
+    return this.translate.instant(key, params);
+  }
+
   ngOnInit() {
     this.quranDataService
       .getQuranComProgress()
@@ -615,7 +619,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       console.log("Translation not available!");
       if (!this.juzmode)
         this.surahService.presentToastWithOptions(
-          `Translation for ${this.title} is not available!`,
+          this.t("reader.toasts.translationNotAvailable", { title: this.title }),
           "dark",
           "top",
         );
@@ -626,7 +630,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           this.readTrans(`${surahNum}:${ayahNum}`);
         } else {
           this.surahService.presentToastWithOptions(
-            "Could not determine the ayah for this line.",
+            this.t("reader.toasts.couldNotDetermineAyah"),
             "warning",
             "bottom",
           );
@@ -671,7 +675,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (lineText) {
       this.copyAnything(lineText);
       this.surahService.presentToastWithOptions(
-        "Line copied!",
+        this.t("reader.toasts.lineCopied"),
         "success-light",
         "bottom",
       );
@@ -717,14 +721,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     const buttons: any[] = [
       {
-        text: "Play from here",
+        text: this.t("reader.contextMenu.playFromHere"),
         icon: "play-outline",
         handler: () => {
           this.playAudioFromLine(lineIndex);
         },
       },
       {
-        text: "Show Translation",
+        text: this.t("reader.contextMenu.showTranslation"),
         icon: "language-outline",
         handler: () => {
           if (verseKey) {
@@ -735,25 +739,25 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         },
       },
       {
-        text: "Copy Line",
+        text: this.t("reader.contextMenu.copyLine"),
         icon: "copy-outline",
         handler: () => {
           this.copyAnything(line);
           this.surahService.presentToastWithOptions(
-            "Line copied!",
+            this.t("reader.toasts.lineCopied"),
             "success-light",
             "bottom",
           );
         },
       },
       {
-        text: "Copy Page",
+        text: this.t("reader.contextMenu.copyPage"),
         icon: "documents-outline",
         handler: () => {
           const pageText = this.lines.join("\n");
           this.copyAnything(pageText);
           this.surahService.presentToastWithOptions(
-            "Page copied!",
+            this.t("reader.toasts.pageCopied"),
             "success-light",
             "bottom",
           );
@@ -764,14 +768,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     // Add copy ayah option if we can identify the verse
     if (verseKey) {
       buttons.push({
-        text: `Copy Ayah (${verseKey})`,
+        text: this.t("reader.contextMenu.copyAyah", { key: verseKey }),
         icon: "document-text-outline",
         handler: () => {
           this.copyAyahText(verseKey);
         },
       });
       buttons.push({
-        text: `Copy Translation (${verseKey})`,
+        text: this.t("reader.contextMenu.copyTranslation", { key: verseKey }),
         icon: "language-outline",
         handler: () => {
           this.copyAyahTranslation(verseKey);
@@ -782,7 +786,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     // Text selection toggle
     if (this.textSelectionMode) {
       buttons.push({
-        text: "Exit Text Selection Mode",
+        text: this.t("reader.contextMenu.exitSelection"),
         icon: "hand-left-outline",
         handler: () => {
           this.textSelectionMode = false;
@@ -791,7 +795,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           ) as HTMLElement;
           if (wrapper) wrapper.style.userSelect = "none";
           this.surahService.presentToastWithOptions(
-            "Text selection disabled",
+            this.t("reader.toasts.textSelectionDisabled"),
             "medium",
             "bottom",
           );
@@ -799,7 +803,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       });
     } else {
       buttons.push({
-        text: "Select Text (copy mode)",
+        text: this.t("reader.contextMenu.enterSelection"),
         icon: "text-outline",
         handler: () => {
           this.textSelectionMode = true;
@@ -808,7 +812,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           ) as HTMLElement;
           if (wrapper) wrapper.style.userSelect = "text";
           this.surahService.presentToastWithOptions(
-            "Text selection enabled — long-press again to exit",
+            this.t("reader.toasts.textSelectionEnabled"),
             "success",
             "bottom",
           );
@@ -818,22 +822,28 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     buttons.push(
       {
-        text: "Bookmark this line",
+        text: this.t("reader.contextMenu.bookmarkLine"),
         icon: "bookmark-outline",
         handler: () => {
           this.bookmarkLine(lineIndex);
         },
       },
       {
-        text: "Cancel",
+        text: this.t("common.cancel"),
         icon: "close",
         role: "cancel",
       },
     );
 
     const header = verseKey
-      ? `Line ${lineIndex + 1} · Ayah ${verseKey}`
-      : `Line ${lineIndex + 1} · Page ${this.currentPageCalculated || this.currentPage}`;
+      ? this.t("reader.contextMenu.lineHeader", {
+          line: lineIndex + 1,
+          key: verseKey,
+        })
+      : this.t("reader.contextMenu.linePageHeader", {
+          line: lineIndex + 1,
+          page: this.currentPageCalculated || this.currentPage,
+        });
 
     const actionSheet = await this.actionSheetController.create({
       header,
@@ -873,7 +883,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     console.log("[Audio] Play from line", lineIndex, "verseKey:", verseKey);
     if (!verseKey) {
       this.surahService.presentToastWithOptions(
-        "Could not determine ayah for this line",
+        this.t("reader.toasts.couldNotDetermineAyahShort"),
         "warning",
         "middle",
       );
@@ -913,7 +923,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((res: any) => {
         if (!res.verse?.audio) {
           this.surahService.presentToastWithOptions(
-            `Audio not available for verse ${key}`,
+            this.t("reader.toasts.audioNotAvailable", { key }),
             "warning",
             "middle",
           );
@@ -937,7 +947,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((res: any) => {
         if (!res.verse?.audio) {
           this.surahService.presentToastWithOptions(
-            `Audio not available for ${verseKey}`,
+            this.t("reader.toasts.audioNotAvailableShort", { key: verseKey }),
             "warning",
             "middle",
           );
@@ -969,7 +979,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           const text = res.verse?.text_indopak || "";
           this.copyAnything(text);
           this.surahService.presentToastWithOptions(
-            `Ayah ${verseKey} copied!`,
+            this.t("reader.toasts.ayahCopied", { key: verseKey }),
             "success-light",
             "bottom",
           );
@@ -977,7 +987,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         () => {
           // Fallback: copy from line text
           this.surahService.presentToastWithOptions(
-            "Failed to fetch ayah text",
+            this.t("reader.toasts.failedFetchAyah"),
             "danger",
             "bottom",
           );
@@ -1003,14 +1013,14 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
             .join("\n\n");
           this.copyAnything(`${verseKey}\n${text}`);
           this.surahService.presentToastWithOptions(
-            `Translation copied!`,
+            this.t("reader.toasts.translationCopied"),
             "success-light",
             "bottom",
           );
         },
         () => {
           this.surahService.presentToastWithOptions(
-            "Failed to fetch translation",
+            this.t("reader.toasts.failedFetchTranslation"),
             "danger",
             "bottom",
           );
@@ -1025,17 +1035,24 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     const page = this.currentPageCalculated || this.currentPage || 1;
     const verseKey = this.getVerseKeyForLine(lineIndex);
     const name = verseKey
-      ? `Ayah ${verseKey} (Page ${page}, Line ${lineIndex + 1})`
-      : `Page ${page}, Line ${lineIndex + 1}`;
+      ? this.t("reader.bookmarksDialog.bookmarkNameAyah", {
+          key: verseKey,
+          page,
+          line: lineIndex + 1,
+        })
+      : this.t("reader.bookmarksDialog.bookmarkNamePage", {
+          page,
+          line: lineIndex + 1,
+        });
     await this.appDataService.addManualBookmark(
       name,
       page,
-      "Reading",
+      this.t("reader.bookmarksDialog.readingFolder"),
       lineIndex,
       verseKey,
     );
     this.surahService.presentToastWithOptions(
-      "Bookmark saved!",
+      this.t("reader.toasts.bookmarkSaved"),
       "success",
       "bottom",
     );
@@ -1871,12 +1888,12 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   async exportText() {
     const buttons: any[] = [
       {
-        text: "Copy Current Page",
+        text: this.t("reader.export.copyCurrentPage"),
         handler: () => {
           const text = this.lines.join("\n");
           this.copyAnything(text);
           this.surahService.presentToastWithOptions(
-            "Page copied!",
+            this.t("reader.toasts.pageCopied"),
             "success-light",
             "bottom",
           );
@@ -1886,13 +1903,18 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.isCompleteMushaf) {
       buttons.push({
-        text: `Copy Current Surah (${this.surahService.surahNames[this.surahCalculated - 1] || ""})`,
+        text: this.t("reader.export.copyCurrentSurah", {
+          name:
+            this.surahService.surahNames[this.surahCalculated - 1] || "",
+        }),
         handler: () => {
           this.copySurahText(this.surahCalculated);
         },
       });
       buttons.push({
-        text: `Copy Current Juz (${this.juzCalculated})`,
+        text: this.t("reader.export.copyCurrentJuz", {
+          num: this.juzCalculated,
+        }),
         handler: () => {
           this.copyJuzText(this.juzCalculated);
         },
@@ -1902,7 +1924,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     // Copy current ruku if applicable
     if (this.isCompleteMushaf && this.juzCalculated) {
       buttons.push({
-        text: "Copy Current Ruku",
+        text: this.t("reader.export.copyCurrentRuku"),
         handler: () => {
           this.copyRukuText();
         },
@@ -1911,25 +1933,25 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
     buttons.push(
       {
-        text: "Copy Page Range...",
+        text: this.t("reader.export.copyPageRange"),
         handler: () => {
           this.promptCopyPageRange();
         },
       },
       {
-        text: "Save as Text File...",
+        text: this.t("reader.export.saveAsFile"),
         handler: () => {
           this.saveAsTextFile();
         },
       },
       {
-        text: "Cancel",
+        text: this.t("common.cancel"),
         role: "cancel",
       },
     );
 
     const actionSheet = await this.actionSheetController.create({
-      header: "Export / Copy Text",
+      header: this.t("reader.export.header"),
       buttons,
     });
     await actionSheet.present();
@@ -1947,7 +1969,9 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .join("\n\n--- Page Break ---\n\n");
     this.copyAnything(text);
     this.surahService.presentToastWithOptions(
-      `Surah ${this.surahService.surahNames[surahNum - 1]} copied!`,
+      this.t("reader.toasts.surahCopied", {
+        name: this.surahService.surahNames[surahNum - 1],
+      }),
       "success-light",
       "bottom",
     );
@@ -1965,7 +1989,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .join("\n\n--- Page Break ---\n\n");
     this.copyAnything(text);
     this.surahService.presentToastWithOptions(
-      `Juz ${juzNum} copied!`,
+      this.t("reader.toasts.juzCopied", { num: juzNum }),
       "success-light",
       "bottom",
     );
@@ -1973,27 +1997,27 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   private async promptCopyPageRange() {
     const alert = await this.alertController.create({
-      header: "Copy Page Range",
+      header: this.t("reader.export.pageRangeHeader"),
       inputs: [
         {
           name: "from",
           type: "number",
-          placeholder: "From page",
+          placeholder: this.t("reader.export.fromPage"),
           min: 1,
           max: this.pages.length,
         },
         {
           name: "to",
           type: "number",
-          placeholder: "To page",
+          placeholder: this.t("reader.export.toPage"),
           min: 1,
           max: this.pages.length,
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.t("common.cancel"), role: "cancel" },
         {
-          text: "Copy",
+          text: this.t("common.copy"),
           handler: (data) => {
             const from = Math.max(1, parseInt(data.from) || 1) - 1;
             const to = Math.min(
@@ -2005,7 +2029,10 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               .join("\n\n--- Page Break ---\n\n");
             this.copyAnything(text);
             this.surahService.presentToastWithOptions(
-              `Pages ${from + 1}–${to} copied!`,
+              this.t("reader.toasts.pagesCopied", {
+                from: from + 1,
+                to,
+              }),
               "success-light",
               "bottom",
             );
@@ -2064,7 +2091,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     const text = textParts.join("\n");
     this.copyAnything(text);
     this.surahService.presentToastWithOptions(
-      `Ruku ${currentRukuIdx + 1} copied!`,
+      this.t("reader.toasts.rukuCopied", { num: currentRukuIdx + 1 }),
       "success-light",
       "bottom",
     );
@@ -2075,12 +2102,12 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    */
   private async saveAsTextFile() {
     const alert = await this.alertController.create({
-      header: "Save as Text File",
-      message: "Choose what to save:",
+      header: this.t("reader.export.saveFileHeader"),
+      message: this.t("reader.export.saveFileMessage"),
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.t("common.cancel"), role: "cancel" },
         {
-          text: "Current Page",
+          text: this.t("reader.export.currentPage"),
           handler: () => {
             const text = this.lines.join("\n");
             const page = this.currentPageCalculated || this.currentPage;
@@ -2088,7 +2115,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           },
         },
         {
-          text: "All Pages",
+          text: this.t("reader.export.allPages"),
           handler: () => {
             const text = this.pages.join("\n\n--- Page Break ---\n\n");
             this.downloadTextFile(text, `quran-full-text.txt`);
@@ -2110,7 +2137,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     this.surahService.presentToastWithOptions(
-      `Saved as ${filename}`,
+      this.t("reader.toasts.savedAsFile", { filename }),
       "success-light",
       "bottom",
     );
@@ -2238,34 +2265,34 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       cssClass: "trans",
       buttons: [
         {
-          text: "Copy",
+          text: this.t("common.copy"),
           handler: () => {
             this.copyAnything(
               this.convertToPlain(`<div>${msg.replaceAll("<br>", "\n")}</div>`),
             );
             this.surahService.presentToastWithOptions(
-              "Copied successfully!",
+              this.t("reader.toasts.copiedSuccess"),
               "success-light",
               "bottom",
             );
           },
         },
         {
-          text: "Next",
+          text: this.t("common.next"),
           handler: () => {
             const [surah, ayah] = header?.split(":");
             this.readTrans(`${surah}:${parseInt(ayah) + 1}`);
           },
         },
         {
-          text: "Previous",
+          text: this.t("common.previous"),
           handler: () => {
             const [surah, ayah] = header?.split(":");
             this.readTrans(`${surah}:${parseInt(ayah) - 1}`);
           },
         },
         {
-          text: "OK",
+          text: this.t("common.ok"),
           role: "cancel",
         },
       ],
@@ -2513,17 +2540,17 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
       .join("\n")
       .split(" ");
     const alert = await alertController.create({
-      header: `On this page (#${this.currentPage})`,
-      subHeader: `Detailed analysis...`,
-      message: `Words: ${words.length} <br />
-      Unique Words: ${new Set(words).size} <br />
-      Unique Words w/o Diacritics: ${
-        new Set(this.surahService.tashkeelRemover(words.join(" ")).split(" "))
-          .size
-      } <br />
-      Ayahs: ${
-        // Count real ayah marks only (exclude ۝۰ continuation markers)
-        (
+      header: this.t("reader.pageInfo.header", { page: this.currentPage }),
+      subHeader: this.t("reader.pageInfo.subHeader"),
+      message: `${this.t("reader.pageInfo.words", { count: words.length })} <br />
+      ${this.t("reader.pageInfo.uniqueWords", { count: new Set(words).size })} <br />
+      ${this.t("reader.pageInfo.uniqueWordsNoDiacritics", {
+        count: new Set(
+          this.surahService.tashkeelRemover(words.join(" ")).split(" "),
+        ).size,
+      })} <br />
+      ${this.t("reader.pageInfo.ayahs", {
+        count: (
           page.match(
             new RegExp(
               this.surahService.diacritics.AYAH_MARK +
@@ -2531,40 +2558,42 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               "g",
             ),
           ) || []
-        ).length
-      } <br />
-      Surah Beginnings: ${
-        page.split(this.surahService.diacritics.BISM).length - 1
-      } <br />
-      Ruku Ends: ${
-        page.split(this.surahService.diacritics.RUKU_MARK).length - 1
-      } <br />
-      Lines: ${this.lines.length} <br />
-      Mushaf Page No.: ${this.currentPageCalculated}`,
+        ).length,
+      })} <br />
+      ${this.t("reader.pageInfo.surahBeginnings", {
+        count: page.split(this.surahService.diacritics.BISM).length - 1,
+      })} <br />
+      ${this.t("reader.pageInfo.rukuEnds", {
+        count: page.split(this.surahService.diacritics.RUKU_MARK).length - 1,
+      })} <br />
+      ${this.t("reader.pageInfo.lines", { count: this.lines.length })} <br />
+      ${this.t("reader.pageInfo.mushafPageNo", {
+        num: this.currentPageCalculated,
+      })}`,
     });
     alert.present();
   }
 
   async presentSurahInfo(s) {
+    const juzRange =
+      s.juz.length > 1
+        ? `${s.juz[0].index}-${s.juz[s.juz.length - 1].index}.<br><br>${this.getJuzDistribution(s.juz)}`
+        : `${s.juz[0].index}`;
     const alert = await alertController.create({
       header: `${s.index}. ${s.title}`,
       subHeader: `${s.type}`,
-      message: `Surah ${s.title} (${s.titleAr}) has ${
-        s.count
-      } Ayahs, was revealed in ${s.place} and is spanned over ${
-        s.juz?.length
-      } juz, i.e. ${s.juz[0].index}${
-        s.juz.length > 1
-          ? "-" +
-            s.juz[s.juz.length - 1].index +
-            ".<br><br>" +
-            this.getJuzDistribution(s.juz)
-          : ""
-      }.`,
+      message: this.t("reader.surahInfoAlert.message", {
+        title: s.title,
+        titleAr: s.titleAr,
+        count: s.count,
+        place: s.place,
+        juzCount: s.juz?.length,
+        juzRange,
+      }),
       buttons: [
         {
           role: "cancel",
-          text: "Ok",
+          text: this.t("common.ok"),
         },
       ],
     });
@@ -2574,7 +2603,11 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   getJuzDistribution(juz): string {
     let d = "";
     for (let j of juz) {
-      d += `Verses ${j.verse.start}-${j.verse.end} in juz ${j.index}.<br>`;
+      d += `${this.t("reader.surahInfoAlert.juzDistribution", {
+        start: j.verse.start,
+        end: j.verse.end,
+        index: j.index,
+      })}<br>`;
     }
     return d;
   }
@@ -3112,7 +3145,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     ) {
       console.warn("readTrans: invalid verseKey", verseKey);
       this.surahService.presentToastWithOptions(
-        "Could not determine the ayah for this line.",
+        this.t("reader.toasts.couldNotDetermineAyah"),
         "warning",
         "bottom",
       );
@@ -3177,7 +3210,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     );
     if (!ayahList || !ayahList.verseIdList?.length) {
       this.surahService.presentToastWithOptions(
-        "Could not determine ayahs on this page for audio playback.",
+        this.t("reader.toasts.couldNotDetermineAyahs"),
         "warning",
         "middle",
       );
@@ -3222,7 +3255,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
         this.audioSrc = "https://verses.quran.com/" + res.verse.audio?.url;
         if (!res.verse.audio) {
           this.surahService.presentToastWithOptions(
-            `The selected Qari might not have the audio for the verse ${key}. Try another Qaris from the list.`,
+            this.t("reader.toasts.qariAudioMissing", { key }),
             "warning",
             "middle",
           );
@@ -3649,32 +3682,32 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   async addManualBookmark() {
     const page = this.currentPageCalculated || this.currentPage || 1;
     const alert = await this.alertController.create({
-      header: "Add Bookmark",
+      header: this.t("reader.bookmarksDialog.addHeader"),
       inputs: [
         {
           name: "name",
           type: "text",
-          placeholder: "Bookmark name",
-          value: `Page ${page}`,
+          placeholder: this.t("reader.bookmarksDialog.bookmarkName"),
+          value: `${this.t("common.page")} ${page}`,
         },
         {
           name: "folder",
           type: "text",
-          placeholder: "Folder (optional)",
-          value: "Default",
+          placeholder: this.t("reader.bookmarksDialog.folderOptional"),
+          value: this.t("common.defaultFolder"),
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.t("common.cancel"), role: "cancel" },
         {
-          text: "Save",
+          text: this.t("common.save"),
           handler: async (data) => {
             const name = (data?.name || "").trim();
-            const folder = (data?.folder || "Default").trim();
+            const folder = (data?.folder || this.t("common.defaultFolder")).trim();
             if (!name) return;
             await this.appDataService.addManualBookmark(name, page, folder);
             this.surahService.presentToastWithOptions(
-              "Bookmark saved",
+              this.t("reader.toasts.bookmarkSavedShort"),
               "success",
               "middle",
             );
@@ -3718,7 +3751,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     await this.appDataService.deleteManualBookmark(bookmark.id);
     this.bookmarkFolders = await this.appDataService.getManualBookmarks();
     this.surahService.presentToastWithOptions(
-      "Bookmark deleted",
+      this.t("reader.toasts.bookmarkDeleted"),
       "danger",
       "bottom",
     );
@@ -3727,26 +3760,28 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
   async deleteFolder(folder: any) {
     if (folder.id === "default") {
       this.surahService.presentToastWithOptions(
-        "Cannot delete default folder",
+        this.t("reader.toasts.cannotDeleteDefaultFolder"),
         "warning",
         "bottom",
       );
       return;
     }
     const alert = await this.alertController.create({
-      header: "Delete Folder",
-      message: `Delete "${folder.name}" and all its bookmarks?`,
+      header: this.t("reader.bookmarksDialog.deleteFolderHeader"),
+      message: this.t("reader.bookmarksDialog.deleteFolderMessage", {
+        name: folder.name,
+      }),
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.t("common.cancel"), role: "cancel" },
         {
-          text: "Delete",
+          text: this.t("common.delete"),
           cssClass: "delete-btn",
           handler: async () => {
             await this.appDataService.deleteBookmarkFolder(folder.id);
             this.bookmarkFolders =
               await this.appDataService.getManualBookmarks();
             this.surahService.presentToastWithOptions(
-              "Folder deleted",
+              this.t("reader.toasts.folderDeleted"),
               "danger",
               "bottom",
             );
@@ -3759,23 +3794,23 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
 
   async addNoteEntry() {
     const alert = await this.alertController.create({
-      header: "Add Note",
+      header: this.t("reader.notesDialog.addHeader"),
       inputs: [
         {
           name: "title",
           type: "text",
-          placeholder: "Note title",
+          placeholder: this.t("reader.notesDialog.noteTitle"),
         },
         {
           name: "content",
           type: "textarea",
-          placeholder: "Write your note...",
+          placeholder: this.t("reader.notesDialog.writeNote"),
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.t("common.cancel"), role: "cancel" },
         {
-          text: "Save",
+          text: this.t("common.save"),
           handler: async (data) => {
             const title = (data?.title || "").trim();
             const content = (data?.content || "").trim();
@@ -3786,7 +3821,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
               juz: this.juzCalculated,
             });
             this.surahService.presentToastWithOptions(
-              "Note saved",
+              this.t("reader.toasts.noteSaved"),
               "success",
               "middle",
             );
@@ -3802,7 +3837,7 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     if (navigator?.clipboard?.writeText) {
       await navigator.clipboard.writeText(json);
       this.surahService.presentToastWithOptions(
-        "App data copied to clipboard",
+        this.t("reader.toasts.appDataCopied"),
         "success",
         "middle",
       );
@@ -3810,8 +3845,8 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const alert = await this.alertController.create({
-      header: "Export Data",
-      message: "<small>Copy the JSON below</small>",
+      header: this.t("reader.dataTransfer.exportHeader"),
+      message: this.t("reader.dataTransfer.exportMessage"),
       inputs: [
         {
           name: "json",
@@ -3819,31 +3854,31 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
           value: json,
         },
       ],
-      buttons: [{ text: "Close", role: "cancel" }],
+      buttons: [{ text: this.t("common.close"), role: "cancel" }],
     });
     await alert.present();
   }
 
   async importAppData() {
     const alert = await this.alertController.create({
-      header: "Import Data",
+      header: this.t("reader.dataTransfer.importHeader"),
       inputs: [
         {
           name: "json",
           type: "textarea",
-          placeholder: "Paste JSON here",
+          placeholder: this.t("reader.dataTransfer.pasteJson"),
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.t("common.cancel"), role: "cancel" },
         {
-          text: "Import",
+          text: this.t("common.import"),
           handler: async (data) => {
             const json = (data?.json || "").trim();
             if (!json) return;
             await this.appDataService.importAppData(json, true);
             this.surahService.presentToastWithOptions(
-              "App data imported",
+              this.t("reader.toasts.appDataImported"),
               "success",
               "middle",
             );
@@ -4164,24 +4199,24 @@ export class ReadPage implements OnInit, AfterViewInit, OnDestroy {
    */
   async showFooterOverflow() {
     const actionSheet = await this.actionSheetController.create({
-      header: "Page Navigation",
+      header: this.t("reader.pageNav.header"),
       buttons: [
         {
-          text: "Jump to First Page",
+          text: this.t("reader.pageNav.jumpFirst"),
           icon: "play-skip-forward-outline",
           handler: () => {
             this.gotoPageNum(1);
           },
         },
         {
-          text: "Jump to Last Page",
+          text: this.t("reader.pageNav.jumpLast"),
           icon: "play-skip-back-outline",
           handler: () => {
             this.gotoPageNum(this.pages?.length);
           },
         },
         {
-          text: "Cancel",
+          text: this.t("common.cancel"),
           icon: "close-outline",
           role: "cancel",
         },

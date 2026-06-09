@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { SurahService } from "./../../services/surah.service";
 import { Surah, Index } from "./../../services/surah";
 import { AlertController, ToastController } from "@ionic/angular";
+import { TranslateService } from "@ngx-translate/core";
 import { User } from "firebase/auth";
 
 @Component({
@@ -21,7 +22,8 @@ export class SurahPage implements OnInit {
     private surahService: SurahService,
     private router: Router,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private translate: TranslateService,
   ) {}
   ngOnInit() {
     // this.items = this.surahService.getSurahs();
@@ -45,7 +47,7 @@ export class SurahPage implements OnInit {
     this.surahService.getSurahById(docId).subscribe(
       (surahData) => {
         if (!surahData) {
-          this.toast('Surah data not found', 'danger');
+          this.toast(this.translate.instant('surahAuth.surahNotFound'), 'danger');
           return;
         }
         // Store fetched data on the service for the reader to pick up
@@ -56,7 +58,7 @@ export class SurahPage implements OnInit {
       },
       (err) => {
         console.error('Failed to fetch surah:', err);
-        this.toast('Failed to load surah data', 'danger');
+        this.toast(this.translate.instant('surahAuth.loadFailed'), 'danger');
       }
     );
   }
@@ -64,35 +66,35 @@ export class SurahPage implements OnInit {
   async loginAlert() {
     console.log(this.loggedInUser);
     const alert = await this.alertController.create({
-      header: "Login / Signup",
+      header: this.translate.instant("surahAuth.loginSignup"),
       cssClass: "custom-alert",
       inputs: [
         {
           name: "email",
           id: "email",
           type: "email",
-          placeholder: "Email...",
+          placeholder: this.translate.instant("surahAuth.emailPlaceholder"),
           value: this.loggedInUser ? this.loggedInUser.email : null,
         },
         {
           name: "password",
           id: "password",
           type: "password",
-          placeholder: "Password...",
+          placeholder: this.translate.instant("surahAuth.passwordPlaceholder"),
         },
       ],
       buttons: [
         {
           ...(this.loggedInUser
             ? {
-                text: "Logout",
+                text: this.translate.instant("surahAuth.logout"),
                 handler: (data) => {
                   console.log("Logout: ");
                   this.surahService
                     .signout()
                     .then((res: any) => {
                       console.log(res);
-                      this.toast("Logged out successfully!", "success-light");
+                      this.toast(this.translate.instant("surahAuth.loggedOut"), "success-light");
                     })
                     .catch((err) => {
                       console.log(err);
@@ -124,7 +126,7 @@ export class SurahPage implements OnInit {
           },
         }, */
         {
-          text: "Login",
+          text: this.translate.instant("surahAuth.login"),
           cssClass: "add-btn",
           handler: (data) => {
             console.log("In Login:");

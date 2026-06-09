@@ -20,6 +20,7 @@ import {
   MemorizeAddModalComponent,
   MemorizeAddResult,
 } from "src/app/components/memorize-add-modal/memorize-add-modal.component";
+import { TranslateService } from "@ngx-translate/core";
 
 interface JuzItem {
   juz: number;
@@ -125,7 +126,8 @@ export class MemorizePage implements OnInit {
     private modalController: ModalController,
     public formBuilder: FormBuilder,
     private surahService: SurahService,
-    private popoverController: PopoverController
+    private popoverController: PopoverController,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {
@@ -194,12 +196,20 @@ export class MemorizePage implements OnInit {
   }
 
   getLevelTitle(): string {
-    const titles = [
-      'Beginner', 'Learner', 'Seeker', 'Reciter',
-      'Memorizer', 'Scholar', 'Hafiz-in-training',
-      'Advanced', 'Master', 'Hafiz'
+    const keys = [
+      "beginner",
+      "learner",
+      "seeker",
+      "reciter",
+      "memorizer",
+      "scholar",
+      "hafizInTraining",
+      "advanced",
+      "master",
+      "hafiz",
     ];
-    return titles[this.getLevel() - 1] || 'Beginner';
+    const key = keys[this.getLevel() - 1] || "beginner";
+    return this.translate.instant(`memorize.levels.${key}`);
   }
 
   getStreak(): number {
@@ -227,7 +237,7 @@ export class MemorizePage implements OnInit {
 
   async resetStreak() {
     await this.storage.set("memorize_streak", { count: 0, lastDate: new Date().toISOString() });
-    this.toast("Streak reset", "medium");
+    this.toast(this.translate.instant("memorize.toasts.streakReset"), "medium");
     this.popoverDismiss();
   }
 
@@ -248,7 +258,7 @@ export class MemorizePage implements OnInit {
   updateBadges() {
     this.earnedBadges = [
       {
-        id: 'first_juz', name: 'First Juz', emoji: '📖',
+        id: 'first_juz', name: this.translate.instant('memorize.badges.firstJuz'), emoji: '📖',
         earned: this.items.some(i => i.completed === i.total),
         condition: () => this.items.some(i => i.completed === i.total)
       },
@@ -263,7 +273,7 @@ export class MemorizePage implements OnInit {
         condition: () => this.items.filter(i => i.completed === i.total).length >= 10
       },
       {
-        id: 'half_quran', name: 'Half Quran', emoji: '🎯',
+        id: 'half_quran', name: this.translate.instant('memorize.badges.halfQuran'), emoji: '🎯',
         earned: this.getTotalProgress() >= 50,
         condition: () => this.getTotalProgress() >= 50
       },
@@ -273,7 +283,7 @@ export class MemorizePage implements OnInit {
         condition: () => this.getTotalProgress() >= 100
       },
       {
-        id: 'first_surah', name: 'First Surah', emoji: '📝',
+        id: 'first_surah', name: this.translate.instant('memorize.badges.firstSurah'), emoji: '📝',
         earned: this.surahItems.some(i => i.completed === i.total),
         condition: () => this.surahItems.some(i => i.completed === i.total)
       },
@@ -351,16 +361,22 @@ export class MemorizePage implements OnInit {
 
   private saveJuzEntry(juz: number, completed: number, item?: JuzItem): void {
     if (juz < 1 || juz > 30) {
-      this.toast("Invalid juz number: " + juz, "danger");
+      this.toast(this.translate.instant("memorize.toasts.invalidJuz", { juz }), "danger");
       return;
     }
     if (!item && this.items.some((i: any) => i.juz === juz)) {
-      this.toast("Entry for Juz " + juz + " already exists.", "danger");
+      this.toast(this.translate.instant("memorize.toasts.juzExists", { juz }), "danger");
       return;
     }
     const totalPages = Number(this.getJuzInfo(juz, "count")) || 0;
     if (completed > totalPages) {
-      this.toast(`Juz ${juz} only has ${totalPages} pages.`, "danger");
+      this.toast(
+        this.translate.instant("memorize.toasts.juzPageLimit", {
+          juz,
+          count: totalPages,
+        }),
+        "danger",
+      );
       return;
     }
     const wasComplete = item && item.completed === item.total;
@@ -383,7 +399,10 @@ export class MemorizePage implements OnInit {
     if (entry.completed === entry.total && !wasComplete) {
       this.justCompleted = juz;
       this.triggerConfetti();
-      this.toast("🎉 MashaAllah! Juz " + juz + " completed!", "success");
+      this.toast(
+        this.translate.instant("memorize.toasts.juzCompleted", { juz }),
+        "success",
+      );
       setTimeout(() => (this.justCompleted = null), 3000);
     }
   }
@@ -448,7 +467,7 @@ export class MemorizePage implements OnInit {
     item?: SurahItem,
   ): void {
     if (surahNum < 1 || surahNum > 114) {
-      this.toast("Invalid surah number (1-114)", "danger");
+      this.toast(this.translate.instant("memorize.toasts.invalidSurah"), "danger");
       return;
     }
     const surahData = this.surahInfo[surahNum - 1];
@@ -461,11 +480,20 @@ export class MemorizePage implements OnInit {
       this.surahService.surahNames?.[surahNum - 1] ||
       `Surah ${surahNum}`;
     if (completed > totalAyahs) {
-      this.toast(`Surah ${surahNum} only has ${totalAyahs} ayahs.`, "danger");
+      this.toast(
+        this.translate.instant("memorize.toasts.surahAyahLimit", {
+          surah: surahNum,
+          count: totalAyahs,
+        }),
+        "danger",
+      );
       return;
     }
     if (!item && this.surahItems.some((i) => i.surahNumber === surahNum)) {
-      this.toast(`Surah ${surahNum} already exists.`, "danger");
+      this.toast(
+        this.translate.instant("memorize.toasts.surahExists", { surah: surahNum }),
+        "danger",
+      );
       return;
     }
     const wasComplete = item && item.completed === item.total;
@@ -492,7 +520,12 @@ export class MemorizePage implements OnInit {
     if (completed === totalAyahs && !wasComplete) {
       this.justCompletedSurah = surahNum;
       this.triggerConfetti();
-      this.toast("🎉 MashaAllah! Surah " + surahName + " completed!", "success");
+      this.toast(
+        this.translate.instant("memorize.toasts.surahCompleted", {
+          name: surahName,
+        }),
+        "success",
+      );
       setTimeout(() => (this.justCompletedSurah = null), 3000);
     }
   }
@@ -552,25 +585,27 @@ export class MemorizePage implements OnInit {
       surah: this.surahItems
     };
     window.navigator.clipboard.writeText(JSON.stringify(exportData));
-    this.toast("Copied all memorization data!", "success");
+    this.toast(this.translate.instant("memorize.toasts.dataCopied"), "success");
     this.popoverDismiss();
   }
 
   async import() {
     const importAlert = await this.alertController.create({
-      header: "Import",
-      message: "Paste the exported JSON data. This will replace existing data.",
+      header: this.translate.instant("memorize.toasts.importHeader"),
+      message: this.translate.instant("memorize.toasts.importMessage"),
       inputs: [
         {
           type: "textarea",
           name: "textarea",
-          placeholder: "Paste the exported JSON data here...",
+          placeholder: this.translate.instant(
+            "memorize.toasts.importPlaceholder",
+          ),
         },
       ],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
         {
-          text: "Import",
+          text: this.translate.instant("common.import"),
           cssClass: "import-btn-alert",
           handler: (data) => {
             try {
@@ -589,9 +624,15 @@ export class MemorizePage implements OnInit {
                 }
               }
               this.updateBadges();
-              this.toast("Data imported successfully!", "success");
+              this.toast(
+                this.translate.instant("memorize.toasts.dataImported"),
+                "success",
+              );
             } catch (e) {
-              this.toast("Invalid JSON data", "danger");
+              this.toast(
+                this.translate.instant("memorize.toasts.invalidJson"),
+                "danger",
+              );
             }
           },
         },
@@ -749,9 +790,17 @@ export class MemorizePage implements OnInit {
     // Log to heatmap
     await this.logReviewActivity();
 
-    this.toast(`${item.label} reviewed! Next in ${this.formatInterval(
-      this.REVIEW_INTERVALS[Math.min(data.cycle, this.REVIEW_INTERVALS.length - 1)]
-    )}`, 'success');
+    this.toast(
+      this.translate.instant("memorize.toasts.reviewed", {
+        label: item.label,
+        interval: this.formatInterval(
+          this.REVIEW_INTERVALS[
+            Math.min(data.cycle, this.REVIEW_INTERVALS.length - 1)
+          ],
+        ),
+      }),
+      "success",
+    );
   }
 
   private formatInterval(days: number): string {

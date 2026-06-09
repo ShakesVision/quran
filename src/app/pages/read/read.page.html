@@ -1,4 +1,4 @@
-<ion-header [class.immersive-hidden]="isImmersive">
+<ion-header [class.immersive-hidden]="isImmersive" class="reader-chrome-ltr" dir="ltr">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
@@ -384,7 +384,7 @@
                 [style.background]="t.bg" [style.color]="t.text"
                 [style.borderColor]="activeTheme === t.id ? t.accent : 'transparent'" (click)="applyTheme(t)">
                 <span class="theme-sample">بسم</span>
-                <span class="theme-name">{{ t.name }}</span>
+                <span class="theme-name">{{ 'reader.themes.' + t.id | translate }}</span>
               </button>
             </div>
             <ion-item>
@@ -659,8 +659,8 @@
     </ion-fab-button>
   </ion-fab>
 </ion-content>
-<ion-footer [class.immersive-hidden]="isImmersive">
-  <div class="btmNav">
+<ion-footer [class.immersive-hidden]="isImmersive" class="reader-chrome-ltr" dir="ltr">
+  <div class="btmNav reader-chrome-ltr" dir="ltr">
     <!-- Font size controls (moved here for easy access) -->
     <ion-button class="nav-btns font-btn" fill="clear" (click)="changeFontSize(-1)">
       <ion-icon name="remove-outline" style="font-size:16px"></ion-icon>
@@ -674,7 +674,7 @@
 
     <!-- Core page navigation -->
     <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==pages?.length" (click)="goToPage(1)">
-      <ion-icon name="chevron-back-outline"></ion-icon>
+      <ion-icon name="chevron-back-outline" flip-rtl="false"></ion-icon>
     </ion-button>
     <div style="font-size: x-small">
       <ion-label color="dark">{{ 'reader.pageLabel' | translate }} </ion-label>
@@ -683,7 +683,7 @@
       <ion-label color="dark"> {{ 'reader.pageOf' | translate }} {{pages?.length}}</ion-label>
     </div>
     <ion-button class="nav-btns" fill="clear" [disabled]="currentPage==1" (click)="goToPage(-1)">
-      <ion-icon name="chevron-forward-outline"></ion-icon>
+      <ion-icon name="chevron-forward-outline" flip-rtl="false"></ion-icon>
     </ion-button>
 
     <!-- Overflow menu for destructive jump actions -->

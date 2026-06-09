@@ -56,11 +56,13 @@
   font-display: swap;
 }
 
-// Urdu/Translation font
+// Urdu/Translation font — unicode-range limits Mehr to Arabic-script glyphs only
+// so Latin/English in mixed labels still use the UI font from the stack.
 @font-face {
   font-family: "Mehr";
   src: url("assets/fonts/MehrNastaliqWeb.woff") format("woff"),
     url("assets/fonts/Mehr.ttf") format("truetype");
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
   font-display: swap;
 }
 
@@ -85,53 +87,85 @@ ion-title.title-large {
   direction: rtl;
 }
 
-.ur {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, Verdana,
-    sans-serif;
-  direction: rtl;
-  font-size: 13px;
-}
-
 .rtl {
   direction: rtl;
 }
 
-body.lang-ur,
-body.rtl-ui {
-  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif;
+// Urdu app UI: Latin-first stack; Mehr (unicode-range) fills Arabic-script in labels only.
+body.lang-ur {
+  font-family: "Segoe UI", Roboto, "Mehr", sans-serif;
 }
 
-// UI chrome (not Quranic Arabic glyphs)
-body.lang-ur {
-  ion-app,
-  ion-content,
-  ion-header,
-  ion-footer,
-  ion-toolbar,
-  ion-title,
-  ion-label,
-  ion-button,
-  ion-item,
-  ion-segment,
-  ion-segment-button,
-  ion-chip,
-  ion-searchbar,
-  ion-select,
-  ion-alert,
-  ion-toast,
-  ion-popover,
-  ion-modal,
-  h1,
-  h2,
-  h3,
-  p,
-  small,
-  .section-title,
-  .feature-card,
-  .tool-card,
-  span:not(.ar-text):not(.ar-text2):not(.ar2):not(.ar-qurancom):not(.wbw-arabic):not(.arabic-line-text):not(.tajweed-text):not(.ayah-word) {
-    font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif;
-  }
+// Explicit Urdu translation / Nastaliq content blocks
+.ur,
+.urdu-text,
+.urdu-label,
+.lang-urdu,
+.inline-translation.ur,
+.font-urdu,
+.native-label-ur {
+  font-family: "Mehr", "Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif;
+  direction: rtl;
+}
+
+.ur {
+  font-size: 13px;
+}
+
+// Quranic Arabic must never inherit Mehr from lang-ur UI stack.
+body.lang-ur .ar,
+body.lang-ur .ar2,
+body.lang-ur .ar-waqflazim,
+body.lang-ur .ar-uthmani,
+body.lang-ur .ar-text,
+body.lang-ur .ar-text2,
+body.lang-ur .ar-qurancom,
+body.lang-ur .ar-tag,
+body.lang-ur .arabic-text,
+body.lang-ur .arabic-line-text,
+body.lang-ur .wbw-arabic,
+body.lang-ur .theme-sample,
+body.lang-ur .ayah-word,
+body.lang-ur .tajweed-text,
+body.lang-ur .page-wrapper.ar .juz-number,
+body.lang-ur .page-wrapper.ar .page-number,
+body.lang-ur .page-wrapper.ar .surah-number {
+  font-family: inherit;
+}
+
+body.lang-ur .ar:not(.ar2):not(.ar-waqflazim):not(.ar-uthmani) {
+  font-family: Indopak, "Traditional Arabic", serif !important;
+}
+
+body.lang-ur .ar2,
+body.lang-ur .ar-text2 {
+  font-family: Muhammadi, Indopak, serif !important;
+}
+
+body.lang-ur .ar-waqflazim {
+  font-family: "IndoPak Waqf Lazim", Indopak, serif !important;
+}
+
+body.lang-ur .ar-uthmani {
+  font-family: "Uthmanic Hafs", "Traditional Arabic", serif !important;
+}
+
+body.lang-ur .ar-text,
+body.lang-ur .ar-tag {
+  font-family: Indopak !important;
+}
+
+body.lang-ur .ar-qurancom {
+  font-family: "Uthmanic Hafs", "Traditional Arabic", serif !important;
+}
+
+body.lang-ur .arabic-line-text,
+body.lang-ur .wbw-arabic {
+  font-family: inherit !important;
+}
+
+body.lang-ur .theme-sample {
+  font-family: "IndoPak Waqf Lazim", "Muhammadi", sans-serif !important;
 }
 
 body.dark app-read ion-content,
@@ -142,6 +176,15 @@ body.dark ion-content.read-page-content {
 
 body.rtl-ui ion-app {
   direction: rtl;
+}
+
+// Reader chrome keeps LTR layout (page nav arrows, toolbar slots) even in Urdu/RTL UI.
+body.rtl-ui app-read ion-header,
+body.rtl-ui app-read ion-footer,
+body.rtl-ui app-read ion-header ion-toolbar,
+body.rtl-ui app-read .btmNav,
+body.rtl-ui app-read .reader-chrome-ltr {
+  direction: ltr !important;
 }
 
 span.ayah_mark {

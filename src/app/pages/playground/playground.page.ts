@@ -4,6 +4,7 @@ import { AlertController, ToastController } from '@ionic/angular';
 import { CustomSourceService, CustomTextFormat, AdapterResult, ParsedAyah } from '../../services/custom-source.service';
 import { MushafLines } from '../../models/text-sources';
 import { take } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 interface PageBreak {
   afterLineIndex: number; // Global line index after which a page break occurs
@@ -54,6 +55,7 @@ export class PlaygroundPage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {}
@@ -276,7 +278,10 @@ export class PlaygroundPage implements OnInit {
       this.pageBreaks.push({ afterLineIndex: i });
     }
     this.buildPreview();
-    this.showToast(`Auto-marked ${this.pageBreaks.length} page breaks (${this.linesPerPage} lines/page)`);
+    this.showToast(this.translate.instant('playground.toasts.autoMarkedPages', {
+      count: this.pageBreaks.length,
+      lines: this.linesPerPage,
+    }));
   }
 
   /**
@@ -285,7 +290,7 @@ export class PlaygroundPage implements OnInit {
   clearPageBreaks() {
     this.pageBreaks = [];
     this.buildPreview();
-    this.showToast('All page breaks cleared');
+    this.showToast(this.translate.instant('playground.toasts.pageBreaksCleared'));
   }
 
   /**
@@ -293,7 +298,7 @@ export class PlaygroundPage implements OnInit {
    */
   async exportData(format: 'json' | 'archive' | 'csv') {
     if (this.previewPages.length === 0) {
-      this.showToast('No data to export. Load text first.', 'warning');
+      this.showToast(this.translate.instant('playground.toasts.noDataToExport'), 'warning');
       return;
     }
 
@@ -352,7 +357,7 @@ export class PlaygroundPage implements OnInit {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    this.showToast(`Exported as ${filename}`, 'success');
+    this.showToast(this.translate.instant('playground.toasts.exportedAs', { filename }), 'success');
   }
 
   /**
@@ -360,15 +365,15 @@ export class PlaygroundPage implements OnInit {
    */
   async saveAsCustomSource() {
     const alert = await this.alertController.create({
-      header: 'Save as Custom Source',
+      header: this.translate.instant('playground.saveSource.header'),
       inputs: [
-        { name: 'name', type: 'text', placeholder: 'Source name (e.g., My 15-Line Quran)' },
-        { name: 'description', type: 'text', placeholder: 'Description (optional)' },
+        { name: 'name', type: 'text', placeholder: this.translate.instant('playground.saveSource.namePlaceholder') },
+        { name: 'description', type: 'text', placeholder: this.translate.instant('playground.saveSource.descPlaceholder') },
       ],
       buttons: [
-        { text: 'Cancel', role: 'cancel' },
+        { text: this.translate.instant('common.cancel'), role: 'cancel' },
         {
-          text: 'Save',
+          text: this.translate.instant('common.save'),
           handler: async (data) => {
             if (!data.name) return false;
 
@@ -385,7 +390,7 @@ export class PlaygroundPage implements OnInit {
               'archive',
               false,
             );
-            this.showToast('Saved as custom source! Available in reader source selector.', 'success');
+            this.showToast(this.translate.instant('playground.toasts.savedCustomSource'), 'success');
             return true;
           },
         },

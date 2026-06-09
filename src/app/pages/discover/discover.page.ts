@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Platform, GestureController, Gesture, ActionSheetController } from '@ionic/angular';
 import { AyahCard } from '../../models/ayah-card';
 import { QuranDataService, TranslationResource } from '../../services/quran-data.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-discover',
@@ -44,7 +45,8 @@ export class DiscoverPage implements OnInit, OnDestroy {
     private platform: Platform,
     private gestureCtrl: GestureController,
     private cdr: ChangeDetectorRef,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
+    private translate: TranslateService,
   ) {}
 
   async ngOnInit() {
@@ -352,11 +354,11 @@ export class DiscoverPage implements OnInit, OnDestroy {
         this.selectEnTranslation(t.id);
       }
     }));
-    buttons.push({ text: 'Cancel', cssClass: 'action-sheet-cancel', handler: () => {} });
+    buttons.push({ text: this.translate.instant('common.cancel'), cssClass: 'action-sheet-cancel', handler: () => {} });
 
     const actionSheet = await this.actionSheetCtrl.create({
-      header: 'English Translation',
-      subHeader: 'Select your preferred English translation',
+      header: this.translate.instant('discover.enPickerHeader'),
+      subHeader: this.translate.instant('discover.enPickerSub'),
       cssClass: 'translation-picker',
       buttons,
     });
@@ -374,11 +376,11 @@ export class DiscoverPage implements OnInit, OnDestroy {
         this.selectUrTranslation(t.id);
       }
     }));
-    buttons.push({ text: 'Cancel', cssClass: 'action-sheet-cancel', handler: () => {} });
+    buttons.push({ text: this.translate.instant('common.cancel'), cssClass: 'action-sheet-cancel', handler: () => {} });
 
     const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Urdu Translation',
-      subHeader: 'اردو ترجمہ منتخب کریں',
+      header: this.translate.instant('discover.urduTranslation'),
+      subHeader: this.translate.instant('discover.urPickerSub'),
       cssClass: 'translation-picker',
       buttons,
     });

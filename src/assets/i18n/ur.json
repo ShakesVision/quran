@@ -61,7 +61,14 @@
     "expandAll": "سب کھولیں",
     "collapseAll": "سب بند",
     "completed": "مکمل",
-    "inProgress": "جاری"
+    "inProgress": "جاری",
+    "copy": "کاپی",
+    "next": "اگلا",
+    "previous": "پچھلا",
+    "go": "جائیں",
+    "log": "درج",
+    "disable": "بند",
+    "defaultFolder": "ڈیفالٹ"
   },
   "browse": {
     "title": "تلاش",
@@ -137,6 +144,22 @@
     "loadingCommits": "کمیٹس لوڈ...",
     "madeForUmmah": "امت کے لیے ❤️ سے",
     "footerBy": "شکیب احمد",
+    "setTargets": "ہدف مقرر کریں",
+    "setTargetsMessage": "① روزانہ صفحات ② روزانہ آیات (حفظ) ③ ختم کی تعداد ④ مدت (دن)",
+    "pagesPerDay": "صفحات/دن",
+    "ayahsPerDayLabel": "آیات/دن",
+    "khatmTarget": "ختم کا ہدف",
+    "periodDays": "مدت (دن)",
+    "pagesRead": "پڑھے گئے صفحات",
+    "ayahsMemorizedInput": "حفظ شدہ آیات",
+    "mashaAllah": "ما شاء اللہ!",
+    "tilawatCompleteToast": "تلاوت کا ہدف مکمل! ما شاء اللہ!",
+    "hifzCompleteToast": "حفظ کا ہدف مکمل! بہترین!",
+    "preparingQuranData": "قرآن کا ڈیٹا تیار ہو رہا ہے...",
+    "changelogLoadError": "چینج لاگ لوڈ نہیں ہو سکا۔ انٹرنیٹ چیک کریں۔",
+    "bannerDigitizing": "ہم 15 سطری قرآن اور ترجمہ یونیکوڈ میں ڈیجیٹائز کر رہے ہیں، یہ کام جاری ہے۔ آپ بھی اس منصوبے میں مدد کر سکتے ہیں۔",
+    "contribute": "تعاون کریں",
+    "mushafPages": "{{name}} ({{pages}} صفحات)",
     "level": {
       "beginner": "ابتدائی",
       "seeker": "طالب",
@@ -225,7 +248,118 @@
       "playFromHere": "یہاں سے چلائیں",
       "bookmark": "بک مارک",
       "selectText": "متن منتخب",
-      "copy": "کاپی"
+      "copy": "کاپی",
+      "showTranslation": "ترجمہ دکھائیں",
+      "copyLine": "سطر کاپی",
+      "copyPage": "صفحہ کاپی",
+      "copyAyah": "آیت کاپی ({{key}})",
+      "copyTranslation": "ترجمہ کاپی ({{key}})",
+      "exitSelection": "متن منتخب موڈ بند",
+      "enterSelection": "متن منتخب (کاپی)",
+      "bookmarkLine": "اس سطر کو بک مارک",
+      "lineHeader": "سطر {{line}} · آیت {{key}}",
+      "linePageHeader": "سطر {{line}} · صفحہ {{page}}"
+    },
+    "toasts": {
+      "translationNotAvailable": "{{title}} کا ترجمہ دستیاب نہیں!",
+      "couldNotDetermineAyah": "اس سطر کی آیت معلوم نہیں ہو سکی۔",
+      "lineCopied": "سطر کاپی!",
+      "pageCopied": "صفحہ کاپی!",
+      "textSelectionDisabled": "متن منتخب بند",
+      "textSelectionEnabled": "متن منتخب فعال — بند کرنے کے لیے دوبارہ دیر تک دبائیں",
+      "couldNotDetermineAyahShort": "اس سطر کی آیت معلوم نہیں",
+      "audioNotAvailable": "آیت {{key}} کی آڈیو دستیاب نہیں",
+      "audioNotAvailableShort": "{{key}} کی آڈیو دستیاب نہیں",
+      "ayahCopied": "آیت {{key}} کاپی!",
+      "failedFetchAyah": "آیت کا متن نہیں مل سکا",
+      "translationCopied": "ترجمہ کاپی!",
+      "failedFetchTranslation": "ترجمہ نہیں مل سکا",
+      "bookmarkSaved": "بک مارک محفوظ!",
+      "surahCopied": "سورت {{name}} کاپی!",
+      "juzCopied": "پارہ {{num}} کاپی!",
+      "pagesCopied": "صفحات {{from}}–{{to}} کاپی!",
+      "rukuCopied": "رکوع {{num}} کاپی!",
+      "savedAsFile": "{{filename}} کے طور پر محفوظ",
+      "copiedSuccess": "کامیابی سے کاپی!",
+      "couldNotDetermineAyahs": "اس صفحے کی آیات آڈیو کے لیے معلوم نہیں ہو سکیں۔",
+      "qariAudioMissing": "منتخب قاری کے پاس آیت {{key}} کی آڈیو نہیں ہو سکتی۔ دوسرا قاری آزمائیں۔",
+      "bookmarkSavedShort": "بک مارک محفوظ",
+      "bookmarkDeleted": "بک مارک حذف",
+      "cannotDeleteDefaultFolder": "ڈیفالٹ فولڈر حذف نہیں",
+      "folderDeleted": "فولڈر حذف",
+      "noteSaved": "نوٹ محفوظ",
+      "appDataCopied": "ڈیٹا کلپ بورڈ پر کاپی",
+      "appDataImported": "ڈیٹا درآمد ہو گیا"
+    },
+    "export": {
+      "header": "برآمد / متن کاپی",
+      "copyCurrentPage": "موجودہ صفحہ کاپی",
+      "copyCurrentSurah": "موجودہ سورت کاپی ({{name}})",
+      "copyCurrentJuz": "موجودہ پارہ کاپی ({{num}})",
+      "copyCurrentRuku": "موجودہ رکوع کاپی",
+      "copyPageRange": "صفحات کی رینج کاپی...",
+      "saveAsFile": "فائل کے طور پر محفوظ...",
+      "pageRangeHeader": "صفحات کی رینج کاپی",
+      "fromPage": "صفحہ سے",
+      "toPage": "صفحہ تک",
+      "saveFileHeader": "فائل کے طور پر محفوظ",
+      "saveFileMessage": "کیا محفوظ کریں:",
+      "currentPage": "موجودہ صفحہ",
+      "allPages": "تمام صفحات"
+    },
+    "bookmarksDialog": {
+      "addHeader": "بک مارک شامل",
+      "bookmarkName": "بک مارک کا نام",
+      "folderOptional": "فولڈر (اختیاری)",
+      "deleteFolderHeader": "فولڈر حذف",
+      "deleteFolderMessage": "\"{{name}}\" اور اس کے تمام بک مارکس حذف کریں؟",
+      "readingFolder": "پڑھنا",
+      "bookmarkNameAyah": "آیت {{key}} (صفحہ {{page}}، سطر {{line}})",
+      "bookmarkNamePage": "صفحہ {{page}}، سطر {{line}}"
+    },
+    "notesDialog": {
+      "addHeader": "نوٹ شامل",
+      "noteTitle": "نوٹ کا عنوان",
+      "writeNote": "اپنا نوٹ لکھیں..."
+    },
+    "dataTransfer": {
+      "exportHeader": "ڈیٹا برآمد",
+      "exportMessage": "نیچے JSON کاپی کریں",
+      "importHeader": "ڈیٹا درآمد",
+      "pasteJson": "JSON یہاں پیسٹ کریں"
+    },
+    "pageNav": {
+      "header": "صفحہ نیویگیشن",
+      "jumpFirst": "پہلے صفحے پر",
+      "jumpLast": "آخری صفحے پر"
+    },
+    "pageInfo": {
+      "header": "اس صفحے پر (#{{page}})",
+      "subHeader": "تفصیلی تجزیہ...",
+      "words": "الفاظ: {{count}}",
+      "uniqueWords": "منفرد الفاظ: {{count}}",
+      "uniqueWordsNoDiacritics": "بغیر تشکیل منفرد: {{count}}",
+      "ayahs": "آیات: {{count}}",
+      "surahBeginnings": "سورت کے آغاز: {{count}}",
+      "rukuEnds": "رکوع کے اختتام: {{count}}",
+      "lines": "سطور: {{count}}",
+      "mushafPageNo": "مصحف صفحہ نمبر: {{num}}"
+    },
+    "surahInfoAlert": {
+      "message": "سورت {{title}} ({{titleAr}}) میں {{count}} آیات ہیں، {{place}} میں نازل ہوئی اور {{juzCount}} پاروں پر مشتمل ہے، یعنی {{juzRange}}۔",
+      "juzDistribution": "آیات {{start}}-{{end}} پارہ {{index}} میں۔"
+    },
+    "themes": {
+      "golden": "سنہری",
+      "paper": "کاغذ",
+      "ivory": "ہاتھی دانت",
+      "sage": "مریم",
+      "ocean": "سمندر",
+      "lavender": "لیوینڈر",
+      "rose": "گلاب",
+      "midnight": "آدھی رات",
+      "charcoal": "کوئلہ",
+      "sepia": "سیپیا"
     }
   },
   "memorize": {
@@ -267,6 +401,41 @@
       "learning": "سیکھ رہے",
       "reviewing": "جائزہ",
       "mastered": "مکمل"
+    },
+    "toasts": {
+      "streakReset": "سلسلہ ری سیٹ",
+      "invalidJuz": "غلط پارہ نمبر: {{juz}}",
+      "juzExists": "پارہ {{juz}} پہلے سے موجود ہے۔",
+      "juzPageLimit": "پارہ {{juz}} میں صرف {{count}} صفحات ہیں۔",
+      "juzCompleted": "🎉 ما شاء اللہ! پارہ {{juz}} مکمل!",
+      "invalidSurah": "غلط سورت نمبر (1-114)",
+      "surahAyahLimit": "سورت {{surah}} میں صرف {{count}} آیات ہیں۔",
+      "surahExists": "سورت {{surah}} پہلے سے موجود ہے۔",
+      "surahCompleted": "🎉 ما شاء اللہ! سورت {{name}} مکمل!",
+      "dataCopied": "تمام حفظ کا ڈیٹا کاپی!",
+      "importHeader": "درآمد",
+      "importMessage": "برآمد شدہ JSON پیسٹ کریں۔ موجودہ ڈیٹا بدل جائے گا۔",
+      "importPlaceholder": "JSON یہاں پیسٹ کریں...",
+      "dataImported": "ڈیٹا کامیابی سے درآمد!",
+      "invalidJson": "غلط JSON",
+      "reviewed": "{{label}} کا جائزہ! اگلا {{interval}} میں"
+    },
+    "levels": {
+      "beginner": "ابتدائی",
+      "learner": "سیکھنے والا",
+      "seeker": "طالب",
+      "reciter": "قاری",
+      "memorizer": "حافظ",
+      "scholar": "عالم",
+      "hafizInTraining": "حفظ کی تربیت",
+      "advanced": "اعلیٰ",
+      "master": "ماہر",
+      "hafiz": "حافظ"
+    },
+    "badges": {
+      "firstJuz": "پہلا پارہ",
+      "halfQuran": "آدھا قرآن",
+      "firstSurah": "پہلی سورت"
     }
   },
   "discover": {
@@ -282,7 +451,10 @@
     "englishTranslation": "انگریزی ترجمہ",
     "urduTranslation": "اردو ترجمہ",
     "settingsNote": "تبدیلیاں تمام کارڈز پر لاگو ہوں گی۔ کچھ ترجموں کے لیے نیٹ ورک چاہیے۔",
-    "copied": "کلپ بورڈ میں کاپی"
+    "copied": "کلپ بورڈ میں کاپی",
+    "enPickerHeader": "انگریزی ترجمہ",
+    "enPickerSub": "پسندیدہ انگریزی ترجمہ منتخب کریں",
+    "urPickerSub": "اردو ترجمہ منتخب کریں"
   },
   "listen": {
     "title": "سنیں",
@@ -318,7 +490,19 @@
     "loadPreview": "پیش نظارہ کے لیے متن لوڈ کریں",
     "clickPageBreaks": "صفحہ وقفے کے لیے سطروں کے درمیان کلک",
     "pageBreak": "── صفحہ وقفہ ──",
-    "pageNav": "صفحہ {{current}} / {{total}}"
+    "pageNav": "صفحہ {{current}} / {{total}}",
+    "toasts": {
+      "pageBreaksCleared": "تمام صفحہ وقفے مٹ گئے",
+      "noDataToExport": "برآمد کے لیے ڈیٹا نہیں۔ پہلے متن لوڈ کریں۔",
+      "exportedAs": "{{filename}} برآمد",
+      "savedCustomSource": "اپنا ماخذ محفوظ! ریڈر میں دستیاب۔",
+      "autoMarkedPages": "{{count}} صفحہ وقفے ({{lines}}/صفحہ)"
+    },
+    "saveSource": {
+      "header": "اپنا ماخذ محفوظ",
+      "namePlaceholder": "ماخذ کا نام (مثلاً میرا 15 سطری)",
+      "descPlaceholder": "تفصیل (اختیاری)"
+    }
   },
   "notes": {
     "title": "میرے نوٹس",
@@ -333,7 +517,17 @@
     "writeNote": "اپنا نوٹ لکھیں...",
     "contextSurah": "سورت {{num}}",
     "contextJuz": "پارہ {{num}}",
-    "contextPage": "صفحہ {{num}}"
+    "contextPage": "صفحہ {{num}}",
+    "toasts": {
+      "loadError": "نوٹس لوڈ نہیں ہوئے",
+      "emptyFields": "عنوان اور مواد خالی نہیں",
+      "updated": "نوٹ تازہ ہو گیا",
+      "saveError": "نوٹ محفوظ نہیں ہوا",
+      "deleteHeader": "نوٹ حذف",
+      "deleteMessage": "\"{{title}}\" حذف کریں؟",
+      "deleted": "نوٹ حذف",
+      "deleteError": "نوٹ حذف نہیں ہوا"
+    }
   },
   "morphology": {
     "title": "صرف",
@@ -416,5 +610,31 @@
   },
   "privacy": {
     "title": "رازداری کی پالیسی"
+  },
+  "tafseer": {
+    "sections": {
+      "morphology": "صرف",
+      "wbw": "لفظ بہ لفظ",
+      "translations": "تراجم",
+      "tafsir": "تفسیر"
+    },
+    "enterAyahKey": "آیت کی کلید",
+    "ayahKeyPlaceholder": "مثلاً 2:255",
+    "invalidAyah": "غلط آیت: {{num}}",
+    "loadFailed": "لوڈ نہیں ہوا"
+  },
+  "juzPage": {
+    "fetchFailedStored": "لوڈ نہیں ہوا، مگر ڈیوائس میں مل گیا۔"
+  },
+  "surahAuth": {
+    "loginSignup": "لاگ ان / سائن اپ",
+    "emailPlaceholder": "ای میل...",
+    "passwordPlaceholder": "پاس ورڈ...",
+    "logout": "لاگ آؤٹ",
+    "signup": "سائن اپ",
+    "login": "لاگ ان",
+    "loggedOut": "کامیابی سے لاگ آؤٹ!",
+    "surahNotFound": "سورت کا ڈیٹا نہیں ملا",
+    "loadFailed": "سورت کا ڈیٹا لوڈ نہیں ہوا"
   }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { AlertController, IonModal, ToastController } from "@ionic/angular";
 import { AppDataService } from "src/app/services/app-data.service";
 import { NoteEntry } from "src/app/models/app-data";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: "app-notes",
@@ -23,6 +24,7 @@ export class NotesPage implements OnInit {
     private appDataService: AppDataService,
     private alertController: AlertController,
     private toastController: ToastController,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {
@@ -40,7 +42,7 @@ export class NotesPage implements OnInit {
       this.filterNotes();
     } catch (error) {
       console.error("Error loading notes:", error);
-      await this.showToast("Error loading notes", "danger");
+      await this.showToast(this.translate.instant("notes.toasts.loadError"), "danger");
     } finally {
       this.isLoading = false;
     }
@@ -93,7 +95,7 @@ export class NotesPage implements OnInit {
     const content = this.editingContent.trim();
 
     if (!title || !content) {
-      await this.showToast("Title and content cannot be empty", "warning");
+      await this.showToast(this.translate.instant("notes.toasts.emptyFields"), "warning");
       return;
     }
 
@@ -108,13 +110,13 @@ export class NotesPage implements OnInit {
         appData.notes[noteIndex].content = content;
         appData.notes[noteIndex].updatedAt = new Date().toISOString();
         await this.appDataService.saveAppData(appData);
-        await this.showToast("Note updated successfully", "success");
+        await this.showToast(this.translate.instant("notes.toasts.updated"), "success");
         await this.editModal.dismiss();
         await this.loadNotes();
       }
     } catch (error) {
       console.error("Error saving note:", error);
-      await this.showToast("Error saving note", "danger");
+      await this.showToast(this.translate.instant("notes.toasts.saveError"), "danger");
     }
   }
 
@@ -123,26 +125,28 @@ export class NotesPage implements OnInit {
    */
   async deleteNote(note: NoteEntry) {
     const alert = await this.alertController.create({
-      header: "Delete Note",
-      message: `Are you sure you want to delete "${note.title}"?`,
+      header: this.translate.instant("notes.toasts.deleteHeader"),
+      message: this.translate.instant("notes.toasts.deleteMessage", {
+        title: note.title,
+      }),
       buttons: [
         {
-          text: "Cancel",
+          text: this.translate.instant("common.cancel"),
           role: "cancel",
         },
         {
-          text: "Delete",
+          text: this.translate.instant("common.delete"),
           role: "destructive",
           handler: async () => {
             try {
               const appData = await this.appDataService.getAppData();
               appData.notes = appData.notes.filter((n) => n.id !== note.id);
               await this.appDataService.saveAppData(appData);
-              await this.showToast("Note deleted", "success");
+              await this.showToast(this.translate.instant("notes.toasts.deleted"), "success");
               await this.loadNotes();
             } catch (error) {
               console.error("Error deleting note:", error);
-              await this.showToast("Error deleting note", "danger");
+              await this.showToast(this.translate.instant("notes.toasts.deleteError"), "danger");
             }
           },
         },

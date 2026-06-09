@@ -9,6 +9,7 @@ import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { ToastController, ToastOptions } from "@ionic/angular";
+import { TranslateService } from "@ngx-translate/core";
 import { Subject } from "rxjs/internal/Subject";
 import { getDefaultTranslationIds } from "../config/translation-sources";
 
@@ -251,7 +252,8 @@ export class SurahService {
     private http: HttpClient,
     private afAuth: AngularFireAuth,
     private toastController: ToastController,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private translate: TranslateService,
   ) {
     this.surahCollection = this.afs.collection<Surah>("surahs");
     this.indexCollection = this.afs.collection<Index>("index", (ref) =>
@@ -449,7 +451,7 @@ export class SurahService {
       duration,
       buttons: [
         {
-          text: "Ok",
+          text: this.translate.instant("common.ok"),
           role: "cancel",
           handler: () => {
             console.log("Cancel clicked.");

@@ -18,6 +18,7 @@ import {
 import { Subscription } from "rxjs";
 import { finalize, map, take } from "rxjs/operators";
 import { SurahService } from "../services/surah.service";
+import { TranslateService } from "@ngx-translate/core";
 import {
   MorphologyService,
   WordMorphology,
@@ -170,6 +171,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     private platform: Platform,
     private morphologyService: MorphologyService,
     private sanitizer: DomSanitizer,
+    private translate: TranslateService,
   ) {}
 
   async ngOnInit() {
@@ -386,10 +388,10 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private defaultSections(): ModalSectionOrder[] {
     return [
-      { id: "morphology", label: "Morphology", visible: true },
-      { id: "wbw", label: "Word by Word", visible: true },
-      { id: "translations", label: "Translations", visible: true },
-      { id: "tafsir", label: "Tafsir", visible: true },
+      { id: "morphology", label: this.translate.instant("tafseer.sections.morphology"), visible: true },
+      { id: "wbw", label: this.translate.instant("tafseer.sections.wbw"), visible: true },
+      { id: "translations", label: this.translate.instant("tafseer.sections.translations"), visible: true },
+      { id: "tafsir", label: this.translate.instant("tafseer.sections.tafsir"), visible: true },
     ];
   }
 
@@ -517,7 +519,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     const nextAyahNumber = parseInt(a) + offset;
     if (nextAyahNumber === 0) {
       this.surahService.presentToastWithOptions(
-        `Invalid Ayah: ${nextAyahNumber}`,
+        this.translate.instant("tafseer.invalidAyah", { num: nextAyahNumber }),
         "danger",
         "middle",
       );
@@ -529,12 +531,12 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async loadAnyAyah() {
     const alert = await this.alertController.create({
-      header: "Enter Ayah Key",
-      inputs: [{ name: "ayahKey", type: "text", placeholder: "e.g. 2:255" }],
+      header: this.translate.instant("tafseer.enterAyahKey"),
+      inputs: [{ name: "ayahKey", type: "text", placeholder: this.translate.instant("tafseer.ayahKeyPlaceholder") }],
       buttons: [
-        { text: "Cancel", role: "cancel" },
+        { text: this.translate.instant("common.cancel"), role: "cancel" },
         {
-          text: "Go",
+          text: this.translate.instant("common.go"),
           handler: (data) => {
             if (data.ayahKey) this.fetchTrans(data.ayahKey);
           },
@@ -563,7 +565,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
         (err) => {
           console.error(err);
           this.surahService.presentToastWithOptions(
-            `${err.error?.status || "Error"}: ${err.error?.error || "Failed to load"}`,
+            `${err.error?.status || "Error"}: ${err.error?.error || this.translate.instant("tafseer.loadFailed")}`,
             "danger",
             "middle",
           );

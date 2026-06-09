@@ -42,6 +42,10 @@ export class PersistentStorageService {
         .then(() => this.migrateLegacyStores())
         .then(() => {
           this._driver = "indexeddb";
+        })
+        .catch((err) => {
+          console.error("[PersistentStorage] Initialization failed:", err);
+          this._driver = this.db ? "indexeddb" : null;
         });
     }
     await this.ready;
@@ -127,13 +131,35 @@ export class PersistentStorageService {
     });
   }
 
+  /**
+   * Direct IDB reads/writes used during migration only.
+   * Must NOT call create() — migrateLegacyStores runs inside create()'s promise chain.
+   */
+  private getDirect(key: string): Promise<unknown> {
+    return this.idbRequest(
+      this.db!.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(key),
+    );
+  }
+
+  private setDirect(key: string, value: unknown): Promise<void> {
+    return this.idbRequest(
+      this.db!.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(value, key),
+    ).then(() => undefined);
+  }
+
+  private keysDirect(): Promise<string[]> {
+    return this.idbRequest(
+      this.db!.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).getAllKeys(),
+    ) as Promise<string[]>;
+  }
+
   private async migrateLegacyStores(): Promise<void> {
-    const migrated = await this.get(MIGRATION_FLAG);
+    const migrated = await this.getDirect(MIGRATION_FLAG);
     if (migrated) {
       return;
     }
 
-    const existingKeys = new Set(await this.keys());
+    const existingKeys = new Set(await this.keysDirect());
     let imported = 0;
 
     // 1) Ionic Storage instance (same config as historical app default)
@@ -151,7 +177,7 @@ export class PersistentStorageService {
         }
         const value = await legacy.get(key);
         if (value !== null && value !== undefined) {
-          await this.set(key, value);
+          await this.setDirect(key, value);
           existingKeys.add(key);
           imported++;
         }
@@ -168,7 +194,7 @@ export class PersistentStorageService {
           if (!key || key === MIGRATION_FLAG || existingKeys.has(key)) {
             continue;
           }
-          await this.set(key, value);
+          await this.setDirect(key, value);
           existingKeys.add(key);
           imported++;
         }
@@ -193,7 +219,7 @@ export class PersistentStorageService {
             continue;
           }
           const value = this.parseLocalStorageValue(raw);
-          await this.set(key, value);
+          await this.setDirect(key, value);
           existingKeys.add(key);
           imported++;
         } catch {
@@ -202,7 +228,7 @@ export class PersistentStorageService {
       }
     }
 
-    await this.set(MIGRATION_FLAG, {
+    await this.setDirect(MIGRATION_FLAG, {
       at: new Date().toISOString(),
       imported,
     });

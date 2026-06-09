@@ -618,6 +618,16 @@
       "translations": "تراجم",
       "tafsir": "تفسیر"
     },
+    "tabs": {
+      "study": "مطالعہ",
+      "tafsir": "تفسیر"
+    },
+    "loadMore": "مزید تفاسیر",
+    "searchTafsir": "تفسیر تلاش کریں…",
+    "noTafsirMatch": "کوئی تفسیر نہیں ملی",
+    "tafsirUnavailable": "اس آیت کے لیے تفسیر دستیاب نہیں",
+    "keepOneTafsir": "کم از کم ایک تفسیر رکھیں",
+    "fontSize": "تفسیر کا فونٹ سائز",
     "enterAyahKey": "آیت کی کلید",
     "ayahKeyPlaceholder": "مثلاً 2:255",
     "invalidAyah": "غلط آیت: {{num}}",

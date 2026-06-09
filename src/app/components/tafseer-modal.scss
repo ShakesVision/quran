@@ -54,6 +54,137 @@
   margin: 0 auto;
 }
 
+.modal-tab-segment {
+  margin: 0 0 12px;
+  --background: rgba(var(--ion-color-medium-rgb), 0.08);
+  border-radius: 10px;
+  padding: 2px;
+
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    --color: var(--ion-color-medium);
+    --color-checked: var(--ion-color-primary);
+    min-height: 36px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: none;
+  }
+}
+
+.tab-panel {
+  animation: fadeSlideUp 0.25s ease-out both;
+}
+
+.tafsir-tab-panel {
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.tafsir-edition-bar {
+  padding: 10px 10px 4px;
+  background: rgba(var(--ion-color-primary-rgb), 0.03);
+  border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.1);
+}
+
+.tafsir-font-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-bottom: 6px;
+
+  .font-ctrl-btn {
+    --padding-start: 4px;
+    --padding-end: 4px;
+    margin: 0;
+    min-width: 32px;
+    height: 28px;
+  }
+
+  .tafsir-font-size-badge {
+    min-width: 24px;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    user-select: none;
+  }
+}
+
+.tafsir-edition-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+
+  ion-chip {
+    margin: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: 30px;
+
+    ion-label {
+      white-space: normal;
+      font-size: 0.72rem;
+      line-height: 1.2;
+    }
+
+    ion-icon {
+      font-size: 16px;
+      margin-inline-start: 4px;
+    }
+  }
+}
+
+.tafsir-picker-panel {
+  border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+
+  ion-searchbar {
+    padding: 6px 8px 0;
+  }
+}
+
+.tafsir-picker-list {
+  overflow-y: auto;
+  max-height: 220px;
+
+  ion-item {
+    --min-height: 52px;
+
+    h3 {
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 0.68rem;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+.tafsir-loading,
+.tafsir-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--ion-color-medium);
+
+  p {
+    margin: 0;
+    font-size: 0.82rem;
+  }
+}
+
 // ── Loading ──
 .loading-wrapper {
   display: flex;
@@ -590,66 +721,44 @@
   cursor: default;
 }
 
-.tafsir-section {
-  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 24px;
-
-  .section-header {
-    cursor: default;
-  }
-}
-
-.tafsir-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 0 12px 12px;
-
-  ion-button {
-    --border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    --padding-start: 12px;
-    --padding-end: 12px;
-    height: 32px;
-  }
-}
-
 .tafsir-block {
   padding: 12px;
-  margin: 0 12px 12px;
+  margin: 12px;
   background: rgba(var(--ion-color-medium-rgb), 0.04);
   border-radius: 8px;
 
   h4 {
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--ion-color-primary);
   }
 
-  p {
+  .tafsir-meta {
+    margin: 0 0 10px;
+    font-size: 0.68rem;
+    color: var(--ion-color-medium);
+  }
+
+  p.tafsir-body {
     margin: 0;
-    font-size: 0.82rem;
+    font-size: var(--tafsir-text-size, 16px);
     line-height: 1.7;
     text-align: justify;
     color: var(--ion-text-color);
   }
 
-  &.rtl p {
+  &.rtl p.tafsir-body {
     direction: rtl;
     text-align: right;
   }
 
-  &.ur p {
+  &.ur p.tafsir-body {
     font-family: "Mehr", "Jameel Noori Nastaleeq", serif;
-    font-size: 0.9rem;
     line-height: 2;
   }
 
-  &.en-text p {
+  &.en-text p.tafsir-body {
     line-height: 1.6;
   }
 }

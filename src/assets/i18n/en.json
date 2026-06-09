@@ -618,6 +618,16 @@
       "translations": "Translations",
       "tafsir": "Tafsir"
     },
+    "tabs": {
+      "study": "Study",
+      "tafsir": "Tafsir"
+    },
+    "loadMore": "Load more",
+    "searchTafsir": "Search tafsirs…",
+    "noTafsirMatch": "No tafsirs match your search",
+    "tafsirUnavailable": "Tafsir not available for this ayah",
+    "keepOneTafsir": "Keep at least one tafsir in your list",
+    "fontSize": "Tafsir font size",
     "enterAyahKey": "Enter Ayah Key",
     "ayahKeyPlaceholder": "e.g. 2:255",
     "invalidAyah": "Invalid Ayah: {{num}}",

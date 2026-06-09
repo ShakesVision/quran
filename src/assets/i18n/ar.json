@@ -618,6 +618,16 @@
       "translations": "الترجمات",
       "tafsir": "التفسير"
     },
+    "tabs": {
+      "study": "دراسة",
+      "tafsir": "تفسير"
+    },
+    "loadMore": "المزيد من التفاسير",
+    "searchTafsir": "ابحث في التفاسير…",
+    "noTafsirMatch": "لا توجد تفاسير مطابقة",
+    "tafsirUnavailable": "التفسير غير متاح لهذه الآية",
+    "keepOneTafsir": "أبقِ تفسيراً واحداً على الأقل",
+    "fontSize": "حجم خط التفسير",
     "enterAyahKey": "أدخل مفتاح الآية",
     "ayahKeyPlaceholder": "مثلاً 2:255",
     "invalidAyah": "آية غير صالحة: {{num}}",

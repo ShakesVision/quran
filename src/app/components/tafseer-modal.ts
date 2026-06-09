@@ -16,7 +16,7 @@ import {
   Platform,
 } from "@ionic/angular";
 import { Subscription } from "rxjs";
-import { finalize, map, take } from "rxjs/operators";
+import { finalize, take } from "rxjs/operators";
 import { SurahService } from "../services/surah.service";
 import { TranslateService } from "@ngx-translate/core";
 import {
@@ -26,6 +26,11 @@ import {
 import { QuranData } from "src/assets/data/quran-data";
 import { Storage } from "@ionic/storage-angular";
 import { DomSanitizer } from "@angular/platform-browser";
+import {
+  DEFAULT_TAFSIR_SLUGS,
+  TafsirApiService,
+  TafsirEdition,
+} from "../services/tafsir-api.service";
 
 /**
  * Translation resource info for display
@@ -47,11 +52,17 @@ interface TranslationOrder {
   position: number;
 }
 
-/** Modal section ordering (morphology, wbw, translations, tafsir) */
+/** Modal section ordering (morphology, wbw, translations) */
 interface ModalSectionOrder {
-  id: "morphology" | "wbw" | "translations" | "tafsir";
+  id: "morphology" | "wbw" | "translations";
   label: string;
   visible: boolean;
+}
+
+interface TafsirLoadState {
+  text: string | null;
+  loading: boolean;
+  error: string | null;
 }
 
 /** Supported WBW translation languages (Quran.com API) */
@@ -120,8 +131,17 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   verse: any;
   audioSrc: string;
   baseurl = "https://verses.quran.com/";
-  tafsir: Record<string, string | null> = { ar: null, ur: null, en: null };
   loading = false;
+  activeTab: "study" | "tafsir" = "study";
+  allTafsirEditions: TafsirEdition[] = [];
+  enabledTafsirSlugs: string[] = [...DEFAULT_TAFSIR_SLUGS];
+  activeTafsirSlug: string | null = DEFAULT_TAFSIR_SLUGS[0];
+  tafsirBySlug: Record<string, TafsirLoadState> = {};
+  showTafsirPicker = false;
+  tafsirPickerQuery = "";
+  tafsirFontSize = 16;
+  readonly tafsirFontSizeMin = 12;
+  readonly tafsirFontSizeMax = 28;
   sajdahMessage: string;
   isConfigMode = false;
   wbwExpanded = false;
@@ -142,6 +162,8 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
   // User's ordering/visibility preference
   private readonly STORAGE_KEY_TRANS_ORDER = "ReaderTranslationOrder";
   private readonly STORAGE_KEY_SECTION_ORDER = "TafseerModalSectionOrder";
+  private readonly STORAGE_KEY_ENABLED_TAFSIRS = "TafseerEnabledTafsirs";
+  private readonly STORAGE_KEY_TAFSIR_FONT_SIZE = "TafseerTafsirFontSize";
   translationOrder: TranslationOrder[] = [];
   modalSections: ModalSectionOrder[] = [];
 
@@ -172,10 +194,19 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     private morphologyService: MorphologyService,
     private sanitizer: DomSanitizer,
     private translate: TranslateService,
+    private tafsirApi: TafsirApiService,
   ) {}
 
   async ngOnInit() {
-    await Promise.all([this.loadTranslationOrder(), this.loadSectionOrder()]);
+    await Promise.all([
+      this.loadTranslationOrder(),
+      this.loadSectionOrder(),
+      this.loadEnabledTafsirs(),
+      this.loadTafsirFontSize(),
+    ]);
+    this.tafsirApi.getEditions().pipe(take(1)).subscribe((eds) => {
+      this.allTafsirEditions = eds;
+    });
     this.fetchTrans(this.verseKey);
 
     this.getSvgContent(this.verseKey);
@@ -391,20 +422,224 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
       { id: "morphology", label: this.translate.instant("tafseer.sections.morphology"), visible: true },
       { id: "wbw", label: this.translate.instant("tafseer.sections.wbw"), visible: true },
       { id: "translations", label: this.translate.instant("tafseer.sections.translations"), visible: true },
-      { id: "tafsir", label: this.translate.instant("tafseer.sections.tafsir"), visible: true },
     ];
   }
 
   private async loadSectionOrder() {
     try {
       const saved = await this.storage.get(this.STORAGE_KEY_SECTION_ORDER);
+      const allowed = new Set(["morphology", "wbw", "translations"]);
+      const cleaned =
+        saved && Array.isArray(saved)
+          ? saved.filter((s) => allowed.has(s.id))
+          : [];
       this.modalSections =
-        saved && Array.isArray(saved) && saved.length
-          ? saved
-          : this.defaultSections();
+        cleaned.length ? cleaned : this.defaultSections();
     } catch {
       this.modalSections = this.defaultSections();
     }
+  }
+
+  private async loadEnabledTafsirs() {
+    try {
+      const saved = await this.storage.get(this.STORAGE_KEY_ENABLED_TAFSIRS);
+      if (saved && Array.isArray(saved) && saved.length) {
+        this.enabledTafsirSlugs = saved;
+        this.activeTafsirSlug = saved[0];
+      }
+    } catch {
+      /* keep defaults */
+    }
+  }
+
+  private async saveEnabledTafsirs() {
+    try {
+      await this.storage.set(
+        this.STORAGE_KEY_ENABLED_TAFSIRS,
+        this.enabledTafsirSlugs,
+      );
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private async loadTafsirFontSize() {
+    try {
+      const saved = await this.storage.get(this.STORAGE_KEY_TAFSIR_FONT_SIZE);
+      if (typeof saved === "number" && !isNaN(saved)) {
+        this.tafsirFontSize = this.clampTafsirFontSize(saved);
+      }
+    } catch {
+      /* keep default */
+    }
+  }
+
+  private async saveTafsirFontSize() {
+    try {
+      await this.storage.set(
+        this.STORAGE_KEY_TAFSIR_FONT_SIZE,
+        this.tafsirFontSize,
+      );
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private clampTafsirFontSize(size: number): number {
+    return Math.min(
+      this.tafsirFontSizeMax,
+      Math.max(this.tafsirFontSizeMin, Math.round(size)),
+    );
+  }
+
+  changeTafsirFontSize(delta: number) {
+    this.tafsirFontSize = this.clampTafsirFontSize(
+      this.tafsirFontSize + delta,
+    );
+    this.saveTafsirFontSize();
+  }
+
+  get activeTafsirEdition(): TafsirEdition | null {
+    if (!this.activeTafsirSlug) {
+      return null;
+    }
+    return (
+      this.enabledTafsirEditions.find((e) => e.slug === this.activeTafsirSlug) ||
+      null
+    );
+  }
+
+  get enabledTafsirEditions(): TafsirEdition[] {
+    const bySlug = new Map(
+      this.allTafsirEditions.map((e) => [e.slug, e]),
+    );
+    return this.enabledTafsirSlugs.map(
+      (slug) =>
+        bySlug.get(slug) || {
+          id: 0,
+          slug,
+          name: slug,
+          author_name: "",
+          language_name: "",
+        },
+    );
+  }
+
+  get filteredPickerEditions(): TafsirEdition[] {
+    const q = this.tafsirPickerQuery.trim().toLowerCase();
+    if (!q) return this.allTafsirEditions;
+    return this.allTafsirEditions.filter((e) => {
+      const hay = `${e.name} ${e.author_name} ${e.language_name}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  isTafsirEnabled(slug: string): boolean {
+    return this.enabledTafsirSlugs.includes(slug);
+  }
+
+  getTafsirState(slug: string): TafsirLoadState {
+    return (
+      this.tafsirBySlug[slug] || {
+        text: null,
+        loading: false,
+        error: null,
+      }
+    );
+  }
+
+  getTafsirBlockClasses(edition: TafsirEdition): Record<string, boolean> {
+    const lang = (edition.language_name || "").toLowerCase();
+    return {
+      rtl: ["arabic", "urdu", "persian", "farsi", "kurdish"].some((l) =>
+        lang.includes(l),
+      ),
+      ur: lang === "urdu",
+      "ar-text2": lang === "arabic",
+      "en-text": lang === "english",
+    };
+  }
+
+  onModalTabChange(tab: string | number | undefined) {
+    if (tab !== "study" && tab !== "tafsir") {
+      return;
+    }
+    this.activeTab = tab;
+    if (tab === "tafsir" && this.activeTafsirSlug) {
+      this.selectTafsir(this.activeTafsirSlug, false);
+    }
+  }
+
+  toggleTafsirPicker() {
+    this.showTafsirPicker = !this.showTafsirPicker;
+    if (!this.showTafsirPicker) {
+      this.tafsirPickerQuery = "";
+    }
+  }
+
+  selectTafsir(slug: string, switchTab = true) {
+    this.activeTafsirSlug = slug;
+    if (switchTab) {
+      this.activeTab = "tafsir";
+    }
+    this.showTafsirPicker = false;
+    this.tafsirPickerQuery = "";
+    this.loadTafsirEdition(slug);
+  }
+
+  addTafsirEdition(slug: string) {
+    if (!this.isTafsirEnabled(slug)) {
+      this.enabledTafsirSlugs = [...this.enabledTafsirSlugs, slug];
+      this.saveEnabledTafsirs();
+    }
+    this.selectTafsir(slug);
+  }
+
+  removeTafsirEdition(slug: string, event?: Event) {
+    event?.stopPropagation();
+    if (this.enabledTafsirSlugs.length <= 1) {
+      this.surahService.presentToastWithOptions(
+        this.translate.instant("tafseer.keepOneTafsir"),
+        "warning",
+        "bottom",
+      );
+      return;
+    }
+    this.enabledTafsirSlugs = this.enabledTafsirSlugs.filter((s) => s !== slug);
+    delete this.tafsirBySlug[slug];
+    if (this.activeTafsirSlug === slug) {
+      this.activeTafsirSlug = this.enabledTafsirSlugs[0] || null;
+      if (this.activeTafsirSlug) {
+        this.loadTafsirEdition(this.activeTafsirSlug);
+      }
+    }
+    this.saveEnabledTafsirs();
+  }
+
+  loadTafsirEdition(slug: string) {
+    if (!this.verse?.verse_key) return;
+
+    const current = this.getTafsirState(slug);
+    if (current.loading) return;
+
+    this.tafsirBySlug[slug] = { text: null, loading: true, error: null };
+
+    this.tafsirApi
+      .getAyahText(slug, this.verse.verse_key)
+      .pipe(take(1))
+      .subscribe((text) => {
+        this.tafsirBySlug[slug] = {
+          text,
+          loading: false,
+          error: text
+            ? null
+            : this.translate.instant("tafseer.tafsirUnavailable"),
+        };
+      });
+  }
+
+  private resetTafsirCache() {
+    this.tafsirBySlug = {};
   }
 
   private async saveSectionOrder() {
@@ -482,38 +717,6 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     return order ? order.visible : true; // visible by default
   }
 
-  loadTafsir(lang: string) {
-    this.loading = true;
-    const [s, a] = this.verse.verse_key.split(":");
-    const base_url = "https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir";
-    let slug = "";
-    switch (lang) {
-      case "ar":
-        slug = "ar-tafsir-ibn-kathir";
-        break;
-      case "sadi":
-        slug = "ar-tafseer-al-saddi";
-        break;
-      case "ur":
-        slug = "ur-tafseer-ibn-e-kaseer";
-        break;
-      case "en":
-        slug = "en-tafsir-maarif-ul-quran";
-        break;
-      default:
-        slug = "ur-tafseer-ibn-e-kaseer";
-        break;
-    }
-    const url = `${base_url}/${slug}/${s}/${a}.json`;
-    return this.httpClient
-      .get<any>(url)
-      .pipe(
-        map((res) => res.text),
-        finalize(() => (this.loading = false)),
-      )
-      .subscribe((res) => (this.tafsir[lang] = res));
-  }
-
   loadNextAyah(offset: number) {
     const [s, a] = this.verse.verse_key.split(":");
     const nextAyahNumber = parseInt(a) + offset;
@@ -551,7 +754,7 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getSvgContent(verse_key);
     this.loading = true;
     this.translations = [];
-    this.tafsir = { ur: null, ar: null, en: null };
+    this.resetTafsirCache();
     this.surahService
       .fetchTrans(verse_key)
       .pipe(finalize(() => (this.loading = false)))
@@ -561,6 +764,9 @@ export class TafseerModalComponent implements OnInit, AfterViewInit, OnDestroy {
           this.audioSrc = `${this.baseurl}${this.verse.audio.url}`;
           this.checkIfAyahHasSajdah();
           this.buildTranslationBlocks(this.verse.translations || []);
+          if (this.activeTab === "tafsir" && this.activeTafsirSlug) {
+            this.loadTafsirEdition(this.activeTafsirSlug);
+          }
         },
         (err) => {
           console.error(err);

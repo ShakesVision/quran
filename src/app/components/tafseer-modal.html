@@ -54,12 +54,24 @@
         </div>
       </div>
 
+      <!-- Study vs Tafsir tabs (ayah card stays above) -->
+      <ion-segment class="modal-tab-segment" [value]="activeTab"
+        (ionChange)="onModalTabChange($event.detail.value)">
+        <ion-segment-button value="study">
+          <ion-label>{{ 'tafseer.tabs.study' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="tafsir">
+          <ion-label>{{ 'tafseer.tabs.tafsir' | translate }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
       <!-- Config Mode Banner -->
-      <div *ngIf="isConfigMode" class="config-banner">
+      <div *ngIf="isConfigMode && activeTab === 'study'" class="config-banner">
         <ion-icon name="reorder-four-outline"></ion-icon>
         <span>Reorder or hide sections. Use arrows and eye icons on each block.</span>
       </div>
 
+      <ng-container *ngIf="activeTab === 'study'">
       <ng-container *ngFor="let sec of modalSections; let si = index">
       <!-- Morphology SVG Section (collapsed by default) -->
       <div class="morphology-svg-section" *ngIf="sec.id === 'morphology' && svgContent && (isSectionVisible('morphology') || isConfigMode)"
@@ -223,65 +235,80 @@
         </div>
       </div>
 
-      <!-- Tafsir Section -->
-      <div class="tafsir-section" *ngIf="sec.id === 'tafsir' && (isSectionVisible('tafsir') || isConfigMode)"
-        [class.hidden-trans]="!isSectionVisible('tafsir') && isConfigMode">
-        <div class="section-header section-header-static">
-          <ion-icon name="book-outline"></ion-icon>
-          <span>Tafsir / Commentary</span>
-          <div class="section-header-right" *ngIf="isConfigMode">
-            <button class="config-btn" (click)="moveSectionUp(si)" [disabled]="si === 0">
-              <ion-icon name="chevron-up-outline"></ion-icon>
-            </button>
-            <button class="config-btn" (click)="moveSectionDown(si)" [disabled]="si === modalSections.length - 1">
-              <ion-icon name="chevron-down-outline"></ion-icon>
-            </button>
-            <button class="config-btn" (click)="toggleSectionVisibility(si)">
-              <ion-icon [name]="sec.visible ? 'eye-outline' : 'eye-off-outline'"
-                [style.color]="sec.visible ? '#4caf50' : '#ef5350'"></ion-icon>
-            </button>
+      </ng-container>
+      </ng-container>
+
+      <!-- Tafsir tab -->
+      <div *ngIf="activeTab === 'tafsir'" class="tab-panel tafsir-tab-panel">
+        <div class="tafsir-edition-bar">
+          <div class="tafsir-font-controls" [attr.aria-label]="'tafseer.fontSize' | translate">
+            <ion-button fill="clear" size="small" class="font-ctrl-btn"
+              [disabled]="tafsirFontSize <= tafsirFontSizeMin"
+              (click)="changeTafsirFontSize(-1)">
+              <ion-icon slot="icon-only" name="remove-outline"></ion-icon>
+            </ion-button>
+            <span class="tafsir-font-size-badge">{{ tafsirFontSize }}</span>
+            <ion-button fill="clear" size="small" class="font-ctrl-btn"
+              [disabled]="tafsirFontSize >= tafsirFontSizeMax"
+              (click)="changeTafsirFontSize(1)">
+              <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+            </ion-button>
+          </div>
+          <div class="tafsir-edition-chips">
+            <ion-chip *ngFor="let ed of enabledTafsirEditions"
+              [color]="activeTafsirSlug === ed.slug ? 'primary' : 'medium'"
+              (click)="selectTafsir(ed.slug)">
+              <ion-label>{{ ed.name }}</ion-label>
+              <ion-icon *ngIf="enabledTafsirEditions.length > 1" name="close-circle"
+                (click)="removeTafsirEdition(ed.slug, $event)"></ion-icon>
+            </ion-chip>
+            <ion-chip outline color="primary" (click)="toggleTafsirPicker()">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <ion-label>{{ 'tafseer.loadMore' | translate }}</ion-label>
+            </ion-chip>
           </div>
         </div>
-        <div class="tafsir-buttons">
-          <ion-button *ngIf="!tafsir.ar" (click)="loadTafsir('ar')" size="small" fill="outline" color="medium"
-            [disabled]="loading">
-            Ibn Kathir (عربی)
-          </ion-button>
-          <ion-button *ngIf="!tafsir.sadi" (click)="loadTafsir('sadi')" size="small" fill="outline" color="medium"
-            [disabled]="loading">
-            Sa'adi (عربی)
-          </ion-button>
-          <ion-button *ngIf="!tafsir.ur" (click)="loadTafsir('ur')" size="small" fill="outline" color="medium"
-            [disabled]="loading">
-            Ibn Kathir (اُردو)
-          </ion-button>
-          <ion-button *ngIf="!tafsir.en" (click)="loadTafsir('en')" size="small" fill="outline" color="medium"
-            [disabled]="loading">
-            Ma'arif ul Quran
-          </ion-button>
+
+        <div *ngIf="showTafsirPicker" class="tafsir-picker-panel">
+          <ion-searchbar [(ngModel)]="tafsirPickerQuery" [placeholder]="'tafseer.searchTafsir' | translate"
+            debounce="250" show-clear-button="focus"></ion-searchbar>
+          <ion-list lines="full" class="tafsir-picker-list">
+            <ion-item button *ngFor="let ed of filteredPickerEditions" (click)="addTafsirEdition(ed.slug)"
+              [color]="isTafsirEnabled(ed.slug) ? 'light' : undefined">
+              <ion-label>
+                <h3>{{ ed.name }}</h3>
+                <p>{{ ed.author_name }} · {{ ed.language_name }}</p>
+              </ion-label>
+              <ion-icon *ngIf="isTafsirEnabled(ed.slug)" slot="end" name="checkmark-circle" color="success"></ion-icon>
+            </ion-item>
+            <ion-item *ngIf="!filteredPickerEditions.length" lines="none">
+              <ion-label color="medium">{{ 'tafseer.noTafsirMatch' | translate }}</ion-label>
+            </ion-item>
+          </ion-list>
         </div>
-        <div *ngIf="tafsir.ar" class="tafsir-block ar-text2 rtl">
-          <h4>ابن کثیر (عَرَبِی)</h4>
-          <p>{{ tafsir.ar }}</p>
-        </div>
-        <div *ngIf="tafsir.ar" class="tafsir-block ar-text2 rtl">
-          <h4>ابن کثیر (عَرَبِی)</h4>
-          <p>{{ tafsir.ar }}</p>
-        </div>
-        <div *ngIf="tafsir.sadi" class="tafsir-block ar-text2 rtl">
-          <h4>سعدی (عَرَبِی)</h4>
-          <p>{{ tafsir.sadi }}</p>
-        </div>
-        <div *ngIf="tafsir.ur" class="tafsir-block ur rtl">
-          <h4>ابن کثیر (اُردو)</h4>
-          <p>{{ tafsir.ur }}</p>
-        </div>
-        <div *ngIf="tafsir.en" class="tafsir-block en-text">
-          <h4>Ma'arif ul Quran (Mufti Shafi Usmani)</h4>
-          <p>{{ tafsir.en }}</p>
-        </div>
+
+        <ng-container *ngIf="activeTafsirEdition as edition">
+          <ng-container *ngIf="getTafsirState(edition.slug) as state">
+            <div *ngIf="state.loading" class="tafsir-loading">
+              <ion-spinner name="crescent" color="primary"></ion-spinner>
+            </div>
+            <div *ngIf="!state.loading && state.error" class="tafsir-empty">
+              <ion-icon name="alert-circle-outline" color="warning"></ion-icon>
+              <p>{{ state.error }}</p>
+              <ion-button size="small" fill="outline" (click)="loadTafsirEdition(edition.slug)">
+                {{ 'common.retry' | translate }}
+              </ion-button>
+            </div>
+            <div *ngIf="!state.loading && state.text" class="tafsir-block"
+              [ngClass]="getTafsirBlockClasses(edition)"
+              [style.--tafsir-text-size.px]="tafsirFontSize">
+              <h4>{{ edition.name }}</h4>
+              <p class="tafsir-meta">{{ edition.author_name }} · {{ edition.language_name }}</p>
+              <p class="tafsir-body">{{ state.text }}</p>
+            </div>
+          </ng-container>
+        </ng-container>
       </div>
-      </ng-container>
 
     </div>
   </div>
